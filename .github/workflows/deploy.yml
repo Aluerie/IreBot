@@ -20,9 +20,9 @@ jobs:
         PORT: ${{ secrets.PORT }}
         KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
-          cd ./Irene_s_Bot
+          cd ./LueBot
           git pull
           source venv/bin/activate
           python3.12 -m pip install -U -r ./requirements.txt  --force-reinstall
-          sudo systemctl restart irenesbot.service
-          sudo systemctl start irenesbot.service
+          sudo systemctl restart luebot.service
+          sudo systemctl start luebot.service
