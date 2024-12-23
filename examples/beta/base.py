@@ -10,24 +10,24 @@ import twitchio
 from twitchio.ext import commands
 
 import config
-from bot import IrenesComponent, irenes_loop
+from bot import LueComponent, lueloop
 from utils import const
 
 if TYPE_CHECKING:
-    from bot import IrenesBot
+    from bot import LueBot
 
 
-class BetaCog(IrenesComponent):
+class BetaCog(LueComponent):
     """Base Class for BetaTest cog.
 
     Used to test random code snippets.
     """
 
-    def __init__(self, bot: IrenesBot) -> None:
+    def __init__(self, bot: LueBot) -> None:
         super().__init__(bot)
         self.beta_test.start()
 
-    @irenes_loop(count=1)
+    @lueloop(count=1)
     async def beta_test(self) -> None:
         """Task that is supposed to run just once to test stuff out."""
         ...

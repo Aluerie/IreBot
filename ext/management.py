@@ -5,22 +5,22 @@ from typing import TYPE_CHECKING
 
 from twitchio.ext import commands
 
-from bot import IrenesComponent, irenes_loop
+from bot import LueComponent, lueloop
 from utils import const, errors, formats
 
 if TYPE_CHECKING:
     import twitchio
 
-    from bot import IrenesBot
+    from bot import LueBot
 
 
-class ChannelManagement(IrenesComponent):
+class ChannelManagement(LueComponent):
     """Channel Management commands.
 
     Such as change Game or Title.
     """
 
-    def __init__(self, bot: IrenesBot) -> None:
+    def __init__(self, bot: LueBot) -> None:
         super().__init__(bot)
         self.game_tracked: str = "idk"
         self.title_tracked: str = "idk"
@@ -31,7 +31,7 @@ class ChannelManagement(IrenesComponent):
 
         self.start_tracking.start()
 
-    @irenes_loop(count=1)
+    @lueloop(count=1)
     async def start_tracking(self) -> None:
         """Start tracking my channel info.
 
@@ -106,7 +106,7 @@ class ChannelManagement(IrenesComponent):
         #     return
 
     @commands.group(name="title", invoke_fallback=True)
-    async def title_group(self, ctx: commands.Context, *, title: str = '') -> None:
+    async def title_group(self, ctx: commands.Context, *, title: str = "") -> None:
         """Callback for !title group commands.
 
         Can be used with subcommands. But when used on its - it either shows the title or updates it,
@@ -240,6 +240,6 @@ class ChannelManagement(IrenesComponent):
         await self.bot.pool.execute(query, cutoff_dt)
 
 
-async def setup(bot: IrenesBot) -> None:
+async def setup(bot: LueBot) -> None:
     """Load IrenesBot extension. Framework of twitchio."""
     await bot.add_component(ChannelManagement(bot))

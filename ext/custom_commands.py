@@ -6,11 +6,11 @@ import asyncpg
 import twitchio  # noqa: TCH002
 from twitchio.ext import commands
 
-from bot import IrenesComponent, irenes_loop
+from bot import LueComponent, lueloop
 from utils import const, errors
 
 if TYPE_CHECKING:
-    from bot import IrenesBot
+    from bot import LueBot
 
     class TwitchCommands(TypedDict):
         """`chat_commands` Table Structure."""
@@ -20,14 +20,14 @@ if TYPE_CHECKING:
         content: str
 
 
-class CustomCommands(IrenesComponent):
+class CustomCommands(LueComponent):
     """Custom commands.
 
     Commands that are managed on the fly.
     The information is contained within the database and cache.
     """
 
-    def __init__(self, bot: IrenesBot) -> None:
+    def __init__(self, bot: LueBot) -> None:
         super().__init__(bot)
         self.command_cache: dict[str, dict[str, str]] = {}
 
@@ -39,7 +39,7 @@ class CustomCommands(IrenesComponent):
     async def component_teardown(self) -> None:
         self.populate_cache.cancel()
 
-    @irenes_loop(count=1)
+    @lueloop(count=1)
     async def populate_cache(self) -> None:
         """Populate custom commands cache."""
         query = """
@@ -144,6 +144,6 @@ class CustomCommands(IrenesComponent):
         await ctx.send(", ".join(cache_list))
 
 
-async def setup(bot: IrenesBot) -> None:
+async def setup(bot: LueBot) -> None:
     """Load IrenesBot extension. Framework of twitchio."""
     await bot.add_component(CustomCommands(bot))

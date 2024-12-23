@@ -8,7 +8,7 @@ from twitchio.ext import commands
 from . import const, errors
 
 if TYPE_CHECKING:
-    from bot import IrenesBot
+    from bot import LueBot
 
 
 def is_vps() -> Any:
@@ -32,7 +32,7 @@ def is_vps() -> Any:
 def is_online() -> Any:
     """Allow the command to be completed only when Irene's stream is online."""
 
-    async def predicate(ctx: commands.Context[IrenesBot]) -> bool:
+    async def predicate(ctx: commands.Context[LueBot]) -> bool:
         return ctx.bot.irene_online
 
     return commands.guard(predicate)

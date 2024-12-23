@@ -15,7 +15,7 @@ except ImportError:
     import config
 
 if TYPE_CHECKING:
-    from bot import IrenesBot
+    from bot import LueBot
 
 log = logging.getLogger(__name__)
 
@@ -28,9 +28,9 @@ class Dota2Client(Client):
     Used to communicate with Dota 2 Game Coordinator in order to track information about my profile real-time.
     """
 
-    def __init__(self, twitch_bot: IrenesBot) -> None:
+    def __init__(self, twitch_bot: LueBot) -> None:
         super().__init__(state=PersonaState.Online)  # .Invisible
-        self.bot: IrenesBot = twitch_bot
+        self.bot: LueBot = twitch_bot
 
     @override
     async def login(self) -> None:

@@ -7,7 +7,7 @@ import sys
 import aiohttp
 import click
 
-from bot import IrenesBot, setup_logging
+from bot import LueBot, setup_logging
 from utils.database import create_pool
 
 try:
@@ -33,7 +33,7 @@ async def start_the_bot() -> None:
     async with (
         aiohttp.ClientSession() as session,
         pool as pool,
-        IrenesBot(session=session, pool=pool) as irenesbot,
+        LueBot(session=session, pool=pool) as irenesbot,
     ):
         await irenesbot.start()
 

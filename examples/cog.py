@@ -4,13 +4,13 @@ from typing import TYPE_CHECKING
 
 from twitchio.ext import commands
 
-from bot import IrenesComponent
+from bot import LueComponent
 
 if TYPE_CHECKING:
-    from bot import IrenesBot
+    from bot import LueBot
 
 
-class NewCog(IrenesComponent):
+class NewCog(LueComponent):
     """."""
 
     @commands.command()
@@ -19,6 +19,6 @@ class NewCog(IrenesComponent):
         await ctx.send("Not implemented yet!")
 
 
-async def setup(bot: IrenesBot) -> None:
+async def setup(bot: LueBot) -> None:
     """Load IrenesBot extension. Framework of twitchio."""
     await bot.add_component(NewCog(bot))

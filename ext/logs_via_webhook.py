@@ -9,13 +9,13 @@ from typing import TYPE_CHECKING, override
 import discord
 from twitchio.ext import commands
 
-from bot import IrenesComponent, irenes_loop
+from bot import LueComponent, lueloop
 from utils import const
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
-    from bot import IrenesBot
+    from bot import LueBot
 
 log = logging.getLogger(__name__)
 
@@ -30,9 +30,7 @@ class LoggingHandler(logging.Handler):
     @override
     def filter(self, record: logging.LogRecord) -> bool:
         """Filter out some somewhat pointless messages so we don't spam the channel as much."""
-        messages_to_ignore = (
-            "Webhook ID 1280488051776163903 is rate limited.",
-        )
+        messages_to_ignore = ("Webhook ID 1280488051776163903 is rate limited.",)
         if any(msg in record.message for msg in messages_to_ignore):  # noqa: SIM103
             return False
 
@@ -43,7 +41,7 @@ class LoggingHandler(logging.Handler):
         self.cog.add_record(record)
 
 
-class LogsViaWebhook(IrenesComponent):
+class LogsViaWebhook(LueComponent):
     """Mirroring logs to discord webhook messages.
 
     This cog is responsible for rate-limiting, formatting, fine-tuning and sending the log messages.
@@ -57,7 +55,7 @@ class LogsViaWebhook(IrenesComponent):
     }
     DOLPHIN_IMAGE: str = "https://em-content.zobj.net/source/microsoft/407/dolphin_1f42c.png"
 
-    def __init__(self, bot: IrenesBot) -> None:
+    def __init__(self, bot: LueBot) -> None:
         super().__init__(bot)
         self._logging_queue = asyncio.Queue()
 
@@ -105,7 +103,7 @@ class LogsViaWebhook(IrenesComponent):
         username = record.name.replace("discord", "disсοrd")  # cSpell: ignore disсοrd  # noqa: RUF003
         await self.bot.logger_webhook.send(msg, username=username, avatar_url=avatar_url)
 
-    @irenes_loop(seconds=0.0)
+    @lueloop(seconds=0.0)
     async def logging_worker(self) -> None:
         """Task responsible for mirroring logging messages to a discord webhook."""
         record = await self._logging_queue.get()
@@ -121,7 +119,7 @@ class LogsViaWebhook(IrenesComponent):
             await self.send_log_record(record)
 
 
-async def setup(bot: IrenesBot) -> None:
+async def setup(bot: LueBot) -> None:
     """Load IrenesBot extension. Framework of twitchio."""
     if __name__ in bot.extensions:
         # check if the extension is listed in extensions

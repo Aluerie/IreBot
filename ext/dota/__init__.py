@@ -5,9 +5,9 @@ from typing import TYPE_CHECKING
 from .commands import DotaCommands
 
 if TYPE_CHECKING:
-    from bot import IrenesBot
+    from bot import LueBot
 
 
-async def setup(bot: IrenesBot) -> None:
+async def setup(bot: LueBot) -> None:
     """Load IrenesBot extension. Framework of twitchio."""
     await bot.add_component(DotaCommands(bot))

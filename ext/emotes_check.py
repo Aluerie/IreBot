@@ -5,23 +5,23 @@ from typing import TYPE_CHECKING, override
 
 from discord import Embed
 
-from bot import IrenesComponent, irenes_loop
+from bot import LueComponent, lueloop
 from utils import const
 
 if TYPE_CHECKING:
     from enum import StrEnum
 
-    from bot import IrenesBot
+    from bot import LueBot
 
 
-class EmoteChecker(IrenesComponent):
+class EmoteChecker(LueComponent):
     """Check if emotes from 3rd party services like 7TV, FFZ, BTTV are valid.
 
     Usable in case I remove an emote that is used in bot's responses.
     Bot will notify me that emote was used so I can make adjustments.
     """
 
-    def __init__(self, bot: IrenesBot) -> None:
+    def __init__(self, bot: LueBot) -> None:
         super().__init__(bot)
 
     @override
@@ -48,7 +48,7 @@ class EmoteChecker(IrenesComponent):
             if emote not in api_emotes:
                 await self.send_error_embed(emote, bot_emotes.__name__, colour)
 
-    @irenes_loop(time=[datetime.time(hour=5, minute=59)])
+    @lueloop(time=[datetime.time(hour=5, minute=59)])
     async def check_emotes(self) -> None:
         """The task to check emotes."""
         if datetime.datetime.now(datetime.UTC).weekday() != 5:
@@ -76,6 +76,6 @@ class EmoteChecker(IrenesComponent):
             await self.cross_check_emotes(bttv_emote_list, const.BTTV, 0xD50014)
 
 
-async def setup(bot: IrenesBot) -> None:
+async def setup(bot: LueBot) -> None:
     """Load IrenesBot extension. Framework of twitchio."""
     await bot.add_component(EmoteChecker(bot))

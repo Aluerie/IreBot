@@ -14,7 +14,7 @@ from ext import EXTENSIONS
 from utils import const, errors
 from utils.dota import Dota2Client
 
-from .bases import irenes_loop
+from .bases import lueloop
 from .exc_manager import ExceptionManager
 
 if TYPE_CHECKING:
@@ -29,17 +29,37 @@ if TYPE_CHECKING:
         refresh: str
 
 
-__all__ = ("IrenesBot",)
+__all__ = ("LueBot",)
 
 log = logging.getLogger(__name__)
 
 
-class IrenesBot(commands.Bot):
-    """Main class for Irene's Bot.
+class LueBot(commands.Bot):
+    """Main class for AlueBot.
 
     Essentially subclass over TwitchIO's Client.
     Used to interact with the Twitch API, EventSub and more.
-    Includes `ext.commands` extension to organize cogs/commands framework.
+    Includes TwitchIO's `ext.commands` extension to organize components/commands framework.
+
+    Note on the name
+    ----
+    This class is named "LueBot" and not "AlueBot" just so when coding I don't confuse myself
+    with a quick glance value (my personal discord bot is named "AluBot").
+
+    The name `AlueBot` is used mainly for display purposes here:
+        * the bot's twitch account user name (just so it's clear that it's Aluerie's bot);
+        * the GitHub repository name and `README.md` file.
+
+    Name `LueBot` is pretty much used elsewhere:
+        * class name;
+        * folder name;
+        * systemd service name;
+        * discord notifications webhook names;
+        * the bot's Steam account's display name;
+        * category name in my own ToDo list;
+        * etc :D
+
+    Maybe I will change this in future to be less confusing, but I think current situation is fine.
     """
 
     if TYPE_CHECKING:
@@ -51,14 +71,7 @@ class IrenesBot(commands.Bot):
         session: ClientSession,
         pool: asyncpg.Pool[asyncpg.Record],
     ) -> None:
-        """Initiate IrenesBot.
-
-        Parameters
-        ----------
-        initial_channels
-            List of channel names (names, not ids!).
-
-        """
+        """Initiate IrenesBot."""
         self.prefixes: tuple[str, ...] = ("!", "?", "$")
         super().__init__(
             client_id=config.TTV_DEV_CLIENT_ID,
@@ -74,7 +87,6 @@ class IrenesBot(commands.Bot):
         self.extensions: tuple[str, ...] = EXTENSIONS
 
         self.exc_manager = ExceptionManager(self)
-        self.repo = "https://github.com/Aluerie/Irene_s_Bot"
         self.dota = Dota2Client(self)
 
         self.irene_online: bool = False
@@ -113,7 +125,7 @@ class IrenesBot(commands.Bot):
             ]
         )
         link = f"http://localhost:4343/oauth?scopes={scopes}&force_verify=true"
-        print(f"🤖🤖🤖 BOT OATH LINK: 🤖🤖🤖\n{link}")  # noqa: T201
+        print(f"🤖🤖🤖 BOT OAUTH LINK: 🤖🤖🤖\n{link}")  # noqa: T201
 
     def print_broadcaster_oauth(self) -> None:
         scopes = "%20".join(
@@ -126,13 +138,25 @@ class IrenesBot(commands.Bot):
             ]
         )
         link = f"http://localhost:4343/oauth?scopes={scopes}&force_verify=true"
-        print(f"🎬🎬🎬 BROADCASTER OATH LINK: 🎬🎬🎬\n{link}")  # noqa: T201
+        print(f"🎬🎬🎬 BROADCASTER OAUTH LINK: 🎬🎬🎬\n{link}")  # noqa: T201
 
     @override
     async def setup_hook(self) -> None:
-        # Twitchio tokens magic
-        # Uncomment the following three lines and run the bot when creating tokens (otherwise they should be commented)
-        # This will make the bot update the database with new tokens.
+        """
+        Setup Hook. Method called after `.login` has been called but before the bot is ready.
+
+        TwitchIO OAuth Tokens Magic
+        ---------------------------
+        In order to get the required oath tokens into the database when running the bot
+        for the first time (or after adding extra scopes):
+            1. Uncomment three first lines in this function;
+            2. Run the bot;
+            3. Click generated links using proper accounts (i.e. broadcaster = the browser with streamer account logged in);
+            4. The bot will update the tokens in the database automatically;
+            5. Comment the lines back. In normal state, they should be commented.
+
+        """
+
         # self.print_bot_oauth()
         # self.print_broadcaster_oauth()
         # return
@@ -140,16 +164,30 @@ class IrenesBot(commands.Bot):
         for ext in self.extensions:
             await self.load_module(ext)
 
-        # it's just a personal bot :)
+        await self.create_eventsub_subscriptions()
+        self.check_if_online.start()
+
+    async def create_eventsub_subscriptions(self) -> None:
+        """
+        Subscribe to all EventSub subscriptions that are required for the bot to work.
+        The function also includes (in code) a table showcasing which subscriptions/scopes are required for what.
+
+        For more links:
+
+        TwitchDev Docs
+        --------------
+            * Eventsub: https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types
+            * Scopes:   https://dev.twitch.tv/docs/authentication/scopes/
+
+        TwitchIO  Docs
+        --------------
+            * Events:   https://twitchio.dev/en/dev-3.0/references/events.html
+            * Models:   https://twitchio.dev/en/dev-3.0/references/eventsub_models.html
+        """
+
+        # it's just a personal bot so things are relatively simple about broadcaster<->bot relation ;)
         broadcaster = const.UserID.Irene
         bot = const.UserID.Bot
-
-        # * TwitchDev Docs:
-        #   Eventsub:   https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types
-        #   Scopes:     https://dev.twitch.tv/docs/authentication/scopes/
-        # * TwitchIO  Docs:
-        #   Events:     https://twitchio.dev/en/dev-3.0/references/events.html
-        #   Models:     https://twitchio.dev/en/dev-3.0/references/eventsub_models.html
 
         # EventSub Subscriptions Table (order - function name sorted by alphabet).
         # Subscription Name                     Permission
@@ -182,8 +220,6 @@ class IrenesBot(commands.Bot):
         sub = eventsub.ChannelUpdateSubscription(broadcaster_user_id=broadcaster)
         await self.subscribe_websocket(payload=sub)
 
-        self.check_if_online.start()
-
     @override
     async def add_token(self, token: str, refresh: str) -> twitchio.authentication.ValidateTokenPayload:
         # Make sure to call super() as it will add the tokens internally and return us some data...
@@ -212,7 +248,7 @@ class IrenesBot(commands.Bot):
 
     # @override
     async def event_ready(self) -> None:
-        log.info("Irene_s_Bot is ready as bot_id = %s", self.bot_id)
+        log.info("%s is ready as bot_id = %s", self.__class__.__name__, self.bot_id)
         if "ext.dota" in self.extensions:
             await self.dota.wait_until_ready()
 
@@ -380,7 +416,7 @@ class IrenesBot(commands.Bot):
     async def irene_stream(self) -> twitchio.Stream | None:
         return next(iter(await self.fetch_streams(user_ids=[const.UserID.Irene])), None)
 
-    @irenes_loop(count=1)
+    @lueloop(count=1)
     async def check_if_online(self) -> None:
         if await self.irene_stream():
             self.irene_online = True

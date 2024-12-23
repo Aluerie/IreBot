@@ -6,7 +6,7 @@ from examples.beta.base import *
 
 
 class BetaTest(BetaCog):
-    @irenes_loop(count=1)
+    @lueloop(count=1)
     async def beta_test(self) -> None:
         pass
 
@@ -15,6 +15,6 @@ class BetaTest(BetaCog):
         pass
 
 
-async def setup(bot: IrenesBot) -> None:
+async def setup(bot: LueBot) -> None:
     if __name__ in bot.extensions:
         await bot.add_component(BetaTest(bot))

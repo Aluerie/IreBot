@@ -6,13 +6,13 @@ import random
 from time import perf_counter
 from typing import TYPE_CHECKING, Any, TypedDict
 
-from bot import irenes_loop
+from bot import lueloop
 from utils import errors
 
 from .pulsefire_clients import ODotaConstantsClient
 
 if TYPE_CHECKING:
-    from bot import IrenesBot
+    from bot import LueBot
 
     class DotaCacheDict(TypedDict):
         item_by_id: dict[int, str]  # id -> item name
@@ -28,15 +28,15 @@ class DotaKeyCache:
     if TYPE_CHECKING:
         oconst: ODotaConstantsClient
 
-    def __init__(self, bot: IrenesBot) -> None:
-        self.bot: IrenesBot = bot
+    def __init__(self, bot: LueBot) -> None:
+        self.bot: LueBot = bot
         self.lock: asyncio.Lock = asyncio.Lock()
         self._update_data.add_exception_type(errors.ResponseNotOK)
         # random times just so we don't have a possibility of all cache being updated at the same time
         self._update_data.change_interval(hours=24, minutes=random.randint(1, 59))
         self._update_data.start()
 
-    @irenes_loop()
+    @lueloop()
     async def _update_data(self) -> None:
         """The task responsible for keeping the data up-to-date."""
         # log.debug("Trying to update Cache %s.", self.__class__.__name__)

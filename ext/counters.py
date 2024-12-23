@@ -9,13 +9,13 @@ from typing import TYPE_CHECKING, TypedDict, override
 from discord import Embed
 from twitchio.ext import commands
 
-from bot import IrenesComponent, irenes_loop
+from bot import LueComponent, lueloop
 from utils import const, formats
 
 if TYPE_CHECKING:
     import twitchio
 
-    from bot import IrenesBot
+    from bot import LueBot
 
     class FirstRedeemsRow(TypedDict):
         """`first_redeems` Table Columns."""
@@ -27,10 +27,10 @@ if TYPE_CHECKING:
 FIRST_ID: str = "013b19fc-8024-4416-99a4-8cf130305b1f"
 
 
-class Counters(IrenesComponent):
+class Counters(LueComponent):
     """Track some silly number counters of how many times this or that happened."""
 
-    def __init__(self, bot: IrenesBot) -> None:
+    def __init__(self, bot: LueBot) -> None:
         super().__init__(bot)
         self.last_erm_notification: datetime.datetime = datetime.datetime.now(datetime.UTC)
 
@@ -152,7 +152,7 @@ class Counters(IrenesComponent):
         content = " ".join(const.DIGITS)
         await ctx.send(content)
 
-    @irenes_loop(count=1)  # time=[datetime.time(hour=4, minute=59)])
+    @lueloop(count=1)  # time=[datetime.time(hour=4, minute=59)])
     async def check_first_reward(self) -> None:
         """The task that ensures the reward "First" under a specific id exists.
 
@@ -177,6 +177,6 @@ class Counters(IrenesComponent):
             await self.bot.error_webhook.send(content=content, embed=embed)
 
 
-async def setup(bot: IrenesBot) -> None:
+async def setup(bot: LueBot) -> None:
     """Load IrenesBot extension. Framework of twitchio."""
     await bot.add_component(Counters(bot))

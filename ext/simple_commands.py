@@ -10,14 +10,14 @@ import twitchio  # noqa: TCH002
 from twitchio.ext import commands
 
 import config
-from bot import IrenesComponent
+from bot import LueComponent
 from utils import const, formats, guards
 
 if TYPE_CHECKING:
-    from bot import IrenesBot
+    from bot import LueBot
 
 
-class DefaultCommands(IrenesComponent):
+class DefaultCommands(LueComponent):
     """Simple commands.
 
     Simple in a sense that they are just somewhat static and their implementation is simple.
@@ -288,7 +288,7 @@ class DefaultCommands(IrenesComponent):
     @commands.command()
     async def source(self, ctx: commands.Context) -> None:
         """Get the link to the bot's GitHub repository."""
-        await ctx.send(f"{self.bot.repo} {const.STV.DankReading}")
+        await ctx.send(f"github.com/Aluerie/AlueBot {const.STV.DankReading}")
 
     @commands.command()
     async def uptime(self, ctx: commands.Context) -> None:
@@ -350,6 +350,6 @@ class DefaultCommands(IrenesComponent):
         await ctx.send(f"Twitch ID for {user.mention}: {user.id}")
 
 
-async def setup(bot: IrenesBot) -> None:
+async def setup(bot: LueBot) -> None:
     """Load IrenesBot extension. Framework of twitchio."""
     await bot.add_component(DefaultCommands(bot))

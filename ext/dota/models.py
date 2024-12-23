@@ -11,7 +11,7 @@ from steam import ID
 from steam.ext.dota2 import GameMode, Hero, LobbyType
 from thefuzz import process
 
-from bot import irenes_loop
+from bot import lueloop
 from utils import errors, formats
 
 from .constants import HERO_ALIASES, PLAYER_COLOURS
@@ -21,7 +21,7 @@ from .utils import convert_id3_to_id64, rank_medal_display_name
 if TYPE_CHECKING:
     from steam.ext.dota2 import MatchHistoryMatch, MatchMinimal
 
-    from bot import IrenesBot
+    from bot import LueBot
 
     type ActiveMatch = PlayMatch | WatchMatch
 
@@ -51,8 +51,8 @@ log.setLevel(logging.DEBUG)
 
 
 class Streamer:
-    def __init__(self, bot: IrenesBot, steam_id64: int) -> None:
-        self.bot: IrenesBot = bot
+    def __init__(self, bot: LueBot, steam_id64: int) -> None:
+        self.bot: LueBot = bot
 
         self.steam_id64: int = steam_id64
         self.account_id: int = ID(steam_id64).id
@@ -219,7 +219,7 @@ class Streamer:
         """
         await self.bot.pool.execute(query, mmr_change, medal, self.account_id)
 
-    @irenes_loop(seconds=20, count=30)
+    @lueloop(seconds=20, count=30)
     async def update_last_game(self) -> None:
         mmr_change: int = 0
 
@@ -391,8 +391,8 @@ class LastGame:
 
 
 class Player:
-    def __init__(self, bot: IrenesBot, account_id: int, hero_id: int, player_slot: int) -> None:
-        self.bot: IrenesBot = bot
+    def __init__(self, bot: LueBot, account_id: int, hero_id: int, player_slot: int) -> None:
+        self.bot: LueBot = bot
         self.account_id: int = account_id
         self.hero: Hero = Hero.try_value(hero_id)
         self.player_slot: int = player_slot
@@ -407,7 +407,7 @@ class Player:
     def __repr__(self) -> str:
         return f"<Player id={self.account_id} hero={self.hero.name}"
 
-    @irenes_loop(seconds=5, count=12)
+    @lueloop(seconds=5, count=12)
     async def update(self) -> None:
         partial_user = self.bot.dota.instantiate_partial_user(self.account_id)
         profile_card = await partial_user.dota2_profile_card()
@@ -442,12 +442,12 @@ class Match(abc.ABC):
 
     def __init__(
         self,
-        bot: IrenesBot,
+        bot: LueBot,
         is_watch: bool,
         *,
         unsupported_error: str = "",
     ) -> None:
-        self.bot: IrenesBot = bot
+        self.bot: LueBot = bot
         self.is_watch: bool = is_watch
 
         self.match_id: int | None = None
@@ -541,7 +541,7 @@ class Match(abc.ABC):
                 break
         else:
             msg = "Didn't find the player's team info Oups"
-            raise errors.PlaceholderRaiseError(msg )
+            raise errors.PlaceholderRaiseError(msg)
 
         prefix = f"[2m delay] {Hero.try_value(api_player['heroid'])} lvl {api_player['level']}"
         net_worth = f"NW: {api_player['net_worth']}"
@@ -574,7 +574,7 @@ class PlayMatch(Match):
 
     def __init__(
         self,
-        bot: IrenesBot,
+        bot: LueBot,
         watchable_game_id: str,
         account_id: int,
     ) -> None:
@@ -597,7 +597,7 @@ class PlayMatch(Match):
             for player in self.players.values():
                 player.update.cancel()
 
-    @irenes_loop(seconds=10, count=30)
+    @lueloop(seconds=10, count=30)
     async def update_data(self) -> None:
         log.debug("Task `update_data` starts now: iteration=%s", self.update_data.current_loop)
         match = next(iter(await self.bot.dota.live_matches(lobby_ids=[self.lobby_id])), None)
@@ -628,7 +628,7 @@ class PlayMatch(Match):
         if self.game_mode:
             self.update_data.stop()
 
-    @irenes_loop(seconds=10, count=30)
+    @lueloop(seconds=10, count=30)
     async def check_players(self) -> None:
         log.debug("Task `check_players` starts now: iteration=%s", self.check_players.current_loop)
         if self.players and all(player.is_data_ready for player in self.players.values()):
@@ -648,7 +648,7 @@ class PlayMatch(Match):
 
     # count exists to prevent potential infinite loop ?
     # i'm not sure how it behaves when the object is null'ed.
-    @irenes_loop(seconds=10, count=30)
+    @lueloop(seconds=10, count=30)
     async def update_heroes(self) -> None:
         log.debug("Task `update_heroes` starts now: iteration=%s", self.update_heroes.current_loop)
         if self.update_heroes.current_loop == 0:
@@ -702,7 +702,7 @@ class WatchMatch(Match):
     * have valid `server_steam_id` in Rich Presence
     """
 
-    def __init__(self, bot: IrenesBot, watching_server: str) -> None:
+    def __init__(self, bot: LueBot, watching_server: str) -> None:
         super().__init__(bot, True)
         self.watching_server: str = watching_server
         self.server_steam_id: int = convert_id3_to_id64(watching_server)
@@ -711,7 +711,7 @@ class WatchMatch(Match):
         self.update_data.cancel()
         self.update_heroes.cancel()
 
-    @irenes_loop(seconds=10, count=30)
+    @lueloop(seconds=10, count=30)
     async def update_data(self) -> None:
         match = await self.bot.steam_web_api.get_real_time_stats(self.server_steam_id)
 
@@ -736,7 +736,7 @@ class WatchMatch(Match):
         if self.game_mode:
             self.update_data.stop()
 
-    @irenes_loop(seconds=10, count=30)
+    @lueloop(seconds=10, count=30)
     async def check_players(self) -> None:
         if self.players and all(player.is_data_ready for player in self.players.values()):
             # match data is ready
@@ -752,7 +752,7 @@ class WatchMatch(Match):
         else:
             return False
 
-    @irenes_loop(seconds=10, count=30)
+    @lueloop(seconds=10, count=30)
     async def update_heroes(self) -> None:
         if self.update_heroes.current_loop == 0:
             return

@@ -7,19 +7,19 @@ from typing import TYPE_CHECKING
 
 from twitchio.ext import commands
 
-from bot import IrenesComponent, irenes_loop
+from bot import LueComponent, lueloop
 from utils import const
 
 if TYPE_CHECKING:
     import twitchio
 
-    from bot import IrenesBot
+    from bot import LueBot
 
 
-class Timers(IrenesComponent):
+class Timers(LueComponent):
     """Periodic messages/announcements in Irene's channel."""
 
-    def __init__(self, bot: IrenesBot) -> None:
+    def __init__(self, bot: LueBot) -> None:
         super().__init__(bot)
 
         self.messages: list[str] = [
@@ -62,7 +62,7 @@ class Timers(IrenesComponent):
 
         self.lines_count += 1
 
-    @irenes_loop(count=1)
+    @lueloop(count=1)
     async def timer_task(self) -> None:
         """Task to send periodic messages into irene's channel on timer."""
         await asyncio.sleep(10 * 60)
@@ -85,6 +85,6 @@ class Timers(IrenesComponent):
         await self.bot.wait_until_ready()
 
 
-async def setup(bot: IrenesBot) -> None:
+async def setup(bot: LueBot) -> None:
     """Load IrenesBot extension. Framework of twitchio."""
     await bot.add_component(Timers(bot))

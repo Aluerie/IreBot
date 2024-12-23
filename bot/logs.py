@@ -14,14 +14,15 @@ if TYPE_CHECKING:
 
 __all__ = ("setup_logging",)
 
+# generated at https://patorjk.com/software/taag/ using "Standard" font
 ASCII_STARTING_UP_ART = r"""
-    ___ ____  _____ _   _ _____ _ ____    ____   ___ _____   ____ _____  _    ____ _____ ___ _   _  ____
-|_ _|  _ \| ____| \ | | ____( ) ___|  | __ ) / _ \_   _| / ___|_   _|/ \  |  _ \_   _|_ _| \ | |/ ___|
- | || |_) |  _| |  \| |  _| |/\___ \  |  _ \| | | || |   \___ \ | | / _ \ | |_) || |  | ||  \| | |  _
- | ||  _ <| |___| |\  | |___   ___) | | |_) | |_| || |    ___) || |/ ___ \|  _ < | |  | || |\  | |_| |
-|___|_| \_\_____|_| \_|_____| |____/  |____/ \___/ |_|   |____/ |_/_/   \_\_| \_\|_| |___|_| \_|\____|
-
-                   [ IRENE_S_BOT IS STARTING NOW ]
+  _               ____        _     ____  _             _   _
+ | |   _   _  ___| __ )  ___ | |_  / ___|| |_ __ _ _ __| |_(_)_ __   __ _
+ | |  | | | |/ _ \  _ \ / _ \| __| \___ \| __/ _` | '__| __| | '_ \ / _` |
+ | |__| |_| |  __/ |_) | (_) | |_   ___) | || (_| | |  | |_| | | | | (_| |
+ |_____\__,_|\___|____/ \___/ \__| |____/ \__\__,_|_|   \__|_|_| |_|\__, |
+                                                                    |___/
+                    [ LUEBOT IS STARTING NOW ]
 """
 
 
@@ -41,7 +42,7 @@ def setup_logging() -> Generator[Any, Any, Any]:
         Path(".temp/").mkdir(parents=True, exist_ok=True)
         # File Handler
         file_handler = RotatingFileHandler(
-            filename=".temp/irenesbot.log",
+            filename=".temp/luebot.log",
             encoding="utf-8",
             mode="w",
             maxBytes=24 * 1024 * 1024,  # MiB

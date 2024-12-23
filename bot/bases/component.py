@@ -10,20 +10,20 @@ from utils import const
 if TYPE_CHECKING:
     import twitchio
 
-    from ..bot import IrenesBot
+    from ..bot import LueBot
 
 
-__all__ = ("IrenesComponent",)
+__all__ = ("LueComponent",)
 
 log = logging.getLogger("alerts")
 log.setLevel(logging.INFO)  # DEBUG
 
 
-class IrenesComponent(commands.Component):
-    """Base component to use with IrenesBot."""
+class LueComponent(commands.Component):
+    """Base component to use with LueBot."""
 
-    def __init__(self, bot: IrenesBot) -> None:
-        self.bot: IrenesBot = bot
+    def __init__(self, bot: LueBot) -> None:
+        self.bot: LueBot = bot
 
     @property
     def irene(self) -> twitchio.PartialUser:

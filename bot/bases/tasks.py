@@ -11,22 +11,22 @@ from discord.utils import MISSING
 if TYPE_CHECKING:
     import datetime
 
-    from ..bot import IrenesBot
+    from ..bot import LueBot
 
     class HasBotAttribute(Protocol):
-        bot: IrenesBot
+        bot: LueBot
 
 
 log = logging.getLogger(__name__)
 
-__all__ = ("irenes_loop",)
+__all__ = ("lueloop",)
 
 
 _func = Callable[..., Coroutine[Any, Any, Any]]
 LF = TypeVar("LF", bound=_func)
 
 
-class IrenesLoop(tasks.Loop[LF]):
+class LueLoop(tasks.Loop[LF]):
     """My subclass for discord.ext.tasks.Loop.
 
     Just extra boilerplate functionality.
@@ -59,6 +59,7 @@ class IrenesLoop(tasks.Loop[LF]):
         name: str | None,
     ) -> None:
         super().__init__(coro, seconds, hours, minutes, time, count, reconnect, name)
+
     #     self._before_loop = self._base_before_loop
 
     # async def _base_before_loop(self, cog: HasBotAttribute) -> None:  # *args: Any
@@ -79,7 +80,7 @@ class IrenesLoop(tasks.Loop[LF]):
     async def _error(self, cog: HasBotAttribute, exception: Exception) -> None:
         """Same `_error` as in parent class but with `exc_manager` integrated."""
         embed = (
-            discord.Embed(title=self.coro.__name__, colour=0x1a7a8a)
+            discord.Embed(title=self.coro.__name__, colour=0x1A7A8A)
             .set_author(name=f"{self.coro.__module__}: {self.coro.__qualname__}")
             .set_footer(text=f"irenesloop: {self.coro.__name__}")
         )
@@ -87,7 +88,7 @@ class IrenesLoop(tasks.Loop[LF]):
 
 
 @discord.utils.copy_doc(tasks.loop)
-def irenes_loop(
+def lueloop(
     *,
     seconds: float = MISSING,
     minutes: float = MISSING,
@@ -96,7 +97,7 @@ def irenes_loop(
     count: int | None = None,
     reconnect: bool = True,
     name: str | None = None,
-) -> Callable[[LF], IrenesLoop[LF]]:
+) -> Callable[[LF], LueLoop[LF]]:
     """Copy-pasted `loop` decorator from `discord.ext.tasks` corresponding to AluLoop class.
 
     Notes
@@ -106,8 +107,8 @@ def irenes_loop(
 
     """
 
-    def decorator(func: LF) -> IrenesLoop[LF]:
-        return IrenesLoop(
+    def decorator(func: LF) -> LueLoop[LF]:
+        return LueLoop(
             func,
             seconds=seconds,
             minutes=minutes,

@@ -6,24 +6,24 @@ from typing import TYPE_CHECKING
 
 from twitchio.ext import commands
 
-from bot import IrenesComponent
+from bot import LueComponent
 from utils import const, formats
 
 if TYPE_CHECKING:
     import twitchio
 
-    from bot import IrenesBot
+    from bot import LueBot
 
 log = logging.getLogger(__name__)
 
 
-class Alerts(IrenesComponent):
+class Alerts(LueComponent):
     """Twitch Chat Alerts.
 
     Mostly, EventSub events that are nice to have a notification in twitch chat for.
     """
 
-    def __init__(self, bot: IrenesBot) -> None:
+    def __init__(self, bot: LueBot) -> None:
         super().__init__(bot)
         self.ban_list: set[str] = set()
 
@@ -88,9 +88,9 @@ class Alerts(IrenesComponent):
             moderator=const.UserID.Bot,
             token_for=const.UserID.Bot,
             message=(
-                f"@{raid.from_broadcaster.display_name} just raided us with {raid.viewer_count} viewers. "
+                f"@{raid.from_broadcaster.display_name} just raided us! "
                 f'They were playing {raider_channel_info.game_name} with title "{raider_channel_info.title}". '
-                f"Hey chat be nice to raiders {const.STV.donkHappy}"
+                f"chat be nice to raiders {const.STV.donkHappy} raiders, feel free to raid and run tho."
             ),
         )
 
@@ -111,6 +111,12 @@ class Alerts(IrenesComponent):
             message=(
                 f"Stream just started {const.STV.FeelsBingMan} "
                 f"Game: {channel_info.game_name} | Title: {channel_info.title}"
+            ),
+        )
+        await online.broadcaster.send_message(
+            sender=self.bot.bot_id,
+            message=(
+                f"{online.broadcaster.mention} remember to pin some message, check if everything is working."
             ),
         )
 
@@ -152,6 +158,6 @@ class Alerts(IrenesComponent):
     #         await message.channel.send(content)
 
 
-async def setup(bot: IrenesBot) -> None:
+async def setup(bot: LueBot) -> None:
     """Load IrenesBot extension. Framework of twitchio."""
     await bot.add_component(Alerts(bot))

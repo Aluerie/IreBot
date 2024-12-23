@@ -7,13 +7,13 @@ from typing import TYPE_CHECKING, TypedDict
 
 from twitchio.ext import commands
 
-from bot import IrenesComponent
+from bot import LueComponent
 from utils import const
 
 if TYPE_CHECKING:
     import twitchio
 
-    from bot import IrenesBot
+    from bot import LueBot
 
     class KeywordDict(TypedDict):
         """Schema for `self.keywords` elements."""
@@ -23,13 +23,13 @@ if TYPE_CHECKING:
         dt: datetime.datetime
 
 
-class Keywords(IrenesComponent):
+class Keywords(LueComponent):
     """React to specific key word / key phrases with bot's own messages.
 
     Mostly used to make a small feeling of a crowd - something like many users are Pog-ing.
     """
 
-    def __init__(self, bot: IrenesBot) -> None:
+    def __init__(self, bot: LueBot) -> None:
         super().__init__(bot)
         self.keywords: list[KeywordDict] = [
             {
@@ -62,6 +62,6 @@ class Keywords(IrenesComponent):
                     keyword["dt"] = now
 
 
-async def setup(bot: IrenesBot) -> None:
+async def setup(bot: LueBot) -> None:
     """Load IrenesBot extension. Framework of twitchio."""
     await bot.add_component(Keywords(bot))

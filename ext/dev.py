@@ -7,11 +7,11 @@ from typing import TYPE_CHECKING, Annotated
 
 from twitchio.ext import commands
 
-from bot import IrenesComponent
+from bot import LueComponent
 from utils import const, guards
 
 if TYPE_CHECKING:
-    from bot import IrenesBot
+    from bot import LueBot
 
 log = logging.getLogger(__name__)
 
@@ -20,7 +20,7 @@ def to_extension(_: commands.Context, extension: str) -> str:
     return f"ext.{extension}"
 
 
-class Development(IrenesComponent):
+class Development(LueComponent):
     """Dev Only Commands."""
 
     @guards.is_vps()
@@ -100,6 +100,6 @@ class Development(IrenesComponent):
         await ctx.send(f"I'll treat {ctx.broadcaster.display_name} as offline now {const.STV.donkSad}")
 
 
-async def setup(bot: IrenesBot) -> None:
+async def setup(bot: LueBot) -> None:
     """Load IrenesBot extension. Framework of twitchio."""
     await bot.add_component(Development(bot))

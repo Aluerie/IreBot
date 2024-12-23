@@ -12,13 +12,13 @@ from typing import TYPE_CHECKING, NamedTuple, TypedDict
 
 from twitchio.ext import commands
 
-from bot import IrenesComponent
+from bot import LueComponent
 from utils import const, errors
 
 if TYPE_CHECKING:
     from aiohttp import ClientSession
 
-    from bot import IrenesBot
+    from bot import LueBot
 
 
 class TranslatedSentence(TypedDict):
@@ -81,7 +81,7 @@ async def translate(
         )
 
 
-class TranslationCog(IrenesComponent):
+class TranslationCog(LueComponent):
     """Translation command cog."""
 
     @commands.command()
@@ -95,6 +95,6 @@ class TranslationCog(IrenesComponent):
         await ctx.send(answer)
 
 
-async def setup(bot: IrenesBot) -> None:
+async def setup(bot: LueBot) -> None:
     """Load IrenesBot extension. Framework of twitchio."""
     await bot.add_component(TranslationCog(bot))
