@@ -115,9 +115,7 @@ class Alerts(LueComponent):
         )
         await online.broadcaster.send_message(
             sender=self.bot.bot_id,
-            message=(
-                f"{online.broadcaster.mention} remember to pin some message, check if everything is working."
-            ),
+            message=(f"{online.broadcaster.mention} remember to pin some message, check if everything is working."),
         )
 
     @commands.Component.listener(name="ad_break")
@@ -127,7 +125,7 @@ class Alerts(LueComponent):
         human_delta = formats.timedelta_to_words(seconds=ad_begin.duration, fmt=formats.TimeDeltaFormat.Short)
         await ad_begin.broadcaster.send_message(
             sender=self.bot.bot_id,
-            message=f"{human_delta} ad starting {const.STV.peepoAd}",
+            message=f"{human_delta} ad starting {const.STV.peepoAds}",
         )
 
         # this is pointless probably
