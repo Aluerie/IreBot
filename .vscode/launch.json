@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Irene_s_Bot",
+            "name": "LueBot",
             "type": "debugpy",
             "request": "launch",
             "program": "__main__.py",

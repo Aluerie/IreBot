@@ -102,7 +102,7 @@ combine-as-imports = true
 
 
 [project]
-name = "Irene_s_Bot"
+name = "AlueBot"
 version = "2024.0.0"
 requires-python = ">=3.12"
 authors = [{ name = "Aluerie" }]

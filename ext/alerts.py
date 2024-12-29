@@ -36,7 +36,7 @@ class Alerts(LueComponent):
         # just testing
         print(f"{event.user.display_name} redeemed {event.reward.title} (id={event.reward.id}).")  # noqa: T201
 
-        if event.user.id == const.UserID.Irene and event.reward.cost < 4:
+        if event.user.id == const.UserID.Aluerie and event.reward.cost < 4:
             # < 4 is a weird way to exclude my "Text-To-Speech" redemption.
             # channel = self.get_channel(payload.broadcaster)
             await event.broadcaster.send_message(
@@ -157,5 +157,5 @@ class Alerts(LueComponent):
 
 
 async def setup(bot: LueBot) -> None:
-    """Load IrenesBot extension. Framework of twitchio."""
+    """Load LueBot extension. Framework of twitchio."""
     await bot.add_component(Alerts(bot))

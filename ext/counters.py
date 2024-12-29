@@ -47,7 +47,7 @@ class Counters(LueComponent):
     @commands.Component.listener(name="message")
     async def erm_counter(self, message: twitchio.ChatMessage) -> None:
         """Erm Counter."""
-        if message.chatter.name in const.Bots or not message.text or message.broadcaster.id != const.UserID.Irene:
+        if message.chatter.name in const.Bots or not message.text or message.broadcaster.id != const.UserID.Aluerie:
             # limit author/channel
             return
         if not re.search(r"\bErm\b", message.text):
@@ -94,7 +94,7 @@ class Counters(LueComponent):
     async def first_counter(self, redemption: twitchio.ChannelPointsRedemptionAdd) -> None:
         """Count all redeems for the reward 'First'."""
 
-        if redemption.reward.id != FIRST_ID or redemption.broadcaster.id != const.UserID.Irene:
+        if redemption.reward.id != FIRST_ID or redemption.broadcaster.id != const.UserID.Aluerie:
             return
 
         query = """--sql
@@ -162,7 +162,7 @@ class Counters(LueComponent):
             # simple way to make a task run once/month
             return
 
-        custom_rewards = await self.irene.fetch_custom_rewards()
+        custom_rewards = await self.aluerie.fetch_custom_rewards()
         for reward in custom_rewards:
             if reward.id == FIRST_ID:
                 # we good
@@ -178,5 +178,5 @@ class Counters(LueComponent):
 
 
 async def setup(bot: LueBot) -> None:
-    """Load IrenesBot extension. Framework of twitchio."""
+    """Load LueBot extension. Framework of twitchio."""
     await bot.add_component(Counters(bot))

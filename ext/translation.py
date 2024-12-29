@@ -96,5 +96,5 @@ class TranslationCog(LueComponent):
 
 
 async def setup(bot: LueBot) -> None:
-    """Load IrenesBot extension. Framework of twitchio."""
+    """Load LueBot extension. Framework of twitchio."""
     await bot.add_component(TranslationCog(bot))

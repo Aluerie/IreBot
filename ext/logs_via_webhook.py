@@ -79,7 +79,7 @@ class LogsViaWebhook(LueComponent):
         # it looks like the `log.info` from `bot.py` doesn't proc before LogsViaWebhook is loaded
         await self.bot.logger_webhook.send(
             content=f"Logged in as `user_id={self.bot.bot_id}`",
-            username="Irene's Dolphin",
+            username="Aluerie's Dolphin",
             avatar_url=self.DOLPHIN_IMAGE,
         )
         await self.deliver(f"{const.STV.hi} the bot is reloaded.")
@@ -120,7 +120,7 @@ class LogsViaWebhook(LueComponent):
 
 
 async def setup(bot: LueBot) -> None:
-    """Load IrenesBot extension. Framework of twitchio."""
+    """Load LueBot extension. Framework of twitchio."""
     if __name__ in bot.extensions:
         # check if the extension is listed in extensions
 

@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
 
 class Timers(LueComponent):
-    """Periodic messages/announcements in Irene's channel."""
+    """Periodic messages/announcements in Aluerie's channel."""
 
     def __init__(self, bot: LueBot) -> None:
         super().__init__(bot)
@@ -42,13 +42,13 @@ class Timers(LueComponent):
         ]
         self.lines_count: int = 0
 
-    @commands.Component.listener(name="irene_online")
+    @commands.Component.listener(name="aluerie_online")
     async def stream_online_start_the_task(self) -> None:
         """Start the timer task when stream goes online."""
         if not self.timer_task.is_running():
             self.timer_task.start()
 
-    @commands.Component.listener(name="irene_offline")
+    @commands.Component.listener(name="aluerie_offline")
     async def stream_offline_cancel_the_task(self) -> None:
         """Cancel the timer task when stream goes offline."""
         self.timer_task.cancel()
@@ -86,5 +86,5 @@ class Timers(LueComponent):
 
 
 async def setup(bot: LueBot) -> None:
-    """Load IrenesBot extension. Framework of twitchio."""
+    """Load LueBot extension. Framework of twitchio."""
     await bot.add_component(Timers(bot))

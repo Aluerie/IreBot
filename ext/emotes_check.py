@@ -33,13 +33,13 @@ class EmoteChecker(LueComponent):
         self.check_emotes.cancel()
 
     async def send_error_embed(self, emote: str, service: str, colour: int) -> None:
-        """Helper function to send a ping to Irene that something is wrong with emote services."""
+        """Helper function to send a ping to Aluerie that something is wrong with emote services."""
         content = self.bot.error_ping
         embed = Embed(
             title=f"Problem with {service} emotes",
             description=f"Looks like emote `{emote}` is no longer present in the channel.",
             colour=colour,
-        ).set_footer(text="but it was previously used for @Irene_s_Bot emotes")
+        ).set_footer(text="but it was previously used for @AlueBot emotes")
         await self.bot.error_webhook.send(content=content, embed=embed)
 
     async def cross_check_emotes(self, api_emotes: list[str], bot_emotes: type[StrEnum], colour: int) -> None:
@@ -56,20 +56,20 @@ class EmoteChecker(LueComponent):
             return
 
         # SEVEN TV
-        async with self.bot.session.get(f"https://7tv.io/v3/users/twitch/{const.UserID.Irene}") as resp:
+        async with self.bot.session.get(f"https://7tv.io/v3/users/twitch/{const.UserID.Aluerie}") as resp:
             stv_json = await resp.json()
             stv_emote_list = [emote["name"] for emote in stv_json["emote_set"]["emotes"]]
             await self.cross_check_emotes(stv_emote_list, const.STV, 0x3493EE)
 
         # FFZ
-        async with self.bot.session.get(f"https://api.frankerfacez.com/v1/room/id/{const.UserID.Irene}") as resp:
+        async with self.bot.session.get(f"https://api.frankerfacez.com/v1/room/id/{const.UserID.Aluerie}") as resp:
             ffz_json = await resp.json()  # if we ever need this "654554" then it exists as `ffz_json["room"]["set"]`
             ffz_emote_list = [emote["name"] for emote in ffz_json["sets"]["654554"]["emoticons"]]
             await self.cross_check_emotes(ffz_emote_list, const.FFZ, 0x271F3E)
 
         # BTTV
         async with self.bot.session.get(
-            f"https://api.betterttv.net/3/cached/users/twitch/{const.UserID.Irene}"
+            f"https://api.betterttv.net/3/cached/users/twitch/{const.UserID.Aluerie}"
         ) as resp:
             bttv_json = await resp.json()
             bttv_emote_list = [emote["code"] for emote in bttv_json["channelEmotes"] + bttv_json["sharedEmotes"]]
@@ -77,5 +77,5 @@ class EmoteChecker(LueComponent):
 
 
 async def setup(bot: LueBot) -> None:
-    """Load IrenesBot extension. Framework of twitchio."""
+    """Load LueBot extension. Framework of twitchio."""
     await bot.add_component(EmoteChecker(bot))

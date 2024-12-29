@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 from twitchio.ext import commands
 
 from bot import LueComponent, lueloop
-from utils import const, errors, formats
+from utils import const, formats
 
 if TYPE_CHECKING:
     import twitchio
@@ -25,7 +25,7 @@ class ChannelManagement(LueComponent):
         self.game_tracked: str = "idk"
         self.title_tracked: str = "idk"
 
-        # datetimes indicating when game/title was changed with specifically Irene's Bot commands !game/!title
+        # datetimes indicating when game/title was changed with specifically LueBot's commands !game/!title
         self.game_updated_dt: datetime.datetime = datetime.datetime.now(datetime.UTC) - datetime.timedelta(hours=1)
         self.title_updated_dt: datetime.datetime = datetime.datetime.now(datetime.UTC) - datetime.timedelta(hours=1)
 
@@ -40,7 +40,7 @@ class ChannelManagement(LueComponent):
 
         This is why we need to track the past ourselves.
         """
-        channel_info = await self.irene.fetch_channel_info()
+        channel_info = await self.aluerie.fetch_channel_info()
 
         self.game_tracked = channel_info.game_name
         self.title_tracked = channel_info.title
@@ -93,17 +93,6 @@ class ChannelManagement(LueComponent):
         """Helper function to update the streamer's title."""
         self.title_updated_dt = datetime.datetime.now(datetime.UTC)
         await streamer.modify_channel(title=title)
-        # try:
-        #     await streamer.modify_channel(title=title)
-        # except Exception as error:
-        #     if "Title is too long" in str(error):
-        #         msg = f"Sorry, title is too long: {len(title)}/140"
-        #         raise errors.UsageError(msg)
-        #     else:
-        #         raise errors.SomethingWentWrong(str(error))
-        # else:
-        #     # success
-        #     return
 
     @commands.group(name="title", invoke_fallback=True)
     async def title_group(self, ctx: commands.Context, *, title: str = "") -> None:
@@ -241,5 +230,5 @@ class ChannelManagement(LueComponent):
 
 
 async def setup(bot: LueBot) -> None:
-    """Load IrenesBot extension. Framework of twitchio."""
+    """Load LueBot extension. Framework of twitchio."""
     await bot.add_component(ChannelManagement(bot))

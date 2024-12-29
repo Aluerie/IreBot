@@ -137,6 +137,7 @@ class RPStatus(MyStrEnum):
     PrivateLobby = "#DOTA_RP_PRIVATE_LOBBY"
     BotPractice = "#DOTA_RP_BOTPRACTICE"
     Coaching = "#DOTA_RP_COACHING"
+    WatchingTournament = "#DOTA_RP_WATCHING_TOURNAMENT"
 
     # EXTRA
     CustomGame = "#DOTA_RP_GAME_IN_PROGRESS_CUSTOM"
@@ -157,6 +158,7 @@ class RPStatus(MyStrEnum):
             cls.PrivateLobby: "Private Lobby",
             cls.BotPractice: "Bot Practice",
             cls.Coaching: "Coaching",
+            cls.WatchingTournament: "Watching Tournament",
             cls.CustomGame: "Custom Game",
         }
 

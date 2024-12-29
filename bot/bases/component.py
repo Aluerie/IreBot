@@ -26,12 +26,12 @@ class LueComponent(commands.Component):
         self.bot: LueBot = bot
 
     @property
-    def irene(self) -> twitchio.PartialUser:
-        """Get Irene's channel from the cache."""
-        return self.bot.create_partialuser(const.UserID.Irene)
+    def aluerie(self) -> twitchio.PartialUser:
+        """Get Aluerie's channel from the cache."""
+        return self.bot.create_partialuser(const.UserID.Aluerie)
 
     async def deliver(self, content: str) -> None:
-        await self.irene.send_message(
+        await self.aluerie.send_message(
             sender=self.bot.bot_id,
             message=content,
         )

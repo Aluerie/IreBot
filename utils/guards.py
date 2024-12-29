@@ -33,6 +33,6 @@ def is_online() -> Any:
     """Allow the command to be completed only when Irene's stream is online."""
 
     async def predicate(ctx: commands.Context[LueBot]) -> bool:
-        return ctx.bot.irene_online
+        return ctx.bot.aluerie_online
 
     return commands.guard(predicate)

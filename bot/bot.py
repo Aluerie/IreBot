@@ -71,13 +71,13 @@ class LueBot(commands.Bot):
         session: ClientSession,
         pool: asyncpg.Pool[asyncpg.Record],
     ) -> None:
-        """Initiate IrenesBot."""
+        """Initiate LueBot."""
         self.prefixes: tuple[str, ...] = ("!", "?", "$")
         super().__init__(
             client_id=config.TTV_DEV_CLIENT_ID,
             client_secret=config.TTV_DEV_CLIENT_SECRET,
             bot_id=const.UserID.Bot,
-            owner_id=const.UserID.Irene,
+            owner_id=const.UserID.Aluerie,
             prefix=self.prefixes,
             # TODO: fill in scopes= argument once we figure out what it's used for :x
         )
@@ -89,7 +89,7 @@ class LueBot(commands.Bot):
         self.exc_manager = ExceptionManager(self)
         self.dota = Dota2Client(self)
 
-        self.irene_online: bool = False
+        self.aluerie_online: bool = False
 
     # def show_oauth(self) -> None:
     #     oauth = twitchio.authentication.OAuth(
@@ -186,7 +186,7 @@ class LueBot(commands.Bot):
         """
 
         # it's just a personal bot so things are relatively simple about broadcaster<->bot relation ;)
-        broadcaster = const.UserID.Irene
+        broadcaster = const.UserID.Aluerie
         bot = const.UserID.Bot
 
         # EventSub Subscriptions Table (order - function name sorted by alphabet).
@@ -255,7 +255,7 @@ class LueBot(commands.Bot):
     @override
     async def event_command_error(self, payload: commands.CommandErrorPayload) -> None:
         """Called when error happens during command invoking."""
-        command: commands.Command[Any, ...] | None = payload.context.command
+        command = payload.context.command
         if command and command.has_error and payload.context.error_dispatched:
             return
 
@@ -266,7 +266,7 @@ class LueBot(commands.Bot):
         error = error.original if isinstance(error, commands.CommandInvokeError) and error.original else error
 
         match error:
-            case errors.IrenesBotError():
+            case errors.LueBotError():
                 # errors defined by me - just send the string
                 await ctx.send(str(error))
             case commands.CommandNotFound():
@@ -298,11 +298,9 @@ class LueBot(commands.Bot):
                 await ctx.send(
                     f'You need to provide "{error.param.name}" argument for this command {const.FFZ.peepoPolice}'
                 )
-
-            # case commands.CommandOnCooldown(): # TODO: WAIT TILL IMPLEMENTED
-            #     await ctx.send(
-            #         f"Command {ctx.prefix}{error.command.name} is on cooldown! Try again in {error.retry_after:.0f} sec."
-            #     )
+            case commands.CommandOnCooldown():
+                command_name = f"{ctx.prefix}{command.name}" if command else "this command"
+                await ctx.send(f"Command {command_name} is on cooldown! Try again in {error.remaining:.0f} sec.")
 
             # case commands.BadArgument():
             #     log.warning("%s %s", error.name, error)
@@ -410,22 +408,22 @@ class LueBot(commands.Bot):
 
     @property
     def error_ping(self) -> str:
-        """Error Role ping used to notify Irene about some errors."""
+        """Error Role ping used to notify the developer(-s) about some errors."""
         return config.ERROR_PING
 
-    async def irene_stream(self) -> twitchio.Stream | None:
-        return next(iter(await self.fetch_streams(user_ids=[const.UserID.Irene])), None)
+    async def aluerie_stream(self) -> twitchio.Stream | None:
+        return next(iter(await self.fetch_streams(user_ids=[const.UserID.Aluerie])), None)
 
     @lueloop(count=1)
     async def check_if_online(self) -> None:
-        if await self.irene_stream():
-            self.irene_online = True
-            self.dispatch("irene_online")
+        if await self.aluerie_stream():
+            self.aluerie_online = True
+            self.dispatch("aluerie_online")
 
     async def event_stream_online(self, _: twitchio.StreamOnline) -> None:
-        self.irene_online = True
-        self.dispatch("irene_online")
+        self.aluerie_online = True
+        self.dispatch("aluerie_online")
 
     async def event_stream_offline(self, _: twitchio.StreamOffline) -> None:
-        self.irene_online = False
-        self.dispatch("irene_offline")
+        self.aluerie_online = False
+        self.dispatch("aluerie_offline")

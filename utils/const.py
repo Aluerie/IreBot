@@ -6,20 +6,20 @@ from enum import StrEnum
 class UserID(StrEnum):
     """Known/special user IDs."""
 
-    Irene = "180499648"
+    Aluerie = "180499648"
     Bot = "519438249"
 
 
 class LowerName(StrEnum):
     """Known/special user names."""
 
-    Irene = "irene_adler__"
+    Aluerie = "irene_adler__"
 
 
 class DisplayName(StrEnum):
     """Known/special user display names."""
 
-    Irene = "Irene_Adler__"
+    Aluerie = "Irene_Adler__"
 
 
 class Global(StrEnum):
@@ -39,7 +39,7 @@ class Global(StrEnum):
 
 
 class BTTV(StrEnum):
-    """Some of BTTV emotes enabled at @Irene channel."""
+    """Some of BTTV emotes enabled on the channel."""
 
     DankG = "DankG"
     Offline = "Offline"
@@ -50,7 +50,7 @@ class BTTV(StrEnum):
 
 
 class FFZ(StrEnum):
-    """Some of FFZ emotes enabled at @Irene channel."""
+    """Some of FFZ emotes enabled on the channel."""
 
     Weirdge = "Weirdge"
     monkaGIGA = "monkaGIGA"
@@ -64,7 +64,7 @@ class FFZ(StrEnum):
 
 
 class STV(StrEnum):
-    """Some of 7TV emotes enabled at @Irene channel."""
+    """Some of 7TV emotes enabled on the channel."""
 
     Adge = "Adge"
     ApuBritish = "ApuBritish"
@@ -115,17 +115,17 @@ class STV(StrEnum):
 class Bots(StrEnum):
     """List of known bot names.
 
-    Mostly, used to identify other bots' messages.
+    Used to identify other bots' messages.
     Variable name is supposed to be their display name while
     the value is lowercase name for easier comparing.
 
     I might enable these bots in the channel so let's keep them all here.
     """
 
-    nine_kmmrbot = "9kmmrbot"
+    d9kmmrbot = "9kmmrbot"
     dotabod = "dotabod"
     Fossabot = "fossabot"
-    Irene_s_Bot = "irene_s_bot"
+    AlueBot = "aluebot"
     LolRankBot = "lolrankbot"
     Moobot = "moobot"
     Nightbot = "nightbot"

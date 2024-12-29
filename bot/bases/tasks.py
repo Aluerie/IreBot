@@ -31,19 +31,15 @@ class LueLoop(tasks.Loop[LF]):
 
     Just extra boilerplate functionality.
 
-    Flavour note
+    Notes
     ------------
-    Sorry to twitchio guys, but `discord.ext.tasks` is way more fleshed out
-    and offers a lot more functionality than `twitchio.ext.routines`.
-
-    Either way, you can check how I subclassed twitchio routines here:
-    https://github.com/Aluerie/Irene_s_Bot/blob/d26948b316445281c01492f0451ba87fe78b1894/bot/bases/routine.py
+    Sorry to twitchio guys, but at the moment of writing this `discord.ext.tasks` is way more fleshed out
+    and offers a bit more functionality than `twitchio.ext.routines`.
 
     Warning
     -------
-    The task should be initiated in a class that has `.bot` of IrenesBot type. Otherwise, it will just fail.
+    The task should be initiated in a class that has `.bot` of LueBot type. Otherwise, it will just fail.
     All my tasks (and all my code is in cogs that do have `.bot` but still)
-
 
     """
 
@@ -82,7 +78,7 @@ class LueLoop(tasks.Loop[LF]):
         embed = (
             discord.Embed(title=self.coro.__name__, colour=0x1A7A8A)
             .set_author(name=f"{self.coro.__module__}: {self.coro.__qualname__}")
-            .set_footer(text=f"irenesloop: {self.coro.__name__}")
+            .set_footer(text=f"{self.__class__.__name__}: {self.coro.__name__}")
         )
         await cog.bot.exc_manager.register_error(exception, embed)
 

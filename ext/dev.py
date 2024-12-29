@@ -37,7 +37,7 @@ class Development(LueComponent):
         await asyncio.sleep(3)
         try:
             # non systemctl users - sorry
-            os.system("sudo systemctl stop irenesbot")
+            os.system("sudo systemctl stop luebot")
         except Exception as error:
             log.error(error, stack_info=True)
             # it might not go off
@@ -55,7 +55,7 @@ class Development(LueComponent):
         await asyncio.sleep(3)
         try:
             # non systemctl users - sorry
-            os.system("sudo systemctl restart irenesbot")
+            os.system("sudo systemctl restart luebot")
         except Exception as error:
             log.error(error, stack_info=True)
             # it might not go off
@@ -89,17 +89,17 @@ class Development(LueComponent):
         * If somehow eventsub missed stream_online notification - this can "manually"
             fix the problem of soft-locking the commands.
         """
-        self.bot.irene_online = True
+        self.bot.aluerie_online = True
         await ctx.send(f"I'll treat {ctx.broadcaster.display_name} as online now {const.STV.dankHey}")
 
     @commands.is_owner()
     @commands.command()
     async def offline(self, ctx: commands.Context) -> None:
         """Make the bot treat streamer as offline."""
-        self.bot.irene_online = False
+        self.bot.aluerie_online = False
         await ctx.send(f"I'll treat {ctx.broadcaster.display_name} as offline now {const.STV.donkSad}")
 
 
 async def setup(bot: LueBot) -> None:
-    """Load IrenesBot extension. Framework of twitchio."""
+    """Load LueBot extension. Framework of twitchio."""
     await bot.add_component(Development(bot))

@@ -7,13 +7,13 @@ It's just my small code practice.
 from __future__ import annotations
 
 
-class IrenesBotError(Exception):
-    """The base exception for Irene's Bot. All other exceptions should inherit from this."""
+class LueBotError(Exception):
+    """The base exception for LueBot. All other exceptions should inherit from this."""
 
     __slots__: tuple[str, ...] = ()
 
 
-class TranslateError(IrenesBotError):
+class TranslateError(LueBotError):
     """Raised when there is an error in translate functionality."""
 
     def __init__(self, status_code: int, text: str) -> None:
@@ -22,7 +22,7 @@ class TranslateError(IrenesBotError):
         super().__init__(f"Google Translate responded with HTTP Status Code {status_code}")
 
 
-class GuardError(IrenesBotError):
+class GuardError(LueBotError):
     """My own `commands.CheckFailure` Error.
 
     Used in my own command checks.
@@ -31,23 +31,23 @@ class GuardError(IrenesBotError):
     __slots__: tuple[str, ...] = ()
 
 
-class BadArgumentError(IrenesBotError):
+class BadArgumentError(LueBotError):
     """Something wasn't properly used"""
 
     __slots__: tuple[str, ...] = ()
 
 
-class UsageError(IrenesBotError):
+class UsageError(LueBotError):
     """Something wasn't properly used"""
 
     __slots__: tuple[str, ...] = ()
 
 
-class SomethingWentWrong(IrenesBotError):  # noqa N818
+class SomethingWentWrong(LueBotError):  # noqa N818
     __slots__: tuple[str, ...] = ()
 
 
-class PlaceholderRaiseError(IrenesBotError):
+class PlaceholderRaiseError(LueBotError):
     """Placeholder Error.
 
     Maybe silly thing, but instead of doing empty `raise` that is not clear later in logs what exactly it is
@@ -58,19 +58,19 @@ class PlaceholderRaiseError(IrenesBotError):
     __slots__: tuple[str, ...] = ()
 
 
-class GameNotFoundError(IrenesBotError):
+class GameNotFoundError(LueBotError):
     """Dota 2 Game Not Found."""
 
     __slots__: tuple[str, ...] = ()
 
 
-class APIResponseError(IrenesBotError):
+class APIResponseError(LueBotError):
     """API Response Error."""
 
     __slots__: tuple[str, ...] = ()
 
 
-class ResponseNotOK(IrenesBotError):  # noqa: N818
+class ResponseNotOK(LueBotError):  # noqa: N818
     """Raised when `aiohttp`'s session response is not OK.
 
     Sometimes we just specifically need to raise an error in those cases

@@ -116,7 +116,7 @@ class DefaultCommands(LueComponent):
             await ctx.send("Silly organic, bots cannot know love BibleThump")
         elif potential_name == ctx.chatter.name:
             await ctx.send("pls")
-        elif potential_name == const.LowerName.Irene:
+        elif potential_name == const.LowerName.Aluerie:
             await ctx.send(f"The {ctx.chatter.mention}'s love for our beloved Irene transcends all")
         else:
             love, emote = choose_love_emote()
@@ -224,7 +224,7 @@ class DefaultCommands(LueComponent):
         """Get the link to my Spotify playlist."""
         await ctx.send("open.spotify.com/playlist/7fVAcuDPLVAUL8555vy8Kz?si=b26cecab2cf24608")  # cSpell: ignore DPLVAUL
 
-    # @commands.cooldown(rate=1, per=60, bucket=commands.Bucket.channel) # TODO: WAIT TILL COOL-DOWNS R IMPLEMENTED
+    @commands.cooldown(rate=1, per=60, key=commands.BucketType.channel)
     @commands.command(aliases=["rr", "russianroulette"])
     async def roulette(self, ctx: commands.Context) -> None:
         """Play russian roulette."""
@@ -293,7 +293,7 @@ class DefaultCommands(LueComponent):
     @commands.command()
     async def uptime(self, ctx: commands.Context) -> None:
         """Get stream uptime."""
-        stream = await self.bot.irene_stream()
+        stream = await self.bot.aluerie_stream()
         if stream is None:
             await ctx.send(f"Stream is offline {const.BTTV.Offline}")
         else:
@@ -351,5 +351,5 @@ class DefaultCommands(LueComponent):
 
 
 async def setup(bot: LueBot) -> None:
-    """Load IrenesBot extension. Framework of twitchio."""
+    """Load LueBot extension. Framework of twitchio."""
     await bot.add_component(DefaultCommands(bot))
