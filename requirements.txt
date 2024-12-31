@@ -13,7 +13,7 @@ asyncpg-stubs==0.30.0
 aiohttp==3.11.6
 
 # DOTA 2 
-steamio @ git+https://github.com/Aluerie/steam.py@test_reconnect_with_dota
+steamio @ git+https://github.com/Aluerie/steam.py@introduce-ext.dota2
 pulsefire==2.0.21
 
 # OPTIMISATION
