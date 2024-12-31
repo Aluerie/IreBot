@@ -6,10 +6,9 @@ import random
 import time
 from typing import TYPE_CHECKING, Any, override
 
-import aiohttp
 import orjson
 from pulsefire.clients import BaseClient
-from pulsefire.middlewares import http_error_middleware, json_response_middleware, rate_limiter_middleware
+from pulsefire.middlewares import http_error_middleware, json_response_middleware
 from pulsefire.ratelimiters import BaseRateLimiter
 
 import config
@@ -19,14 +18,14 @@ if TYPE_CHECKING:
 
     from pulsefire.invocation import Invocation
 
-    from . import schemas
+    from .schemas import steam_web_api, stratz
 
     type HeaderRateLimitInfo = Mapping[str, Sequence[tuple[int, int]]]
 
 
 __all__ = (
-    "OpenDotaClient",
     "SteamWebAPIClient",
+    "StratzClient",
 )
 
 log = logging.getLogger(__name__)
@@ -48,7 +47,7 @@ class SteamWebAPIClient(BaseClient):
             ],
         )
 
-    async def get_real_time_stats(self, server_steam_id: int) -> schemas.SteamWebAPI.RealtimeStats:
+    async def get_real_time_stats(self, server_steam_id: int) -> steam_web_api.RealTimeStatsResponse:
         """GET /IDOTA2Match_570/GetMatchDetails/v1/.
 
         https://steamapi.xpaw.me/#IDOTA2MatchStats_570/GetRealtimeStats.
@@ -137,114 +136,65 @@ class DotaAPIsRateLimiter(BaseRateLimiter):
         raise NotImplementedError
 
 
-class OpenDotaAPIRateLimiter(DotaAPIsRateLimiter):
+class StratzAPIRateLimiter(DotaAPIsRateLimiter):
     @override
     def analyze_headers(self, headers: dict[str, str]) -> tuple[HeaderRateLimitInfo, HeaderRateLimitInfo]:
         self.rate_limits_string = "\n".join(
-            [f"{timeframe}: {headers[f'X-Rate-Limit-Remaining-{timeframe}']}" for timeframe in ("Minute", "Day")]
-        )
-        self.rate_limits_ratio = int(headers["X-Rate-Limit-Remaining-Day"]) / 2000
-
-        header_limits = {
-            "app": [(60, 60), (2000, 60 * 60 * 24)],
-        }
-        header_counts = {
-            "app": [
-                (int(headers[f"X-Rate-Limit-Remaining-{name}"]), period)
-                for name, period in [("Minute", 60), ("Day", 60 * 60 * 24)]
+            [
+                f"{timeframe}: "
+                f"{headers[f'X-RateLimit-Remaining-{timeframe}']}/{headers[f'X-RateLimit-Limit-{timeframe}']}"
+                for timeframe in ("Second", "Minute", "Hour", "Day")
             ]
-        }
+        )
+        self.rate_limits_ratio = int(headers["X-RateLimit-Remaining-Day"]) / int(headers["X-RateLimit-Limit-Day"])
+
+        periods = [
+            ("Second", 1),
+            ("Minute", 60),
+            ("Hour", 60 * 60),
+            ("Day", 60 * 60 * 24),
+        ]
+        header_limits = {"app": [(int(headers[f"X-RateLimit-Limit-{name}"]), period) for name, period in periods]}
+        header_counts = {"app": [(int(headers[f"X-RateLimit-Remaining-{name}"]), period) for name, period in periods]}
         return header_limits, header_counts
 
 
-class OpenDotaClient(BaseClient):
-    """Pulsefire client for OpenDota API."""
+class StratzClient(BaseClient):
+    """Pulsefire client to boilerplate work with Stratz GraphQL queries.
 
-    def __init__(self) -> None:
-        self.rate_limiter = OpenDotaAPIRateLimiter()
-        super().__init__(
-            base_url="https://api.opendota.com/api",
-            default_params={},
-            default_headers={},
-            default_queries={},
-            middlewares=[
-                json_response_middleware(orjson.loads),
-                http_error_middleware(),
-                rate_limiter_middleware(self.rate_limiter),
-            ],
-        )
-
-    # @overload
-    # async def get_match(self, *, match_id: int, raise_exc: Literal[True]) -> schemas.OpenDotaAPI.GetMatch.Match: ...
-
-    # @overload
-    # async def get_match(
-    #     self, *, match_id: int, raise_exc: Literal[False]
-    # ) -> schemas.OpenDotaAPI.GetMatch.Match | None: ...
-
-    async def get_match(self, *, match_id: int) -> schemas.OpenDotaAPI.GetMatch.Match | None:
-        """GET matches/{match_id}."""
-        try:
-            match: schemas.OpenDotaAPI.GetMatch.Match = await self.invoke("GET", f"/matches/{match_id}")  # type: ignore
-            return match
-        except aiohttp.ClientResponseError as exc:
-            log.debug("OpenDota API Response Not OK with status %s", exc.status)
-            return None
-
-
-class ODotaConstantsClient(BaseClient):
-    """Pulsefire client to work with OpenDota constants.
-
-    This client works with odota/dotaconstants repository.
-    https://github.com/odota/dotaconstants
+    You can play around with queries here: https://api.stratz.com/graphiql/
+    Note "i" means it's a fancy UI version.
     """
 
     def __init__(self) -> None:
-        self.rate_limiter = OpenDotaAPIRateLimiter()
+        self.rate_limiter = StratzAPIRateLimiter()
         super().__init__(
-            # could use `https://api.opendota.com/api/constants` but sometimes they update the repo first
-            # and forget to update the site backend x_x
-            base_url="https://raw.githubusercontent.com/odota/dotaconstants/master/build",
+            base_url="https://api.stratz.com/graphql",
             default_params={},
-            default_headers={},
+            default_headers={
+                "User-Agent": "STRATZ_API",
+                "Authorization": f"Bearer {config.STRATZ_BEARER_TOKEN}",
+                "Content-Type": "application/json",
+            },
             default_queries={},
             middlewares=[
                 json_response_middleware(orjson.loads),
                 http_error_middleware(),
+                # rate_limiter_middleware(self.rate_limiter),
             ],
         )
 
-    async def get_heroes(self) -> schemas.ODotaConstantsJson.Heroes:
-        """Get `heroes.json` data.
-
-        https://raw.githubusercontent.com/odota/dotaconstants/master/build/heroes.json
+    async def get_items(self) -> stratz.ItemsResponse:
+        """Queries Dota 2 Hero Item Constants."""
+        query = """
+            query Items {
+                constants {
+                    items {
+                        id
+                        displayName
+                    }
+                }
+            }
         """
-        return await self.invoke("GET", "/heroes.json")  # type: ignore
-
-    async def get_ability_ids(self) -> schemas.ODotaConstantsJson.AbilityIDs:
-        """Get `ability_ids.json` data.
-
-        https://raw.githubusercontent.com/odota/dotaconstants/master/build/ability_ids.json
-        """
-        return await self.invoke("GET", "/ability_ids.json")  # type: ignore
-
-    async def get_abilities(self) -> schemas.ODotaConstantsJson.Abilities:
-        """Get `abilities.json` data.
-
-        https://raw.githubusercontent.com/odota/dotaconstants/master/build/abilities.json
-        """
-        return await self.invoke("GET", "/abilities.json")  # type: ignore
-
-    async def get_hero_abilities(self) -> schemas.ODotaConstantsJson.HeroAbilitiesData:
-        """Get `hero_abilities.json` data.
-
-        https://raw.githubusercontent.com/odota/dotaconstants/master/build/hero_abilities.json.
-        """
-        return await self.invoke("GET", "/hero_abilities.json")  # type: ignore
-
-    async def get_items(self) -> schemas.ODotaConstantsJson.Items:
-        """Get `items.json` data.
-
-        https://raw.githubusercontent.com/odota/dotaconstants/master/build/items.json
-        """
-        return await self.invoke("GET", "/items.json")  # type: ignore
+        json = {"query": query}  # noqa F481
+        return await self.invoke("POST", "")  # type: ignore

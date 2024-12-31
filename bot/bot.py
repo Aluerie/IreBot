@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import TYPE_CHECKING, Any, TypedDict, override
+from typing import TYPE_CHECKING, TypedDict, override
 
 import discord
 import twitchio
@@ -64,6 +64,7 @@ class LueBot(commands.Bot):
 
     if TYPE_CHECKING:
         logs_via_webhook_handler: logging.Handler
+        dota: Dota2Client
 
     def __init__(
         self,
@@ -87,7 +88,6 @@ class LueBot(commands.Bot):
         self.extensions: tuple[str, ...] = EXTENSIONS
 
         self.exc_manager = ExceptionManager(self)
-        self.dota = Dota2Client(self)
 
         self.aluerie_online: bool = False
 
@@ -246,10 +246,33 @@ class LueBot(commands.Bot):
         for row in rows:
             await self.add_token(row["token"], row["refresh"])
 
+    @override
+    async def start(self) -> None:
+        if "ext.dota" in self.extensions:
+            self.dota = Dota2Client(self)
+            await asyncio.gather(
+                super().start(),
+                self.dota.login(),
+            )
+        else:
+            await super().start()
+
+    @override
+    async def close(self) -> None:
+        await self.dota.close()
+        await super().close()
+
+        for client in (
+            "steam_web_api",
+            "opendota",
+        ):
+            if hasattr(self, client):
+                await getattr(self, client).__aexit__()
+
     # @override
     async def event_ready(self) -> None:
         log.info("%s is ready as bot_id = %s", self.__class__.__name__, self.bot_id)
-        if "ext.dota" in self.extensions:
+        if hasattr(self, "dota"):
             await self.dota.wait_until_ready()
 
     @override
@@ -346,51 +369,6 @@ class LueBot(commands.Bot):
             .set_footer(text=f"event_error: `{payload.listener.__qualname__}`")
         )
         await self.exc_manager.register_error(payload.error, embed=embed)
-
-    @override
-    async def start(self) -> None:
-        if "ext.dota" in self.extensions:
-            await asyncio.gather(
-                super().start(),
-                self.dota.login(),
-            )
-        else:
-            await super().start()
-
-    async def instantiate_steam_web_api(self) -> None:
-        """Initialize Steam Web API client."""
-        if not hasattr(self, "steam_web_api"):
-            from utils.dota import SteamWebAPIClient
-
-            self.steam_web_api = SteamWebAPIClient()
-            await self.steam_web_api.__aenter__()
-
-    async def instantiate_opendota(self) -> None:
-        """Initialize OpenDota client."""
-        if not hasattr(self, "opendota"):
-            from utils.dota import OpenDotaClient
-
-            self.opendota = OpenDotaClient()
-            await self.opendota.__aenter__()
-
-    async def instantiate_cache_dota(self) -> None:
-        """Initialize OpenDota client."""
-        if not hasattr(self, "cache_dota"):
-            from utils.dota import DotaKeyCache
-
-            self.cache_dota = DotaKeyCache(self)
-
-    @override
-    async def close(self) -> None:
-        await self.dota.close()
-        await super().close()
-
-        for client in (
-            "steam_web_api",
-            "opendota",
-        ):
-            if hasattr(self, client):
-                await getattr(self, client).__aexit__()
 
     def webhook_from_url(self, url: str) -> discord.Webhook:
         """A shortcut function with filled in discord.Webhook.from_url args."""

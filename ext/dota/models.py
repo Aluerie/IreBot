@@ -491,7 +491,7 @@ class Match(abc.ABC):
             return "This match doesn't support `real_time_stats`."
 
         try:
-            match = await self.bot.steam_web_api.get_real_time_stats(self.server_steam_id)
+            match = await self.bot.dota.steam_web_api.get_real_time_stats(self.server_steam_id)
         except Exception as exc:
             log.error("!items errored out at `get_real_time_stats` step", exc_info=exc)
             if self.lobby_type == LobbyType.NewPlayerMode:
@@ -548,7 +548,7 @@ class Match(abc.ABC):
         kda = f"{api_player['kill_count']}/{api_player['death_count']}/{api_player['assists_count']}"
         cs = f"CS: {api_player['lh_count']}"
 
-        items = ", ".join([await self.bot.cache_dota.item_by_id(item) for item in api_player["items"] if item != -1])
+        items = ", ".join([str(await self.bot.dota.items.by_id(item)) for item in api_player["items"] if item != -1])
         link = f"stratz.com/players/{api_player['accountid']}"
 
         response_parts = (prefix, net_worth, kda, cs, items, link)
@@ -713,7 +713,7 @@ class WatchMatch(Match):
 
     @lueloop(seconds=10, count=30)
     async def update_data(self) -> None:
-        match = await self.bot.steam_web_api.get_real_time_stats(self.server_steam_id)
+        match = await self.bot.dota.steam_web_api.get_real_time_stats(self.server_steam_id)
 
         # match data
         self.match_id = int(match["match"]["match_id"])
@@ -761,7 +761,7 @@ class WatchMatch(Match):
             msg = f"Somehow update_heroes was started with {self.players=}."
             raise errors.PlaceholderRaiseError(msg)
 
-        match = await self.bot.steam_web_api.get_real_time_stats(self.server_steam_id)
+        match = await self.bot.dota.steam_web_api.get_real_time_stats(self.server_steam_id)
 
         for api_player in itertools.chain(match["teams"][0]["players"], match["teams"][1]["players"]):
             player = self.players[api_player["accountid"]]

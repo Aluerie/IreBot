@@ -46,9 +46,6 @@ class DotaCommands(LueComponent):
     @override
     async def component_load(self) -> None:
         """Cog load."""
-        await self.bot.instantiate_steam_web_api()
-        await self.bot.instantiate_cache_dota()
-
         self.clean_up_the_database.start()
         self.check_streamers_rich_presence.start()
         # self.check_last_games.start()
