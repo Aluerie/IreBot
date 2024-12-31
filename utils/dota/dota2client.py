@@ -11,10 +11,10 @@ try:
 except ImportError:
     import sys
 
-    sys.path.append("D:/LAPTOP/AluBot")
+    sys.path.append("D:/LAPTOP/LueBot")
     import config
 
-from . import SteamWebAPIClient, StratzClient
+from .pulsefire_clients import SteamWebAPIClient, StratzClient
 from .storage import Items
 
 if TYPE_CHECKING:
