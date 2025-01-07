@@ -8,6 +8,7 @@ class UserID(StrEnum):
 
     Aluerie = "180499648"
     Bot = "519438249"
+    AuuBot = "1158666176"
 
 
 class LowerName(StrEnum):
