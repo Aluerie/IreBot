@@ -32,6 +32,7 @@ class DefaultCommands(LueComponent):
     async def erdoc(self, ctx: commands.Context) -> None:
         """Link to my Elden Ring notes."""
         await ctx.send(  # cspell: disable-next-line
+            "My notes with everything Elden Ring related: "
             "docs.google.com/document/d/19vTJVS7k1zdmShOAcO41KBWepfybMsTprQ208O7HpLU"
         )
 
@@ -40,8 +41,8 @@ class DefaultCommands(LueComponent):
         """Explanation of my first Sekiro hitless run."""
         msg = (
             "All Memories & Unique MiniBosses (so no repetitions). "
-            "The idea is that I have to learn and practice all boss move-sets in the game. "
-            "Even load Emma+Isshin save in the end. "
+            "The idea: I have to learn and practice all boss move-sets. "
+            "Even load Emma+Isshin save-file. "
             "Almost Charmless (take it back pre-demon). Mostly Sword+Shuriken. Somewhat loop-less. "
             "For more look !notes."
         )
@@ -51,7 +52,7 @@ class DefaultCommands(LueComponent):
     async def sekirodoc(self, ctx: commands.Context) -> None:
         """Link to my Sekiro notes."""
         await ctx.send(  # cspell: disable-next-line
-            "My notes with pretty much everything Sekiro-related: "
+            "My notes with everything Sekiro related: "
             "docs.google.com/document/d/1rjp7lhvP0vwwlO7bC7TyFAjKcGDovFuo2EYUaX66QiA"
         )
 
