@@ -23,6 +23,6 @@ uvloop==0.21.0; platform_system == 'Linux'  # ignore on non-Linux - because not 
 # JUPYTER NOTEBOOKS
 ipykernel; platform_system == 'Windows'
 
-# UNCATEGORIZED YET
+# UNCATEGORISED YET
 click== 8.1.8
 thefuzz

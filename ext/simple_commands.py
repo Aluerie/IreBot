@@ -39,12 +39,11 @@ class DefaultCommands(LueComponent):
     async def run(self, ctx: commands.Context) -> None:
         """Explanation of my first Sekiro hitless run."""
         msg = (
-            "All Memories Unique MiniBosses (so no repetitions). "
+            "All Memories & Unique MiniBosses (so no repetitions). "
             "The idea is that I have to learn and practice all boss move-sets in the game. "
-            "Almost Charmless (take it back pre-demon). Mostly Sword+Shuriken. Somewhat loop-less."
-            "For more look !notes: "
-            "docs.google.com/document/d/1rjp7lhvP0vwwlO7bC7TyFAjKcGDovFuo2EYUaX66QiA "  # cspell: disable-line
-            "It's my first ever hitless run, so there is a lot to learn & grind."
+            "Even load Emma+Isshin save in the end. "
+            "Almost Charmless (take it back pre-demon). Mostly Sword+Shuriken. Somewhat loop-less. "
+            "For more look !notes."
         )
         await ctx.send(msg)
 

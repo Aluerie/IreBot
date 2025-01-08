@@ -9,6 +9,7 @@ import twitchio
 from twitchio import eventsub
 from twitchio.ext import commands
 
+# from twitchio.web import StarletteAdapter
 import config
 from ext import EXTENSIONS
 from utils import const, errors
@@ -74,12 +75,18 @@ class LueBot(commands.Bot):
     ) -> None:
         """Initiate LueBot."""
         self.prefixes: tuple[str, ...] = ("!", "?", "$")
+        # adapter: StarletteAdapter = StarletteAdapter(
+        #     host="0.0.0.0",
+        #     domain="https://parrot-thankful-trivially.ngrok-free.app",
+        #     eventsub_secret=config.EVENTSUB_SECRET,
+        # )
         super().__init__(
             client_id=config.TTV_DEV_CLIENT_ID,
             client_secret=config.TTV_DEV_CLIENT_SECRET,
             bot_id=const.UserID.Bot,
             owner_id=const.UserID.Aluerie,
             prefix=self.prefixes,
+            # adapter=adapter,
             # TODO: fill in scopes= argument once we figure out what it's used for :x
         )
         self.database: asyncpg.Pool[asyncpg.Record] = pool
@@ -128,6 +135,9 @@ class LueBot(commands.Bot):
         print(f"🤖🤖🤖 BOT OAUTH LINK: 🤖🤖🤖\n{link}")  # noqa: T201
 
     def print_broadcaster_oauth(self) -> None:
+        """
+        https://parrot-thankful-trivially.ngrok-free.app/oauth?scopes=channel:bot&force_verify=true
+        """
         scopes = "%20".join(
             [
                 "channel:bot",
@@ -159,7 +169,6 @@ class LueBot(commands.Bot):
 
         # self.print_bot_oauth()
         # self.print_broadcaster_oauth()
-        # return
 
         for ext in self.extensions:
             await self.load_module(ext)
@@ -259,15 +268,9 @@ class LueBot(commands.Bot):
 
     @override
     async def close(self) -> None:
-        await self.dota.close()
+        if hasattr(self, "dota"):
+            await self.dota.close()
         await super().close()
-
-        for client in (
-            "steam_web_api",
-            "opendota",
-        ):
-            if hasattr(self, client):
-                await getattr(self, client).__aexit__()
 
     # @override
     async def event_ready(self) -> None:
