@@ -50,13 +50,13 @@ class LueBot(commands.Bot):
     The name `AlueBot` is used mainly for display purposes here:
         * the bot's twitch account user name (just so it's clear that it's Aluerie's bot);
         * the GitHub repository name and `README.md` file.
+        * the bot's Steam account's display name;
 
     Name `LueBot` is pretty much used elsewhere:
         * class name;
         * folder name;
         * systemd service name;
         * discord notifications webhook names;
-        * the bot's Steam account's display name;
         * category name in my own ToDo list;
         * etc :D
 
