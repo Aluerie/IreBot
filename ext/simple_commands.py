@@ -87,7 +87,7 @@ class DefaultCommands(LueComponent):
         # just a small joke to teach people
         await ctx.send("Just click your name 4Head")
 
-    @commands.command(aliases=["hi", "yo"])
+    @commands.command(aliases=["hi", "yo", "hallo"])
     async def hello(self, ctx: commands.Context) -> None:
         """Hello."""
         await ctx.send(const.STV.hello)
