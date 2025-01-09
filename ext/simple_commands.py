@@ -42,7 +42,7 @@ class DefaultCommands(LueComponent):
         msg = (
             "All Memories & Unique MiniBosses (so no repetitions). "
             "The idea: I have to learn and practice all boss move-sets. "
-            "Even load Emma+Isshin save-file. "
+            "Even load Inner Father, Fire Isshin and Emma save-file. "
             "Almost Charmless (take it back pre-demon). Mostly Sword+Shuriken. Somewhat loop-less. "
             "For more look !notes."
         )
