@@ -136,7 +136,17 @@ class LueBot(commands.Bot):
 
     def print_broadcaster_oauth(self) -> None:
         """
-        https://parrot-thankful-trivially.ngrok-free.app/oauth?scopes=channel:bot&force_verify=true
+
+        Notes
+        -----
+        * Currently my developer console has localhost as a callback: http://localhost:4343/oauth/callback
+            But if we ever switch to multi-streams setup then I already have some things set up with
+            * https://parrot-thankful-trivially.ngrok-free.app/oauth/callback (in developer console)
+            * ngrok http --url=parrot-thankful-trivially.ngrok-free.app 80 (in my/vps terminal)
+            Look ngrok dashboard for more.
+
+            With it a user needs to go to a link like this:
+            https://parrot-thankful-trivially.ngrok-free.app/oauth?scopes=channel:bot&force_verify=true
         """
         scopes = "%20".join(
             [
@@ -145,6 +155,7 @@ class LueBot(commands.Bot):
                 "channel:moderate",
                 "channel:read:redemptions",
                 "channel:manage:broadcast",
+                "channel:read:subscriptions",
             ]
         )
         link = f"http://localhost:4343/oauth?scopes={scopes}&force_verify=true"
@@ -169,9 +180,10 @@ class LueBot(commands.Bot):
 
         # self.print_bot_oauth()
         # self.print_broadcaster_oauth()
+        # return
 
         for ext in self.extensions:
-            await self.load_module(ext)
+            (await self.load_module(ext))
 
         await self.create_eventsub_subscriptions()
         self.check_if_online.start()
@@ -216,7 +228,7 @@ class LueBot(commands.Bot):
         # ✅ Message                               user:read:chat from the chatting user, channel:bot from broadcaster
         sub = eventsub.ChatMessageSubscription(broadcaster_user_id=broadcaster, user_id=bot)
         await self.subscribe_websocket(payload=sub)
-        # Raids to the channel                  No authorization required
+        # ❓ Raids to the channel                  No authorization required
         sub = eventsub.ChannelRaidSubscription(to_broadcaster_user_id=broadcaster)
         await self.subscribe_websocket(payload=sub)
         # ✅ Stream went offline                   No authorization required
@@ -228,6 +240,9 @@ class LueBot(commands.Bot):
         # ✅ Channel Update (title/game)           No authorization required
         sub = eventsub.ChannelUpdateSubscription(broadcaster_user_id=broadcaster)
         await self.subscribe_websocket(payload=sub)
+        # ❓ Channel Subscribe (paid)              channel:read:subscriptions
+        sub = eventsub.ChannelSubscribeSubscription(broadcaster_user_id=broadcaster)
+        await self.subscribe_websocket(payload=sub, token_for=broadcaster, as_bot=False)
 
     @override
     async def add_token(self, token: str, refresh: str) -> twitchio.authentication.ValidateTokenPayload:
@@ -244,7 +259,7 @@ class LueBot(commands.Bot):
                 refresh = excluded.refresh;
         """
         await self.pool.execute(query, resp.user_id, token, refresh)
-        log.debug("Added token to the database for user: %s", resp.user_id)
+        log.info("Added token to the database for user: %s", resp.user_id)
         return resp
 
     @override

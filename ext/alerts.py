@@ -94,6 +94,24 @@ class Alerts(LueComponent):
             ),
         )
 
+    @commands.Component.listener(name="stream_online")
+    async def stream_start(self, online: twitchio.StreamOnline) -> None:
+        """Stream started (went live)."""
+        channel_info = await online.broadcaster.fetch_channel_info()
+        # notification
+        await online.broadcaster.send_message(
+            sender=self.bot.bot_id,
+            message=(
+                f"Stream just started {const.STV.FeelsBingMan} "
+                f"Game: {channel_info.game_name} | Title: {channel_info.title}"
+            ),
+        )
+        # reminder for the streamer
+        await online.broadcaster.send_message(
+            sender=self.bot.bot_id,
+            message=f"{online.broadcaster.mention} remember to pin some message, check if everything is working.",
+        )
+
     @commands.Component.listener(name="stream_offline")
     async def stream_end(self, offline: twitchio.StreamOffline) -> None:
         """Stream ended (went offline)."""
@@ -102,35 +120,19 @@ class Alerts(LueComponent):
             message=f"Stream is now offline {const.BTTV.Offline}",
         )
 
-    @commands.Component.listener(name="stream_online")
-    async def stream_start(self, online: twitchio.StreamOnline) -> None:
-        """Stream started (went live)."""
-        channel_info = await online.broadcaster.fetch_channel_info()
-        await online.broadcaster.send_message(
-            sender=self.bot.bot_id,
-            message=(
-                f"Stream just started {const.STV.FeelsBingMan} "
-                f"Game: {channel_info.game_name} | Title: {channel_info.title}"
-            ),
-        )
-        await online.broadcaster.send_message(
-            sender=self.bot.bot_id,
-            message=(f"{online.broadcaster.mention} remember to pin some message, check if everything is working."),
-        )
-
     @commands.Component.listener(name="ad_break")
     async def ad_break(self, ad_begin: twitchio.ChannelAdBreakBegin) -> None:
         """Ad break."""
-        # word = "automatic" if payload.is_automatic else "manual"
+        word = "automatic" if ad_begin.automatic else "manual"
         human_delta = formats.timedelta_to_words(seconds=ad_begin.duration, fmt=formats.TimeDeltaFormat.Short)
         await ad_begin.broadcaster.send_message(
             sender=self.bot.bot_id,
-            message=f"{human_delta} ad starting {const.STV.peepoAds}",
+            message=f"{human_delta} {word} ad starting {const.STV.peepoAds}",
         )
 
         # this is pointless probably
         # await asyncio.sleep(payload.duration)
-        # await channel.send("TAd break is over")
+        # await channel.send("Ad break is over")
 
     @commands.Component.listener(name="ban")
     async def bans_timeouts(self, ban: twitchio.Ban) -> None:
@@ -154,6 +156,15 @@ class Alerts(LueComponent):
     #             f"\N{WHITE QUESTION MARK ORNAMENT} {const.STV.DankThink}"
     #         )
     #         await message.channel.send(content)
+
+    @commands.Component.listener(name="subscription")
+    async def subscription(self, subscribe: twitchio.ChannelSubscribe) -> None:
+        """Subscriptions"""
+        await subscribe.broadcaster.send_message(
+            sender=self.bot.bot_id,
+            message=f"{subscribe.user.mention} just subscribed {const.STV.Donki} thanks",
+        )
+
 
 
 async def setup(bot: LueBot) -> None:

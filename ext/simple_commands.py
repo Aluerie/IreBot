@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from bot import LueBot
 
 
-class DefaultCommands(LueComponent):
+class SimpleCommands(LueComponent):
     """Simple commands.
 
     Simple in a sense that they are just somewhat static and their implementation is simple.
@@ -25,39 +25,6 @@ class DefaultCommands(LueComponent):
     because they are defined here in code, instead of
     sitting in the database like commands from `custom_commands.py` do.
     """
-
-    # 1. TEMPORARY COMMANDS
-
-    @commands.command()
-    async def erdoc(self, ctx: commands.Context) -> None:
-        """Link to my Elden Ring notes."""
-        await ctx.send(  # cspell: disable-next-line
-            "My notes with everything Elden Ring related: "
-            "docs.google.com/document/d/19vTJVS7k1zdmShOAcO41KBWepfybMsTprQ208O7HpLU"
-        )
-
-    @commands.command()
-    async def run(self, ctx: commands.Context) -> None:
-        """Explanation of my first Sekiro hitless run."""
-        msg = (
-            "All Memories & Unique MiniBosses (so no repetitions). "
-            "The idea: I have to learn and practice all boss move-sets. "
-            "Even load Inner Father, Fire Isshin and Emma save-file. "
-            "Almost Charmless (take it back pre-demon). Mostly Sword+Shuriken. Somewhat loop-less. "
-            "For more look !notes."
-        )
-        await ctx.send(msg)
-
-    @commands.command(aliases=["sekironotes", "notes", "skdoc"])
-    async def sekirodoc(self, ctx: commands.Context) -> None:
-        """Link to my Sekiro notes."""
-        await ctx.send(  # cspell: disable-next-line
-            "My notes with everything Sekiro related: "
-            "docs.google.com/document/d/1rjp7lhvP0vwwlO7bC7TyFAjKcGDovFuo2EYUaX66QiA"
-        )
-
-    # 2. MORE OR LESS STABLE COMMANDS
-    # (sorted alphabetically)
 
     @guards.is_online()
     @commands.command()
@@ -356,4 +323,4 @@ class DefaultCommands(LueComponent):
 
 async def setup(bot: LueBot) -> None:
     """Load LueBot extension. Framework of twitchio."""
-    await bot.add_component(DefaultCommands(bot))
+    await bot.add_component(SimpleCommands(bot))

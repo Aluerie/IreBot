@@ -42,6 +42,30 @@ class Counters(LueComponent):
     async def component_teardown(self) -> None:
         self.check_first_reward.cancel()
 
+    @commands.is_owner()
+    @commands.group()
+    async def counter(self, ctx: commands.Context) -> None:
+        # TODO: I guess, we need to implement "send_help"
+        await ctx.send("Use this command together with subcommands delete/create/change")
+
+    @counter.command()
+    async def create(self, ctx: commands.Context, name: str) -> None:
+        query = """
+            INSERT INTO ttv_counters
+            (name, value)
+            VALUES ($1, $2)
+            ON CONFLICT (name)
+                DO NOTHING
+            RETURNING value;
+        """
+        value: int | None = await self.bot.pool.fetchval(query, name, 0)
+        if value is None:
+            await ctx.send(f"Such counter already exists! {const.STV.POLICE}")
+        else:
+            await ctx.send(f"Created a counter `{name}` (current value = {value}) {const.STV.science}")
+
+    # TODO: counter set (change)/increment (add) / remove commands
+
     # ERM COUNTERS
 
     @commands.Component.listener(name="message")
@@ -152,7 +176,7 @@ class Counters(LueComponent):
         content = " ".join(const.DIGITS)
         await ctx.send(content)
 
-    @lueloop(count=1)  # time=[datetime.time(hour=4, minute=59)])
+    @lueloop(time=[datetime.time(hour=4, minute=59)])
     async def check_first_reward(self) -> None:
         """The task that ensures the reward "First" under a specific id exists.
 
