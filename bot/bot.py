@@ -412,6 +412,7 @@ class LueBot(commands.Bot):
 
     @lueloop(count=1)
     async def check_if_online(self) -> None:
+        await asyncio.sleep(1.0)  # just in case;
         if await self.aluerie_stream():
             self.aluerie_online = True
             self.dispatch("aluerie_online")

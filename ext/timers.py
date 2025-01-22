@@ -37,6 +37,10 @@ class Timers(LueComponent):
                 "hi chat many features of this bot are WIP so, please, if you notice bugs or incorrect responses "
                 f"- inform me {const.STV.DANKHACKERMANS}"
             ),
+            (
+                "hey chat I'm making a small web-page to describe the bot's features (WIP)."
+                "You can see it here: (not implemented xdd)"  # TODO: add the web page
+            ),
             # "Discord discord.gg/K8FuDeP",
             # "if you have nothing to do Sadge you can try !randompasta. Maybe you'll like it Okayge",
         ]
@@ -83,6 +87,23 @@ class Timers(LueComponent):
     @timer_task.before_loop
     async def timer_task_before_loop(self) -> None:
         await self.bot.wait_until_ready()
+
+    @commands.Component.listener(name="aluerie_online")
+    async def periodic_announcements(self) -> None:
+        """Send periodic announcements into irene's channel on timer."""
+
+        # lazy implementation
+        for _ in range(0, 3):
+            await asyncio.sleep(60 * 3)
+            await self.aluerie.send_announcement(
+                moderator=const.UserID.Bot,
+                token_for=const.UserID.Bot,
+                message=(
+                    "hey chat soon I will need to grind an affiliate for @AlueBot account. "
+                    f"{const.STV.please} Any follows and lurks for that account are appreciated. "
+                    f"We need 50 followers total and 3 average viewers {const.STV.Erm}."
+                ),
+            )
 
 
 async def setup(bot: LueBot) -> None:

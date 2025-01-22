@@ -106,6 +106,7 @@ class STV(StrEnum):
     How2Read = "How2Read"
     peepoAds = "peepoAds"
     peepoDapper = "peepoDapper"
+    please = "please"
     plink = "plink"
     PogChampPepe = "PogChampPepe"
     POGCRAZY = "POGCRAZY"

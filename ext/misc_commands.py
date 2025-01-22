@@ -32,8 +32,8 @@ class MiscellaneousCommands(LueComponent):
             "All Memories & Unique MiniBosses (so no repetitions). "
             "The idea: I have to learn and practice all boss move-sets. "
             "Even load Inner Father, Fire Isshin and Emma save-file. "
-            "Almost Charmless (take it back pre-demon). Mostly Sword+Shuriken. Somewhat loop-less. "
-            "For more look !notes."
+            "Almost Charmless (take it back pre-demon). Mostly Sword+Shuriken (~29/37 boss fights). "
+            "Somewhat loop-less. For more look !notes."
         )
         await ctx.send(msg)
 

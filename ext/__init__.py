@@ -20,7 +20,8 @@ except ModuleNotFoundError:
 DISABLED_EXTENSIONS: tuple[str, ...] = (
     # extensions that should not be loaded
     "ext.beta",
-    # "ext.dota",
+    # currently disabled
+    "ext.dota",
 )
 
 CORE_EXTENSIONS: tuple[str, ...] = (
