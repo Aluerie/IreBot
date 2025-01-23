@@ -117,7 +117,6 @@ class Counters(LueComponent):
     @commands.Component.listener(name="custom_redemption_add")
     async def first_counter(self, redemption: twitchio.ChannelPointsRedemptionAdd) -> None:
         """Count all redeems for the reward 'First'."""
-
         if redemption.reward.id != FIRST_ID or redemption.broadcaster.id != const.UserID.Aluerie:
             return
 
@@ -161,7 +160,7 @@ class Counters(LueComponent):
             [
                 f"{rank_medals[i]} {row['user_name']}: {formats.plural(row['first_times']):time};"
                 for i, row in enumerate(rows)
-            ]
+            ],
         )
         await ctx.send(content)
 

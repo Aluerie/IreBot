@@ -129,7 +129,7 @@ class LueBot(commands.Bot):
                 "moderator:manage:announcements",
                 "moderator:manage:banned_users",
                 "clips:edit",
-            ]
+            ],
         )
         link = f"http://localhost:4343/oauth?scopes={scopes}&force_verify=true"
         print(f"🤖🤖🤖 BOT OAUTH LINK: 🤖🤖🤖\n{link}")  # noqa: T201
@@ -156,7 +156,7 @@ class LueBot(commands.Bot):
                 "channel:read:redemptions",
                 "channel:manage:broadcast",
                 "channel:read:subscriptions",
-            ]
+            ],
         )
         link = f"http://localhost:4343/oauth?scopes={scopes}&force_verify=true"
         print(f"🎬🎬🎬 BROADCASTER OAUTH LINK: 🎬🎬🎬\n{link}")  # noqa: T201
@@ -177,7 +177,6 @@ class LueBot(commands.Bot):
             5. Comment the lines back. In normal state, they should be commented.
 
         """
-
         # self.print_bot_oauth()
         # self.print_broadcaster_oauth()
         # return
@@ -205,7 +204,6 @@ class LueBot(commands.Bot):
             * Events:   https://twitchio.dev/en/dev-3.0/references/events.html
             * Models:   https://twitchio.dev/en/dev-3.0/references/eventsub_models.html
         """
-
         # it's just a personal bot so things are relatively simple about broadcaster<->bot relation ;)
         broadcaster = const.UserID.Aluerie
         bot = const.UserID.Bot
@@ -333,11 +331,11 @@ class LueBot(commands.Bot):
                 # log.error("%s", error.__class__.__name__, exc_info=error)
                 await ctx.send(
                     f"{error.extra.get('error', 'Error')} {error.extra.get('status', 'XXX')}: "
-                    f"{error.extra.get('message', 'Unknown')} {const.STV.dankFix}"
+                    f"{error.extra.get('message', 'Unknown')} {const.STV.dankFix}",
                 )
             case commands.MissingRequiredArgument():
                 await ctx.send(
-                    f'You need to provide "{error.param.name}" argument for this command {const.FFZ.peepoPolice}'
+                    f'You need to provide "{error.param.name}" argument for this command {const.FFZ.peepoPolice}',
                 )
             case commands.CommandOnCooldown():
                 command_name = f"{ctx.prefix}{command.name}" if command else "this command"

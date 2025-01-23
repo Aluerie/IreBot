@@ -134,15 +134,14 @@ class DotaCommands(LueComponent):
 
         if match:
             return match
+        if self.streamer.unsupported_error:
+            msg = self.streamer.unsupported_error
         else:
-            if self.streamer.unsupported_error:
-                msg = self.streamer.unsupported_error
-            else:
-                msg = f"No Game Found. Irene's Status: {self.streamer.rp_status.display_name}"
+            msg = f"No Game Found. Irene's Status: {self.streamer.rp_status.display_name}"
 
-            perf_time = perf_counter() - start
-            msg = f"[{perf_time:.3f}s] {msg}"
-            raise errors.GameNotFoundError(msg)
+        perf_time = perf_counter() - start
+        msg = f"[{perf_time:.3f}s] {msg}"
+        raise errors.GameNotFoundError(msg)
 
     def fmt_response(self, response: str, is_watch: bool, perf: helpers.measure_time) -> str:
         debug_prefix = f"[{perf.end:.3f}s] " if self.debug_mode else ""
@@ -183,7 +182,7 @@ class DotaCommands(LueComponent):
     async def profile_error(self, payload: commands.CommandErrorPayload) -> None:
         if isinstance(payload.exception, commands.MissingRequiredArgument):
             await payload.context.send(
-                "You need to provide a hero name (i.e. VengefulSpirit , PA, Mireska, etc) or player slot (i.e. 9, DarkGreen )"
+                "You need to provide a hero name (i.e. VengefulSpirit , PA, Mireska, etc) or player slot (i.e. 9, DarkGreen )",
             )
         else:
             raise payload.exception

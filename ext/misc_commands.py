@@ -22,7 +22,7 @@ class MiscellaneousCommands(LueComponent):
         """Link to my Elden Ring notes."""
         await ctx.send(  # cspell: disable-next-line
             "My notes with everything Elden Ring related: "
-            "docs.google.com/document/d/19vTJVS7k1zdmShOAcO41KBWepfybMsTprQ208O7HpLU"
+            "docs.google.com/document/d/19vTJVS7k1zdmShOAcO41KBWepfybMsTprQ208O7HpLU",
         )
 
     @commands.command()
@@ -42,7 +42,7 @@ class MiscellaneousCommands(LueComponent):
         """Link to my Sekiro notes."""
         await ctx.send(  # cspell: disable-next-line
             "My notes with everything Sekiro related: "
-            "docs.google.com/document/d/1rjp7lhvP0vwwlO7bC7TyFAjKcGDovFuo2EYUaX66QiA"
+            "docs.google.com/document/d/1rjp7lhvP0vwwlO7bC7TyFAjKcGDovFuo2EYUaX66QiA",
         )
 
     @commands.group(invoke_fallback=True)
@@ -53,7 +53,7 @@ class MiscellaneousCommands(LueComponent):
         query = "SELECT value FROM ttv_counters WHERE name = $1;"
         attempts: int = await self.bot.pool.fetchval(query, "gunfort_attempts")
 
-        stats = f" Success Rate: {success/attempts:.1%} (over {attempts} attempts)"
+        stats = f" Success Rate: {success / attempts:.1%} (over {attempts} attempts)"
         await ctx.send(f"{const.STV.science} Yolo Gunfort {stats}")
 
     @commands.is_owner()
@@ -65,7 +65,7 @@ class MiscellaneousCommands(LueComponent):
         query = "UPDATE ttv_counters SET value = value + 1 WHERE name = $1 RETURNING value;"
         attempts: int = await self.bot.pool.fetchval(query, "gunfort_attempts")
 
-        stats = f" Success Rate: {success/attempts:.1%} (over {attempts} attempts)"
+        stats = f" Success Rate: {success / attempts:.1%} (over {attempts} attempts)"
         await ctx.send(f"Failed yolo gunfort? {const.STV.classic} {stats}")
 
     @commands.is_owner()
@@ -77,7 +77,7 @@ class MiscellaneousCommands(LueComponent):
         query = "UPDATE ttv_counters SET value = value + 1 WHERE name = $1 RETURNING value;"
         attempts: int = await self.bot.pool.fetchval(query, "gunfort_attempts")
 
-        stats = f" Success Rate: {success/attempts:.1%} (over {attempts} attempts)"
+        stats = f" Success Rate: {success / attempts:.1%} (over {attempts} attempts)"
         await ctx.send(f"Yolo Gunfort is easy {const.STV.EZdodge} {stats}")
 
 

@@ -34,16 +34,15 @@ def get_extensions() -> tuple[str, ...]:
     if platform.system() == "Windows" and not TEST_USE_ALL_EXTENSIONS:
         # assume testing specific extensions from `_test.py`
         return tuple(f"{__package__}.{ext}" for ext in TEST_EXTENSIONS)
-    else:
-        # assume running full bot functionality (besides `DISABLED_EXTENSIONS`)
+    # assume running full bot functionality (besides `DISABLED_EXTENSIONS`)
 
-        all_extensions = tuple(
-            module.name
-            for module in iter_modules(__path__, f"{__package__}.")
-            if module.name not in DISABLED_EXTENSIONS
-        )
-        temp = tuple(set(all_extensions).difference(CORE_EXTENSIONS))
-        return CORE_EXTENSIONS + temp
+    all_extensions = tuple(
+        module.name
+        for module in iter_modules(__path__, f"{__package__}.")
+        if module.name not in DISABLED_EXTENSIONS
+    )
+    temp = tuple(set(all_extensions).difference(CORE_EXTENSIONS))
+    return CORE_EXTENSIONS + temp
 
 
 EXTENSIONS = get_extensions()

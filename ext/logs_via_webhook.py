@@ -75,7 +75,6 @@ class LogsViaWebhook(LueComponent):
     @commands.Component.listener(name="ready")
     async def announce_reloaded(self) -> None:
         """Announce that bot is successfully reloaded/restarted."""
-
         # it looks like the `log.info` from `bot.py` doesn't proc before LogsViaWebhook is loaded
         await self.bot.logger_webhook.send(
             content=f"Logged in as `user_id={self.bot.bot_id}`",

@@ -121,10 +121,9 @@ class Streamer:
             # no changes in rich presence
             # or no need to fetch data from the match
             return
-        else:
-            # Detected Rich Presence change;
-            self.rich_presence = rich_presence
-            log.debug("Rich Presence = %s", rich_presence)
+        # Detected Rich Presence change;
+        self.rich_presence = rich_presence
+        log.debug("Rich Presence = %s", rich_presence)
 
         rp_status = RPStatus.try_value(rich_presence.get("status") or "#MY_NoStatus")  # hard-coded
 
@@ -164,28 +163,26 @@ class Streamer:
                     else:
                         msg = f'RP is "Playing" but {watchable_game_id=} and {party_state=}'
                         raise errors.PlaceholderRaiseError(msg)
-                else:
-                    # all is good
-                    if not self.play_match:
-                        # started playing new match
-                        self.play_match = PlayMatch(self.bot, watchable_game_id, self.account_id)
-                    elif self.play_match.watchable_game_id != watchable_game_id:
-                        self.reset("Started new match bypassing Menu")
-                        # started playing new match right so fast after bypassing Menu
-                        self.play_match = PlayMatch(self.bot, watchable_game_id, self.account_id)
+                # all is good
+                elif not self.play_match:
+                    # started playing new match
+                    self.play_match = PlayMatch(self.bot, watchable_game_id, self.account_id)
+                elif self.play_match.watchable_game_id != watchable_game_id:
+                    self.reset("Started new match bypassing Menu")
+                    # started playing new match right so fast after bypassing Menu
+                    self.play_match = PlayMatch(self.bot, watchable_game_id, self.account_id)
 
             case RPStatus.Spectating:
                 watching_server = rich_presence.get("watching_server")
                 if watching_server is None:
                     msg = f"RP is Playing but {watching_server=}"
                     raise errors.PlaceholderRaiseError(msg)
-                else:
-                    self.watch_match = WatchMatch(self.bot, watching_server)
+                self.watch_match = WatchMatch(self.bot, watching_server)
             case _:
                 self.reset("Unknown to the bot Steam Status.")
 
     async def add_completed_match_to_database(
-        self, history_match: MatchHistoryMatch
+        self, history_match: MatchHistoryMatch,
     ) -> tuple[MatchMinimal, PlayerMatchOutcome]:
         partial_match = self.bot.dota.instantiate_partial_match(history_match.id)
         minimal_match = await partial_match.minimal()
@@ -326,11 +323,10 @@ class Streamer:
                 continue
             if game["start_time"] < loop_dt - datetime.timedelta(hours=6):
                 break
-            else:
-                # tha match is included into current gaming session
-                loop_dt = game["start_time"]
-                category = WinLossCategory.create(game["lobby_type"], game["game_mode"])
-                mapping.setdefault(category, [0, 0])[int(game["outcome"])] += 1
+            # tha match is included into current gaming session
+            loop_dt = game["start_time"]
+            category = WinLossCategory.create(game["lobby_type"], game["game_mode"])
+            mapping.setdefault(category, [0, 0])[int(game["outcome"])] += 1
 
         if not mapping:
             return "0 W - 0 L"
@@ -496,8 +492,7 @@ class Match(abc.ABC):
             log.error("!items errored out at `get_real_time_stats` step", exc_info=exc)
             if self.lobby_type == LobbyType.NewPlayerMode:
                 return "New Player Mode matches don't support `real_time_stats`."
-            else:
-                return "Failed to get `real_time_stats` for this match."
+            return "Failed to get `real_time_stats` for this match."
 
         if argument.isdigit():
             # then the user typed only a number and our life is easy because it is a player slot
@@ -643,8 +638,7 @@ class PlayMatch(Match):
             self.hero = next(player.hero for player in self.players.values() if player.account_id == self.account_id)
             self.bot.dispatch("match_hero_ready")
             return True
-        else:
-            return False
+        return False
 
     # count exists to prevent potential infinite loop ?
     # i'm not sure how it behaves when the object is null'ed.
@@ -687,11 +681,10 @@ class PlayMatch(Match):
         overlap_player_ids.remove(self.account_id)  # remove myself
         if not overlap_player_ids:
             return "No players from last game present in the match."
-        else:
-            return "Players from last game:" + " \N{BULLET} ".join(
-                f"{self.players[player_id].identifier} was {last_game.players[player_id].name}"
-                for player_id in overlap_player_ids
-            )
+        return "Players from last game:" + " \N{BULLET} ".join(
+            f"{self.players[player_id].identifier} was {last_game.players[player_id].name}"
+            for player_id in overlap_player_ids
+        )
 
 
 class WatchMatch(Match):
@@ -724,7 +717,7 @@ class WatchMatch(Match):
         self.players = {
             api_player["accountid"]: Player(self.bot, api_player["accountid"], api_player["heroid"], player_slot)
             for player_slot, api_player in enumerate(
-                itertools.chain(match["teams"][0]["players"], match["teams"][1]["players"])
+                itertools.chain(match["teams"][0]["players"], match["teams"][1]["players"]),
             )
         }
         if self.update_data.current_loop == 0:
@@ -749,8 +742,7 @@ class WatchMatch(Match):
             self.is_hero_ready = True
             self.bot.dispatch("match_hero_ready")
             return True
-        else:
-            return False
+        return False
 
     @lueloop(seconds=10, count=30)
     async def update_heroes(self) -> None:

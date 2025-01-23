@@ -122,9 +122,9 @@ class DotaAPIsRateLimiter(BaseRateLimiter):
             return
         for scope, idx, *subscopes in pinging_targets:  # type: ignore
             if idx >= len(header_limits[scope]):
-                self._index[(scope, idx, *subscopes)] = (0, 10**10, response_time + 3600, 0, 0)
+                self._index[scope, idx, *subscopes] = (0, 10**10, response_time + 3600, 0, 0)
                 continue
-            self._index[(scope, idx, *subscopes)] = (
+            self._index[scope, idx, *subscopes] = (
                 header_counts[scope][idx][0],
                 header_limits[scope][idx][0],
                 header_limits[scope][idx][1] + response_time,
@@ -144,7 +144,7 @@ class StratzAPIRateLimiter(DotaAPIsRateLimiter):
                 f"{timeframe}: "
                 f"{headers[f'X-RateLimit-Remaining-{timeframe}']}/{headers[f'X-RateLimit-Limit-{timeframe}']}"
                 for timeframe in ("Second", "Minute", "Hour", "Day")
-            ]
+            ],
         )
         self.rate_limits_ratio = int(headers["X-RateLimit-Remaining-Day"]) / int(headers["X-RateLimit-Limit-Day"])
 

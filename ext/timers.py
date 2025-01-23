@@ -91,9 +91,8 @@ class Timers(LueComponent):
     @commands.Component.listener(name="aluerie_online")
     async def periodic_announcements(self) -> None:
         """Send periodic announcements into irene's channel on timer."""
-
         # lazy implementation
-        for _ in range(0, 3):
+        for _ in range(3):
             await asyncio.sleep(60 * 3)
             await self.aluerie.send_announcement(
                 moderator=const.UserID.Bot,

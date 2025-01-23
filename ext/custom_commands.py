@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, TypedDict, override
 
 import asyncpg
-import twitchio  # noqa: TCH002
+import twitchio  # noqa: TC002
 from twitchio.ext import commands
 
 from bot import LueComponent, lueloop

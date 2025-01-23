@@ -22,11 +22,11 @@ class ExceptionManager:
     """Exception Manager that."""
 
     __slots__: tuple[str, ...] = (
+        "_lock",
+        "_most_recent",
         "bot",
         "cooldown",
         "errors_cache",
-        "_lock",
-        "_most_recent",
     )
 
     def __init__(self, bot: LueBot, *, cooldown: datetime.timedelta = datetime.timedelta(seconds=5)) -> None:
@@ -64,7 +64,6 @@ class ExceptionManager:
 
         It is not recommended to call this yourself, call `register_error` instead.
         """
-
         code_chunks = list(self._yield_code_chunks(traceback))
 
         if mention:

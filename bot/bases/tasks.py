@@ -32,7 +32,7 @@ class LueLoop(tasks.Loop[LF]):
     Just extra boilerplate functionality.
 
     Notes
-    ------------
+    -----
     Sorry to twitchio guys, but at the moment of writing this `discord.ext.tasks` is way more fleshed out
     and offers a bit more functionality than `twitchio.ext.routines`.
 

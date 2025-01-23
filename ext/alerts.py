@@ -57,7 +57,7 @@ class Alerts(LueComponent):
                 "enjoy your stay",
                 "nice to see you",
                 "enjoy the show",
-            ]
+            ],
         )
         random_emote = random.choice(
             [
@@ -67,7 +67,7 @@ class Alerts(LueComponent):
                 const.STV.donkHey,
                 const.BTTV.peepoHey,
                 const.STV.Hey,
-            ]
+            ],
         )
         await follow.broadcaster.send_message(
             sender=self.bot.bot_id,
@@ -77,12 +77,11 @@ class Alerts(LueComponent):
     @commands.Component.listener(name="raid")
     async def raids(self, raid: twitchio.ChannelRaid) -> None:
         """Somebody raided the channel."""
-
         streamer = await raid.to_broadcaster.user()
         raider_channel_info = await raid.from_broadcaster.fetch_channel_info()
 
         await streamer.send_shoutout(
-            to_broadcaster=raid.from_broadcaster.id, moderator=const.UserID.Bot, token_for=const.UserID.Bot
+            to_broadcaster=raid.from_broadcaster.id, moderator=const.UserID.Bot, token_for=const.UserID.Bot,
         )
         await streamer.send_announcement(
             moderator=const.UserID.Bot,
@@ -164,7 +163,6 @@ class Alerts(LueComponent):
             sender=self.bot.bot_id,
             message=f"{subscribe.user.mention} just subscribed {const.STV.Donki} thanks",
         )
-
 
 
 async def setup(bot: LueBot) -> None:

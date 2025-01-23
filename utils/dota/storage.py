@@ -70,7 +70,6 @@ class GameDataStorage(abc.ABC, Generic[VT, PseudoVT]):
         This function is supposed to be implemented by subclasses.
         We get the data and sort it out into a convenient dictionary to cache.
         """
-        ...
 
     @lueloop()
     async def update_data(self) -> None:
@@ -160,9 +159,7 @@ class Items(GameDataStorage[Item, Item]):
     @override
     async def by_id(self, item_id: int) -> Item:
         """Get Item by its ID."""
-
         # special case
         if item_id == 0:
             return Item(0, "Empty Slot")
-        else:
-            return await super().by_id(item_id)
+        return await super().by_id(item_id)

@@ -29,14 +29,13 @@ class PlayerMatchOutcome(IntEnum):
     @property
     def valid(self) -> bool:
         """Whether match properly ended and the result is properly scored: win or loss."""
-        return self.value < 2  #  hardcoded value, scary :o
+        return self.value < 2  # hardcoded value, scary :o
 
     def mmr_change(self, lobby_type: int) -> int:
         if lobby_type == 7 and self.valid:
             # "2 * boolean - 1" is just a fancy way to do {true -> 1, false -> -1} mapping
             return (2 * self.value - 1) * 25
-        else:
-            return 0
+        return 0
 
     # @classmethod
     # def create(cls, minimal_match: MatchMinimal, bool: bool) -> PlayerMatchOutcome:
@@ -53,14 +52,12 @@ class PlayerMatchOutcome(IntEnum):
     def create_from_history(cls, minimal_match: MatchMinimal, history_match: MatchHistoryMatch) -> PlayerMatchOutcome:
         if history_match.abandon:
             return PlayerMatchOutcome.Abandon
-        else:
-            outcome = minimal_match.outcome
-            if outcome == MatchOutcome.RadiantVictory or outcome == MatchOutcome.DireVictory:
-                return PlayerMatchOutcome(int(history_match.win))
-            elif minimal_match.outcome >= MatchOutcome.NotScoredPoorNetworkConditions:
-                return PlayerMatchOutcome.NotScored
-            else:
-                return PlayerMatchOutcome.Other
+        outcome = minimal_match.outcome
+        if outcome == MatchOutcome.RadiantVictory or outcome == MatchOutcome.DireVictory:
+            return PlayerMatchOutcome(int(history_match.win))
+        if minimal_match.outcome >= MatchOutcome.NotScoredPoorNetworkConditions:
+            return PlayerMatchOutcome.NotScored
+        return PlayerMatchOutcome.Other
 
 
 class WinLossCategory(IntEnum):
@@ -99,8 +96,7 @@ class WinLossCategory(IntEnum):
         display_name = mapping.get(self.value, None)
         if display_name:
             return display_name
-        else:
-            return f"{lobby_type.display_name} ({game_mode.display_name})"
+        return f"{lobby_type.display_name} ({game_mode.display_name})"
 
 
 class MyStrEnum(Enum, str):

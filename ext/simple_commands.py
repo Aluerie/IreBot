@@ -6,7 +6,7 @@ import random
 import unicodedata
 from typing import TYPE_CHECKING
 
-import twitchio  # noqa: TCH002
+import twitchio  # noqa: TC002
 from twitchio.ext import commands
 
 import config
@@ -102,7 +102,7 @@ class SimpleCommands(LueComponent):
             "Duis sagittis ipsum. Praesent mauris. Fusce nec tellus sed augue semper porta. Mauris massa. "
             "Vestibulum lacinia arcu eget nulla. Class aptent taciti sociosqu ad litora torquent per conubia nostra, "
             "per inceptos himenaeos. Curabitur sodales ligula in libero. Sed dignissim lacinia nunc. Curabitur tortor. "
-            "Pellentesque nibh."
+            "Pellentesque nibh.",
         )  # cSpell:enable
 
     @commands.command()
@@ -179,7 +179,7 @@ class SimpleCommands(LueComponent):
             "I can't go on a hour🕐of my day🌞without thinking💭💦about plowing👉👌🚜that tight😳wooden🌳ass💦🍑. "
             "I'd kill🔫😱a man👨 in cold❄️blood😈just to spend💷a minute⏱️with her crotch🍑😫grinding against "
             "my throbbing💦🍆💦manhood💦🍆💦as she whispers🙊😫terribly dirty💩💩things to me in her "
-            "geographically🌍🌎ambiguous🌏🗺️accent 🇮🇪"
+            "geographically🌍🌎ambiguous🌏🗺️accent 🇮🇪",
         )
 
     @commands.command()

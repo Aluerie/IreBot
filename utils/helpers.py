@@ -52,8 +52,8 @@ class measure_time:  # noqa: N801 # it's fine to call classes lowercase if they 
         self.end = end = perf_counter() - self.start
         self.log.debug("%s PT: %.3f secs", self.name, end)
 
-    def __exit__(self, *_: Any) -> None:
+    def __exit__(self, *_: object) -> None:
         self.measure_time()
 
-    async def __aexit__(self, *_: Any) -> None:
+    async def __aexit__(self, *_: object) -> None:
         self.measure_time()

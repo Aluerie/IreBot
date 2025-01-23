@@ -48,12 +48,11 @@ class ChannelManagement(LueComponent):
     @commands.command()
     async def game(self, ctx: commands.Context, *, game_name: str | None = None) -> None:
         """Either get current channel game or update it."""
-
         if not game_name:
             # 1. No argument
             # respond with current game name the channel is playing
             channel_info = await ctx.broadcaster.fetch_channel_info()
-            game_name = channel_info.game_name if channel_info.game_name else "No game category"
+            game_name = channel_info.game_name or "No game category"
             await ctx.send(f"{game_name} {const.STV.DankDolmes}")
             return
 
@@ -106,7 +105,6 @@ class ChannelManagement(LueComponent):
             * !title - shows current title.
             * !title Hello World - title changes to "Hello World" (if mod)
         """
-
         if not title:
             # 1. No argument
             # respond with current game name the channel is playing
@@ -174,7 +172,7 @@ class ChannelManagement(LueComponent):
             OFFSET 1
         """
         history_titles: list[str] = [r for (r,) in await self.bot.pool.fetch(query, number)]
-        if len(history_titles):
+        if history_titles:
             for count, saved_title in enumerate(history_titles, start=1):
                 await ctx.send(f"{count}. {saved_title}")
         else:

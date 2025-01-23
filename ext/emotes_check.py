@@ -69,7 +69,7 @@ class EmoteChecker(LueComponent):
 
         # BTTV
         async with self.bot.session.get(
-            f"https://api.betterttv.net/3/cached/users/twitch/{const.UserID.Aluerie}"
+            f"https://api.betterttv.net/3/cached/users/twitch/{const.UserID.Aluerie}",
         ) as resp:
             bttv_json = await resp.json()
             bttv_emote_list = [emote["code"] for emote in bttv_json["channelEmotes"] + bttv_json["sharedEmotes"]]

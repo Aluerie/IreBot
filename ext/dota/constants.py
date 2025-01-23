@@ -112,7 +112,7 @@ HERO_ALIASES = {
     77: ["banehallow", "wolf"],  # Lycan
     78: ["brew", "mangix"],  # Brewmaster
     79: ["sd"],  # ShadowDemon
-    80: ["ld", "bear", "sylla"],  #  LoneDruid
+    80: ["ld", "bear", "sylla"],  # LoneDruid
     81: ["ck", "chaos"],  # ChaosKnight
     82: ["geomancer", "meepwn"],  # Meepo
     83: ["tree"],  # TreantProtector

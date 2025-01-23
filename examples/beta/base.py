@@ -30,4 +30,3 @@ class BetaCog(LueComponent):
     @lueloop(count=1)
     async def beta_test(self) -> None:
         """Task that is supposed to run just once to test stuff out."""
-        ...
