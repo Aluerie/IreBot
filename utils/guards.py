@@ -18,7 +18,7 @@ def is_vps() -> Any:
     kill the bot process or reboot it.
     """
 
-    async def predicate(_: commands.Context) -> bool:
+    def predicate(_: commands.Context) -> bool:
         if platform.system() == "Windows":
             # wrong PC
             msg = f"Only production bot allows usage of this command {const.FFZ.peepoPolice}"
@@ -31,7 +31,7 @@ def is_vps() -> Any:
 def is_online() -> Any:
     """Allow the command to be completed only when Irene's stream is online."""
 
-    async def predicate(ctx: commands.Context[LueBot]) -> bool:
-        return ctx.bot.aluerie_online
+    def predicate(ctx: commands.Context[LueBot]) -> bool:  # type:ignore[reportInvalidTypeArgument]
+        return ctx.bot.aluerie_online  # type:ignore[reportAttributeAccessIssue]
 
     return commands.guard(predicate)

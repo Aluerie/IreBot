@@ -18,14 +18,14 @@ exclude = ["**/__pycache__"]
 
 deprecateTypingAliases = true
 reportMissingTypeStubs = "none"    # a lot of libs don't have stubs
-reportPrivateUsage = "none"        # it's my choice, reeee
+reportPrivateUsage = "none"        # it's my choice
 reportImplicitOverride = "warning" # I love it
 
 # Unnecessary
 reportUnnecessaryIsInstance = "none"           # I like "else" raising the error if type is somehow not it
 reportUnnecessaryTypeIgnoreComment = "warning" # why it's "none" by default, even for strict ?!
 
-# Unused stuff - yes, I write a lot of unused stuff **GIGACHAD music**
+# Unused stuff - yes, I write a lot of unused stuff
 reportUnusedImport = "warning"
 reportUnusedVariable = "none"
 reportUnusedClass = "none"
@@ -106,6 +106,7 @@ select = [
 ]
 ignore = [
     "ANN401",   # `Any` is the correct type in some cases
+    "ASYNC109", # dpy commonly uses this parameter
     "ASYNC116", # Long sleeps are fine
     "C90",      # mc cabe complexity memes
     "F401",     # unused imports
@@ -132,10 +133,14 @@ ignore = [
     # "UP038",
 
     # DOC STRINGS
+    # general doc string exceptions
     "D100",     # Missing docstring in module: no, module level docs aren't always needed
     "D105",     # Missing docstring in magic method: documenting magic methods is often dumb.
     "D107",     # Missing docstring in `__init__`: __init__ is the wrong place to doc this.
-    "D401",     # Doc should be starting with an imperative verb: dumb rule tbh.
+    "D401",     # Doc should be starting with an imperative verb: dumb rule, to be honest.
+    # doc string exceptions 
+    # for this bot because it's a bot and it's pointless to document *everything* in one-man project.
+    "DOC201",   # `return` is not documented in docstring
     
     # "D104",    # Missing docstring in public package. Otherwise spams __init__.py and such.
     # "D417",    # Missing argument description. Otherwise, it keeps asking to document interaction/context args.
