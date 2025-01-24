@@ -47,8 +47,8 @@ class Dota2Client(Client):
 
     async def start_helpers(self) -> None:
         if not self.started:
-            await self.steam_web_api.__aenter__()
-            await self.stratz.__aenter__()
+            await self.steam_web_api.__aenter__()  # noqa: PLC2801
+            await self.stratz.__aenter__()  # noqa: PLC2801
             self.items.start()
 
     @override

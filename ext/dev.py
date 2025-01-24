@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import os
 from typing import TYPE_CHECKING, Annotated
 
 from twitchio.ext import commands
@@ -54,9 +53,9 @@ class Development(LueComponent):
         await asyncio.sleep(3)
         try:
             # non systemctl users - sorry
-            os.system("sudo systemctl restart luebot")
-        except Exception as error:
-            log.error(error, stack_info=True)
+            await asyncio.create_subprocess_shell("sudo systemctl restart luebot")  # `os.system`
+        except Exception:
+            log.exception("Failed to Restart the bot's process", stack_info=True)
             # it might not go off
             await ctx.send("Something went wrong.")
 

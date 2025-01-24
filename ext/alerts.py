@@ -158,7 +158,7 @@ class Alerts(LueComponent):
 
     @commands.Component.listener(name="subscription")
     async def subscription(self, subscribe: twitchio.ChannelSubscribe) -> None:
-        """Subscriptions"""
+        """Subscriptions."""
         await subscribe.broadcaster.send_message(
             sender=self.bot.bot_id,
             message=f"{subscribe.user.mention} just subscribed {const.STV.Donki} thanks",

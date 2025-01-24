@@ -52,8 +52,8 @@ class SteamWebAPIClient(BaseClient):
 
         https://steamapi.xpaw.me/#IDOTA2MatchStats_570/GetRealtimeStats.
         """
-        queries = {"server_steam_id": server_steam_id}  # noqa F481
-        return await self.invoke("GET", "/IDOTA2MatchStats_570/GetRealtimeStats/v1/")  # type: ignore
+        queries = {"server_steam_id": server_steam_id}  # noqa: F841
+        return await self.invoke("GET", "/IDOTA2MatchStats_570/GetRealtimeStats/v1/")  # pyright: ignore[reportReturnType]
 
 
 class DotaAPIsRateLimiter(BaseRateLimiter):
@@ -196,5 +196,5 @@ class StratzClient(BaseClient):
                 }
             }
         """
-        json = {"query": query}  # noqa F481
-        return await self.invoke("POST", "")  # type: ignore
+        json = {"query": query}  # noqa: F841
+        return await self.invoke("POST", "")  # pyright: ignore[reportReturnType]

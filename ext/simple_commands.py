@@ -308,8 +308,7 @@ class SimpleCommands(LueComponent):
 
         def to_string(c: str) -> str:
             name = unicodedata.name(c, None)
-            name = f"\\N{{{name}}}" if name else "Name not found."
-            return name
+            return f"\\N{{{name}}}" if name else "Name not found."
 
         names = " ".join(to_string(c) for c in characters[:10])
         if len(characters) > 10:
@@ -318,6 +317,7 @@ class SimpleCommands(LueComponent):
 
     @commands.command(aliases=["id", "twitchid"])
     async def twitch_id(self, ctx: commands.Context, *, user: twitchio.User) -> None:
+        """Get mentioned @user numeric twitch_id."""
         await ctx.send(f"Twitch ID for {user.mention}: {user.id}")
 
 

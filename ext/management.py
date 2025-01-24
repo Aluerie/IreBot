@@ -181,12 +181,6 @@ class ChannelManagement(LueComponent):
     @commands.Component.listener(name="channel_update")
     async def channel_update(self, update: twitchio.ChannelUpdate) -> None:
         """Channel Info (game, title, etc) got updated."""
-        # payload: eventsub.ChannelUpdateData = event.data
-        # channel_name = payload.broadcaster.name
-        # assert channel_name
-        # channel = self.bot.get_channel(channel_name)
-        # assert channel
-
         now = datetime.datetime.now(datetime.UTC)
         # time check is needed so we don't repeat notif that comes from !game !title commands.
 

@@ -132,7 +132,10 @@ class Counters(LueComponent):
         if count == 1:
             msg = f'@{redemption.user.display_name}, gratz on your very first "First!" {const.STV.gg}'
         else:
-            msg = f"@{redemption.user.display_name}, Gratz! you've been first {count} times {const.STV.gg} {const.Global.EZ}"
+            msg = (
+                f"@{redemption.user.display_name}, Gratz! you've been first {count} times"
+                f" {const.STV.gg} {const.Global.EZ}"
+            )
 
         await redemption.broadcaster.send_message(
             sender=self.bot.bot_id,
