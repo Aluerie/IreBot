@@ -29,10 +29,9 @@ class MiscellaneousCommands(LueComponent):
     async def run(self, ctx: commands.Context) -> None:
         """Explanation of my first Sekiro hitless run."""
         msg = (
-            "All Memories & Unique MiniBosses (so no repetitions). "
+            "All Memories & Unique MiniBosses (so no repetitions) & save-file for Inner+Shura. "
             "The idea: I have to learn and practice all boss move-sets. "
-            "Even load Inner Father, Fire Isshin and Emma save-file. "
-            "Almost Charmless (take it back pre-demon). Mostly Sword+Shuriken (~29/37 boss fights). "
+            "Almost Charmless (take it back pre-demon). Mostly Sword+Shuriken (~31/39 boss fights). "
             "Somewhat loop-less. For more look !notes."
         )
         await ctx.send(msg)

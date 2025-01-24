@@ -97,7 +97,7 @@ class LogsViaWebhook(LueComponent):
 
         emoji = attributes.get(record.levelname, "\N{WHITE QUESTION MARK ORNAMENT}")
         dt = datetime.datetime.fromtimestamp(record.created, datetime.UTC)
-        msg = textwrap.shorten(f"{emoji} {discord.utils.format_dt(dt, style="T")} {record.message}", width=1995)
+        msg = textwrap.shorten(f"{emoji} {discord.utils.format_dt(dt, style='T')} {record.message}", width=1995)
         avatar_url = self.AVATAR_MAPPING.get(record.name, discord.utils.MISSING)
         username = record.name.replace("discord", "disсοrd")  # cSpell: ignore disсοrd  # noqa: RUF003
         await self.bot.logger_webhook.send(msg, username=username, avatar_url=avatar_url)

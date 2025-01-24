@@ -77,7 +77,7 @@ class CustomCommands(LueComponent):
     @commands.is_moderator()
     @commands.group(invoke_fallback=True)
     async def cmd(self, ctx: commands.Context) -> None:
-        """Group command to define cmd"""
+        """Group command to define cmd."""
         await ctx.send('You need to use this with subcommands, i.e. "cmd add/delete/edit/list"')
 
     @commands.is_moderator()
@@ -93,7 +93,7 @@ class CustomCommands(LueComponent):
             await self.bot.pool.execute(query, ctx.broadcaster.id, cmd_name, text)
         except asyncpg.UniqueViolationError:
             msg = "There already exists a command with such name."
-            raise errors.BadArgumentError(msg)
+            raise errors.BadArgumentError(msg) from None
 
         self.command_cache.setdefault(ctx.broadcaster.id, {})[cmd_name] = text
         await ctx.send(f"Added the command {cmd_name}.")
@@ -139,7 +139,7 @@ class CustomCommands(LueComponent):
         """Get commands list."""
         cache_list = [f"!{name}" for v in self.command_cache.values() for name in v]
         # bot_cmds = [
-        #     f"!{v.full_name}" for v in self.bot.commands.values() if not v._checks and not isinstance(v, commands.Group)
+        # f"!{v.full_name}" for v in self.bot.commands.values() if not v._checks and not isinstance(v, commands.Group)
         # ]
         await ctx.send(", ".join(cache_list))
 

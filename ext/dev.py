@@ -36,10 +36,9 @@ class Development(LueComponent):
         await ctx.send("Shutting down the bot in 3 2 1")
         await asyncio.sleep(3)
         try:
-            # non systemctl users - sorry
-            os.system("sudo systemctl stop luebot")
-        except Exception as error:
-            log.error(error, stack_info=True)
+            await asyncio.create_subprocess_shell("sudo systemctl stop luebot")  # `os.system`
+        except Exception:
+            log.exception("Failed to Stop the bot's process", stack_info=True)
             # it might not go off
             await ctx.send("Something went wrong.")
 
