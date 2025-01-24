@@ -57,9 +57,9 @@ class ExceptionManager:
                 await asyncio.sleep(total_seconds)
 
             self._most_recent = datetime.datetime.now(datetime.UTC)
-            await self.send_error(traceback_string, embed, mention)
+            await self.send_error(traceback_string, embed, mention=mention)
 
-    async def send_error(self, traceback: str, embed: discord.Embed, mention: bool) -> None:
+    async def send_error(self, traceback: str, embed: discord.Embed, *, mention: bool) -> None:
         """Send an error to the webhook.
 
         It is not recommended to call this yourself, call `register_error` instead.

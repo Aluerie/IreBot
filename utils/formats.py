@@ -33,7 +33,7 @@ class plural:  # noqa: N801
     @override
     def __format__(self, format_spec: str) -> str:
         number = self.number
-        singular, separator, plural = format_spec.partition("|")
+        singular, _, plural = format_spec.partition("|")  # _ is `separator`
         plural = plural or f"{singular}s"
         if abs(number) != 1:
             return f"{number} {plural}"
@@ -60,11 +60,10 @@ def timedelta_to_words(
 
     Example:
     -------
-        ```py
+        ```
         x = datetime.timedelta(seconds=66)
         timedelta_to_words(x)  # "1 minute 6 seconds"
         ```
-
     """
     if delta is not MISSING and seconds is not MISSING:
         msg = "Cannot mix `delta` and `seconds` keyword arguments."
@@ -98,12 +97,13 @@ def timedelta_to_words(
 
 
 def ordinal(n: int | str) -> str:
-    """Convert an integer into its ordinal representation, i.e. 0->'0th', '3'->'3rd'."""
-    # Remember that there is always funny lambda possibility
-    # ```py
-    # ordinal = lambda n: "%d%s" % (n, "tsnrhtdd"[(n // 10 % 10 != 1) * (n % 10 < 4) * n % 10::4])
-    # print([ordinal(n) for n in range(1,32)])
-    # ```
+    """Convert an integer into its ordinal representation, i.e. 0->'0th', '3'->'3rd'.
+
+    Dev Note
+    --------
+    Remember that there is always a funny lambda possibility
+    `ordinal = lambda n: "%d%s" % (n, "tsnrhtdd"[(n // 10 % 10 != 1) * (n % 10 < 4) * n % 10::4])`
+    """
     n = int(n)
     suffix = "th" if 11 <= n % 100 <= 13 else ["th", "st", "nd", "rd", "th"][min(n % 10, 4)]
     return str(n) + suffix

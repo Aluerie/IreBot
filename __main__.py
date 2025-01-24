@@ -11,7 +11,7 @@ from bot import LueBot, setup_logging
 from utils.database import create_pool
 
 try:
-    import uvloop  # type: ignore
+    import uvloop  # pyright: ignore[reportMissingImports]
 except ImportError:
     # WINDOWS
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())

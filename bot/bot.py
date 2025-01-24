@@ -90,7 +90,8 @@ class LueBot(commands.Bot):
             # TODO: fill in scopes= argument once we figure out what it's used for :x
         )
         self.database: asyncpg.Pool[asyncpg.Record] = pool
-        self.pool: PoolTypedWithAny = pool  # type: ignore # asyncpg typehinting crutch, read `utils.database` for more
+        # asyncpg typehinting crutch, read `utils.database` for more
+        self.pool: PoolTypedWithAny = pool  # pyright: ignore[reportAttributeAccessIssue]
         self.session: ClientSession = session
         self.extensions: tuple[str, ...] = EXTENSIONS
 
@@ -119,6 +120,10 @@ class LueBot(commands.Bot):
     #     print(auth_url)  # noa: T201
 
     def print_bot_oauth(self) -> None:
+        """Print a link for me (developer) to click and authorize the bot scopes for the bot account.
+
+        Required for proper work of Twitch Eventsub events and API requests.
+        """
         scopes = "%20".join(
             [
                 "user:read:chat",
@@ -135,14 +140,16 @@ class LueBot(commands.Bot):
         print(f"🤖🤖🤖 BOT OAUTH LINK: 🤖🤖🤖\n{link}")  # noqa: T201
 
     def print_broadcaster_oauth(self) -> None:
-        """
+        """Print a link for streamers to click and authorize the scopes for the bot.
+
+        Required for proper work of Twitch Eventsub events and API requests.
 
         Notes
         -----
         * Currently my developer console has localhost as a callback: http://localhost:4343/oauth/callback
             But if we ever switch to multi-streams setup then I already have some things set up with
             * https://parrot-thankful-trivially.ngrok-free.app/oauth/callback (in developer console)
-            * ngrok http --url=parrot-thankful-trivially.ngrok-free.app 80 (in my/vps terminal)
+            * `ngrok http --url=parrot-thankful-trivially.ngrok-free.app 80` (in my/vps terminal)
             Look ngrok dashboard for more.
 
             With it a user needs to go to a link like this:
@@ -172,7 +179,8 @@ class LueBot(commands.Bot):
         for the first time (or after adding extra scopes):
             1. Uncomment three first lines in this function;
             2. Run the bot;
-            3. Click generated links using proper accounts (i.e. broadcaster = the browser with streamer account logged in);
+            3. Click generated links using proper accounts:
+                (i.e. broadcaster = the browser with streamer account logged in);
             4. The bot will update the tokens in the database automatically;
             5. Comment the lines back. In normal state, they should be commented.
 
@@ -188,10 +196,9 @@ class LueBot(commands.Bot):
         self.check_if_online.start()
 
     async def create_eventsub_subscriptions(self) -> None:
-        """
-        Subscribe to all EventSub subscriptions that are required for the bot to work.
-        The function also includes (in code) a table showcasing which subscriptions/scopes are required for what.
+        """Subscribe to all EventSub subscriptions that are required for the bot to work.
 
+        The function also includes (in code) a table showcasing which subscriptions/scopes are required for what.
         For more links:
 
         TwitchDev Docs
@@ -261,7 +268,7 @@ class LueBot(commands.Bot):
         return resp
 
     @override
-    async def load_tokens(self, path: str | None = None) -> None:
+    async def load_tokens(self, _: str | None = None) -> None:  # _ is `path`
         # We don't need to call this manually, it is called in .login() from .start() internally...
 
         rows: list[LoadTokensQueryRow] = await self.pool.fetch("""SELECT * from ttv_tokens""")
@@ -328,9 +335,9 @@ class LueBot(commands.Bot):
                 }
                 await ctx.send(guard_mapping.get(error.guard.__qualname__, str(error)))
             case twitchio.HTTPException():
-                # log.error("%s", error.__class__.__name__, exc_info=error)
                 await ctx.send(
-                    f"{error.extra.get('error', 'Error')} {error.extra.get('status', 'XXX')}: "
+                    f"{error.extra.get('error', 'Error')} "
+                    f"{error.extra.get('status', 'XXX')}: "
                     f"{error.extra.get('message', 'Unknown')} {const.STV.dankFix}",
                 )
             case commands.MissingRequiredArgument():
@@ -406,19 +413,26 @@ class LueBot(commands.Bot):
         return config.ERROR_PING
 
     async def aluerie_stream(self) -> twitchio.Stream | None:
+        """Shortcut to get @Aluerie's stream."""
         return next(iter(await self.fetch_streams(user_ids=[const.UserID.Aluerie])), None)
 
     @lueloop(count=1)
     async def check_if_online(self) -> None:
+        """Check if aluerie is online - used to make my own (proper) online event instead of twitchio's."""
         await asyncio.sleep(1.0)  # just in case;
         if await self.aluerie_stream():
             self.aluerie_online = True
             self.dispatch("aluerie_online")
 
     async def event_stream_online(self, _: twitchio.StreamOnline) -> None:
+        """Instead of the twitchio event - dispatch my own online event.
+
+        The difference is that my event accounts for the state of my stream when the bot restarts.
+        """
         self.aluerie_online = True
         self.dispatch("aluerie_online")
 
     async def event_stream_offline(self, _: twitchio.StreamOffline) -> None:
+        """Instead of the twitchio event - dispatch my own offline event."""
         self.aluerie_online = False
         self.dispatch("aluerie_offline")

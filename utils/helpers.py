@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import logging
 from time import perf_counter
-from typing import TYPE_CHECKING, Any, Self
+from typing import TYPE_CHECKING, Self
 
 __all__ = ("measure_time",)
 
@@ -48,7 +48,12 @@ class measure_time:  # noqa: N801 # it's fine to call classes lowercase if they 
         return self
 
     def measure_time(self) -> None:
-        # PT for Performance Time, maybe there are better ideas for abbreviations.
+        """Record and debug-log measured PT (Performance Time).
+
+        Notes
+        -----
+        * maybe there are better ideas for abbreviations than PT.
+        """
         self.end = end = perf_counter() - self.start
         self.log.debug("%s PT: %.3f secs", self.name, end)
 
