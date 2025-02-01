@@ -17,7 +17,7 @@ steamio @ git+https://github.com/Aluerie/steam.py@introduce-ext.dota2
 pulsefire==2.0.21
 
 # OPTIMISATION
-orjson==3.10.13
+orjson==3.10.15
 uvloop==0.21.0; platform_system == 'Linux'  # ignore on non-Linux - because not available
 
 # JUPYTER NOTEBOOKS
