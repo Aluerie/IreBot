@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import platform
 from typing import TYPE_CHECKING, TypedDict, override
 
 import discord
@@ -10,7 +11,7 @@ from twitchio import eventsub
 from twitchio.ext import commands
 
 # from twitchio.web import StarletteAdapter
-import config
+from config import config, replace_secrets
 from ext import EXTENSIONS
 from ext.dota.api import Dota2Client
 from utils import const, errors
@@ -22,7 +23,7 @@ if TYPE_CHECKING:
     import asyncpg
     from aiohttp import ClientSession
 
-    from utils.database import PoolTypedWithAny
+    from types_.database import PoolTypedWithAny
 
     class LoadTokensQueryRow(TypedDict):
         user_id: str
@@ -78,8 +79,8 @@ class IreBot(commands.Bot):
         #     eventsub_secret=config.EVENTSUB_SECRET,
         # )
         super().__init__(
-            client_id=config.TTV_DEV_CLIENT_ID,
-            client_secret=config.TTV_DEV_CLIENT_SECRET,
+            client_id=config["TWITCH"]["CLIENT_ID"],
+            client_secret=config["TWITCH"]["CLIENT_SECRET"],
             bot_id=const.UserID.Bot,
             owner_id=const.UserID.Irene,
             prefix=self.prefixes,
@@ -332,7 +333,7 @@ class IreBot(commands.Bot):
             #     await ctx.send(str(error))
 
             case _:
-                await ctx.send(f"{error.__class__.__name__}: {config.replace_secrets(str(error))}")
+                await ctx.send(f"{error.__class__.__name__}: {replace_secrets(str(error))}")
 
                 command_name = getattr(ctx.command, "name", "unknown")
 
@@ -377,27 +378,27 @@ class IreBot(commands.Bot):
     @discord.utils.cached_property
     def logger_webhook(self) -> discord.Webhook:
         """A webhook in hideout's #logger channel."""
-        return self.webhook_from_url(config.LOGGER_WEBHOOK)
+        return self.webhook_from_url(config["WEBHOOKS"]["LOGGER"])
 
     @discord.utils.cached_property
     def error_webhook(self) -> discord.Webhook:
         """A webhook in hideout server to send errors/notifications to the developer(-s)."""
-        return self.webhook_from_url(config.ERROR_WEBHOOK)
+        return self.webhook_from_url(config["WEBHOOKS"]["ERROR"])
 
-    @property
+    @discord.utils.cached_property
     def error_ping(self) -> str:
         """Error Role ping used to notify the developer(-s) about some errors."""
-        return config.ERROR_PING
+        return "<@&1306631362870120600>" if platform.system() == "Windows" else "<@&1116171071528374394>"
 
-    async def aluerie_stream(self) -> twitchio.Stream | None:
-        """Shortcut to get @Aluerie's stream."""
+    async def irene_stream(self) -> twitchio.Stream | None:
+        """Shortcut to get @Irene's stream."""
         return next(iter(await self.fetch_streams(user_ids=[const.UserID.Irene])), None)
 
     @ireloop(count=1)
     async def check_if_online(self) -> None:
         """Check if aluerie is online - used to make my own (proper) online event instead of twitchio's."""
         await asyncio.sleep(1.0)  # just in case;
-        if await self.aluerie_stream():
+        if await self.irene_stream():
             self.irene_online = True
             self.dispatch("aluerie_online")
 

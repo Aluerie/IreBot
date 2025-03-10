@@ -9,8 +9,8 @@ import aiohttp
 import twitchio
 from twitchio.ext import commands
 
-import config
 from bot import IreComponent, ireloop
+from config import config
 from utils import const
 
 if TYPE_CHECKING:

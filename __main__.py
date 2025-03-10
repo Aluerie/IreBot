@@ -2,13 +2,15 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import platform
 import sys
 
 import aiohttp
+import asyncpg
 import click
 
 from bot import IreBot, setup_logging
-from utils.database import create_pool
+from config import config
 
 try:
     import uvloop  # pyright: ignore[reportMissingImports]
@@ -18,6 +20,18 @@ except ImportError:
 else:
     # LINUX
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+
+
+async def create_pool() -> asyncpg.Pool[asyncpg.Record]:
+    """Create AsyncPG Pool."""
+    postgres_url = config["POSTGRES"]["VPS"] if platform.system() == "Linux" else config["POSTGRES"]["HOME"]
+    return await asyncpg.create_pool(
+        postgres_url,
+        command_timeout=60,
+        min_size=10,
+        max_size=10,
+        statement_cache_size=0,
+    )  # type: ignore[reportReturnType]
 
 
 async def start_the_bot() -> None:

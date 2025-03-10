@@ -11,7 +11,7 @@ from pulsefire.clients import BaseClient
 from pulsefire.middlewares import http_error_middleware, json_response_middleware
 from pulsefire.ratelimiters import BaseRateLimiter
 
-import config
+from config import config
 
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
@@ -40,7 +40,7 @@ class SteamWebAPIClient(BaseClient):
             base_url="https://api.steampowered.com/",
             default_params={},
             default_headers={},
-            default_queries={"key": config.STEAM_WEB_API_KEY},
+            default_queries={"key": config["TOKENS"]["STEAM"]},
             middlewares=[
                 json_response_middleware(orjson.loads),
                 http_error_middleware(),
@@ -173,7 +173,7 @@ class StratzClient(BaseClient):
             default_params={},
             default_headers={
                 "User-Agent": "STRATZ_API",
-                "Authorization": f"Bearer {config.STRATZ_BEARER_TOKEN}",
+                "Authorization": f"Bearer {config['TOKENS']['STRATZ_BEARER']}",
                 "Content-Type": "application/json",
             },
             default_queries={},

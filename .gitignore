@@ -11,7 +11,7 @@ venv/
 
 *.ini
 
-config.py
+config.toml
 
 .temp/
 

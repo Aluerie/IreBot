@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 import logging
+import platform
 from typing import TYPE_CHECKING, override
 
 from steam import PersonaState
 from steam.ext.dota2 import Client
 
-import config
+from config import config
 
 from .pulsefire_clients import SteamWebAPIClient, StratzClient
 from .storage import Items
@@ -37,7 +38,7 @@ class Dota2Client(Client):
         self.items = Items(twitch_bot)
 
     def irene(self) -> PartialUser:
-        return self.instantiate_partial_user(config.IRENE_STEAM_ID64)
+        return self.instantiate_partial_user(config["STEAM"]["IRENE_ID64"])
 
     async def start_helpers(self) -> None:
         if not self.started:
@@ -47,7 +48,11 @@ class Dota2Client(Client):
 
     @override
     async def login(self) -> None:
-        await super().login(config.STEAM_USERNAME, config.STEAM_PASSWORD)
+        account_credentials = (
+            config["STEAM"]["IRENESTEST"] if platform.system() == "Windows" else config["STEAM"]["IRENESBOT"]
+        )
+        username, password = account_credentials["USERNAME"], account_credentials["PASSWORD"]
+        await super().login(username, password)
 
     @override
     async def close(self) -> None:

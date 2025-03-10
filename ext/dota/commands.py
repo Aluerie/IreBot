@@ -7,8 +7,8 @@ from typing import TYPE_CHECKING, TypedDict, override
 
 from twitchio.ext import commands
 
-import config
 from bot import IreComponent, ireloop
+from config import config
 from utils import const, errors, helpers
 
 from .models import Streamer
@@ -39,7 +39,7 @@ class DotaCommands(IreComponent):
 
     def __init__(self, bot: IreBot) -> None:
         super().__init__(bot)
-        self.streamer: Streamer = Streamer(self.bot, config.IRENE_STEAM_ID64)
+        self.streamer: Streamer = Streamer(self.bot, config["STEAM"]["IRENE_ID64"])
         self.debug_mode: bool = True
 
     async def debug_send(self, message: str) -> None:

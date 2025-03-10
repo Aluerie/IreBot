@@ -9,8 +9,8 @@ from typing import TYPE_CHECKING
 import twitchio  # noqa: TC002
 from twitchio.ext import commands
 
-import config
 from bot import IreComponent
+from config import config
 from utils import const, formats, guards
 
 if TYPE_CHECKING:
@@ -239,7 +239,7 @@ class SimpleCommands(IreComponent):
     @commands.command()
     async def song(self, ctx: commands.Context) -> None:
         """Get currently played song on Spotify."""
-        url = f"https://spotify.aidenwallis.co.uk/u/{config.SPOTIFY_AIDENWALLIS_CODE}"
+        url = f"https://spotify.aidenwallis.co.uk/u/{config['TOKENS']['SPOTIFY_AIDENWALLIS']}"
         async with self.bot.session.get(url) as resp:
             msg = await resp.text()
 
@@ -264,7 +264,7 @@ class SimpleCommands(IreComponent):
     @commands.command()
     async def uptime(self, ctx: commands.Context) -> None:
         """Get stream uptime."""
-        stream = await self.bot.aluerie_stream()
+        stream = await self.bot.irene_stream()
         if stream is None:
             await ctx.send(f"Stream is offline {const.BTTV.Offline}")
         else:

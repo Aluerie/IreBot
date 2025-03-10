@@ -128,7 +128,6 @@ def get_log_fmt(handler: logging.Handler) -> logging.Formatter:
         formatter = logging.Formatter(
             "%(asctime)s %(levelname)-4.4s %(name)-30s %(lineno)-4d %(funcName)-35s %(message)s",
             "%H:%M:%S %d/%m",
-            style="{",
         )
 
     return formatter
