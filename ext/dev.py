@@ -36,7 +36,7 @@ class Development(IreComponent):
         await ctx.send("Shutting down the bot in 3 2 1")
         await asyncio.sleep(3)
         try:
-            await asyncio.create_subprocess_shell("sudo systemctl stop luebot")  # `os.system`
+            await asyncio.create_subprocess_shell("sudo systemctl stop irebot")  # `os.system`
         except Exception:
             log.exception("Failed to Stop the bot's process", stack_info=True)
             # it might not go off
@@ -54,7 +54,7 @@ class Development(IreComponent):
         await asyncio.sleep(3)
         try:
             # non systemctl users - sorry
-            await asyncio.create_subprocess_shell("sudo systemctl restart luebot")  # `os.system`
+            await asyncio.create_subprocess_shell("sudo systemctl restart irebot")  # `os.system`
         except Exception:
             log.exception("Failed to Restart the bot's process", stack_info=True)
             # it might not go off
@@ -100,5 +100,5 @@ class Development(IreComponent):
 
 
 async def setup(bot: IreBot) -> None:
-    """Load LueBot extension. Framework of twitchio."""
+    """Load IreBot extension. Framework of twitchio."""
     await bot.add_component(Development(bot))

@@ -7,13 +7,13 @@ It's just my small code practice.
 from __future__ import annotations
 
 
-class LueBotError(Exception):
-    """The base exception for LueBot. All other exceptions should inherit from this."""
+class IreBotError(Exception):
+    """The base exception for IreBot. All other exceptions should inherit from this."""
 
     __slots__: tuple[str, ...] = ()
 
 
-class TranslateError(LueBotError):
+class TranslateError(IreBotError):
     """Raised when there is an error in translate functionality."""
 
     def __init__(self, status_code: int, text: str) -> None:
@@ -22,7 +22,7 @@ class TranslateError(LueBotError):
         super().__init__(f"Google Translate responded with HTTP Status Code {status_code}")
 
 
-class GuardError(LueBotError):
+class GuardError(IreBotError):
     """My own `commands.CheckFailure` Error.
 
     Used in my own command checks.
@@ -31,23 +31,23 @@ class GuardError(LueBotError):
     __slots__: tuple[str, ...] = ()
 
 
-class BadArgumentError(LueBotError):
+class BadArgumentError(IreBotError):
     """Something wasn't properly used."""
 
     __slots__: tuple[str, ...] = ()
 
 
-class UsageError(LueBotError):
+class UsageError(IreBotError):
     """Something wasn't properly used."""
 
     __slots__: tuple[str, ...] = ()
 
 
-class SomethingWentWrong(LueBotError):  # noqa: N818
+class SomethingWentWrong(IreBotError):  # noqa: N818
     __slots__: tuple[str, ...] = ()
 
 
-class PlaceholderRaiseError(LueBotError):
+class PlaceholderRaiseError(IreBotError):
     """Placeholder Error.
 
     Maybe silly thing, but instead of doing empty `raise` that is not clear later in logs what exactly it is
@@ -58,19 +58,19 @@ class PlaceholderRaiseError(LueBotError):
     __slots__: tuple[str, ...] = ()
 
 
-class GameNotFoundError(LueBotError):
+class GameNotFoundError(IreBotError):
     """Dota 2 Game Not Found."""
 
     __slots__: tuple[str, ...] = ()
 
 
-class APIResponseError(LueBotError):
+class APIResponseError(IreBotError):
     """API Response Error."""
 
     __slots__: tuple[str, ...] = ()
 
 
-class ResponseNotOK(LueBotError):  # noqa: N818
+class ResponseNotOK(IreBotError):  # noqa: N818
     """Raised when `aiohttp`'s session response is not OK.
 
     Sometimes we just specifically need to raise an error in those cases

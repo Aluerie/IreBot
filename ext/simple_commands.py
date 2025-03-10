@@ -21,7 +21,7 @@ class SimpleCommands(IreComponent):
     """Simple commands.
 
     Simple in a sense that they are just somewhat static and their implementation is simple.
-    Probably a better name would be "uncategorised custom commands"
+    Probably a better name would be "uncategorised code commands"
     because they are defined here in code, instead of
     sitting in the database like commands from `custom_commands.py` do.
     """
@@ -259,7 +259,7 @@ class SimpleCommands(IreComponent):
     @commands.command()
     async def source(self, ctx: commands.Context) -> None:
         """Get the link to the bot's GitHub repository."""
-        await ctx.send(f"github.com/Aluerie/AlueBot {const.STV.DankReading}")
+        await ctx.send(f"github.com/Aluerie/IreBot {const.STV.DankReading}")
 
     @commands.command()
     async def uptime(self, ctx: commands.Context) -> None:
@@ -320,7 +320,12 @@ class SimpleCommands(IreComponent):
         """Get mentioned @user numeric twitch_id."""
         await ctx.send(f"Twitch ID for {user.mention}: {user.id}")
 
+    @commands.command(aliases=["pcparts", "specs"])
+    async def pc(self, ctx: commands.Context) -> None:
+        """Get Irene's current PC setup."""
+        await ctx.send("pcpartpicker.com/user/aluerie/saved/dY497P")
+
 
 async def setup(bot: IreBot) -> None:
-    """Load LueBot extension. Framework of twitchio."""
+    """Load IreBot extension. Framework of twitchio."""
     await bot.add_component(SimpleCommands(bot))

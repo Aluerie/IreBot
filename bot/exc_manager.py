@@ -47,7 +47,7 @@ class ExceptionManager:
         """Register, analyse error and put it into queue to send to developers."""
         log.error("%s: `%s`.", error.__class__.__name__, embed.footer.text, exc_info=error)
 
-        traceback_string = "".join(traceback.format_exception(error)).replace(str(Path.cwd()), "LueBot")
+        traceback_string = "".join(traceback.format_exception(error)).replace(str(Path.cwd()), "IreBot")
 
         async with self._lock:
             if self._most_recent and (delta := datetime.datetime.now(datetime.UTC) - self._most_recent) < self.cooldown:

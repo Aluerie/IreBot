@@ -20,7 +20,7 @@ log.setLevel(logging.INFO)  # DEBUG
 
 
 class IreComponent(commands.Component):
-    """Base component to use with LueBot."""
+    """Base component to use with IreBot."""
 
     def __init__(self, bot: IreBot) -> None:
         self.bot: IreBot = bot

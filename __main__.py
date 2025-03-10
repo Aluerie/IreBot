@@ -33,9 +33,9 @@ async def start_the_bot() -> None:
     async with (
         aiohttp.ClientSession() as session,
         pool as pool,
-        IreBot(session=session, pool=pool) as luebot,
+        IreBot(session=session, pool=pool) as irebot,
     ):
-        await luebot.start()
+        await irebot.start()
 
 
 @click.group(invoke_without_command=True, options_metavar="[options]")

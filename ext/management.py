@@ -25,7 +25,7 @@ class ChannelManagement(IreComponent):
         self.game_tracked: str = "idk"
         self.title_tracked: str = "idk"
 
-        # datetimes indicating when game/title was changed with specifically LueBot's commands !game/!title
+        # datetimes indicating when game/title was changed with specifically IreBot's commands !game/!title
         self.game_updated_dt: datetime.datetime = datetime.datetime.now(datetime.UTC) - datetime.timedelta(hours=1)
         self.title_updated_dt: datetime.datetime = datetime.datetime.now(datetime.UTC) - datetime.timedelta(hours=1)
 
@@ -222,5 +222,5 @@ class ChannelManagement(IreComponent):
 
 
 async def setup(bot: IreBot) -> None:
-    """Load LueBot extension. Framework of twitchio."""
+    """Load IreBot extension. Framework of twitchio."""
     await bot.add_component(ChannelManagement(bot))

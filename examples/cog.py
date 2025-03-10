@@ -20,5 +20,5 @@ class NewCog(IreComponent):
 
 
 async def setup(bot: IreBot) -> None:
-    """Load LueBot extension. Framework of twitchio."""
+    """Load IreBot extension. Framework of twitchio."""
     await bot.add_component(NewCog(bot))

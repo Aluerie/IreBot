@@ -29,13 +29,13 @@ class MiscellaneousCommands(IreComponent):
     async def run(self, ctx: commands.Context) -> None:
         """Explanation of my first Sekiro hitless run."""
         msg = (
-            "All Unique Bosses: includes All Memories, Extra MiniBosses without repetitions "
-            "(i.e. one Headless, one Shichi, O'Rin, etc) and "
-            "we load a save-file with Reflections for Emma, Fire Isshin and Inner Bosses. "
-            "Charmless*. No forced loops. "
-            "Sword+Shuriken for bosses that I like (~34/40). "
-            "Mist Raven for lighting reversal. "
-            "Full blasting for the rest. For more look !notes."
+            "Bosses I like % Sword+Shuriken Focused. "
+            "On paper it's Immortal Severance with 4 extra bosses and loading a save file "
+            "for Emma, Fire Isshin and Inner Owl reflections. "
+            "DB NKC No Loop No Cheese No Glitch. "
+            "Sword+Shuriken focused. "
+            "The only boss that I blast with MDs is Ape. "
+            "My notes: docs.google.com/document/d/1rjp7lhvP0vwwlO7bC7TyFAjKcGDovFuo2EYUaX66QiA."
         )
         await ctx.send(msg)
 
@@ -84,5 +84,5 @@ class MiscellaneousCommands(IreComponent):
 
 
 async def setup(bot: IreBot) -> None:
-    """Load LueBot extension. Framework of twitchio."""
+    """Load IreBot extension. Framework of twitchio."""
     await bot.add_component(MiscellaneousCommands(bot))

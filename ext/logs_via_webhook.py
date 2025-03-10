@@ -119,7 +119,7 @@ class LogsViaWebhook(IreComponent):
 
 
 async def setup(bot: IreBot) -> None:
-    """Load LueBot extension. Framework of twitchio."""
+    """Load IreBot extension. Framework of twitchio."""
     if __name__ in bot.extensions:
         # check if the extension is listed in extensions
 

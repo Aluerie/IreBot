@@ -70,7 +70,7 @@ class IreBot(commands.Bot):
         session: ClientSession,
         pool: asyncpg.Pool[asyncpg.Record],
     ) -> None:
-        """Initiate LueBot."""
+        """Initiate IreBot."""
         self.prefixes: tuple[str, ...] = ("!", "?", "$")
         # adapter: StarletteAdapter = StarletteAdapter(
         #     host="0.0.0.0",
@@ -95,26 +95,6 @@ class IreBot(commands.Bot):
         self.exc_manager = ExceptionManager(self)
 
         self.irene_online: bool = False
-
-    # def show_oauth(self) -> None:
-    #     oauth = twitchio.authentication.OAuth(
-    #         client_id=config.TTV_DEV_CLIENT_ID,
-    #         client_secret=config.TTV_DEV_CLIENT_SECRET,
-    #         redirect_uri="http://localhost:4343/oauth/callback",
-    #         scopes=twitchio.Scopes(
-    #             [
-    #                 "channel:bot",
-    #                 "channel:read:ads",
-    #                 "channel:moderate",
-    #                 "moderator:read:followers",
-    #                 "channel:read:redemptions",
-    #             ]
-    #         ),
-    #     )
-    #     #
-    #     #  # Generate the authorization URL
-    #     auth_url = oauth.get_authorization_url(force_verify=True)
-    #     print(auth_url)  # noa: T201
 
     def print_bot_oauth(self) -> None:
         """Print a link for me (developer) to click and authorize the bot scopes for the bot account.
@@ -309,7 +289,7 @@ class IreBot(commands.Bot):
         error = error.original if isinstance(error, commands.CommandInvokeError) and error.original else error
 
         match error:
-            case errors.LueBotError():
+            case errors.IreBotError():
                 # errors defined by me - just send the string
                 await ctx.send(str(error))
             case commands.CommandNotFound():
@@ -433,3 +413,23 @@ class IreBot(commands.Bot):
         """Instead of the twitchio event - dispatch my own offline event."""
         self.irene_online = False
         self.dispatch("aluerie_offline")
+
+    # def show_oauth(self) -> None:
+    #     oauth = twitchio.authentication.OAuth(
+    #         client_id=config.TTV_DEV_CLIENT_ID,
+    #         client_secret=config.TTV_DEV_CLIENT_SECRET,
+    #         redirect_uri="http://localhost:4343/oauth/callback",
+    #         scopes=twitchio.Scopes(
+    #             [
+    #                 "channel:bot",
+    #                 "channel:read:ads",
+    #                 "channel:moderate",
+    #                 "moderator:read:followers",
+    #                 "channel:read:redemptions",
+    #             ]
+    #         ),
+    #     )
+    #     #
+    #     #  # Generate the authorization URL
+    #     auth_url = oauth.get_authorization_url(force_verify=True)
+    #     print(auth_url)  # noa: T201

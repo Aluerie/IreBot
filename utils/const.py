@@ -7,9 +7,9 @@ class UserID(StrEnum):
     """Known/special user IDs."""
 
     Irene = "180499648"
-    Bot = "1277023540"
-    # AuuBot = "1158666176"  # noqa: ERA001
-    # AlueBot = "519438249"  # noqa: ERA001
+    Bot = "1277023540"  # @IrenesBot
+    # AuuBot = "1158666176"  # @AuuBot noqa: ERA001
+    # AlueBot = "519438249"  # @AlueBot noqa: ERA001
 
 
 class LowerName(StrEnum):
@@ -133,7 +133,7 @@ class Bots(StrEnum):
     d9kmmrbot = "9kmmrbot"
     dotabod = "dotabod"
     Fossabot = "fossabot"
-    AlueBot = "aluebot"
+    IrenesBot = "irenesbot"
     LolRankBot = "lolrankbot"
     Moobot = "moobot"
     Nightbot = "nightbot"

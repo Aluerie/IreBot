@@ -1,8 +1,6 @@
 {
     "cSpell.words": [
         "Adge",
-        "Alue",
-        "aluebot",
         "BOTPRACTICE",
         "Chadder",
         "charinfo",
@@ -28,9 +26,6 @@
         "kmmrbot",
         "lolrankbot",
         "loremipsum",
-        "luebot",
-        "LUEBOT",
-        "lueloop",
         "matchid",
         "Mireska",
         "monka",
@@ -42,6 +37,8 @@
         "oconst",
         "Okayge",
         "partialuser",
+        "pcpartpicker",
+        "pcparts",
         "POGCRAZY",
         "randompasta",
         "reciever",
@@ -73,6 +70,6 @@
     ],
     "python.REPL.enableREPLSmartSend": false,
     "yaml.schemas": {
-        "https://json.schemastore.org/github-workflow.json": "file:///d%3A/LAPTOP/LueBot/.github/workflows/deploy.yml"
+        "https://json.schemastore.org/github-workflow.json": "file:///d%3A/LAPTOP/IreBot/.github/workflows/deploy.yml"
     }
 }

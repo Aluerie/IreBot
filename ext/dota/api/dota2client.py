@@ -6,13 +6,7 @@ from typing import TYPE_CHECKING, override
 from steam import PersonaState
 from steam.ext.dota2 import Client
 
-try:
-    import config
-except ImportError:
-    import sys
-
-    sys.path.append("D:/LAPTOP/LueBot")
-    import config
+import config
 
 from .pulsefire_clients import SteamWebAPIClient, StratzClient
 from .storage import Items
@@ -42,7 +36,7 @@ class Dota2Client(Client):
         self.stratz = StratzClient()
         self.items = Items(twitch_bot)
 
-    def aluerie(self) -> PartialUser:
+    def irene(self) -> PartialUser:
         return self.instantiate_partial_user(config.IRENE_STEAM_ID64)
 
     async def start_helpers(self) -> None:
