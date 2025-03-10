@@ -38,7 +38,7 @@ class LueLoop(tasks.Loop[LF]):
 
     Warning
     -------
-    The task should be initiated in a class that has `.bot` of LueBot type. Otherwise, it will just fail.
+    The task should be initiated in a class that has `.bot` of IreBot type. Otherwise, it will just fail.
     All my tasks (and all my code is in cogs that do have `.bot` but still)
 
     """
