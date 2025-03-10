@@ -24,6 +24,9 @@ if TYPE_CHECKING:
         twitch_name: str
 
 
+__all__ = ("DotaCommands",)
+
+
 log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
 

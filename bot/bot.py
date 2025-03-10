@@ -12,8 +12,8 @@ from twitchio.ext import commands
 # from twitchio.web import StarletteAdapter
 import config
 from ext import EXTENSIONS
+from ext.dota.api import Dota2Client
 from utils import const, errors
-from utils.dota import Dota2Client
 
 from .bases import lueloop
 from .exc_manager import ExceptionManager
