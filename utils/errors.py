@@ -32,18 +32,18 @@ class GuardError(LueBotError):
 
 
 class BadArgumentError(LueBotError):
-    """Something wasn't properly used"""
+    """Something wasn't properly used."""
 
     __slots__: tuple[str, ...] = ()
 
 
 class UsageError(LueBotError):
-    """Something wasn't properly used"""
+    """Something wasn't properly used."""
 
     __slots__: tuple[str, ...] = ()
 
 
-class SomethingWentWrong(LueBotError):  # noqa N818
+class SomethingWentWrong(LueBotError):  # noqa: N818
     __slots__: tuple[str, ...] = ()
 
 

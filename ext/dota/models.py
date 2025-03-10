@@ -320,7 +320,7 @@ class Streamer:
         # or better to say value[0] is losses, [1] is wins
         loop_dt = datetime.datetime.now(datetime.UTC)
         for game in db_games:
-            if game["outcome"] not in (PlayerMatchOutcome.Win, PlayerMatchOutcome.Loss):
+            if game["outcome"] not in {PlayerMatchOutcome.Win, PlayerMatchOutcome.Loss}:
                 continue
             if game["start_time"] < loop_dt - datetime.timedelta(hours=6):
                 break
@@ -490,7 +490,7 @@ class Match(abc.ABC):
         try:
             match = await self.bot.dota.steam_web_api.get_real_time_stats(self.server_steam_id)
         except Exception as exc:
-            log.error("!items errored out at `get_real_time_stats` step", exc_info=exc)
+            log.exception("!items errored out at `get_real_time_stats` step", exc_info=exc)
             if self.lobby_type == LobbyType.NewPlayerMode:
                 return "New Player Mode matches don't support `real_time_stats`."
             return "Failed to get `real_time_stats` for this match."

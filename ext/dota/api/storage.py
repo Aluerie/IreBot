@@ -28,7 +28,7 @@ PseudoVT = TypeVar("PseudoVT")
 CDN_REACT = "https://cdn.akamai.steamstatic.com/apps/dota2/images/dota_react/"
 
 
-class GameDataStorage(abc.ABC, Generic[VT, PseudoVT]):
+class GameDataStorage[VT, PseudoVT](abc.ABC):
     """Game Data Storage.
 
     Used for fetching and storing data from public API and JSONs.
@@ -117,12 +117,11 @@ class GameDataStorage(abc.ABC, Generic[VT, PseudoVT]):
     def generate_unknown_object(id: int) -> PseudoVT: ...
 
     async def by_id(self, id: int) -> VT | PseudoVT:
-        """Get storage object by its ID"""
+        """Get storage object by its ID."""
         try:
             storage_object = await self.get_value(id)
         except KeyError:
-            unknown_object = self.generate_unknown_object(id)
-            return unknown_object
+            return self.generate_unknown_object(id)
         else:
             return storage_object
 

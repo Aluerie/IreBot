@@ -53,7 +53,7 @@ class PlayerMatchOutcome(IntEnum):
         if history_match.abandon:
             return PlayerMatchOutcome.Abandon
         outcome = minimal_match.outcome
-        if outcome == MatchOutcome.RadiantVictory or outcome == MatchOutcome.DireVictory:
+        if outcome in {MatchOutcome.RadiantVictory, MatchOutcome.DireVictory}:
             return PlayerMatchOutcome(int(history_match.win))
         if minimal_match.outcome >= MatchOutcome.NotScoredPoorNetworkConditions:
             return PlayerMatchOutcome.NotScored
@@ -139,7 +139,7 @@ class RPStatus(MyStrEnum):
     CustomGame = "#DOTA_RP_GAME_IN_PROGRESS_CUSTOM"
 
     @classproperty
-    def KNOWN_DISPLAY_NAMES(cls: type[Self]) -> Mapping[RPStatus, str]:  # type: ignore # noqa N802, N805
+    def KNOWN_DISPLAY_NAMES(cls: type[Self]) -> Mapping[RPStatus, str]:  # type: ignore # noqa: N802, N805
         return {
             cls.Offline: "Offline/Invisible",
             cls.Idle: "Main Menu (Idle)",
