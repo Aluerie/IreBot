@@ -5,16 +5,16 @@ twitchio[starlette] @ git+https://github.com/PythonistaGuild/TwitchIO.git@dev/3.
 # py -m pip install "twitchio[starlette] @ git+https://github.com/PythonistaGuild/TwitchIO.git@dev/3.0" --force-reinstall 
 
 # DISCORD
-discord.py[speed]==2.4.0
+discord.py[speed]==2.5.0
 
 # BOT'S BASE
 asyncpg==0.30.0
 asyncpg-stubs==0.30.0
-aiohttp==3.11.11
+aiohttp==3.11.13
 
 # DOTA 2 
 steamio @ git+https://github.com/Aluerie/steam.py@introduce-ext.dota2
-pulsefire==2.0.21
+pulsefire==2.0.23
 
 # OPTIMISATION
 orjson==3.10.15
