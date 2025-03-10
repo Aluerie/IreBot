@@ -11,7 +11,7 @@ from utils import const
 if TYPE_CHECKING:
     from enum import StrEnum
 
-    from bot import LueBot
+    from bot import IreBot
 
 
 class EmoteChecker(LueComponent):
@@ -21,7 +21,7 @@ class EmoteChecker(LueComponent):
     Bot will notify me that emote was used so I can make adjustments.
     """
 
-    def __init__(self, bot: LueBot) -> None:
+    def __init__(self, bot: IreBot) -> None:
         super().__init__(bot)
 
     @override
@@ -76,6 +76,6 @@ class EmoteChecker(LueComponent):
             await self.cross_check_emotes(bttv_emote_list, const.BTTV, 0xD50014)
 
 
-async def setup(bot: LueBot) -> None:
+async def setup(bot: IreBot) -> None:
     """Load LueBot extension. Framework of twitchio."""
     await bot.add_component(EmoteChecker(bot))

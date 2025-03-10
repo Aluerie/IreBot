@@ -30,13 +30,13 @@ if TYPE_CHECKING:
         refresh: str
 
 
-__all__ = ("LueBot",)
+__all__ = ("IreBot",)
 
 log = logging.getLogger(__name__)
 
 
-class LueBot(commands.Bot):
-    """Main class for AlueBot.
+class IreBot(commands.Bot):
+    """Main class for IreBot.
 
     Essentially subclass over TwitchIO's Client.
     Used to interact with the Twitch API, EventSub and more.
@@ -44,14 +44,11 @@ class LueBot(commands.Bot):
 
     Note on the name
     ----
-    This class is named "LueBot" and not "AlueBot" just so when coding I don't confuse myself
-    with a quick glance value (my personal discord bot is named "AluBot").
-
-    The name `AlueBot` is used mainly for display purposes here:
+    The name `IrenesBot` is used mainly for display purposes here:
         * the bot's twitch account user name (just so it's clear that it's Aluerie's bot);
         * the bot's Steam account's display name;
 
-    Name `LueBot` is pretty much used elsewhere:
+    Name `IreBot` is pretty much used elsewhere:
         * the GitHub repository name and `README.md` file.
         * class name;
         * folder name;

@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
     import discord
 
-    from .bot import LueBot
+    from .bot import IreBot
 
 
 log = logging.getLogger("exc_manager")
@@ -29,8 +29,8 @@ class ExceptionManager:
         "errors_cache",
     )
 
-    def __init__(self, bot: LueBot, *, cooldown: datetime.timedelta = datetime.timedelta(seconds=5)) -> None:
-        self.bot: LueBot = bot
+    def __init__(self, bot: IreBot, *, cooldown: datetime.timedelta = datetime.timedelta(seconds=5)) -> None:
+        self.bot: IreBot = bot
         self.cooldown: datetime.timedelta = cooldown
 
         self._lock: asyncio.Lock = asyncio.Lock()

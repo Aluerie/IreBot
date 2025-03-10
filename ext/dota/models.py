@@ -21,7 +21,7 @@ from .utils import convert_id3_to_id64, rank_medal_display_name
 if TYPE_CHECKING:
     from steam.ext.dota2 import MatchHistoryMatch, MatchMinimal
 
-    from bot import LueBot
+    from bot import IreBot
 
     type ActiveMatch = PlayMatch | WatchMatch
 
@@ -51,8 +51,8 @@ log.setLevel(logging.DEBUG)
 
 
 class Streamer:
-    def __init__(self, bot: LueBot, steam_id64: int) -> None:
-        self.bot: LueBot = bot
+    def __init__(self, bot: IreBot, steam_id64: int) -> None:
+        self.bot: IreBot = bot
 
         self.steam_id64: int = steam_id64
         self.account_id: int = ID(steam_id64).id
@@ -182,7 +182,8 @@ class Streamer:
                 self.reset("Unknown to the bot Steam Status.")
 
     async def add_completed_match_to_database(
-        self, history_match: MatchHistoryMatch,
+        self,
+        history_match: MatchHistoryMatch,
     ) -> tuple[MatchMinimal, PlayerMatchOutcome]:
         partial_match = self.bot.dota.instantiate_partial_match(history_match.id)
         minimal_match = await partial_match.minimal()
@@ -387,8 +388,8 @@ class LastGame:
 
 
 class Player:
-    def __init__(self, bot: LueBot, account_id: int, hero_id: int, player_slot: int) -> None:
-        self.bot: LueBot = bot
+    def __init__(self, bot: IreBot, account_id: int, hero_id: int, player_slot: int) -> None:
+        self.bot: IreBot = bot
         self.account_id: int = account_id
         self.hero: Hero = Hero.try_value(hero_id)
         self.player_slot: int = player_slot
@@ -438,12 +439,12 @@ class Match(abc.ABC):
 
     def __init__(
         self,
-        bot: LueBot,
+        bot: IreBot,
         is_watch: bool,
         *,
         unsupported_error: str = "",
     ) -> None:
-        self.bot: LueBot = bot
+        self.bot: IreBot = bot
         self.is_watch: bool = is_watch
 
         self.match_id: int | None = None
@@ -569,7 +570,7 @@ class PlayMatch(Match):
 
     def __init__(
         self,
-        bot: LueBot,
+        bot: IreBot,
         watchable_game_id: str,
         account_id: int,
     ) -> None:
@@ -695,7 +696,7 @@ class WatchMatch(Match):
     * have valid `server_steam_id` in Rich Presence
     """
 
-    def __init__(self, bot: LueBot, watching_server: str) -> None:
+    def __init__(self, bot: IreBot, watching_server: str) -> None:
         super().__init__(bot, True)
         self.watching_server: str = watching_server
         self.server_steam_id: int = convert_id3_to_id64(watching_server)

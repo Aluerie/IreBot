@@ -12,7 +12,7 @@ from utils import const, formats
 if TYPE_CHECKING:
     import twitchio
 
-    from bot import LueBot
+    from bot import IreBot
 
 log = logging.getLogger(__name__)
 
@@ -23,7 +23,7 @@ class Alerts(LueComponent):
     Mostly, EventSub events that are nice to have a notification in twitch chat for.
     """
 
-    def __init__(self, bot: LueBot) -> None:
+    def __init__(self, bot: IreBot) -> None:
         super().__init__(bot)
         self.ban_list: set[str] = set()
 
@@ -169,6 +169,6 @@ class Alerts(LueComponent):
         )
 
 
-async def setup(bot: LueBot) -> None:
+async def setup(bot: IreBot) -> None:
     """Load LueBot extension. Framework of twitchio."""
     await bot.add_component(Alerts(bot))

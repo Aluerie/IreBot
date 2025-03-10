@@ -11,10 +11,10 @@ from discord.utils import MISSING
 if TYPE_CHECKING:
     import datetime
 
-    from ..bot import LueBot
+    from ..bot import IreBot
 
     class HasBotAttribute(Protocol):
-        bot: LueBot
+        bot: IreBot
 
 
 log = logging.getLogger(__name__)

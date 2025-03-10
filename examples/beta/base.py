@@ -14,7 +14,7 @@ from bot import LueComponent, lueloop
 from utils import const
 
 if TYPE_CHECKING:
-    from bot import LueBot
+    from bot import IreBot
 
 
 class BetaCog(LueComponent):
@@ -23,7 +23,7 @@ class BetaCog(LueComponent):
     Used to test random code snippets.
     """
 
-    def __init__(self, bot: LueBot) -> None:
+    def __init__(self, bot: IreBot) -> None:
         super().__init__(bot)
         self.beta_test.start()
 

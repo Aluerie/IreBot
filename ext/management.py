@@ -11,7 +11,7 @@ from utils import const, formats
 if TYPE_CHECKING:
     import twitchio
 
-    from bot import LueBot
+    from bot import IreBot
 
 
 class ChannelManagement(LueComponent):
@@ -20,7 +20,7 @@ class ChannelManagement(LueComponent):
     Such as change Game or Title.
     """
 
-    def __init__(self, bot: LueBot) -> None:
+    def __init__(self, bot: IreBot) -> None:
         super().__init__(bot)
         self.game_tracked: str = "idk"
         self.title_tracked: str = "idk"
@@ -221,6 +221,6 @@ class ChannelManagement(LueComponent):
         await self.bot.pool.execute(query, cutoff_dt)
 
 
-async def setup(bot: LueBot) -> None:
+async def setup(bot: IreBot) -> None:
     """Load LueBot extension. Framework of twitchio."""
     await bot.add_component(ChannelManagement(bot))

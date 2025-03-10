@@ -18,7 +18,7 @@ from utils import const, errors
 if TYPE_CHECKING:
     from aiohttp import ClientSession
 
-    from bot import LueBot
+    from bot import IreBot
 
 
 class TranslatedSentence(TypedDict):
@@ -95,6 +95,6 @@ class TranslationCog(LueComponent):
         await ctx.send(answer)
 
 
-async def setup(bot: LueBot) -> None:
+async def setup(bot: IreBot) -> None:
     """Load LueBot extension. Framework of twitchio."""
     await bot.add_component(TranslationCog(bot))

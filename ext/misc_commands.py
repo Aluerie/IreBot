@@ -8,7 +8,7 @@ from bot import LueComponent
 from utils import const
 
 if TYPE_CHECKING:
-    from bot import LueBot
+    from bot import IreBot
 
 
 class MiscellaneousCommands(LueComponent):
@@ -83,6 +83,6 @@ class MiscellaneousCommands(LueComponent):
         await ctx.send(f"Yolo Gunfort is easy {const.STV.EZdodge} {stats}")
 
 
-async def setup(bot: LueBot) -> None:
+async def setup(bot: IreBot) -> None:
     """Load LueBot extension. Framework of twitchio."""
     await bot.add_component(MiscellaneousCommands(bot))

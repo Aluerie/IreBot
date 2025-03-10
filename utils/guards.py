@@ -8,7 +8,7 @@ from twitchio.ext import commands
 from . import const, errors
 
 if TYPE_CHECKING:
-    from bot import LueBot
+    from bot import IreBot
 
 
 def is_vps() -> Any:
@@ -31,7 +31,7 @@ def is_vps() -> Any:
 def is_online() -> Any:
     """Allow the command to be completed only when Irene's stream is online."""
 
-    def predicate(ctx: commands.Context[LueBot]) -> bool:  # type:ignore[reportInvalidTypeArgument]
+    def predicate(ctx: commands.Context[IreBot]) -> bool:  # type:ignore[reportInvalidTypeArgument]
         return ctx.bot.aluerie_online  # type:ignore[reportAttributeAccessIssue]
 
     return commands.guard(predicate)

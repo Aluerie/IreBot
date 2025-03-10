@@ -15,7 +15,7 @@ from utils import const
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
-    from bot import LueBot
+    from bot import IreBot
 
 log = logging.getLogger(__name__)
 
@@ -55,7 +55,7 @@ class LogsViaWebhook(LueComponent):
     }
     DOLPHIN_IMAGE: str = "https://em-content.zobj.net/source/microsoft/407/dolphin_1f42c.png"
 
-    def __init__(self, bot: LueBot) -> None:
+    def __init__(self, bot: IreBot) -> None:
         super().__init__(bot)
         self._logging_queue = asyncio.Queue()
 
@@ -118,7 +118,7 @@ class LogsViaWebhook(LueComponent):
             await self.send_log_record(record)
 
 
-async def setup(bot: LueBot) -> None:
+async def setup(bot: IreBot) -> None:
     """Load LueBot extension. Framework of twitchio."""
     if __name__ in bot.extensions:
         # check if the extension is listed in extensions

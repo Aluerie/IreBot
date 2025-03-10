@@ -13,7 +13,7 @@ from utils import const
 if TYPE_CHECKING:
     import twitchio
 
-    from bot import LueBot
+    from bot import IreBot
 
     class KeywordDict(TypedDict):
         """Schema for `self.keywords` elements."""
@@ -29,7 +29,7 @@ class Keywords(LueComponent):
     Mostly used to make a small feeling of a crowd - something like many users are Pog-ing.
     """
 
-    def __init__(self, bot: LueBot) -> None:
+    def __init__(self, bot: IreBot) -> None:
         super().__init__(bot)
         self.keywords: list[KeywordDict] = [
             {
@@ -62,6 +62,6 @@ class Keywords(LueComponent):
                     keyword["dt"] = now
 
 
-async def setup(bot: LueBot) -> None:
+async def setup(bot: IreBot) -> None:
     """Load LueBot extension. Framework of twitchio."""
     await bot.add_component(Keywords(bot))

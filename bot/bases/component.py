@@ -10,7 +10,7 @@ from utils import const
 if TYPE_CHECKING:
     import twitchio
 
-    from ..bot import LueBot
+    from ..bot import IreBot
 
 
 __all__ = ("LueComponent",)
@@ -22,8 +22,8 @@ log.setLevel(logging.INFO)  # DEBUG
 class LueComponent(commands.Component):
     """Base component to use with LueBot."""
 
-    def __init__(self, bot: LueBot) -> None:
-        self.bot: LueBot = bot
+    def __init__(self, bot: IreBot) -> None:
+        self.bot: IreBot = bot
 
     @property
     def aluerie(self) -> twitchio.PartialUser:

@@ -10,7 +10,7 @@ from bot import LueComponent, lueloop
 from utils import const, errors
 
 if TYPE_CHECKING:
-    from bot import LueBot
+    from bot import IreBot
 
     class TwitchCommands(TypedDict):
         """`chat_commands` Table Structure."""
@@ -27,7 +27,7 @@ class CustomCommands(LueComponent):
     The information is contained within the database and cache.
     """
 
-    def __init__(self, bot: LueBot) -> None:
+    def __init__(self, bot: IreBot) -> None:
         super().__init__(bot)
         self.command_cache: dict[str, dict[str, str]] = {}
 
@@ -144,6 +144,6 @@ class CustomCommands(LueComponent):
         await ctx.send(", ".join(cache_list))
 
 
-async def setup(bot: LueBot) -> None:
+async def setup(bot: IreBot) -> None:
     """Load LueBot extension. Framework of twitchio."""
     await bot.add_component(CustomCommands(bot))

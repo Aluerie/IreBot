@@ -13,7 +13,7 @@ import discord
 from bot import lueloop
 
 if TYPE_CHECKING:
-    from bot import LueBot
+    from bot import IreBot
 
     class DotaCacheDict(TypedDict):
         item_by_id: dict[int, str]  # id -> item name
@@ -42,7 +42,7 @@ class GameDataStorage(abc.ABC, Generic[VT, PseudoVT]):
     if TYPE_CHECKING:
         cached_data: dict[int, VT]
 
-    def __init__(self, bot: LueBot) -> None:
+    def __init__(self, bot: IreBot) -> None:
         """__init__.
 
         Parameters
@@ -50,7 +50,7 @@ class GameDataStorage(abc.ABC, Generic[VT, PseudoVT]):
         bot
             need it just so @lueloop task can use `exc_manager` to send an error notification.
         """
-        self.bot: LueBot = bot
+        self.bot: IreBot = bot
         self.lock: asyncio.Lock = asyncio.Lock()
 
     def start(self) -> None:

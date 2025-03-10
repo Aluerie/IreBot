@@ -15,7 +15,7 @@ from utils import const, formats
 if TYPE_CHECKING:
     import twitchio
 
-    from bot import LueBot
+    from bot import IreBot
 
     class FirstRedeemsRow(TypedDict):
         """`first_redeems` Table Columns."""
@@ -30,7 +30,7 @@ FIRST_ID: str = "013b19fc-8024-4416-99a4-8cf130305b1f"
 class Counters(LueComponent):
     """Track some silly number counters of how many times this or that happened."""
 
-    def __init__(self, bot: LueBot) -> None:
+    def __init__(self, bot: IreBot) -> None:
         super().__init__(bot)
         self.last_erm_notification: datetime.datetime = datetime.datetime.now(datetime.UTC)
 
@@ -203,6 +203,6 @@ class Counters(LueComponent):
             await self.bot.error_webhook.send(content=content, embed=embed)
 
 
-async def setup(bot: LueBot) -> None:
+async def setup(bot: IreBot) -> None:
     """Load LueBot extension. Framework of twitchio."""
     await bot.add_component(Counters(bot))

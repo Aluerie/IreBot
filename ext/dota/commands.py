@@ -14,7 +14,7 @@ from utils import const, errors, helpers
 from .models import Streamer
 
 if TYPE_CHECKING:
-    from bot import LueBot
+    from bot import IreBot
 
     from .enums import RPStatus
     from .models import ActiveMatch
@@ -34,7 +34,7 @@ class DotaCommands(LueComponent):
     This functionality is supposed to be an analogy to 9kmmrbot/dotabod features.
     """
 
-    def __init__(self, bot: LueBot) -> None:
+    def __init__(self, bot: IreBot) -> None:
         super().__init__(bot)
         self.streamer: Streamer = Streamer(self.bot, config.IRENE_STEAM_ID64)
         self.debug_mode: bool = True

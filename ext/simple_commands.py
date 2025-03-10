@@ -14,7 +14,7 @@ from bot import LueComponent
 from utils import const, formats, guards
 
 if TYPE_CHECKING:
-    from bot import LueBot
+    from bot import IreBot
 
 
 class SimpleCommands(LueComponent):
@@ -321,6 +321,6 @@ class SimpleCommands(LueComponent):
         await ctx.send(f"Twitch ID for {user.mention}: {user.id}")
 
 
-async def setup(bot: LueBot) -> None:
+async def setup(bot: IreBot) -> None:
     """Load LueBot extension. Framework of twitchio."""
     await bot.add_component(SimpleCommands(bot))

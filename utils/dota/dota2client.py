@@ -20,7 +20,7 @@ from .storage import Items
 if TYPE_CHECKING:
     from steam.ext.dota2 import PartialUser
 
-    from bot import LueBot
+    from bot import IreBot
 
 log = logging.getLogger(__name__)
 
@@ -33,9 +33,9 @@ class Dota2Client(Client):
     Used to communicate with Dota 2 Game Coordinator in order to track information about my profile real-time.
     """
 
-    def __init__(self, twitch_bot: LueBot) -> None:
+    def __init__(self, twitch_bot: IreBot) -> None:
         super().__init__(state=PersonaState.Online)  # .Invisible
-        self.bot: LueBot = twitch_bot
+        self.bot: IreBot = twitch_bot
         self.started: bool = False
 
         self.steam_web_api = SteamWebAPIClient()

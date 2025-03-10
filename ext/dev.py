@@ -10,7 +10,7 @@ from bot import LueComponent
 from utils import const, guards
 
 if TYPE_CHECKING:
-    from bot import LueBot
+    from bot import IreBot
 
 log = logging.getLogger(__name__)
 
@@ -99,6 +99,6 @@ class Development(LueComponent):
         await ctx.send(f"I'll treat {ctx.broadcaster.display_name} as offline now {const.STV.donkSad}")
 
 
-async def setup(bot: LueBot) -> None:
+async def setup(bot: IreBot) -> None:
     """Load LueBot extension. Framework of twitchio."""
     await bot.add_component(Development(bot))

@@ -15,6 +15,6 @@ class BetaTest(BetaCog):
         pass
 
 
-async def setup(bot: LueBot) -> None:
+async def setup(bot: IreBot) -> None:
     if __name__ in bot.extensions:
         await bot.add_component(BetaTest(bot))
