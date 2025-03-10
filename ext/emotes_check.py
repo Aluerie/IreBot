@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, override
 
 from discord import Embed
 
-from bot import LueComponent, lueloop
+from bot import IreComponent, lueloop
 from utils import const
 
 if TYPE_CHECKING:
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from bot import IreBot
 
 
-class EmoteChecker(LueComponent):
+class EmoteChecker(IreComponent):
     """Check if emotes from 3rd party services like 7TV, FFZ, BTTV are valid.
 
     Usable in case I remove an emote that is used in bot's responses.

@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, TypedDict
 
 from twitchio.ext import commands
 
-from bot import LueComponent
+from bot import IreComponent
 from utils import const
 
 if TYPE_CHECKING:
@@ -23,7 +23,7 @@ if TYPE_CHECKING:
         dt: datetime.datetime
 
 
-class Keywords(LueComponent):
+class Keywords(IreComponent):
     """React to specific key word / key phrases with bot's own messages.
 
     Mostly used to make a small feeling of a crowd - something like many users are Pog-ing.

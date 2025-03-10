@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Annotated
 
 from twitchio.ext import commands
 
-from bot import LueComponent
+from bot import IreComponent
 from utils import const, guards
 
 if TYPE_CHECKING:
@@ -20,7 +20,7 @@ def to_extension(_: commands.Context, extension: str) -> str:
     return f"ext.{extension}"
 
 
-class Development(LueComponent):
+class Development(IreComponent):
     """Dev Only Commands."""
 
     @guards.is_vps()

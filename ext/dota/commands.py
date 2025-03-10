@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, TypedDict, override
 from twitchio.ext import commands
 
 import config
-from bot import LueComponent, lueloop
+from bot import IreComponent, lueloop
 from utils import const, errors, helpers
 
 from .models import Streamer
@@ -31,7 +31,7 @@ log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
 
 
-class DotaCommands(LueComponent):
+class DotaCommands(IreComponent):
     """Cog responsible for Dota 2 related commands and statistics tracker.
 
     This functionality is supposed to be an analogy to 9kmmrbot/dotabod features.

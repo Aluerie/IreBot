@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, NamedTuple, TypedDict
 
 from twitchio.ext import commands
 
-from bot import LueComponent
+from bot import IreComponent
 from utils import const, errors
 
 if TYPE_CHECKING:
@@ -81,7 +81,7 @@ async def translate(
         )
 
 
-class TranslationCog(LueComponent):
+class TranslationCog(IreComponent):
     """Translation command cog."""
 
     @commands.command()

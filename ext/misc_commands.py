@@ -4,14 +4,14 @@ from typing import TYPE_CHECKING
 
 from twitchio.ext import commands
 
-from bot import LueComponent
+from bot import IreComponent
 from utils import const
 
 if TYPE_CHECKING:
     from bot import IreBot
 
 
-class MiscellaneousCommands(LueComponent):
+class MiscellaneousCommands(IreComponent):
     """Miscellaneous commands.
 
     Commands that are likely to be removed in future.

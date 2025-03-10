@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from twitchio.ext import commands
 
-from bot import LueComponent
+from bot import IreComponent
 from utils import const, formats
 
 if TYPE_CHECKING:
@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 log = logging.getLogger(__name__)
 
 
-class Alerts(LueComponent):
+class Alerts(IreComponent):
     """Twitch Chat Alerts.
 
     Mostly, EventSub events that are nice to have a notification in twitch chat for.

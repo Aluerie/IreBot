@@ -6,7 +6,7 @@ import asyncpg
 import twitchio  # noqa: TC002
 from twitchio.ext import commands
 
-from bot import LueComponent, lueloop
+from bot import IreComponent, lueloop
 from utils import const, errors
 
 if TYPE_CHECKING:
@@ -20,7 +20,7 @@ if TYPE_CHECKING:
         content: str
 
 
-class CustomCommands(LueComponent):
+class CustomCommands(IreComponent):
     """Custom commands.
 
     Commands that are managed on the fly.

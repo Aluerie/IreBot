@@ -13,13 +13,13 @@ if TYPE_CHECKING:
     from ..bot import IreBot
 
 
-__all__ = ("LueComponent",)
+__all__ = ("IreComponent",)
 
 log = logging.getLogger("alerts")
 log.setLevel(logging.INFO)  # DEBUG
 
 
-class LueComponent(commands.Component):
+class IreComponent(commands.Component):
     """Base component to use with LueBot."""
 
     def __init__(self, bot: IreBot) -> None:

@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, TypedDict, override
 from discord import Embed
 from twitchio.ext import commands
 
-from bot import LueComponent, lueloop
+from bot import IreComponent, lueloop
 from utils import const, formats
 
 if TYPE_CHECKING:
@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 FIRST_ID: str = "013b19fc-8024-4416-99a4-8cf130305b1f"
 
 
-class Counters(LueComponent):
+class Counters(IreComponent):
     """Track some silly number counters of how many times this or that happened."""
 
     def __init__(self, bot: IreBot) -> None:

@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 from twitchio.ext import commands
 
-from bot import LueComponent, lueloop
+from bot import IreComponent, lueloop
 from utils import const, formats
 
 if TYPE_CHECKING:
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from bot import IreBot
 
 
-class ChannelManagement(LueComponent):
+class ChannelManagement(IreComponent):
     """Channel Management commands.
 
     Such as change Game or Title.

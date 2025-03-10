@@ -10,14 +10,14 @@ import twitchio
 from twitchio.ext import commands
 
 import config
-from bot import LueComponent, lueloop
+from bot import IreComponent, lueloop
 from utils import const
 
 if TYPE_CHECKING:
     from bot import IreBot
 
 
-class BetaCog(LueComponent):
+class BetaCog(IreComponent):
     """Base Class for BetaTest cog.
 
     Used to test random code snippets.

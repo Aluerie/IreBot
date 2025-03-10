@@ -10,14 +10,14 @@ import twitchio  # noqa: TC002
 from twitchio.ext import commands
 
 import config
-from bot import LueComponent
+from bot import IreComponent
 from utils import const, formats, guards
 
 if TYPE_CHECKING:
     from bot import IreBot
 
 
-class SimpleCommands(LueComponent):
+class SimpleCommands(IreComponent):
     """Simple commands.
 
     Simple in a sense that they are just somewhat static and their implementation is simple.
