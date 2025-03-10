@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, override
 import discord
 from twitchio.ext import commands
 
-from bot import IreComponent, lueloop
+from bot import IreComponent, ireloop
 from utils import const
 
 if TYPE_CHECKING:
@@ -102,7 +102,7 @@ class LogsViaWebhook(IreComponent):
         username = record.name.replace("discord", "disсοrd")  # cSpell: ignore disсοrd  # noqa: RUF003
         await self.bot.logger_webhook.send(msg, username=username, avatar_url=avatar_url)
 
-    @lueloop(seconds=0.0)
+    @ireloop(seconds=0.0)
     async def logging_worker(self) -> None:
         """Task responsible for mirroring logging messages to a discord webhook."""
         record = await self._logging_queue.get()

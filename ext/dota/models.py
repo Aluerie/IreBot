@@ -11,7 +11,7 @@ from steam import ID
 from steam.ext.dota2 import GameMode, Hero, LobbyType
 from thefuzz import process
 
-from bot import lueloop
+from bot import ireloop
 from utils import errors, formats
 
 from .constants import HERO_ALIASES, PLAYER_COLOURS
@@ -217,7 +217,7 @@ class Streamer:
         """
         await self.bot.pool.execute(query, mmr_change, medal, self.account_id)
 
-    @lueloop(seconds=20, count=30)
+    @ireloop(seconds=20, count=30)
     async def update_last_game(self) -> None:
         mmr_change: int = 0
 
@@ -404,7 +404,7 @@ class Player:
     def __repr__(self) -> str:
         return f"<Player id={self.account_id} hero={self.hero.name}"
 
-    @lueloop(seconds=5, count=12)
+    @ireloop(seconds=5, count=12)
     async def update(self) -> None:
         partial_user = self.bot.dota.instantiate_partial_user(self.account_id)
         profile_card = await partial_user.dota2_profile_card()
@@ -593,7 +593,7 @@ class PlayMatch(Match):
             for player in self.players.values():
                 player.update.cancel()
 
-    @lueloop(seconds=10, count=30)
+    @ireloop(seconds=10, count=30)
     async def update_data(self) -> None:
         log.debug("Task `update_data` starts now: iteration=%s", self.update_data.current_loop)
         match = next(iter(await self.bot.dota.live_matches(lobby_ids=[self.lobby_id])), None)
@@ -624,7 +624,7 @@ class PlayMatch(Match):
         if self.game_mode:
             self.update_data.stop()
 
-    @lueloop(seconds=10, count=30)
+    @ireloop(seconds=10, count=30)
     async def check_players(self) -> None:
         log.debug("Task `check_players` starts now: iteration=%s", self.check_players.current_loop)
         if self.players and all(player.is_data_ready for player in self.players.values()):
@@ -643,7 +643,7 @@ class PlayMatch(Match):
 
     # count exists to prevent potential infinite loop ?
     # i'm not sure how it behaves when the object is null'ed.
-    @lueloop(seconds=10, count=30)
+    @ireloop(seconds=10, count=30)
     async def update_heroes(self) -> None:
         log.debug("Task `update_heroes` starts now: iteration=%s", self.update_heroes.current_loop)
         if self.update_heroes.current_loop == 0:
@@ -705,7 +705,7 @@ class WatchMatch(Match):
         self.update_data.cancel()
         self.update_heroes.cancel()
 
-    @lueloop(seconds=10, count=30)
+    @ireloop(seconds=10, count=30)
     async def update_data(self) -> None:
         match = await self.bot.dota.steam_web_api.get_real_time_stats(self.server_steam_id)
 
@@ -730,7 +730,7 @@ class WatchMatch(Match):
         if self.game_mode:
             self.update_data.stop()
 
-    @lueloop(seconds=10, count=30)
+    @ireloop(seconds=10, count=30)
     async def check_players(self) -> None:
         if self.players and all(player.is_data_ready for player in self.players.values()):
             # match data is ready
@@ -745,7 +745,7 @@ class WatchMatch(Match):
             return True
         return False
 
-    @lueloop(seconds=10, count=30)
+    @ireloop(seconds=10, count=30)
     async def update_heroes(self) -> None:
         if self.update_heroes.current_loop == 0:
             return

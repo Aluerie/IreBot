@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 
 log = logging.getLogger(__name__)
 
-__all__ = ("lueloop",)
+__all__ = ("ireloop",)
 
 
 _func = Callable[..., Coroutine[Any, Any, Any]]
@@ -84,7 +84,7 @@ class LueLoop(tasks.Loop[LF]):
 
 
 @discord.utils.copy_doc(tasks.loop)
-def lueloop(
+def ireloop(
     *,
     seconds: float = MISSING,
     minutes: float = MISSING,

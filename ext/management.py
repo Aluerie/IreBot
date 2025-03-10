@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 from twitchio.ext import commands
 
-from bot import IreComponent, lueloop
+from bot import IreComponent, ireloop
 from utils import const, formats
 
 if TYPE_CHECKING:
@@ -31,7 +31,7 @@ class ChannelManagement(IreComponent):
 
         self.start_tracking.start()
 
-    @lueloop(count=1)
+    @ireloop(count=1)
     async def start_tracking(self) -> None:
         """Start tracking my channel info.
 

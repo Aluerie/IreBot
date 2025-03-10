@@ -10,7 +10,7 @@ import twitchio
 from twitchio.ext import commands
 
 import config
-from bot import IreComponent, lueloop
+from bot import IreComponent, ireloop
 from utils import const
 
 if TYPE_CHECKING:
@@ -27,6 +27,6 @@ class BetaCog(IreComponent):
         super().__init__(bot)
         self.beta_test.start()
 
-    @lueloop(count=1)
+    @ireloop(count=1)
     async def beta_test(self) -> None:
         """Task that is supposed to run just once to test stuff out."""

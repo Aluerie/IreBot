@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, override
 
 from discord import Embed
 
-from bot import IreComponent, lueloop
+from bot import IreComponent, ireloop
 from utils import const
 
 if TYPE_CHECKING:
@@ -48,7 +48,7 @@ class EmoteChecker(IreComponent):
             if emote not in api_emotes:
                 await self.send_error_embed(emote, bot_emotes.__name__, colour)
 
-    @lueloop(time=[datetime.time(hour=5, minute=59)])
+    @ireloop(time=[datetime.time(hour=5, minute=59)])
     async def check_emotes(self) -> None:
         """The task to check emotes."""
         if datetime.datetime.now(datetime.UTC).weekday() != 5:

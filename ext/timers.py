@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 
 from twitchio.ext import commands
 
-from bot import IreComponent, lueloop
+from bot import IreComponent, ireloop
 from utils import const
 
 if TYPE_CHECKING:
@@ -66,7 +66,7 @@ class Timers(IreComponent):
 
         self.lines_count += 1
 
-    @lueloop(count=1)
+    @ireloop(count=1)
     async def timer_task(self) -> None:
         """Task to send periodic messages into irene's channel on timer."""
         await asyncio.sleep(10 * 60)

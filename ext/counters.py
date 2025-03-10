@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, TypedDict, override
 from discord import Embed
 from twitchio.ext import commands
 
-from bot import IreComponent, lueloop
+from bot import IreComponent, ireloop
 from utils import const, formats
 
 if TYPE_CHECKING:
@@ -178,7 +178,7 @@ class Counters(IreComponent):
         content = " ".join(const.DIGITS)
         await ctx.send(content)
 
-    @lueloop(time=[datetime.time(hour=4, minute=59)])
+    @ireloop(time=[datetime.time(hour=4, minute=59)])
     async def check_first_reward(self) -> None:
         """The task that ensures the reward "First" under a specific id exists.
 

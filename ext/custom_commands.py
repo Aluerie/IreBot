@@ -6,7 +6,7 @@ import asyncpg
 import twitchio  # noqa: TC002
 from twitchio.ext import commands
 
-from bot import IreComponent, lueloop
+from bot import IreComponent, ireloop
 from utils import const, errors
 
 if TYPE_CHECKING:
@@ -39,7 +39,7 @@ class CustomCommands(IreComponent):
     async def component_teardown(self) -> None:
         self.populate_cache.cancel()
 
-    @lueloop(count=1)
+    @ireloop(count=1)
     async def populate_cache(self) -> None:
         """Populate custom commands cache."""
         query = """

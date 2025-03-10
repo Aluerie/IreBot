@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Generic, TypedDict, TypeVar, override
 
 import discord
 
-from bot import lueloop
+from bot import ireloop
 
 if TYPE_CHECKING:
     from bot import IreBot
@@ -71,7 +71,7 @@ class GameDataStorage(abc.ABC, Generic[VT, PseudoVT]):
         We get the data and sort it out into a convenient dictionary to cache.
         """
 
-    @lueloop()
+    @ireloop()
     async def update_data(self) -> None:
         """The task responsible for keeping the data up-to-date."""
         log.debug("Updating Storage %s.", self.__class__.__name__)

@@ -15,7 +15,7 @@ from ext import EXTENSIONS
 from ext.dota.api import Dota2Client
 from utils import const, errors
 
-from .bases import lueloop
+from .bases import ireloop
 from .exc_manager import ExceptionManager
 
 if TYPE_CHECKING:
@@ -413,7 +413,7 @@ class IreBot(commands.Bot):
         """Shortcut to get @Aluerie's stream."""
         return next(iter(await self.fetch_streams(user_ids=[const.UserID.Irene])), None)
 
-    @lueloop(count=1)
+    @ireloop(count=1)
     async def check_if_online(self) -> None:
         """Check if aluerie is online - used to make my own (proper) online event instead of twitchio's."""
         await asyncio.sleep(1.0)  # just in case;

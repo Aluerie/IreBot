@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, TypedDict, override
 from twitchio.ext import commands
 
 import config
-from bot import IreComponent, lueloop
+from bot import IreComponent, ireloop
 from utils import const, errors, helpers
 
 from .models import Streamer
@@ -58,7 +58,7 @@ class DotaCommands(IreComponent):
     async def component_teardown(self) -> None:
         self.check_streamers_rich_presence.cancel()
 
-    @lueloop(hours=48)
+    @ireloop(hours=48)
     async def clean_up_the_database(self) -> None:
         log.debug("Task: cleaning database from too old matches.")
         query = """
@@ -78,7 +78,7 @@ class DotaCommands(IreComponent):
         if self.clean_up_the_database.current_loop == 0:
             await self.streamer.fix_match_history()
 
-    @lueloop(seconds=10)
+    @ireloop(seconds=10)
     async def check_streamers_rich_presence(self) -> None:
         await self.streamer.update()
 
@@ -235,7 +235,7 @@ class DotaCommands(IreComponent):
             response = f"Set mmr to {mmr}"
         await ctx.send(self.fmt_response(response, False, perf))
 
-    @lueloop(time=datetime.time(hour=6, minute=34, second=10))
+    @ireloop(time=datetime.time(hour=6, minute=34, second=10))
     async def check_twitch_accounts_renames(self) -> None:
         """Checks if people in FPC database renamed themselves on twitch.tv.
 
@@ -258,7 +258,7 @@ class DotaCommands(IreComponent):
                 await self.bot.pool.execute(query, user.display_name, user.id)
 
     # NOT ACTIVE
-    @lueloop(hours=3)
+    @ireloop(hours=3)
     async def double_check_task(self) -> None:
         account_id = self.streamer.account_id
 

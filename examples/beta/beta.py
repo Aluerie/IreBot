@@ -6,7 +6,7 @@ from examples.beta.base import *
 
 
 class BetaTest(BetaCog):
-    @lueloop(count=1)
+    @ireloop(count=1)
     async def beta_test(self) -> None:
         pass
 
