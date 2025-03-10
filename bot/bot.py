@@ -94,7 +94,7 @@ class IreBot(commands.Bot):
 
         self.exc_manager = ExceptionManager(self)
 
-        self.aluerie_online: bool = False
+        self.irene_online: bool = False
 
     # def show_oauth(self) -> None:
     #     oauth = twitchio.authentication.OAuth(
@@ -182,9 +182,9 @@ class IreBot(commands.Bot):
             5. Comment the lines back. In normal state, they should be commented.
 
         """
-        self.print_bot_oauth()  # noqa: ERA001, RUF100
-        self.print_broadcaster_oauth()  # noqa: ERA001, RUF100
-        return  # noqa: ERA001, RUF100
+        # self.print_bot_oauth()  # noqa: ERA001, RUF100
+        # self.print_broadcaster_oauth()  # noqa: ERA001, RUF100
+        # return  # noqa: ERA001, RUF100
 
         for ext in self.extensions:
             (await self.load_module(ext))
@@ -418,7 +418,7 @@ class IreBot(commands.Bot):
         """Check if aluerie is online - used to make my own (proper) online event instead of twitchio's."""
         await asyncio.sleep(1.0)  # just in case;
         if await self.aluerie_stream():
-            self.aluerie_online = True
+            self.irene_online = True
             self.dispatch("aluerie_online")
 
     async def event_stream_online(self, _: twitchio.StreamOnline) -> None:
@@ -426,10 +426,10 @@ class IreBot(commands.Bot):
 
         The difference is that my event accounts for the state of my stream when the bot restarts.
         """
-        self.aluerie_online = True
+        self.irene_online = True
         self.dispatch("aluerie_online")
 
     async def event_stream_offline(self, _: twitchio.StreamOffline) -> None:
         """Instead of the twitchio event - dispatch my own offline event."""
-        self.aluerie_online = False
+        self.irene_online = False
         self.dispatch("aluerie_offline")

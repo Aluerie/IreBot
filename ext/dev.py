@@ -88,14 +88,14 @@ class Development(LueComponent):
         * If somehow eventsub missed stream_online notification - this can "manually"
             fix the problem of soft-locking the commands.
         """
-        self.bot.aluerie_online = True
+        self.bot.irene_online = True
         await ctx.send(f"I'll treat {ctx.broadcaster.display_name} as online now {const.STV.dankHey}")
 
     @commands.is_owner()
     @commands.command()
     async def offline(self, ctx: commands.Context) -> None:
         """Make the bot treat streamer as offline."""
-        self.bot.aluerie_online = False
+        self.bot.irene_online = False
         await ctx.send(f"I'll treat {ctx.broadcaster.display_name} as offline now {const.STV.donkSad}")
 
 
