@@ -84,7 +84,7 @@ class LueBot(commands.Bot):
             client_id=config.TTV_DEV_CLIENT_ID,
             client_secret=config.TTV_DEV_CLIENT_SECRET,
             bot_id=const.UserID.Bot,
-            owner_id=const.UserID.Aluerie,
+            owner_id=const.UserID.Irene,
             prefix=self.prefixes,
             # adapter=adapter,
             # TODO: fill in scopes= argument once we figure out what it's used for :x
@@ -185,9 +185,9 @@ class LueBot(commands.Bot):
             5. Comment the lines back. In normal state, they should be commented.
 
         """
-        # self.print_bot_oauth()
-        # self.print_broadcaster_oauth()
-        # return
+        self.print_bot_oauth()  # noqa: ERA001, RUF100
+        self.print_broadcaster_oauth()  # noqa: ERA001, RUF100
+        return  # noqa: ERA001, RUF100
 
         for ext in self.extensions:
             (await self.load_module(ext))
@@ -212,7 +212,7 @@ class LueBot(commands.Bot):
             * Models:   https://twitchio.dev/en/dev-3.0/references/eventsub_models.html
         """
         # it's just a personal bot so things are relatively simple about broadcaster<->bot relation ;)
-        broadcaster = const.UserID.Aluerie
+        broadcaster = const.UserID.Irene
         bot = const.UserID.Bot
 
         # EventSub Subscriptions Table (order - function name sorted by alphabet).
@@ -414,7 +414,7 @@ class LueBot(commands.Bot):
 
     async def aluerie_stream(self) -> twitchio.Stream | None:
         """Shortcut to get @Aluerie's stream."""
-        return next(iter(await self.fetch_streams(user_ids=[const.UserID.Aluerie])), None)
+        return next(iter(await self.fetch_streams(user_ids=[const.UserID.Irene])), None)
 
     @lueloop(count=1)
     async def check_if_online(self) -> None:

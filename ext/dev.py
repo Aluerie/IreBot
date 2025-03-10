@@ -16,6 +16,7 @@ log = logging.getLogger(__name__)
 
 
 def to_extension(_: commands.Context, extension: str) -> str:
+    """Just a shortcut to add `ext.` so I can use command like this `!reload emotes_check`."""
     return f"ext.{extension}"
 
 

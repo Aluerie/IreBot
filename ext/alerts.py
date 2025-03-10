@@ -36,9 +36,8 @@ class Alerts(LueComponent):
         # just testing
         print(f"{event.user.display_name} redeemed {event.reward.title} (id={event.reward.id}).")  # noqa: T201
 
-        if event.user.id == const.UserID.Aluerie and event.reward.cost < 4:
+        if event.user.id == const.UserID.Irene and event.reward.cost < 4:
             # < 4 is a weird way to exclude my "Text-To-Speech" redemption.
-            # channel = self.get_channel(payload.broadcaster)
             await event.broadcaster.send_message(
                 sender=self.bot.bot_id,
                 message=f"Thanks, I think bot is working {const.FFZ.PepoG}",
@@ -81,7 +80,9 @@ class Alerts(LueComponent):
         raider_channel_info = await raid.from_broadcaster.fetch_channel_info()
 
         await streamer.send_shoutout(
-            to_broadcaster=raid.from_broadcaster.id, moderator=const.UserID.Bot, token_for=const.UserID.Bot,
+            to_broadcaster=raid.from_broadcaster.id,
+            moderator=const.UserID.Bot,
+            token_for=const.UserID.Bot,
         )
         await streamer.send_announcement(
             moderator=const.UserID.Bot,
@@ -108,7 +109,10 @@ class Alerts(LueComponent):
         # reminder for the streamer
         await online.broadcaster.send_message(
             sender=self.bot.bot_id,
-            message=f"{online.broadcaster.mention} remember to pin some message, check if everything is working.",
+            message=(
+                f"{online.broadcaster.mention} remember to pin some message, check if everything is working. "
+                f"Maybe turn some music on {const.STV.donkJam}"
+            ),
         )
 
     @commands.Component.listener(name="stream_offline")
@@ -130,8 +134,8 @@ class Alerts(LueComponent):
         )
 
         # this is pointless probably
-        # await asyncio.sleep(payload.duration)
-        # await channel.send("Ad break is over")
+        # await asyncio.sleep(payload.duration)  # noqa: ERA001
+        # await channel.send("Ad break is over")  # noqa: ERA001
 
     @commands.Component.listener(name="ban")
     async def bans_timeouts(self, ban: twitchio.Ban) -> None:

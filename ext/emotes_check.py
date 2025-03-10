@@ -56,20 +56,20 @@ class EmoteChecker(LueComponent):
             return
 
         # SEVEN TV
-        async with self.bot.session.get(f"https://7tv.io/v3/users/twitch/{const.UserID.Aluerie}") as resp:
+        async with self.bot.session.get(f"https://7tv.io/v3/users/twitch/{const.UserID.Irene}") as resp:
             stv_json = await resp.json()
             stv_emote_list = [emote["name"] for emote in stv_json["emote_set"]["emotes"]]
             await self.cross_check_emotes(stv_emote_list, const.STV, 0x3493EE)
 
         # FFZ
-        async with self.bot.session.get(f"https://api.frankerfacez.com/v1/room/id/{const.UserID.Aluerie}") as resp:
+        async with self.bot.session.get(f"https://api.frankerfacez.com/v1/room/id/{const.UserID.Irene}") as resp:
             ffz_json = await resp.json()  # if we ever need this "654554" then it exists as `ffz_json["room"]["set"]`
             ffz_emote_list = [emote["name"] for emote in ffz_json["sets"]["654554"]["emoticons"]]
             await self.cross_check_emotes(ffz_emote_list, const.FFZ, 0x271F3E)
 
         # BTTV
         async with self.bot.session.get(
-            f"https://api.betterttv.net/3/cached/users/twitch/{const.UserID.Aluerie}",
+            f"https://api.betterttv.net/3/cached/users/twitch/{const.UserID.Irene}",
         ) as resp:
             bttv_json = await resp.json()
             bttv_emote_list = [emote["code"] for emote in bttv_json["channelEmotes"] + bttv_json["sharedEmotes"]]

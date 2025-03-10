@@ -71,7 +71,7 @@ class Counters(LueComponent):
     @commands.Component.listener(name="message")
     async def erm_counter(self, message: twitchio.ChatMessage) -> None:
         """Erm Counter."""
-        if message.chatter.name in const.Bots or not message.text or message.broadcaster.id != const.UserID.Aluerie:
+        if message.chatter.name in const.Bots or not message.text or message.broadcaster.id != const.UserID.Irene:
             # limit author/channel
             return
         if not re.search(r"\bErm\b", message.text):
@@ -117,7 +117,7 @@ class Counters(LueComponent):
     @commands.Component.listener(name="custom_redemption_add")
     async def first_counter(self, redemption: twitchio.ChannelPointsRedemptionAdd) -> None:
         """Count all redeems for the reward 'First'."""
-        if redemption.reward.id != FIRST_ID or redemption.broadcaster.id != const.UserID.Aluerie:
+        if redemption.reward.id != FIRST_ID or redemption.broadcaster.id != const.UserID.Irene:
             return
 
         query = """--sql

@@ -87,7 +87,7 @@ class SimpleCommands(LueComponent):
             await ctx.send("Silly organic, bots cannot know love BibleThump")
         elif potential_name == ctx.chatter.name:
             await ctx.send("pls")
-        elif potential_name == const.LowerName.Aluerie:
+        elif potential_name == const.LowerName.Irene:
             await ctx.send(f"The {ctx.chatter.mention}'s love for our beloved Irene transcends all")
         else:
             love, emote = choose_love_emote()
