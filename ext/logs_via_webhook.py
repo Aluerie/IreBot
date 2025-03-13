@@ -33,7 +33,6 @@ class LoggingHandler(logging.Handler):
         messages_to_ignore = ("Webhook ID 1280488051776163903 is rate limited.",)
         if any(msg in record.message for msg in messages_to_ignore):  # noqa: SIM103
             return False
-
         return True
 
     @override
@@ -47,17 +46,29 @@ class LogsViaWebhook(IreComponent):
     This cog is responsible for rate-limiting, formatting, fine-tuning and sending the log messages.
     """
 
-    AVATAR_MAPPING: Mapping[str, str] = {
+    EXACT_AVATAR_MAPPING: Mapping[str, str] = {
         "bot.bot": "https://i.imgur.com/6XZ8Roa.png",  # lady Noir
         "exc_manager": "https://em-content.zobj.net/source/microsoft/378/sos-button_1f198.png",
-        "twitchio.ext.eventsub.ws": const.Logo.Twitch,
-        "twitchio.websocket": const.Logo.Twitch,
+    }
+    INCLUSIVE_AVATAR_MAPPING: Mapping[str, str] = {
+        "twitchio.": "https://raw.githubusercontent.com/Aluerie/AluBot/main/assets/images/logo/twitchio.png",
     }
     DOLPHIN_IMAGE: str = "https://em-content.zobj.net/source/microsoft/407/dolphin_1f42c.png"
 
+    EMOJIS: Mapping[str, str] = {
+        "INFO": "\N{INFORMATION SOURCE}\ufe0f",
+        "WARNING": "\N{WARNING SIGN}\ufe0f",
+        "ERROR": "\N{CROSS MARK}",
+    }
+    COLORS: Mapping[str, discord.Color | int] = {
+        "INFO": 0x03A9F4,
+        "WARNING": 0xFBC02D,
+        "ERROR": 0x800000,
+    }
+
     def __init__(self, bot: IreBot) -> None:
         super().__init__(bot)
-        self._logging_queue = asyncio.Queue()
+        self._logging_queue: asyncio.Queue[logging.LogRecord] = asyncio.Queue()
 
         # cooldown attrs
         self._lock: asyncio.Lock = asyncio.Lock()
@@ -72,35 +83,34 @@ class LogsViaWebhook(IreComponent):
     async def component_teardown(self) -> None:
         self.logging_worker.stop()
 
-    @commands.Component.listener(name="ready")
-    async def announce_reloaded(self) -> None:
-        """Announce that bot is successfully reloaded/restarted."""
-        # it looks like the `log.info` from `bot.py` doesn't proc before LogsViaWebhook is loaded
-        await self.bot.logger_webhook.send(
-            content=f"Logged in as `user_id={self.bot.bot_id}`",
-            username="Aluerie's Dolphin",
-            avatar_url=self.DOLPHIN_IMAGE,
-        )
-        await self.deliver(f"{const.STV.hi} the bot is reloaded.")
-
     def add_record(self, record: logging.LogRecord) -> None:
         """Add a record to a logging queue."""
         self._logging_queue.put_nowait(record)
 
+    def get_avatar(self, username: str) -> str:
+        """Helper function to get an avatar ulr based on a webhook username to send the record with."""
+        # exact name
+        if avatar_url := self.EXACT_AVATAR_MAPPING.get(username):
+            return avatar_url
+        # inclusions
+        for search_name, candidate in self.INCLUSIVE_AVATAR_MAPPING.items():
+            if username.startswith(search_name):
+                return candidate
+        # else
+        return discord.utils.MISSING
+
     async def send_log_record(self, record: logging.LogRecord) -> None:
         """Send Log record to discord webhook."""
-        attributes = {
-            "INFO": "\N{INFORMATION SOURCE}\ufe0f",
-            "WARNING": "\N{WARNING SIGN}\ufe0f",
-            "ERROR": "\N{CROSS MARK}",
-        }
+        emoji = self.EMOJIS.get(record.levelname, "\N{WHITE QUESTION MARK ORNAMENT}")
+        color = self.COLORS.get(record.levelname)
 
-        emoji = attributes.get(record.levelname, "\N{WHITE QUESTION MARK ORNAMENT}")
         dt = datetime.datetime.fromtimestamp(record.created, datetime.UTC)
         msg = textwrap.shorten(f"{emoji} {discord.utils.format_dt(dt, style='T')} {record.message}", width=1995)
-        avatar_url = self.AVATAR_MAPPING.get(record.name, discord.utils.MISSING)
+        avatar_url = self.get_avatar(record.name)
         username = record.name.replace("discord", "disсοrd")  # cSpell: ignore disсοrd  # noqa: RUF003
-        await self.bot.logger_webhook.send(msg, username=username, avatar_url=avatar_url)
+
+        embed = discord.Embed(color=color, description=msg)
+        await self.bot.logger_webhook.send(embed=embed, username=username, avatar_url=avatar_url)
 
     @ireloop(seconds=0.0)
     async def logging_worker(self) -> None:
@@ -117,6 +127,11 @@ class LogsViaWebhook(IreComponent):
             self._most_recent = datetime.datetime.now(datetime.UTC)
             await self.send_log_record(record)
 
+    @commands.Component.listener(name="ready")
+    async def announce_reloaded(self) -> None:
+        """Announce that bot is successfully reloaded/restarted."""
+        await self.deliver(f"{const.STV.hi} the bot is reloaded.")
+
 
 async def setup(bot: IreBot) -> None:
     """Load IreBot extension. Framework of twitchio."""
@@ -124,6 +139,6 @@ async def setup(bot: IreBot) -> None:
         # check if the extension is listed in extensions
 
         cog = LogsViaWebhook(bot)
-        await bot.add_component(LogsViaWebhook(bot))
+        await bot.add_component(cog)
         bot.logs_via_webhook_handler = handler = LoggingHandler(cog)
         logging.getLogger().addHandler(handler)

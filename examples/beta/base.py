@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import asyncio
+import itertools
+import logging
 import platform
 from typing import TYPE_CHECKING
 
@@ -15,6 +18,8 @@ from utils import const
 
 if TYPE_CHECKING:
     from bot import IreBot
+
+log = logging.getLogger(__name__)
 
 
 class BetaCog(IreComponent):

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import datetime
+import logging
 import random
 import unicodedata
 from typing import TYPE_CHECKING
@@ -15,6 +16,8 @@ from utils import const, formats, guards
 
 if TYPE_CHECKING:
     from bot import IreBot
+
+log = logging.getLogger(__name__)
 
 
 class SimpleCommands(IreComponent):
@@ -36,6 +39,7 @@ class SimpleCommands(IreComponent):
     @commands.command(name="commands", aliases=["help"])
     async def command_list(self, ctx: commands.Context) -> None:
         """Get a list of bot commands."""
+        log.info("xddddddddddddd")
         await ctx.send("Not implemented yet.")
 
     @commands.command()

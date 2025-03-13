@@ -440,8 +440,8 @@ class Match(abc.ABC):
     def __init__(
         self,
         bot: IreBot,
-        is_watch: bool,
         *,
+        is_watch: bool,
         unsupported_error: str = "",
     ) -> None:
         self.bot: IreBot = bot
@@ -574,7 +574,7 @@ class PlayMatch(Match):
         watchable_game_id: str,
         account_id: int,
     ) -> None:
-        super().__init__(bot, False)
+        super().__init__(bot, is_watch=False)
         self.watchable_game_id: str = watchable_game_id
         self.lobby_id: int = int(watchable_game_id)
         self.account_id: int = account_id
@@ -697,7 +697,7 @@ class WatchMatch(Match):
     """
 
     def __init__(self, bot: IreBot, watching_server: str) -> None:
-        super().__init__(bot, True)
+        super().__init__(bot, is_watch=True)
         self.watching_server: str = watching_server
         self.server_steam_id: int = convert_id3_to_id64(watching_server)
 

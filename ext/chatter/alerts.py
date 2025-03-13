@@ -134,8 +134,8 @@ class Alerts(IreComponent):
         )
 
         # this is pointless probably
-        # await asyncio.sleep(payload.duration)  # noqa: ERA001
-        # await channel.send("Ad break is over")  # noqa: ERA001
+        # await asyncio.sleep(payload.duration)
+        # await channel.send("Ad break is over")
 
     @commands.Component.listener(name="ban")
     async def bans_timeouts(self, ban: twitchio.Ban) -> None:
