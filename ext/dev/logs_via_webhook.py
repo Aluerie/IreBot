@@ -4,13 +4,15 @@ import asyncio
 import datetime
 import logging
 import textwrap
-from typing import TYPE_CHECKING, override
+from typing import TYPE_CHECKING, Any, override
 
 import discord
 from twitchio.ext import commands
 
-from bot import IreComponent, ireloop
+from bot import ireloop
 from utils import const
+
+from ._base import BaseDevComponent
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -40,7 +42,7 @@ class LoggingHandler(logging.Handler):
         self.cog.add_record(record)
 
 
-class LogsViaWebhook(IreComponent):
+class LogsViaWebhook(BaseDevComponent):
     """Mirroring logs to discord webhook messages.
 
     This cog is responsible for rate-limiting, formatting, fine-tuning and sending the log messages.
@@ -66,8 +68,8 @@ class LogsViaWebhook(IreComponent):
         "ERROR": 0x800000,
     }
 
-    def __init__(self, bot: IreBot) -> None:
-        super().__init__(bot)
+    def __init__(self, bot: IreBot, *args: Any, **kwargs: Any) -> None:
+        super().__init__(bot, *args, **kwargs)
         self._logging_queue: asyncio.Queue[logging.LogRecord] = asyncio.Queue()
 
         # cooldown attrs
@@ -78,10 +80,12 @@ class LogsViaWebhook(IreComponent):
     @override
     async def component_load(self) -> None:
         self.logging_worker.start()
+        await super().component_load()
 
     @override
     async def component_teardown(self) -> None:
         self.logging_worker.stop()
+        await super().component_teardown()
 
     def add_record(self, record: logging.LogRecord) -> None:
         """Add a record to a logging queue."""

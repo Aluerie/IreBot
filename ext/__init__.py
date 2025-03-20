@@ -24,10 +24,10 @@ DISABLED_EXTENSIONS: tuple[str, ...] = (
     "ext.dota",
 )
 
-CORE_EXTENSIONS: tuple[str, ...] = (
-    # extensions that should not loaded first
-    "ext.logs_via_webhook",
-)
+# CORE_EXTENSIONS: tuple[str, ...] = (
+#     # extensions that should not loaded first
+#     "ext.logs_via_webhook",
+# )
 
 
 def get_extensions() -> tuple[str, ...]:
@@ -36,12 +36,12 @@ def get_extensions() -> tuple[str, ...]:
         return tuple(f"{__package__}.{ext}" for ext in TEST_EXTENSIONS)
 
     # assume running full bot functionality (besides `DISABLED_EXTENSIONS`)
-    all_extensions = tuple(
+    return tuple(
         module.name for module in iter_modules(__path__, f"{__package__}.") if module.name not in DISABLED_EXTENSIONS
     )
-    # move CORE_EXTENSIONS to the front
-    temp = tuple(set(all_extensions).difference(CORE_EXTENSIONS))
-    return CORE_EXTENSIONS + temp
+    # # move CORE_EXTENSIONS to the front
+    # temp = tuple(set(all_extensions).difference(CORE_EXTENSIONS))
+    # return CORE_EXTENSIONS + temp
 
 
 EXTENSIONS = get_extensions()

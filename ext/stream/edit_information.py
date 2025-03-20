@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from twitchio.ext import commands
 
@@ -14,14 +14,17 @@ if TYPE_CHECKING:
     from bot import IreBot
 
 
-class ChannelManagement(IreComponent):
-    """Channel Management commands.
+class EditInformation(IreComponent):
+    """Commands replicating "Edit Stream Information" window.
 
-    Such as change Game or Title.
+    Such as
+    * Edit stream title
+    * Edit stream game
+    The commands are designed to be a little bit smart.
     """
 
-    def __init__(self, bot: IreBot) -> None:
-        super().__init__(bot)
+    def __init__(self, bot: IreBot, *args: Any, **kwargs: Any) -> None:
+        super().__init__(bot, *args, **kwargs)
         self.game_tracked: str = "idk"
         self.title_tracked: str = "idk"
 
@@ -40,7 +43,7 @@ class ChannelManagement(IreComponent):
 
         This is why we need to track the past ourselves.
         """
-        channel_info = await self.aluerie.fetch_channel_info()
+        channel_info = await self.irene.fetch_channel_info()
 
         self.game_tracked = channel_info.game_name
         self.title_tracked = channel_info.title
@@ -75,6 +78,7 @@ class ChannelManagement(IreComponent):
         game_keywords = {
             "dota": "Dota 2",
             "er": "Elden Ring",
+            "sk": "Sekiro",
         }
         game_name = game_keywords.get(game_name, game_name)
 
@@ -223,4 +227,4 @@ class ChannelManagement(IreComponent):
 
 async def setup(bot: IreBot) -> None:
     """Load IreBot extension. Framework of twitchio."""
-    await bot.add_component(ChannelManagement(bot))
+    await bot.add_component(EditInformation(bot))

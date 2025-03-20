@@ -51,6 +51,7 @@ class LueLoop(tasks.Loop[LF]):
         minutes: float,
         time: datetime.time | Sequence[datetime.time],
         count: int | None,
+        *,
         reconnect: bool,
         name: str | None,
     ) -> None:

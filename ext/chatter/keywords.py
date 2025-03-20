@@ -3,7 +3,7 @@ from __future__ import annotations
 import datetime
 import random
 import re
-from typing import TYPE_CHECKING, TypedDict
+from typing import TYPE_CHECKING, Any, TypedDict
 
 from twitchio.ext import commands
 
@@ -16,11 +16,12 @@ if TYPE_CHECKING:
     from bot import IreBot
 
     class KeywordDict(TypedDict):
-        """Schema for `self.keywords` elements."""
-
         aliases: list[str]
         response: str
         dt: datetime.datetime
+
+
+__all__ = ("Keywords",)
 
 
 class Keywords(IreComponent):
@@ -29,8 +30,8 @@ class Keywords(IreComponent):
     Mostly used to make a small feeling of a crowd - something like many users are Pog-ing.
     """
 
-    def __init__(self, bot: IreBot) -> None:
-        super().__init__(bot)
+    def __init__(self, bot: IreBot, *args: Any, **kwargs: Any) -> None:
+        super().__init__(bot, *args, **kwargs)
         self.keywords: list[KeywordDict] = [
             {
                 "aliases": aliases,
@@ -41,6 +42,7 @@ class Keywords(IreComponent):
                 (["Pog", "PogU"], "Pog"),
                 (["gg"], "gg"),
                 (["GG"], "GG"),
+                (["bueno"], "bueno"),
                 (
                     ["Pepoga"],
                     "Pepoga 📣 AAAIIIIIIIIIREEEEEEEEEEEEEEEENEE !",
@@ -56,8 +58,13 @@ class Keywords(IreComponent):
 
         now = datetime.datetime.now(datetime.UTC)
         for keyword in self.keywords:
+            if (now - keyword["dt"]).seconds < 777:
+                # the keyword was recently triggered
+                continue
+
             for word in keyword["aliases"]:
-                if re.search(r"\b" + re.escape(word) + r"\b", message.text) and (now - keyword["dt"]).seconds > 600:
+                # TODO: Check if | thing works instead of looping
+                if re.search(r"\b" + re.escape(word) + r"\b", message.text):
                     await message.broadcaster.send_message(sender=self.bot.bot_id, message=keyword["response"])
                     keyword["dt"] = now
 

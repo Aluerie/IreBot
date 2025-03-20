@@ -270,8 +270,9 @@ class IreBot(commands.Bot):
             await self.dota.close()
         await super().close()
 
-    # @override
+    # @override  # interesting that it's not an override
     async def event_ready(self) -> None:
+        """Event that is dispatched when the `Client` is ready and has completed login."""
         log.info("%s is ready as bot_id = %s", self.__class__.__name__, self.bot_id)
         if hasattr(self, "dota"):
             await self.dota.wait_until_ready()

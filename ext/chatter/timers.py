@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 import itertools
 import random
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from twitchio.ext import commands
 
@@ -19,8 +19,8 @@ if TYPE_CHECKING:
 class Timers(IreComponent):
     """Periodic messages/announcements in Aluerie's channel."""
 
-    def __init__(self, bot: IreBot) -> None:
-        super().__init__(bot)
+    def __init__(self, bot: IreBot, *args: Any, **kwargs: Any) -> None:
+        super().__init__(bot, *args, **kwargs)
 
         self.messages: list[str] = [
             f"FIX YOUR POSTURE {const.BTTV.weirdChamp}",
@@ -94,7 +94,7 @@ class Timers(IreComponent):
         # lazy implementation
         for _ in range(3):
             await asyncio.sleep(60 * 3)
-            await self.aluerie.send_announcement(
+            await self.irene.send_announcement(
                 moderator=const.UserID.Bot,
                 token_for=const.UserID.Bot,
                 message=(

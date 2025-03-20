@@ -16,22 +16,21 @@ from .models import Streamer
 if TYPE_CHECKING:
     from bot import IreBot
 
-    from .enums import RPStatus
-    from .models import ActiveMatch
+    from .models import ActiveMatch, RPStatus
 
     class CheckTwitchRenamesQueryRow(TypedDict):
         twitch_id: str
         twitch_name: str
 
 
-__all__ = ("DotaCommands",)
+__all__ = ("GameFlow",)
 
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
 
 
-class DotaCommands(IreComponent):
+class GameFlow(IreComponent):
     """Cog responsible for Dota 2 related commands and statistics tracker.
 
     This functionality is supposed to be an analogy to 9kmmrbot/dotabod features.

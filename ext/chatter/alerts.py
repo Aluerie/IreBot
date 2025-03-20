@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import random
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from twitchio.ext import commands
 
@@ -23,8 +23,8 @@ class Alerts(IreComponent):
     Mostly, EventSub events that are nice to have a notification in twitch chat for.
     """
 
-    def __init__(self, bot: IreBot) -> None:
-        super().__init__(bot)
+    def __init__(self, bot: IreBot, *args: Any, **kwargs: Any) -> None:
+        super().__init__(bot, *args, **kwargs)
         self.ban_list: set[str] = set()
 
     # SECTION 1.

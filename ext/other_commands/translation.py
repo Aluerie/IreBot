@@ -1,4 +1,4 @@
-"""TRANSLATION COMMANDS.
+"""TRANSLATION COMMAND.
 
 Sources
 -------
@@ -19,6 +19,9 @@ if TYPE_CHECKING:
     from aiohttp import ClientSession
 
     from bot import IreBot
+
+
+__all__ = ("Translations",)
 
 
 class TranslatedSentence(TypedDict):
@@ -81,8 +84,8 @@ async def translate(
         )
 
 
-class TranslationCog(IreComponent):
-    """Translation command cog."""
+class Translations(IreComponent):
+    """Translation command component."""
 
     @commands.command()
     async def translate(self, ctx: commands.Context, *, text: str) -> None:
@@ -97,4 +100,4 @@ class TranslationCog(IreComponent):
 
 async def setup(bot: IreBot) -> None:
     """Load IreBot extension. Framework of twitchio."""
-    await bot.add_component(TranslationCog(bot))
+    await bot.add_component(Translations(bot))

@@ -6,7 +6,7 @@ import logging
 import random
 import time
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Generic, TypedDict, TypeVar, override
+from typing import TYPE_CHECKING, TypedDict, override
 
 import discord
 
@@ -19,11 +19,15 @@ if TYPE_CHECKING:
         item_by_id: dict[int, str]  # id -> item name
 
 
+__all__ = (
+    "GameDataStorage",
+    "Items",
+)
+
+
 log = logging.getLogger(__name__)
 log.setLevel(logging.INFO)
 
-VT = TypeVar("VT")
-PseudoVT = TypeVar("PseudoVT")
 
 CDN_REACT = "https://cdn.akamai.steamstatic.com/apps/dota2/images/dota_react/"
 
@@ -48,7 +52,7 @@ class GameDataStorage[VT, PseudoVT](abc.ABC):
         Parameters
         ----------
         bot
-            need it just so @lueloop task can use `exc_manager` to send an error notification.
+            need it just so @ireloop task can use `exc_manager` to send an error notification.
         """
         self.bot: IreBot = bot
         self.lock: asyncio.Lock = asyncio.Lock()
@@ -64,6 +68,7 @@ class GameDataStorage[VT, PseudoVT](abc.ABC):
         """Cancel the storage tasks."""
         self.update_data.cancel()
 
+    @abc.abstractmethod
     async def fill_data(self) -> dict[int, VT]:
         """Fill self.cached_data with the data from various json data.
 
@@ -93,35 +98,35 @@ class GameDataStorage[VT, PseudoVT](abc.ABC):
             await self.update_data()
             return self.cached_data
 
-    async def get_value(self, id: int) -> VT:
+    async def get_value(self, object_id: int) -> VT:
         """Get value by the `key` from `self.cached_data`."""
         try:
-            return self.cached_data[id]
+            return self.cached_data[object_id]
         except (KeyError, AttributeError):
             # let's try to update the cache in case it's a KeyError due to
             # * new patch or something
             # * the data is not initialized then we will get stuck in self.lock waiting for the data.
             await self.update_data()
-            return self.cached_data[id]
+            return self.cached_data[object_id]
 
-    async def send_unknown_value_report(self, id: int) -> None:
+    async def send_unknown_value_report(self, object_id: int) -> None:
         embed = discord.Embed(
             color=discord.Colour.red(),
             title=f"Unknown {self.__class__.__name__} appeared!",
-            description=f"```py\nid={id}\n```",
+            description=f"```py\nid={object_id}\n```",
         ).set_footer(text=f"Package: {__package__}")
         await self.bot.error_webhook.send(embed=embed)
 
     @staticmethod
     @abc.abstractmethod
-    def generate_unknown_object(id: int) -> PseudoVT: ...
+    def generate_unknown_object(object_id: int) -> PseudoVT: ...
 
-    async def by_id(self, id: int) -> VT | PseudoVT:
+    async def by_id(self, object_id: int) -> VT | PseudoVT:
         """Get storage object by its ID."""
         try:
-            storage_object = await self.get_value(id)
+            storage_object = await self.get_value(object_id)
         except KeyError:
-            return self.generate_unknown_object(id)
+            return self.generate_unknown_object(object_id)
         else:
             return storage_object
 

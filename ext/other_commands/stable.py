@@ -39,7 +39,6 @@ class SimpleCommands(IreComponent):
     @commands.command(name="commands", aliases=["help"])
     async def command_list(self, ctx: commands.Context) -> None:
         """Get a list of bot commands."""
-        log.info("xddddddddddddd")
         await ctx.send("Not implemented yet.")
 
     @commands.command()

@@ -9,21 +9,18 @@ from typing import TYPE_CHECKING, TypedDict, override
 
 from steam import ID
 from steam.ext.dota2 import GameMode, Hero, LobbyType
-from thefuzz import process
 
 from bot import ireloop
 from utils import errors, formats
 
+from ._utils import convert_id3_to_id64, rank_medal_display_name
 from .constants import HERO_ALIASES, PLAYER_COLOURS
 from .enums import LobbyParam0, PlayerMatchOutcome, RPStatus, Team, WinLossCategory
-from .utils import convert_id3_to_id64, rank_medal_display_name
 
 if TYPE_CHECKING:
     from steam.ext.dota2 import MatchHistoryMatch, MatchMinimal
 
     from bot import IreBot
-
-    type ActiveMatch = PlayMatch | WatchMatch
 
     class UpdateLastGamesQuery1Row(TypedDict):
         match_id: int
@@ -44,10 +41,12 @@ if TYPE_CHECKING:
         team: int
 
 
-__all__ = ("Streamer",)
+__all__ = ("ActiveMatch", "Streamer")
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
+
+type ActiveMatch = PlayMatch | WatchMatch
 
 
 class Streamer:

@@ -6,8 +6,9 @@ from typing import TYPE_CHECKING, Annotated
 
 from twitchio.ext import commands
 
-from bot import IreComponent
 from utils import const, guards
+
+from ._base import BaseDevComponent
 
 if TYPE_CHECKING:
     from bot import IreBot
@@ -20,11 +21,10 @@ def to_extension(_: commands.Context, extension: str) -> str:
     return f"ext.{extension}"
 
 
-class Development(IreComponent):
+class Control(BaseDevComponent):
     """Dev Only Commands."""
 
     @guards.is_vps()
-    @commands.is_owner()
     @commands.command(aliases=["kill"])
     async def maintenance(self, ctx: commands.Context) -> None:
         """Kill the bot process on VPS.
@@ -43,7 +43,6 @@ class Development(IreComponent):
             await ctx.send("Something went wrong.")
 
     @guards.is_vps()
-    @commands.is_owner()
     @commands.command(aliases=["restart"])
     async def reboot(self, ctx: commands.Context) -> None:
         """Restart the bot process on VPS.
@@ -60,25 +59,21 @@ class Development(IreComponent):
             # it might not go off
             await ctx.send("Something went wrong.")
 
-    @commands.is_owner()
     @commands.command()
     async def unload(self, ctx: commands.Context, *, extension: Annotated[str, to_extension]) -> None:
         await self.bot.unload_module(extension)
         await ctx.send(f"{const.STV.DankApprove} unloaded {extension}")
 
-    @commands.is_owner()
     @commands.command()
     async def reload(self, ctx: commands.Context, *, extension: Annotated[str, to_extension]) -> None:
         await self.bot.reload_module(extension)
         await ctx.send(f"{const.STV.DankApprove} reloaded {extension}")
 
-    @commands.is_owner()
     @commands.command()
     async def load(self, ctx: commands.Context, *, extension: Annotated[str, to_extension]) -> None:
         await self.bot.load_module(extension)
         await ctx.send(f"{const.STV.DankApprove} loaded {extension}")
 
-    @commands.is_owner()
     @commands.command()
     async def online(self, ctx: commands.Context) -> None:
         """Make the bot treat streamer as online.
@@ -91,7 +86,6 @@ class Development(IreComponent):
         self.bot.irene_online = True
         await ctx.send(f"I'll treat {ctx.broadcaster.display_name} as online now {const.STV.dankHey}")
 
-    @commands.is_owner()
     @commands.command()
     async def offline(self, ctx: commands.Context) -> None:
         """Make the bot treat streamer as offline."""
@@ -101,4 +95,4 @@ class Development(IreComponent):
 
 async def setup(bot: IreBot) -> None:
     """Load IreBot extension. Framework of twitchio."""
-    await bot.add_component(Development(bot))
+    await bot.add_component(Control(bot))

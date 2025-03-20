@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, TypedDict, override
+from typing import TYPE_CHECKING, Any, TypedDict, override
 
 import asyncpg
 import twitchio  # noqa: TC002
@@ -27,17 +27,19 @@ class CustomCommands(IreComponent):
     The information is contained within the database and cache.
     """
 
-    def __init__(self, bot: IreBot) -> None:
-        super().__init__(bot)
+    def __init__(self, bot: IreBot, *args: Any, **kwargs: Any) -> None:
+        super().__init__(bot, *args, **kwargs)
         self.command_cache: dict[str, dict[str, str]] = {}
 
     @override
     async def component_load(self) -> None:
         self.populate_cache.start()
+        await super().component_load()
 
     @override
     async def component_teardown(self) -> None:
         self.populate_cache.cancel()
+        await super().component_teardown()
 
     @ireloop(count=1)
     async def populate_cache(self) -> None:

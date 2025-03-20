@@ -4,7 +4,7 @@ import asyncio
 import datetime
 import random
 import re
-from typing import TYPE_CHECKING, TypedDict, override
+from typing import TYPE_CHECKING, Any, TypedDict, override
 
 from discord import Embed
 from twitchio.ext import commands
@@ -30,17 +30,19 @@ FIRST_ID: str = "013b19fc-8024-4416-99a4-8cf130305b1f"
 class Counters(IreComponent):
     """Track some silly number counters of how many times this or that happened."""
 
-    def __init__(self, bot: IreBot) -> None:
-        super().__init__(bot)
+    def __init__(self, bot: IreBot, *args: Any, **kwargs: Any) -> None:
+        super().__init__(bot, *args, **kwargs)
         self.last_erm_notification: datetime.datetime = datetime.datetime.now(datetime.UTC)
 
     @override
     async def component_load(self) -> None:
         self.check_first_reward.start()
+        await super().component_load()
 
     @override
     async def component_teardown(self) -> None:
         self.check_first_reward.cancel()
+        await super().component_teardown()
 
     @commands.is_owner()
     @commands.group()
@@ -64,7 +66,7 @@ class Counters(IreComponent):
         else:
             await ctx.send(f"Created a counter `{name}` (current value = {value}) {const.STV.science}")
 
-    # TODO: counter set (change)/increment (add) / remove commands
+    # TODO: counter set (change)/increment (add) / remove commands ; maybe do it smarter like !deaths and it understands
 
     # ERM COUNTERS
 
@@ -188,7 +190,7 @@ class Counters(IreComponent):
             # simple way to make a task run once/month
             return
 
-        custom_rewards = await self.aluerie.fetch_custom_rewards()
+        custom_rewards = await self.irene.fetch_custom_rewards()
         for reward in custom_rewards:
             if reward.id == FIRST_ID:
                 # we good

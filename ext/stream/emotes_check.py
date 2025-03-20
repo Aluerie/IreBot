@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING, override
+from typing import TYPE_CHECKING, Any, override
 
 from discord import Embed
 
@@ -21,16 +21,18 @@ class EmoteChecker(IreComponent):
     Bot will notify me that emote was used so I can make adjustments.
     """
 
-    def __init__(self, bot: IreBot) -> None:
-        super().__init__(bot)
+    def __init__(self, bot: IreBot, *args: Any, **kwargs: Any) -> None:
+        super().__init__(bot, *args, **kwargs)
 
     @override
     async def component_load(self) -> None:
         self.check_emotes.start()
+        await super().component_load()
 
     @override
     async def component_teardown(self) -> None:
         self.check_emotes.cancel()
+        await super().component_teardown()
 
     async def send_error_embed(self, emote: str, service: str, colour: int) -> None:
         """Helper function to send a ping to Aluerie that something is wrong with emote services."""

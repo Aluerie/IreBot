@@ -32,7 +32,7 @@ class GuardError(IreBotError):
 
 
 class BadArgumentError(IreBotError):
-    """Something wasn't properly used."""
+    """Bad Argument was provided for the command."""
 
     __slots__: tuple[str, ...] = ()
 
@@ -44,6 +44,8 @@ class UsageError(IreBotError):
 
 
 class SomethingWentWrong(IreBotError):  # noqa: N818
+    """Something went wrong."""
+
     __slots__: tuple[str, ...] = ()
 
 

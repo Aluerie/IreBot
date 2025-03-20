@@ -25,4 +25,3 @@ ipykernel; platform_system == 'Windows'
 
 # UNCATEGORISED YET
 click== 8.1.8
-thefuzz
