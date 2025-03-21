@@ -11,7 +11,7 @@ from bot import IreComponent, ireloop
 from config import config
 from utils import const, errors, helpers
 
-from .models import Streamer
+from .models import BLOCKED_RP_STATUSES, Streamer
 
 if TYPE_CHECKING:
     from bot import IreBot
@@ -84,10 +84,10 @@ class GameFlow(IreComponent):
     @commands.Component.listener("event_rich_presence_changed")
     async def rich_presence_changed(self, status: RPStatus) -> None:
         if status.name == f"{status.__class__.__name__}UnknownValue":
-            if "Crownfall" in status.value:
-                # skip crownfall mini-games for now
-                # TODO: remove when Crownfall is over, or maybe implement a series of block-words so like Deadlock statues don't show up as well;
+            if any(rp in status.value for rp in BLOCKED_RP_STATUSES):
+                # skip blocked RP statuses, such as Crownfall or Deadlock
                 return
+
             await self.debug_send(f'RP Change: Unknown "{status.value}"')
         else:
             await self.debug_send(f"RP Change: {status}")
@@ -184,7 +184,8 @@ class GameFlow(IreComponent):
     async def profile_error(self, payload: commands.CommandErrorPayload) -> None:
         if isinstance(payload.exception, commands.MissingRequiredArgument):
             await payload.context.send(
-                "You need to provide a hero name (i.e. VengefulSpirit , PA, Mireska, etc) or player slot (i.e. 9, DarkGreen )",
+                "You need to provide a hero name (i.e. VengefulSpirit , PA, Mireska, etc) or "
+                "player slot (i.e. 9, DarkGreen )",
             )
         else:
             raise payload.exception

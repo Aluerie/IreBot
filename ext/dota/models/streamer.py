@@ -11,7 +11,7 @@ from steam import ID
 from steam.ext.dota2 import GameMode, Hero, LobbyType
 
 from bot import ireloop
-from utils import errors, formats
+from utils import errors, formats, fuzzy
 
 from ._utils import convert_id3_to_id64, rank_medal_display_name
 from .constants import HERO_ALIASES, PLAYER_COLOURS
@@ -508,14 +508,14 @@ class Match(abc.ABC):
                 identifiers = [PLAYER_COLOURS[player_slot]]
                 if hero:
                     identifiers.extend([hero.name, hero.display_name])
-                find = process.extractOne(argument, identifiers, score_cutoff=69)
+                find = fuzzy.extract_one(argument, identifiers, score_cutoff=69)
                 if find and find[1] > the_choice[1]:
                     the_choice = (player_slot, find[1])
 
             # second, let's see if hero aliases can beat official
             for player_slot, hero in enumerate(heroes):
                 if hero:
-                    find = process.extractOne(argument, HERO_ALIASES[hero.id], score_cutoff=69)
+                    find = fuzzy.extract_one(argument, HERO_ALIASES[hero.id], score_cutoff=69)
                     if find and find[1] > the_choice[1]:
                         the_choice = (player_slot, find[1])
 

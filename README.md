@@ -2,7 +2,7 @@
 
 ![IreBot Social Preview](<assets/images/profile/GitHub - Social Preview.png>)
 
-Just a personal bot of mine ([@Irene_Adler__](https://www.twitch.tv/irene_adler__) on twitch).
+Just a personal twitch.tv bot of mine.
 
 > ![IreBot Display Name](<assets/images/display_name.png>)
 

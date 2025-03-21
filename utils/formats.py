@@ -3,7 +3,7 @@ from __future__ import annotations
 from enum import IntEnum
 from typing import TYPE_CHECKING, override
 
-from discord.utils import MISSING
+from . import MISSING
 
 if TYPE_CHECKING:
     import datetime
@@ -22,10 +22,11 @@ class plural:  # noqa: N801
         >>> format(plural(8), 'week|weeks')  # '8 weeks'
         >>> f'{plural(3):reminder}' # 3 reminders
 
+    Sources
+    -------
+    * Rapptz/RoboDanny (licensed MPL v2)
+        https://github.com/Rapptz/RoboDanny/blob/rewrite/cogs/utils/formats.py
     """
-
-    # licensed MPL v2 from Rapptz/RoboDanny
-    # https://github.com/Rapptz/RoboDanny/blob/rewrite/cogs/utils/formats.py
 
     def __init__(self, number: int) -> None:
         self.number: int = number
@@ -41,6 +42,8 @@ class plural:  # noqa: N801
 
 
 class TimeDeltaFormat(IntEnum):
+    """An enum representing options for `fmt` argument in `timedelta_to_words` function."""
+
     Full = 1
     """1 minute 6 seconds"""
     Short = 2
@@ -57,6 +60,25 @@ def timedelta_to_words(
     fmt: TimeDeltaFormat = TimeDeltaFormat.Full,
 ) -> str:
     """Convert `datetime.timedelta` to a string of humanly readable words.
+
+    Parameters
+    ----------
+    delta: datetime.timedelta = MISSING
+        Time delta to convert to words (as datetime.timedelta type)
+    seconds: int = MISSING
+        Time delta to convert to words (as integer amount of seconds).
+        Note that you should pass only one argument: either `delta` or `seconds`.
+    accuracy: int = 2
+        Amount of words to allow in the result. This is called accuracy because effectively,
+        we are cutting down on how accurately the wording represents the time delta.
+    fmt: TimeDeltaFormat = TimeDeltaFormat.Full
+        A formatting choice for the output.
+        The examples of each are given in `TimeDeltaFormat` class' doc-strings for each enum.
+
+    Returns
+    -------
+    str
+        Human-readable description for the time delta.
 
     Example:
     -------

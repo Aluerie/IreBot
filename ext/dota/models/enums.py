@@ -139,7 +139,8 @@ class RPStatus(MyStrEnum):
     CustomGame = "#DOTA_RP_GAME_IN_PROGRESS_CUSTOM"
 
     @classproperty
-    def KNOWN_DISPLAY_NAMES(cls: type[Self]) -> Mapping[RPStatus, str]:  # type: ignore # noqa: N802, N805
+    def KNOWN_DISPLAY_NAMES(cls: type[Self]) -> Mapping[RPStatus, str]:  # type: ignore[GeneralTypeIssue] # noqa: N802, N805
+        """Mapping between RPStatus enum and human-readable display names for them."""
         return {
             cls.Offline: "Offline/Invisible",
             cls.Idle: "Main Menu (Idle)",
@@ -165,6 +166,12 @@ class RPStatus(MyStrEnum):
         except KeyError:
             # will still return "#DEADLOCK_RP_SOMETHING"
             return self.value
+
+
+BLOCKED_RP_STATUSES = {
+    "Crownfall",
+    "DEADLOCK",
+}
 
 
 class LobbyParam0(StrEnum):
