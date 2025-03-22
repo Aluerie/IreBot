@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime
+import itertools
 import random
 import re
 from typing import TYPE_CHECKING, Any, TypedDict
@@ -32,41 +33,38 @@ class Keywords(IreComponent):
 
     def __init__(self, bot: IreBot, *args: Any, **kwargs: Any) -> None:
         super().__init__(bot, *args, **kwargs)
-        self.keywords: list[KeywordDict] = [
-            {
-                "aliases": aliases,
-                "response": response,
-                "dt": datetime.datetime.now(datetime.UTC) - datetime.timedelta(hours=1),
-            }
-            for aliases, response in [
-                (["Pog", "PogU"], "Pog"),
-                (["gg"], "gg"),
-                (["GG"], "GG"),
-                (["bueno"], "bueno"),
-                (
-                    ["Pepoga"],
-                    "Pepoga 📣 AAAIIIIIIIIIREEEEEEEEEEEEEEEENEE !",
-                ),  # # cSpell: ignore AAAIIIIIIIIIREEEEEEEEEEEEEEEENEE
-            ]
-        ]
+        self.cooldown_dt = datetime.datetime.now(datetime.UTC) - datetime.timedelta(hours=1)
+
+        response_search = {
+            # response: search in chat
+            "Pog": ["Pog", "PogU"],
+            "gg": ["gg"],
+            "GG": ["GG"],
+            "bueno": ["bueno"],
+        }
+
+        self.keywords: dict[str, str] = {
+            keyword: response for response, search in response_search.items() for keyword in itertools.chain(search)
+        }
+        self.compiled_regex = re.compile(r"\b" + r"|".join(self.keywords) + r"\b", flags=re.VERBOSE)
 
     @commands.Component.listener(name="message")
     async def keywords_response(self, message: twitchio.ChatMessage) -> None:
         """Sends a flavour message if a keyword/key phrase was spotted in the chat."""
-        if message.chatter.name in const.Bots or not message.text or random.randint(1, 100) > 5:
+        now = datetime.datetime.now(datetime.UTC)
+        if (now - self.cooldown_dt).seconds < 7:
+            # the keyword was recently triggered
+            return
+        if message.chatter.name in const.Bots or not message.text or random.randint(1, 100) > 10:
+            # restrict `keywords` functionality from
+            # 1. invited bots
+            # 2. weird empty messages
+            # 3. ~90% chance to fail just so the bot doesn't spam it too much (even though we have cd)
             return
 
-        now = datetime.datetime.now(datetime.UTC)
-        for keyword in self.keywords:
-            if (now - keyword["dt"]).seconds < 777:
-                # the keyword was recently triggered
-                continue
-
-            for word in keyword["aliases"]:
-                # TODO: Check if | thing works instead of looping
-                if re.search(r"\b" + re.escape(word) + r"\b", message.text):
-                    await message.broadcaster.send_message(sender=self.bot.bot_id, message=keyword["response"])
-                    keyword["dt"] = now
+        if found := self.compiled_regex.search(message.text):
+            await message.broadcaster.send_message(sender=self.bot.bot_id, message=self.keywords[found[0]])
+            self.cooldown_dt = now
 
 
 async def setup(bot: IreBot) -> None:

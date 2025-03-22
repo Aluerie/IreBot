@@ -130,16 +130,19 @@ class Bots(StrEnum):
     I might enable these bots in the channel so let's keep them all here.
     """
 
-    d9kmmrbot = "9kmmrbot"
-    dotabod = "dotabod"
-    Fossabot = "fossabot"
+    # the commented bots are currently not invited to irene's channel
+    # commenting them for that extra nano-second performance gain when doing "chatter.name in const.Bots" check.
+
+    # d9kmmrbot = "9kmmrbot"
+    # dotabod = "dotabod"
+    # Fossabot = "fossabot"
     IrenesBot = "irenesbot"
-    LolRankBot = "lolrankbot"
-    Moobot = "moobot"
-    Nightbot = "nightbot"
-    Sery_Bot = "sery_bot"
-    StreamLabs = "streamlabs"
-    Streamelements = "streamelements"
+    # LolRankBot = "lolrankbot"
+    # Moobot = "moobot"
+    # Nightbot = "nightbot"
+    # Sery_Bot = "sery_bot"
+    # StreamLabs = "streamlabs"
+    # Streamelements = "streamelements"
     Supibot = "supibot"
     WizeBot = "wizebot"
 

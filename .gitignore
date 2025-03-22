@@ -18,3 +18,4 @@ config.toml
 ext/_beta.py
 ext/beta.py
 _test.py
+scripts/
