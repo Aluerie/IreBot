@@ -11,12 +11,12 @@ from utils import const, guards
 from ._base import BaseDevComponent
 
 if TYPE_CHECKING:
-    from bot import IreBot
+    from bot import IreBot, IreContext
 
 log = logging.getLogger(__name__)
 
 
-def to_extension(_: commands.Context, extension: str) -> str:
+def to_extension(_: IreContext, extension: str) -> str:
     """Just a shortcut to add `ext.` so I can use command like this `!reload emotes_check`."""
     return f"ext.{extension}"
 
@@ -26,7 +26,7 @@ class Control(BaseDevComponent):
 
     @guards.is_vps()
     @commands.command(aliases=["kill"])
-    async def maintenance(self, ctx: commands.Context) -> None:
+    async def maintenance(self, ctx: IreContext) -> None:
         """Kill the bot process on VPS.
 
         Usable for bot testing so I don't have double responses.
@@ -44,7 +44,7 @@ class Control(BaseDevComponent):
 
     @guards.is_vps()
     @commands.command(aliases=["restart"])
-    async def reboot(self, ctx: commands.Context) -> None:
+    async def reboot(self, ctx: IreContext) -> None:
         """Restart the bot process on VPS.
 
         Usable to restart the bot without logging to VPS machine or committing something.
@@ -60,22 +60,22 @@ class Control(BaseDevComponent):
             await ctx.send("Something went wrong.")
 
     @commands.command()
-    async def unload(self, ctx: commands.Context, *, extension: Annotated[str, to_extension]) -> None:
+    async def unload(self, ctx: IreContext, *, extension: Annotated[str, to_extension]) -> None:
         await self.bot.unload_module(extension)
         await ctx.send(f"{const.STV.DankApprove} unloaded {extension}")
 
     @commands.command()
-    async def reload(self, ctx: commands.Context, *, extension: Annotated[str, to_extension]) -> None:
+    async def reload(self, ctx: IreContext, *, extension: Annotated[str, to_extension]) -> None:
         await self.bot.reload_module(extension)
         await ctx.send(f"{const.STV.DankApprove} reloaded {extension}")
 
     @commands.command()
-    async def load(self, ctx: commands.Context, *, extension: Annotated[str, to_extension]) -> None:
+    async def load(self, ctx: IreContext, *, extension: Annotated[str, to_extension]) -> None:
         await self.bot.load_module(extension)
         await ctx.send(f"{const.STV.DankApprove} loaded {extension}")
 
     @commands.command()
-    async def online(self, ctx: commands.Context) -> None:
+    async def online(self, ctx: IreContext) -> None:
         """Make the bot treat streamer as online.
 
         * forces availability for commands which normally are only allowed during online streams
@@ -87,7 +87,7 @@ class Control(BaseDevComponent):
         await ctx.send(f"I'll treat {ctx.broadcaster.display_name} as online now {const.STV.dankHey}")
 
     @commands.command()
-    async def offline(self, ctx: commands.Context) -> None:
+    async def offline(self, ctx: IreContext) -> None:
         """Make the bot treat streamer as offline."""
         self.bot.irene_online = False
         await ctx.send(f"I'll treat {ctx.broadcaster.display_name} as offline now {const.STV.donkSad}")

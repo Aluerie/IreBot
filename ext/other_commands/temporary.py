@@ -8,7 +8,7 @@ from bot import IreComponent
 from utils import const
 
 if TYPE_CHECKING:
-    from bot import IreBot
+    from bot import IreBot, IreContext
 
 
 class MiscellaneousCommands(IreComponent):
@@ -18,7 +18,7 @@ class MiscellaneousCommands(IreComponent):
     """
 
     @commands.command()
-    async def notes(self, ctx: commands.Context, *, game: Literal["sekiro", "er"]) -> None:
+    async def notes(self, ctx: IreContext, *, game: Literal["sekiro", "er"]) -> None:
         """Get a link to one of my notes."""
         mapping = {
             "sekiro": "docs.google.com/document/d/1rjp7lhvP0vwwlO7bC7TyFAjKcGDovFuo2EYUaX66QiA",
@@ -35,7 +35,7 @@ class MiscellaneousCommands(IreComponent):
             raise payload.exception
 
     @commands.command()
-    async def run(self, ctx: commands.Context) -> None:
+    async def run(self, ctx: IreContext) -> None:
         """Explanation of my first Sekiro hitless run."""
         msg = (
             "Bosses I like %, Sword+Shuriken Focused. "
@@ -48,7 +48,7 @@ class MiscellaneousCommands(IreComponent):
         await ctx.send(msg)
 
     @commands.group(invoke_fallback=True)
-    async def gunfort(self, ctx: commands.Context) -> None:
+    async def gunfort(self, ctx: IreContext) -> None:
         """Commands to count my successful and failed Yolo Gunfort attempts."""
         query = "SELECT value FROM ttv_counters WHERE name = $1;"
         success: int = await self.bot.pool.fetchval(query, "gunfort_success")
@@ -60,7 +60,7 @@ class MiscellaneousCommands(IreComponent):
 
     @commands.is_owner()
     @gunfort.command()
-    async def no(self, ctx: commands.Context) -> None:
+    async def no(self, ctx: IreContext) -> None:
         """Count a failed Yolo Gunfort attempt in."""
         query = "SELECT value FROM ttv_counters WHERE name = $1;"
         success: int = await self.bot.pool.fetchval(query, "gunfort_success")
@@ -72,7 +72,7 @@ class MiscellaneousCommands(IreComponent):
 
     @commands.is_owner()
     @gunfort.command()
-    async def yes(self, ctx: commands.Context) -> None:
+    async def yes(self, ctx: IreContext) -> None:
         """Count a successful Yolo Gunfort attempt in."""
         query = "UPDATE ttv_counters SET value = value + 1 WHERE name = $1 RETURNING value;"
         success: int = await self.bot.pool.fetchval(query, "gunfort_success")

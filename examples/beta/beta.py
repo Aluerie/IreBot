@@ -11,7 +11,7 @@ class BetaTest(BetaCog):
         pass
 
     @commands.command()
-    async def beta(self, ctx: commands.Context) -> None:
+    async def beta(self, ctx: IreContext) -> None:
         pass
 
 

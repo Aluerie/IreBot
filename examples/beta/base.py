@@ -17,7 +17,7 @@ from config import config
 from utils import const
 
 if TYPE_CHECKING:
-    from bot import IreBot
+    from bot import IreBot, IreContext
 
 log = logging.getLogger(__name__)
 

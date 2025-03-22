@@ -18,7 +18,7 @@ from utils import const, errors
 if TYPE_CHECKING:
     from aiohttp import ClientSession
 
-    from bot import IreBot
+    from bot import IreBot, IreContext
 
 
 __all__ = ("Translations",)
@@ -88,7 +88,7 @@ class Translations(IreComponent):
     """Translation command component."""
 
     @commands.command()
-    async def translate(self, ctx: commands.Context, *, text: str) -> None:
+    async def translate(self, ctx: IreContext, *, text: str) -> None:
         """Translate to English.
 
         Uses Google Translate. Autodetects source language.

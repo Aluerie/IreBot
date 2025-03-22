@@ -11,7 +11,7 @@ from utils import const, formats
 if TYPE_CHECKING:
     import twitchio
 
-    from bot import IreBot
+    from bot import IreBot, IreContext
 
 
 class EditInformation(IreComponent):
@@ -49,7 +49,7 @@ class EditInformation(IreComponent):
         self.title_tracked = channel_info.title
 
     @commands.command()
-    async def game(self, ctx: commands.Context, *, game_name: str | None = None) -> None:
+    async def game(self, ctx: IreContext, *, game_name: str | None = None) -> None:
         """Either get current channel game or update it."""
         if not game_name:
             # 1. No argument
@@ -98,7 +98,7 @@ class EditInformation(IreComponent):
         await streamer.modify_channel(title=title)
 
     @commands.group(name="title", invoke_fallback=True)
-    async def title_group(self, ctx: commands.Context, *, title: str = "") -> None:
+    async def title_group(self, ctx: IreContext, *, title: str = "") -> None:
         """Callback for !title group commands.
 
         Can be used with subcommands. But when used on its - it either shows the title or updates it,
@@ -125,14 +125,14 @@ class EditInformation(IreComponent):
 
     @commands.is_moderator()
     @title_group.command(name="set")
-    async def title_set(self, ctx: commands.Context, *, title: str) -> None:
+    async def title_set(self, ctx: IreContext, *, title: str) -> None:
         """Set the title for the stream."""
         await self.update_title(ctx.broadcaster, title=title)
         await ctx.send(f'{const.STV.donkHappy} Set title to "{title}"')
 
     @commands.is_moderator()
     @title_group.command(name="restore", aliases=["prev", "previous"])
-    async def title_restore(self, ctx: commands.Context, offset: int = 1) -> None:
+    async def title_restore(self, ctx: IreContext, offset: int = 1) -> None:
         """Restore title for the stream from the database.
 
         Database keeps some recent titles (cleans up up to last 2 days on stream-offline event).
@@ -160,7 +160,7 @@ class EditInformation(IreComponent):
 
     @commands.is_moderator()
     @title_group.command(name="history")
-    async def title_history(self, ctx: commands.Context, number: int = 3) -> None:
+    async def title_history(self, ctx: IreContext, number: int = 3) -> None:
         """Shows some title history so you can remember/edit what we had before.
 
         Parameters

@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import platform
-from typing import TYPE_CHECKING, TypedDict, override
+from typing import TYPE_CHECKING, Any, TypedDict, override
 
 import discord
 import twitchio
@@ -16,7 +16,7 @@ from ext import EXTENSIONS
 from ext.dota.api import Dota2Client
 from utils import const, errors
 
-from .bases import ireloop
+from .bases import IreContext, ireloop
 from .exc_manager import ExceptionManager
 
 if TYPE_CHECKING:
@@ -269,6 +269,10 @@ class IreBot(commands.Bot):
         if hasattr(self, "dota"):
             await self.dota.close()
         await super().close()
+
+    @override
+    def get_context(self, message: twitchio.ChatMessage, *, cls: Any = IreContext) -> IreContext:
+        return super().get_context(message, cls=cls)
 
     # @override  # interesting that it's not an override
     async def event_ready(self) -> None:

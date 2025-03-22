@@ -10,7 +10,7 @@ from bot import IreComponent, ireloop
 from utils import const, errors
 
 if TYPE_CHECKING:
-    from bot import IreBot
+    from bot import IreBot, IreContext
 
     class TwitchCommands(TypedDict):
         """`chat_commands` Table Structure."""
@@ -78,13 +78,13 @@ class CustomCommands(IreComponent):
 
     @commands.is_moderator()
     @commands.group(invoke_fallback=True)
-    async def cmd(self, ctx: commands.Context) -> None:
+    async def cmd(self, ctx: IreContext) -> None:
         """Group command to define cmd."""
         await ctx.send('You need to use this with subcommands, i.e. "cmd add/delete/edit/list"')
 
     @commands.is_moderator()
     @cmd.command()
-    async def add(self, ctx: commands.Context, cmd_name: str, *, text: str) -> None:
+    async def add(self, ctx: IreContext, cmd_name: str, *, text: str) -> None:
         """Add custom command."""
         query = """
             INSERT INTO ttv_chat_commands
@@ -102,7 +102,7 @@ class CustomCommands(IreComponent):
 
     @commands.is_moderator()
     @cmd.command(name="del")
-    async def delete(self, ctx: commands.Context, command_name: str) -> None:
+    async def delete(self, ctx: IreContext, command_name: str) -> None:
         """Delete custom command by name."""
         query = """
             DELETE FROM ttv_chat_commands
@@ -119,7 +119,7 @@ class CustomCommands(IreComponent):
 
     @commands.is_moderator()
     @cmd.command()
-    async def edit(self, ctx: commands.Context, command_name: str, *, text: str) -> None:
+    async def edit(self, ctx: IreContext, command_name: str, *, text: str) -> None:
         """Edit custom command."""
         query = """
             UPDATE ttv_chat_commands
@@ -137,7 +137,7 @@ class CustomCommands(IreComponent):
 
     # TODO: THIS IS KINDA BAD, we need more centralized help, maybe git page
     @cmd.command(name="list")
-    async def cmd_list(self, ctx: commands.Context) -> None:
+    async def cmd_list(self, ctx: IreContext) -> None:
         """Get commands list."""
         cache_list = [f"!{name}" for v in self.command_cache.values() for name in v]
         # bot_cmds = [

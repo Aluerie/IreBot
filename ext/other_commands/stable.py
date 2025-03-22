@@ -15,7 +15,7 @@ from config import config
 from utils import const, formats, guards
 
 if TYPE_CHECKING:
-    from bot import IreBot
+    from bot import IreBot, IreContext
 
 log = logging.getLogger(__name__)
 
@@ -31,39 +31,39 @@ class SimpleCommands(IreComponent):
 
     @guards.is_online()
     @commands.command()
-    async def clip(self, ctx: commands.Context) -> None:
+    async def clip(self, ctx: IreContext) -> None:
         """Create a clip for last 30 seconds of the stream."""
         clip = await ctx.broadcaster.create_clip(token_for=const.UserID.Bot)
         await ctx.send(f"https://clips.twitch.tv/{clip.id}")
 
     @commands.command(name="commands", aliases=["help"])
-    async def command_list(self, ctx: commands.Context) -> None:
+    async def command_list(self, ctx: IreContext) -> None:
         """Get a list of bot commands."""
         await ctx.send("Not implemented yet.")
 
     @commands.command()
-    async def discord(self, ctx: commands.Context) -> None:
+    async def discord(self, ctx: IreContext) -> None:
         """Link to my discord community server."""
         await ctx.send(f"{const.STV.Discord} discord.gg/K8FuDeP")
 
     @commands.command()
-    async def donate(self, ctx: commands.Context) -> None:
+    async def donate(self, ctx: IreContext) -> None:
         """Link to my Donation page."""
         await ctx.send("donationalerts.com/r/irene_adler__")
 
     @commands.command()
-    async def followage(self, ctx: commands.Context) -> None:
+    async def followage(self, ctx: IreContext) -> None:
         """Get your follow age."""
         # just a small joke to teach people
         await ctx.send("Just click your name 4Head")
 
     @commands.command(aliases=["hi", "yo", "hallo"])
-    async def hello(self, ctx: commands.Context) -> None:
+    async def hello(self, ctx: IreContext) -> None:
         """Hello."""
         await ctx.send(const.STV.hello)
 
     @commands.command()
-    async def love(self, ctx: commands.Context, *, arg: str) -> None:
+    async def love(self, ctx: IreContext, *, arg: str) -> None:
         """Measure love between chatter and `arg`.
 
         arg can be a user or anything else.
@@ -97,7 +97,7 @@ class SimpleCommands(IreComponent):
             await ctx.send(f"{love}% love between {ctx.chatter.mention} and {arg} {emote}")
 
     @commands.command(aliases=["lorem", "ipsum"])
-    async def loremipsum(self, ctx: commands.Context) -> None:
+    async def loremipsum(self, ctx: IreContext) -> None:
         """Lorem ipsum."""
         await ctx.send(  # cSpell:disable
             "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. "
@@ -109,13 +109,13 @@ class SimpleCommands(IreComponent):
         )  # cSpell:enable
 
     @commands.command()
-    async def lurk(self, ctx: commands.Context) -> None:
+    async def lurk(self, ctx: IreContext) -> None:
         """Make it clear to the chat that you are lurking."""
         await ctx.send(f"{ctx.chatter.mention} is now lurking {const.STV.DankLurk} Have fun {const.STV.donkHappy}")
         # TODO: maybe make something like returning message for them with a time that they lurked
 
     @commands.command(name="decide", aliases=["ball", "8ball", "answer", "question", "yesno"])
-    async def magic_ball(self, ctx: commands.Context, *, text: str | None = None) -> None:
+    async def magic_ball(self, ctx: IreContext, *, text: str | None = None) -> None:
         """Get a random answer from a Magic Ball.
 
         Better than ChatGPT.
@@ -170,12 +170,12 @@ class SimpleCommands(IreComponent):
         await ctx.send(random.choice(options))
 
     @commands.command()
-    async def nomic(self, ctx: commands.Context) -> None:
+    async def nomic(self, ctx: IreContext) -> None:
         """No mic."""
         await ctx.send("Please read info below the stream, specifically, FAQ")
 
     @commands.command()
-    async def oversight(self, ctx: commands.Context) -> None:
+    async def oversight(self, ctx: IreContext) -> None:
         """Give me the famous Oversight Dark Willow copypaste."""
         await ctx.send(
             "The biggest🙌💯oversight🔭🔍with Dark✊🏾Willow🌳is that she's unbelievably sexy🤤💦🍆. "
@@ -186,7 +186,7 @@ class SimpleCommands(IreComponent):
         )
 
     @commands.command()
-    async def ping(self, ctx: commands.Context) -> None:
+    async def ping(self, ctx: IreContext) -> None:
         """Ping the bot.
 
         Currently doesn't provide any useful info.
@@ -194,13 +194,13 @@ class SimpleCommands(IreComponent):
         await ctx.send("\N{TABLE TENNIS PADDLE AND BALL} Pong!")
 
     @commands.command()
-    async def playlist(self, ctx: commands.Context) -> None:
+    async def playlist(self, ctx: IreContext) -> None:
         """Get the link to my Spotify playlist."""
         await ctx.send("open.spotify.com/playlist/7fVAcuDPLVAUL8555vy8Kz?si=b26cecab2cf24608")  # cSpell: ignore DPLVAUL
 
     @commands.cooldown(rate=1, per=60, key=commands.BucketType.channel)
     @commands.command(aliases=["rr", "russianroulette"])
-    async def roulette(self, ctx: commands.Context) -> None:
+    async def roulette(self, ctx: IreContext) -> None:
         """Play russian roulette."""
         mention = ctx.chatter.mention
 
@@ -231,7 +231,7 @@ class SimpleCommands(IreComponent):
     @guards.is_online()
     @commands.is_moderator()
     @commands.command(aliases=["so"])
-    async def shoutout(self, ctx: commands.Context, user: twitchio.User) -> None:
+    async def shoutout(self, ctx: IreContext, user: twitchio.User) -> None:
         """Do /shoutout to a user."""
         await ctx.broadcaster.send_shoutout(
             to_broadcaster=user.id,
@@ -240,7 +240,7 @@ class SimpleCommands(IreComponent):
         )
 
     @commands.command()
-    async def song(self, ctx: commands.Context) -> None:
+    async def song(self, ctx: IreContext) -> None:
         """Get currently played song on Spotify."""
         url = f"https://spotify.aidenwallis.co.uk/u/{config['TOKENS']['SPOTIFY_AIDENWALLIS']}"
         async with self.bot.session.get(url) as resp:
@@ -255,17 +255,17 @@ class SimpleCommands(IreComponent):
         await ctx.send(answer)
 
     @commands.command()
-    async def about(self, ctx: commands.Context) -> None:
+    async def about(self, ctx: IreContext) -> None:
         """A bit bio information about the bot."""
         await ctx.send(f"I'm a personal Irene's bot, made by Irene. {const.STV.AYAYA}")
 
     @commands.command()
-    async def source(self, ctx: commands.Context) -> None:
+    async def source(self, ctx: IreContext) -> None:
         """Get the link to the bot's GitHub repository."""
         await ctx.send(f"github.com/Aluerie/IreBot {const.STV.DankReading}")
 
     @commands.command()
-    async def uptime(self, ctx: commands.Context) -> None:
+    async def uptime(self, ctx: IreContext) -> None:
         """Get stream uptime."""
         stream = await self.bot.irene_stream()
         if stream is None:
@@ -275,7 +275,7 @@ class SimpleCommands(IreComponent):
             await ctx.send(f"{formats.timedelta_to_words(uptime)} {const.STV.peepoDapper}")
 
     @commands.command(aliases=["seppuku"])
-    async def vanish(self, ctx: commands.Context) -> None:
+    async def vanish(self, ctx: IreContext) -> None:
         """Allows for chatters to vanish from the chat by time-outing themselves."""
         if ctx.chatter.moderator:
             if "seppuku" in ctx.message.text:
@@ -292,12 +292,12 @@ class SimpleCommands(IreComponent):
             )
 
     @commands.command()
-    async def vods(self, ctx: commands.Context) -> None:
+    async def vods(self, ctx: IreContext) -> None:
         """Get the link to youtube vods archive."""
         await ctx.send(f"youtube.com/@AluerieVODS/ {const.STV.Cinema}")
 
     @commands.command(aliases=["char"])
-    async def charinfo(self, ctx: commands.Context, *, characters: str) -> None:
+    async def charinfo(self, ctx: IreContext, *, characters: str) -> None:
         """Shows information about character(-s).
 
         Only up to a 10 characters at a time though.
@@ -319,12 +319,12 @@ class SimpleCommands(IreComponent):
         await ctx.send(names)
 
     @commands.command(aliases=["id", "twitchid"])
-    async def twitch_id(self, ctx: commands.Context, *, user: twitchio.User) -> None:
+    async def twitch_id(self, ctx: IreContext, *, user: twitchio.User) -> None:
         """Get mentioned @user numeric twitch_id."""
         await ctx.send(f"Twitch ID for {user.mention}: {user.id}")
 
     @commands.command(aliases=["pcparts", "specs"])
-    async def pc(self, ctx: commands.Context) -> None:
+    async def pc(self, ctx: IreContext) -> None:
         """Get Irene's current PC setup."""
         await ctx.send("pcpartpicker.com/user/aluerie/saved/dY497P")
 

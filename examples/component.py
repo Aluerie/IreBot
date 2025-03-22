@@ -7,14 +7,14 @@ from twitchio.ext import commands
 from bot import IreComponent
 
 if TYPE_CHECKING:
-    from bot import IreBot
+    from bot import IreBot, IreContext
 
 
 class NewCog(IreComponent):
     """."""
 
     @commands.command()
-    async def new_command(self, ctx: commands.Context) -> None:
+    async def new_command(self, ctx: IreContext) -> None:
         """."""
         await ctx.send("Not implemented yet!")
 

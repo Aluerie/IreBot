@@ -14,7 +14,7 @@ from utils import const, errors, helpers
 from .models import BLOCKED_RP_STATUSES, Streamer
 
 if TYPE_CHECKING:
-    from bot import IreBot
+    from bot import IreBot, IreContext
 
     from .models import ActiveMatch, RPStatus
 
@@ -151,7 +151,7 @@ class GameFlow(IreComponent):
         return debug_prefix + tag + response
 
     @commands.command(aliases=["gm"])
-    async def game_medals(self, ctx: commands.Context) -> None:
+    async def game_medals(self, ctx: IreContext) -> None:
         """Fetch each player rank medals in the current game."""
         async with helpers.measure_time() as perf:
             active_match = await self.get_active_match(is_hero=False)
@@ -159,7 +159,7 @@ class GameFlow(IreComponent):
         await ctx.send(self.fmt_response(response, active_match.is_watch, perf))
 
     @commands.command()
-    async def ranked(self, ctx: commands.Context) -> None:
+    async def ranked(self, ctx: IreContext) -> None:
         """Fetch each player rank medals in the current game."""
         async with helpers.measure_time() as perf:
             active_match = await self.get_active_match(is_hero=False)
@@ -167,14 +167,14 @@ class GameFlow(IreComponent):
         await ctx.send(self.fmt_response(response, active_match.is_watch, perf))
 
     @commands.command()
-    async def smurfs(self, ctx: commands.Context) -> None:
+    async def smurfs(self, ctx: IreContext) -> None:
         async with helpers.measure_time() as perf:
             active_match = await self.get_active_match(is_hero=False)
             response = active_match.smurfs()
         await ctx.send(self.fmt_response(response, active_match.is_watch, perf))
 
     @commands.command(aliases=["items", "item", "player"])
-    async def profile(self, ctx: commands.Context, *, argument: str) -> None:
+    async def profile(self, ctx: IreContext, *, argument: str) -> None:
         async with helpers.measure_time() as perf:
             active_match = await self.get_active_match(is_hero=False)
             response = await active_match.profile(argument)
@@ -191,7 +191,7 @@ class GameFlow(IreComponent):
             raise payload.exception
 
     @commands.command(aliases=["matchid"])
-    async def match_id(self, ctx: commands.Context) -> None:
+    async def match_id(self, ctx: IreContext) -> None:
         async with helpers.measure_time() as perf:
             active_match = await self.get_active_match(is_hero=False)
             response = f"{active_match.match_id}"
@@ -200,7 +200,7 @@ class GameFlow(IreComponent):
     # LAST GAME
 
     @commands.command(aliases=["lg", "lm"])
-    async def last_game(self, ctx: commands.Context) -> None:
+    async def last_game(self, ctx: IreContext) -> None:
         async with helpers.measure_time() as perf:
             last_game = self.streamer.last_game
             response = last_game.last_game_command_response if last_game else "No Data Yet."
@@ -209,7 +209,7 @@ class GameFlow(IreComponent):
     # STREAMER INFO COMMANDS
 
     @commands.command(aliases=["wl", "winloss"])
-    async def score(self, ctx: commands.Context) -> None:
+    async def score(self, ctx: IreContext) -> None:
         """Show streamer's Win - Loss score for today's gaming session.
 
         This by design should include offline games as well.
@@ -221,14 +221,14 @@ class GameFlow(IreComponent):
         await ctx.send(self.fmt_response(response, False, perf))
 
     @commands.command()
-    async def mmr(self, ctx: commands.Context) -> None:
+    async def mmr(self, ctx: IreContext) -> None:
         async with helpers.measure_time() as perf:
             response = await self.streamer.mmr_command_response()
         await ctx.send(self.fmt_response(response, False, perf))
 
     @commands.is_moderator()
     @commands.command(name="setmmr")
-    async def set_mmr(self, ctx: commands.Context, mmr: int) -> None:
+    async def set_mmr(self, ctx: IreContext, mmr: int) -> None:
         async with helpers.measure_time() as perf:
             query = "UPDATE ttv_dota_streamers SET mmr = $1 WHERE account_id = $2"
             await self.bot.pool.execute(query, mmr, self.streamer.account_id)

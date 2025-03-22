@@ -8,7 +8,7 @@ from twitchio.ext import commands
 from . import const, errors
 
 if TYPE_CHECKING:
-    from bot import IreBot
+    from bot import IreContext
 
 
 def is_vps() -> Any:
@@ -18,7 +18,7 @@ def is_vps() -> Any:
     kill the bot process or reboot it.
     """
 
-    def predicate(_: commands.Context) -> bool:
+    def predicate(_: IreContext) -> bool:
         if platform.system() == "Windows":
             # wrong PC
             msg = f"Only production bot allows usage of this command {const.FFZ.peepoPolice}"
@@ -31,7 +31,7 @@ def is_vps() -> Any:
 def is_online() -> Any:
     """Allow the command to be completed only when Irene's stream is online."""
 
-    def predicate(ctx: commands.Context[IreBot]) -> bool:  # type:ignore[reportInvalidTypeArgument]
-        return ctx.bot.aluerie_online  # type:ignore[reportAttributeAccessIssue]
+    def predicate(ctx: IreContext) -> bool:
+        return ctx.bot.irene_online
 
     return commands.guard(predicate)

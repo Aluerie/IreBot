@@ -15,7 +15,7 @@ from utils import const, formats
 if TYPE_CHECKING:
     import twitchio
 
-    from bot import IreBot
+    from bot import IreBot, IreContext
 
     class FirstRedeemsRow(TypedDict):
         """`first_redeems` Table Columns."""
@@ -46,12 +46,12 @@ class Counters(IreComponent):
 
     @commands.is_owner()
     @commands.group()
-    async def counter(self, ctx: commands.Context) -> None:
+    async def counter(self, ctx: IreContext) -> None:
         # TODO: I guess, we need to implement "send_help"
         await ctx.send("Use this command together with subcommands delete/create/change")
 
     @counter.command()
-    async def create(self, ctx: commands.Context, name: str) -> None:
+    async def create(self, ctx: IreContext, name: str) -> None:
         query = """
             INSERT INTO ttv_counters
             (name, value)
@@ -108,7 +108,7 @@ class Counters(IreComponent):
             return
 
     @commands.command(aliases=["erm"])
-    async def erms(self, ctx: commands.Context) -> None:
+    async def erms(self, ctx: IreContext) -> None:
         """Get an erm_counter value."""
         query = "SELECT value FROM ttv_counters WHERE name = $1"
         value: int = await self.bot.pool.fetchval(query, "erm")
@@ -145,7 +145,7 @@ class Counters(IreComponent):
         )
 
     @commands.command(aliases=["first"])
-    async def firsts(self, ctx: commands.Context) -> None:
+    async def firsts(self, ctx: IreContext) -> None:
         """Get top10 first redeemers."""
         query = """--sql
             SELECT user_name, first_times
@@ -170,7 +170,7 @@ class Counters(IreComponent):
         await ctx.send(content)
 
     @commands.command()
-    async def test_digits(self, ctx: commands.Context) -> None:
+    async def test_digits(self, ctx: IreContext) -> None:
         """Test digit emotes in twitch chat.
 
         At the point of writing this function - the number emotes like :one: were not working
