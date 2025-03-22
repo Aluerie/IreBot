@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 from twitchio.ext import commands
 
@@ -18,34 +18,34 @@ class MiscellaneousCommands(IreComponent):
     """
 
     @commands.command()
-    async def erdoc(self, ctx: commands.Context) -> None:
-        """Link to my Elden Ring notes."""
-        await ctx.send(  # cspell: disable-next-line
-            "My notes with everything Elden Ring related: "
-            "docs.google.com/document/d/19vTJVS7k1zdmShOAcO41KBWepfybMsTprQ208O7HpLU",
-        )
+    async def notes(self, ctx: commands.Context, *, game: Literal["sekiro", "er"]) -> None:
+        """Get a link to one of my notes."""
+        mapping = {
+            "sekiro": "docs.google.com/document/d/1rjp7lhvP0vwwlO7bC7TyFAjKcGDovFuo2EYUaX66QiA",
+            "er": "docs.google.com/document/d/19vTJVS7k1zdmShOAcO41KBWepfybMsTprQ208O7HpLU",
+        }
+        await ctx.send(mapping[game.lower()])
+
+    @notes.error
+    async def notes_error(self, payload: commands.CommandErrorPayload) -> None:
+        """XD."""
+        if isinstance(exc := payload.exception, commands.BadArgument):
+            await payload.context.send(f'Bad argument: "{exc.value}". Supported notes: "sekiro", "er".')
+        else:
+            raise payload.exception
 
     @commands.command()
     async def run(self, ctx: commands.Context) -> None:
         """Explanation of my first Sekiro hitless run."""
         msg = (
-            "Bosses I like % Sword+Shuriken Focused. "
-            "On paper it's Immortal Severance with 4 extra bosses and loading a save file "
-            "for Emma, Fire Isshin and Inner Owl reflections. "
-            "DB NKC No Loop No Cheese No Glitch. "
-            "Sword+Shuriken focused. "
+            "Bosses I like %, Sword+Shuriken Focused. "
+            "On paper, it's Immortal Severance with 7 extra bosses including loading a save file "
+            "with Inner Father, Fire Isshin and Emma reflections. "
+            "DB NKC LL NC GL. "
             "The only boss that I blast with MDs is Ape. "
-            "My notes: docs.google.com/document/d/1rjp7lhvP0vwwlO7bC7TyFAjKcGDovFuo2EYUaX66QiA."
+            "My notes: !notes sekiro."
         )
         await ctx.send(msg)
-
-    @commands.command(aliases=["sekironotes", "notes", "skdoc"])
-    async def sekirodoc(self, ctx: commands.Context) -> None:
-        """Link to my Sekiro notes."""
-        await ctx.send(  # cspell: disable-next-line
-            "My notes with everything Sekiro related: "
-            "docs.google.com/document/d/1rjp7lhvP0vwwlO7bC7TyFAjKcGDovFuo2EYUaX66QiA",
-        )
 
     @commands.group(invoke_fallback=True)
     async def gunfort(self, ctx: commands.Context) -> None:

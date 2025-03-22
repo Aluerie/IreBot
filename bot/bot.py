@@ -281,11 +281,11 @@ class IreBot(commands.Bot):
     async def event_command_error(self, payload: commands.CommandErrorPayload) -> None:
         """Called when error happens during command invoking."""
         command = payload.context.command
-        if command and command.has_error and payload.context.error_dispatched:
-            return
-
         ctx = payload.context
         error = payload.exception
+
+        if command and command.has_error and ctx.error_dispatched:
+            return
 
         # we aren't interested in the chain traceback:
         error = error.original if isinstance(error, commands.CommandInvokeError) and error.original else error
@@ -296,7 +296,7 @@ class IreBot(commands.Bot):
                 await ctx.send(str(error))
             case commands.CommandNotFound():
                 #  otherwise we just spam console with commands from other bots and from my event thing
-                log.info("CommandNotFound: %s", payload.exception)
+                log.info("CommandNotFound: %s", error)
             case commands.GuardFailure():
                 guard_mapping = {
                     "is_moderator.<locals>.predicate": (

@@ -3,7 +3,7 @@ from __future__ import annotations
 import datetime
 import logging
 from time import perf_counter
-from typing import TYPE_CHECKING, TypedDict, override
+from typing import TYPE_CHECKING, Any, TypedDict, override
 
 from twitchio.ext import commands
 
@@ -36,8 +36,8 @@ class GameFlow(IreComponent):
     This functionality is supposed to be an analogy to 9kmmrbot/dotabod features.
     """
 
-    def __init__(self, bot: IreBot) -> None:
-        super().__init__(bot)
+    def __init__(self, bot: IreBot, *args: Any, **kwargs: Any) -> None:
+        super().__init__(bot, *args, **kwargs)
         self.streamer: Streamer = Streamer(self.bot, config["STEAM"]["IRENE_ID64"])
         self.debug_mode: bool = True
 
