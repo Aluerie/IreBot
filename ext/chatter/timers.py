@@ -88,9 +88,9 @@ class Timers(IreComponent):
     async def periodic_announcements(self) -> None:
         """Send periodic announcements into irene's channel on timer."""
         # lazy implementation
-        await asyncio.sleep(60 * 3)
+        await asyncio.sleep(60 * 5)
         for _ in range(10):
-            await asyncio.sleep(3600)
+            await asyncio.sleep(3600 * 2 + 60 * random.randint(0, 120))
             await self.irene.send_announcement(
                 moderator=const.UserID.Bot,
                 token_for=const.UserID.Bot,
