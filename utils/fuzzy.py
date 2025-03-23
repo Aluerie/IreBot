@@ -29,11 +29,13 @@ T = TypeVar("T")
 
 
 def ratio(a: str, b: str) -> int:
+    """Return a measure of the sequences' similarity as an integer in the range [0, 100]."""
     m = SequenceMatcher(None, a, b)
     return round(100 * m.ratio())
 
 
 def quick_ratio(a: str, b: str) -> int:
+    """Return an upper bound on `ratio()` relatively quickly."""
     m = SequenceMatcher(None, a, b)
     return round(100 * m.quick_ratio())
 
@@ -75,6 +77,10 @@ def token_sort_ratio(a: str, b: str) -> int:
 
 
 def quick_token_sort_ratio(a: str, b: str) -> int:
+    """Return a measure of the sequences' similarity between 0 and 100 but sorting the token before comparing.
+
+    And using `quick_ratio` instead.
+    """
     a = _sort_tokens(a)
     b = _sort_tokens(b)
     return quick_ratio(a, b)
@@ -164,8 +170,8 @@ def extract[T](
     """
     it = _extraction_generator(query, choices, scorer, score_cutoff)
     if limit is not None:
-        return heapq.nlargest(limit, it, key=operator.itemgetter(1))  # pyright: ignore[reportReturnType]
-    return sorted(it, key=operator.itemgetter(1), reverse=True)  # pyright: ignore[reportReturnType]
+        return heapq.nlargest(limit, it, key=operator.itemgetter(1))  # type: ignore[reportReturnType]
+    return sorted(it, key=operator.itemgetter(1), reverse=True)  # type: ignore[reportReturnType]
 
 
 @overload
@@ -203,7 +209,7 @@ def extract_one[T](
     it = _extraction_generator(query, choices, scorer, score_cutoff)
     try:
         return max(it, key=operator.itemgetter(1))
-    except:
+    except:  # noqa: E722
         # iterator could return nothing
         return None
 

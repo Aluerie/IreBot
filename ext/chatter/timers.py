@@ -66,7 +66,7 @@ class Timers(IreComponent):
 
         self.lines_count += 1
 
-    @ireloop(count=1)
+    @ireloop(count=1, wait_for_ready=True)
     async def timer_task(self) -> None:
         """Task to send periodic messages into irene's channel on timer."""
         await asyncio.sleep(10 * 60)
@@ -84,10 +84,6 @@ class Timers(IreComponent):
             minutes_to_sleep = 69 + random.randint(1, 21)
             await asyncio.sleep(minutes_to_sleep * 60)
 
-    @timer_task.before_loop
-    async def timer_task_before_loop(self) -> None:
-        await self.bot.wait_until_ready()
-
     @commands.Component.listener(name="aluerie_online")
     async def periodic_announcements(self) -> None:
         """Send periodic announcements into irene's channel on timer."""
@@ -98,9 +94,9 @@ class Timers(IreComponent):
                 moderator=const.UserID.Bot,
                 token_for=const.UserID.Bot,
                 message=(
-                    "hey chat soon I will need to grind an affiliate for @AlueBot account. "
-                    f"{const.STV.please} Any follows and lurks for that account are appreciated. "
-                    f"We need 50 followers total and 3 average viewers {const.STV.Erm}."
+                    "hey chat soon I will need to grind an affiliate on @IrenesBot account. "
+                    f"{const.STV.please} Any follows and lurks for that account are appreciated. {const.STV.Erm}"
+                    f"Feel free to {const.STV.catFU} though."
                 ),
             )
 

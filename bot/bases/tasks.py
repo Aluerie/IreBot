@@ -26,7 +26,7 @@ _func = Callable[..., Coroutine[Any, Any, Any]]
 LF = TypeVar("LF", bound=_func)
 
 
-class LueLoop(tasks.Loop[LF]):
+class IreLoop(tasks.Loop[LF]):
     """My subclass for discord.ext.tasks.Loop.
 
     Just extra boilerplate functionality.
@@ -54,24 +54,14 @@ class LueLoop(tasks.Loop[LF]):
         *,
         reconnect: bool,
         name: str | None,
+        wait_for_ready: bool = False,
     ) -> None:
         super().__init__(coro, seconds, hours, minutes, time, count, reconnect, name)
+        if wait_for_ready:
+            self._before_loop = self._wait_for_ready
 
-    #     self._before_loop = self._base_before_loop
-
-    # async def _base_before_loop(self, cog: HasBotAttribute) -> None:  # *args: Any
-    #     """A standard coro to `_before_loop`.
-
-    #     Otherwise every task has same
-    #     ```py
-    #     @my_task.before_loop
-    #     @other_task.before_loop
-    #     async def my_task_before(self):
-    #         await self.bot.wait_until_ready()
-    #     ```
-    #     fragment of code.
-    #     """
-    #     await cog.bot.wait_for_ready()
+    async def _wait_for_ready(self, cog: HasBotAttribute) -> None:  # *args: Any
+        await cog.bot.wait_until_ready()
 
     @override
     async def _error(self, cog: HasBotAttribute, exception: Exception) -> None:
@@ -94,7 +84,8 @@ def ireloop(
     count: int | None = None,
     reconnect: bool = True,
     name: str | None = None,
-) -> Callable[[LF], LueLoop[LF]]:
+    wait_for_ready: bool = False,
+) -> Callable[[LF], IreLoop[LF]]:
     """Copy-pasted `loop` decorator from `discord.ext.tasks` corresponding to AluLoop class.
 
     Notes
@@ -104,8 +95,8 @@ def ireloop(
 
     """
 
-    def decorator(func: LF) -> LueLoop[LF]:
-        return LueLoop(
+    def decorator(func: LF) -> IreLoop[LF]:
+        return IreLoop(
             func,
             seconds=seconds,
             minutes=minutes,
@@ -114,6 +105,7 @@ def ireloop(
             time=time,
             reconnect=reconnect,
             name=name,
+            wait_for_ready=wait_for_ready,
         )
 
     return decorator

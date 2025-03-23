@@ -42,6 +42,10 @@ class GameFlow(IreComponent):
         self.debug_mode: bool = True
 
     async def debug_send(self, message: str) -> None:
+        """Debug send.
+
+        The message will be sent to Irene's chat only if debug mode is activated.
+        """
         if self.debug_mode:
             await self.deliver(f"[debug] {message}")
 
@@ -77,12 +81,13 @@ class GameFlow(IreComponent):
         if self.clean_up_the_database.current_loop == 0:
             await self.streamer.fix_match_history()
 
-    @ireloop(seconds=10)
+    @ireloop(seconds=20)
     async def check_streamers_rich_presence(self) -> None:
         await self.streamer.update()
 
     @commands.Component.listener("event_rich_presence_changed")
     async def rich_presence_changed(self, status: RPStatus) -> None:
+        """Debug alert for when the Irene's Rich Presence change is detected."""
         if status.name == f"{status.__class__.__name__}UnknownValue":
             if any(rp in status.value for rp in BLOCKED_RP_STATUSES):
                 # skip blocked RP statuses, such as Crownfall or Deadlock
@@ -94,14 +99,17 @@ class GameFlow(IreComponent):
 
     @commands.Component.listener("event_reset_streamer")
     async def reset_streamer(self, event_msg: str) -> None:
+        """Debug alert for when the streamer state is reset."""
         await self.debug_send(f"Reset: {event_msg}")
 
     @commands.Component.listener("event_match_data_ready")
     async def announce_data_ready(self) -> None:
+        """Debug alert for when the basic match data for a freshly queued game is ready."""
         await self.debug_send(f"Players+Match Data Ready! (1/2) {const.STV.wickedchad}")
 
     @commands.Component.listener("event_match_hero_ready")
     async def announce_hero_ready(self) -> None:
+        """Debug alert for when hero match data for a freshly queued game is ready."""
         await self.debug_send(f"Hero Info Ready! (2/2) {const.STV.wickedchad}")
 
     # @commands.Component.listener("event_check_last_games")
@@ -123,6 +131,7 @@ class GameFlow(IreComponent):
     # ACTIVE MATCH COMMANDS
 
     async def get_active_match(self, *, is_hero: bool) -> ActiveMatch:
+        """Get Irene's current active match."""
         start = perf_counter()
 
         match = self.streamer.active_match
@@ -145,7 +154,8 @@ class GameFlow(IreComponent):
         msg = f"[{perf_time:.3f}s] {msg}"
         raise errors.GameNotFoundError(msg)
 
-    def fmt_response(self, response: str, is_watch: bool, perf: helpers.measure_time) -> str:
+    def fmt_response(self, response: str, perf: helpers.measure_time, *, is_watch: bool) -> str:
+        """Apply some formatting tags before sending the message."""
         debug_prefix = f"[{perf.end:.3f}s] " if self.debug_mode else ""
         tag = "[Watching] " if is_watch else ""
         return debug_prefix + tag + response
@@ -156,32 +166,41 @@ class GameFlow(IreComponent):
         async with helpers.measure_time() as perf:
             active_match = await self.get_active_match(is_hero=False)
             response = active_match.game_medals()
-        await ctx.send(self.fmt_response(response, active_match.is_watch, perf))
+        await ctx.send(self.fmt_response(response, perf, is_watch=active_match.is_watch))
 
     @commands.command()
     async def ranked(self, ctx: IreContext) -> None:
-        """Fetch each player rank medals in the current game."""
+        """Show whether the current game is ranked or not."""
         async with helpers.measure_time() as perf:
             active_match = await self.get_active_match(is_hero=False)
             response = active_match.ranked()
-        await ctx.send(self.fmt_response(response, active_match.is_watch, perf))
+        await ctx.send(self.fmt_response(response, perf, is_watch=active_match.is_watch))
 
     @commands.command()
     async def smurfs(self, ctx: IreContext) -> None:
+        """Show amount of total games each player has on their accounts.
+
+        Not really a "smurf detector", but it's quite good initial metric.
+        """
         async with helpers.measure_time() as perf:
             active_match = await self.get_active_match(is_hero=False)
             response = active_match.smurfs()
-        await ctx.send(self.fmt_response(response, active_match.is_watch, perf))
+        await ctx.send(self.fmt_response(response, perf, is_watch=active_match.is_watch))
 
     @commands.command(aliases=["items", "item", "player"])
     async def profile(self, ctx: IreContext, *, argument: str) -> None:
+        """Fetch items and some profile data about a certain player in the game.
+
+        `argument` can be a hero name, hero alias, player slot or colour.
+        """
         async with helpers.measure_time() as perf:
             active_match = await self.get_active_match(is_hero=False)
             response = await active_match.profile(argument)
-        await ctx.send(self.fmt_response(response, active_match.is_watch, perf))
+        await ctx.send(self.fmt_response(response, perf, is_watch=active_match.is_watch))
 
     @profile.error
     async def profile_error(self, payload: commands.CommandErrorPayload) -> None:
+        """Error for !profile argument."""
         if isinstance(payload.exception, commands.MissingRequiredArgument):
             await payload.context.send(
                 "You need to provide a hero name (i.e. VengefulSpirit , PA, Mireska, etc) or "
@@ -192,25 +211,27 @@ class GameFlow(IreComponent):
 
     @commands.command(aliases=["matchid"])
     async def match_id(self, ctx: IreContext) -> None:
+        """Show match ID for the current match."""
         async with helpers.measure_time() as perf:
             active_match = await self.get_active_match(is_hero=False)
             response = f"{active_match.match_id}"
-        await ctx.send(self.fmt_response(response, active_match.is_watch, perf))
+        await ctx.send(self.fmt_response(response, perf, is_watch=active_match.is_watch))
 
     # LAST GAME
 
     @commands.command(aliases=["lg", "lm"])
     async def last_game(self, ctx: IreContext) -> None:
+        """Show some data about streamer's previous game."""
         async with helpers.measure_time() as perf:
             last_game = self.streamer.last_game
             response = last_game.last_game_command_response if last_game else "No Data Yet."
-        await ctx.send(self.fmt_response(response, False, perf))
+        await ctx.send(self.fmt_response(response, perf, is_watch=False))
 
     # STREAMER INFO COMMANDS
 
     @commands.command(aliases=["wl", "winloss"])
     async def score(self, ctx: IreContext) -> None:
-        """Show streamer's Win - Loss score for today's gaming session.
+        """Show streamer's Win - Loss score ratio for today's gaming session.
 
         This by design should include offline games as well.
         Gaming sessions are considered separated if they are for at least 6 hours apart.
@@ -218,22 +239,24 @@ class GameFlow(IreComponent):
         # await self.prepare()  # do we need it here ?
         async with helpers.measure_time() as perf:
             response = await self.streamer.wl_command_response()
-        await ctx.send(self.fmt_response(response, False, perf))
+        await ctx.send(self.fmt_response(response, perf, is_watch=False))
 
     @commands.command()
     async def mmr(self, ctx: IreContext) -> None:
+        """Show streamer's MMR."""
         async with helpers.measure_time() as perf:
             response = await self.streamer.mmr_command_response()
-        await ctx.send(self.fmt_response(response, False, perf))
+        await ctx.send(self.fmt_response(response, perf, is_watch=False))
 
     @commands.is_moderator()
     @commands.command(name="setmmr")
     async def set_mmr(self, ctx: IreContext, mmr: int) -> None:
+        """Set streamer's MMR."""
         async with helpers.measure_time() as perf:
             query = "UPDATE ttv_dota_streamers SET mmr = $1 WHERE account_id = $2"
             await self.bot.pool.execute(query, mmr, self.streamer.account_id)
             response = f"Set mmr to {mmr}"
-        await ctx.send(self.fmt_response(response, False, perf))
+        await ctx.send(self.fmt_response(response, perf, is_watch=False))
 
     @ireloop(time=datetime.time(hour=6, minute=34, second=10))
     async def check_twitch_accounts_renames(self) -> None:
@@ -260,6 +283,10 @@ class GameFlow(IreComponent):
     # NOT ACTIVE
     @ireloop(hours=3)
     async def double_check_task(self) -> None:
+        """A backup task to double check if we haven't missed any games.
+
+        Useful to keep W-L as precise as possible.
+        """
         account_id = self.streamer.account_id
 
         partial_user = self.bot.dota.instantiate_partial_user(account_id)

@@ -50,6 +50,8 @@ type ActiveMatch = PlayMatch | WatchMatch
 
 
 class Streamer:
+    """Class representing a streamer object."""
+
     def __init__(self, bot: IreBot, steam_id64: int) -> None:
         self.bot: IreBot = bot
 
@@ -68,9 +70,11 @@ class Streamer:
 
     @property
     def active_match(self) -> PlayMatch | WatchMatch | None:
+        """Get streamer's current active match which is either match they play or watch."""
         return self.play_match or self.watch_match
 
     def reset(self, event_msg: str, *, unsupported_error: str = "") -> None:
+        """Reset the streamer state to neutral."""
         log.debug("Resetting streamer state to play_match=`None`: %s", event_msg)
         if p := self.play_match:
             p.reset()
@@ -89,6 +93,7 @@ class Streamer:
         self.unsupported_error = unsupported_error
 
     async def update(self) -> None:
+        """Central task to update the streamer's state."""
         user = self.bot.dota.get_user(self.steam_id64)
         if not user:
             try:
@@ -97,7 +102,7 @@ class Streamer:
                     user = await self.bot.dota.fetch_user(self.steam_id64)
             except TimeoutError:
                 msg = "TimeoutError when fetching the user."
-                raise errors.PlaceholderRaiseError(msg)
+                raise errors.PlaceholderRaiseError(msg) from None
 
         # don't do anything if not needed.
         rich_presence = user.rich_presence
@@ -302,6 +307,7 @@ class Streamer:
         log.debug("`match_history_ready` is ready.")
 
     async def wl_command_response(self) -> str:
+        """Response for !wl command."""
         if not self.match_history_ready:
             return "Match history is not ready yet."
 
@@ -333,6 +339,7 @@ class Streamer:
         return " \N{BULLET} ".join(f"{category.name} {wl[1]} W - {wl[0]} L" for category, wl in mapping.items())
 
     async def mmr_command_response(self) -> str:
+        """Response for !mmr command."""
         query = "SELECT mmr, medal FROM ttv_dota_streamers WHERE account_id = $1"
         row: MMRCommandQuery = await self.bot.pool.fetchrow(query, self.account_id)
         return f"[Placeholder number, haven't played ranked since 2021] {row['mmr']} \N{BULLET} {row['medal']}"

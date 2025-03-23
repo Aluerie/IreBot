@@ -61,16 +61,19 @@ class Control(BaseDevComponent):
 
     @commands.command()
     async def unload(self, ctx: IreContext, *, extension: Annotated[str, to_extension]) -> None:
+        """Unload the extension."""
         await self.bot.unload_module(extension)
         await ctx.send(f"{const.STV.DankApprove} unloaded {extension}")
 
     @commands.command()
     async def reload(self, ctx: IreContext, *, extension: Annotated[str, to_extension]) -> None:
+        """Reload the extension."""
         await self.bot.reload_module(extension)
         await ctx.send(f"{const.STV.DankApprove} reloaded {extension}")
 
     @commands.command()
     async def load(self, ctx: IreContext, *, extension: Annotated[str, to_extension]) -> None:
+        """Load the extension."""
         await self.bot.load_module(extension)
         await ctx.send(f"{const.STV.DankApprove} loaded {extension}")
 

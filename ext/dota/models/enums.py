@@ -91,6 +91,7 @@ class WinLossCategory(IntEnum):
         return category
 
     def display_name(self, lobby_type: LobbyType, game_mode: GameMode) -> str:
+        """Get name that people usually reference this category by."""
         mapping = {1: "Ranked", 3: "Turbo", 4: "New Player Mode"}
 
         display_name = mapping.get(self.value, None)
@@ -102,8 +103,11 @@ class WinLossCategory(IntEnum):
 class MyStrEnum(Enum, str):
     """An enumeration where all the values are integers, emulates `enum.StrEnum`."""
 
+    __slots__ = ()
+
     if TYPE_CHECKING:
 
+        @override
         def __new__(cls, value: str) -> Self: ...
 
         @override
@@ -161,6 +165,7 @@ class RPStatus(MyStrEnum):
 
     @property
     def display_name(self) -> str:
+        """Get a chat-send friendly display name, if present."""
         try:
             return self.KNOWN_DISPLAY_NAMES[self]
         except KeyError:
@@ -175,5 +180,7 @@ BLOCKED_RP_STATUSES = {
 
 
 class LobbyParam0(StrEnum):
+    """Known Lobby Param 0."""
+
     DemoMode = "#demo_hero_mode_name"
     BotMatch = "#DOTA_lobby_type_name_bot_match"
