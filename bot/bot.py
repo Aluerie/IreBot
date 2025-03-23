@@ -401,11 +401,11 @@ class IreBot(commands.Bot):
 
     @ireloop(count=1)
     async def check_if_online(self) -> None:
-        """Check if aluerie is online - used to make my own (proper) online event instead of twitchio's."""
+        """Check if Irene is online - used to make my own (proper) online event instead of twitchio's."""
         await asyncio.sleep(1.0)  # just in case;
         if await self.irene_stream():
             self.irene_online = True
-            self.dispatch("aluerie_online")
+            self.dispatch("irene_online")
 
     async def event_stream_online(self, _: twitchio.StreamOnline) -> None:
         """Instead of the twitchio event - dispatch my own online event.
@@ -413,12 +413,12 @@ class IreBot(commands.Bot):
         The difference is that my event accounts for the state of my stream when the bot restarts.
         """
         self.irene_online = True
-        self.dispatch("aluerie_online")
+        self.dispatch("irene_online")
 
     async def event_stream_offline(self, _: twitchio.StreamOffline) -> None:
         """Instead of the twitchio event - dispatch my own offline event."""
         self.irene_online = False
-        self.dispatch("aluerie_offline")
+        self.dispatch("irene_offline")
 
     # def show_oauth(self) -> None:
     #     oauth = twitchio.authentication.OAuth(

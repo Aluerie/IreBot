@@ -46,13 +46,13 @@ class Timers(IreComponent):
         ]
         self.lines_count: int = 0
 
-    @commands.Component.listener(name="aluerie_online")
+    @commands.Component.listener(name="irene_online")
     async def stream_online_start_the_task(self) -> None:
         """Start the timer task when stream goes online."""
         if not self.timer_task.is_running():
             self.timer_task.start()
 
-    @commands.Component.listener(name="aluerie_offline")
+    @commands.Component.listener(name="irene_offline")
     async def stream_offline_cancel_the_task(self) -> None:
         """Cancel the timer task when stream goes offline."""
         self.timer_task.cancel()
@@ -88,14 +88,15 @@ class Timers(IreComponent):
     async def periodic_announcements(self) -> None:
         """Send periodic announcements into irene's channel on timer."""
         # lazy implementation
-        for _ in range(3):
-            await asyncio.sleep(60 * 3)
+        await asyncio.sleep(60 * 3)
+        for _ in range(10):
+            await asyncio.sleep(3600)
             await self.irene.send_announcement(
                 moderator=const.UserID.Bot,
                 token_for=const.UserID.Bot,
                 message=(
                     "hey chat soon I will need to grind an affiliate on @IrenesBot account. "
-                    f"{const.STV.please} Any follows and lurks for that account are appreciated. {const.STV.Erm}"
+                    f"{const.STV.please} Any follows and lurks for that account are appreciated. {const.STV.Erm} "
                     f"Feel free to {const.STV.catFU} though."
                 ),
             )
