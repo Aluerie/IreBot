@@ -84,7 +84,7 @@ class Timers(IreComponent):
             minutes_to_sleep = 69 + random.randint(1, 21)
             await asyncio.sleep(minutes_to_sleep * 60)
 
-    @commands.Component.listener(name="aluerie_online")
+    @commands.Component.listener(name="irene_online")
     async def periodic_announcements(self) -> None:
         """Send periodic announcements into irene's channel on timer."""
         # lazy implementation
