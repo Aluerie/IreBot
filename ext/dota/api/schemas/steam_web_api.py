@@ -11,6 +11,8 @@ __all__ = ("RealTimeStatsResponse",)
 
 
 class RealTimeStatsResponse(TypedDict):
+    """Schema for `get_real_time_stats` response."""
+
     match: Match
     teams: list[Team]
     buildings: list[Building]

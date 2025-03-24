@@ -20,6 +20,8 @@ class Team(IntEnum):
 
 
 class PlayerMatchOutcome(IntEnum):
+    """Match Outcome."""
+
     Loss = 0
     Win = 1
     Abandon = 21
@@ -32,6 +34,7 @@ class PlayerMatchOutcome(IntEnum):
         return self.value < 2  # hardcoded value, scary :o
 
     def mmr_change(self, lobby_type: int) -> int:
+        """Get expected mmr change per lobby."""
         if lobby_type == 7 and self.valid:
             # "2 * boolean - 1" is just a fancy way to do {true -> 1, false -> -1} mapping
             return (2 * self.value - 1) * 25
@@ -50,6 +53,7 @@ class PlayerMatchOutcome(IntEnum):
 
     @classmethod
     def create_from_history(cls, minimal_match: MatchMinimal, history_match: MatchHistoryMatch) -> PlayerMatchOutcome:
+        """Create an enum from MatchHistoryMatch object."""
         if history_match.abandon:
             return PlayerMatchOutcome.Abandon
         outcome = minimal_match.outcome

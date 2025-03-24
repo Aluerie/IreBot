@@ -63,6 +63,7 @@ class GameFlow(IreComponent):
 
     @ireloop(hours=48)
     async def clean_up_the_database(self) -> None:
+        """Clean the database from old matches."""
         log.debug("Task: cleaning database from too old matches.")
         query = """
             DELETE FROM ttv_dota_matches
@@ -83,6 +84,7 @@ class GameFlow(IreComponent):
 
     @ireloop(seconds=20)
     async def check_streamers_rich_presence(self) -> None:
+        """The main loop checking streamer's rich presence every 20 seconds."""
         await self.streamer.update()
 
     @commands.Component.listener("event_rich_presence_changed")

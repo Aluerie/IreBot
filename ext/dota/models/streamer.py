@@ -189,6 +189,7 @@ class Streamer:
         self,
         history_match: MatchHistoryMatch,
     ) -> tuple[MatchMinimal, PlayerMatchOutcome]:
+        """Add completed match to the database."""
         partial_match = self.bot.dota.instantiate_partial_match(history_match.id)
         minimal_match = await partial_match.minimal()
 
@@ -211,6 +212,7 @@ class Streamer:
         return minimal_match, outcome
 
     async def update_mmr(self, mmr_change: int) -> None:
+        """Update streamer's mmr."""
         partial_user = self.bot.dota.instantiate_partial_user(self.account_id)
         profile_card = await partial_user.dota2_profile_card()
         medal = rank_medal_display_name(profile_card)
@@ -223,6 +225,7 @@ class Streamer:
 
     @ireloop(seconds=20, count=30)
     async def update_last_game(self) -> None:
+        """Task to update streamer's last game."""
         mmr_change: int = 0
 
         partial_user = self.bot.dota.instantiate_partial_user(self.account_id)

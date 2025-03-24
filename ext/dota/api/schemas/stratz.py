@@ -11,6 +11,8 @@ __all__ = ("ItemsResponse",)
 
 
 class ItemsResponse(TypedDict):
+    """Schema for `get_items` response."""
+
     data: ItemData
 
 

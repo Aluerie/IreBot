@@ -110,6 +110,7 @@ class GameDataStorage[VT, PseudoVT](abc.ABC):
             return self.cached_data[object_id]
 
     async def send_unknown_value_report(self, object_id: int) -> None:
+        """Send a notification to the developers when unknown value appears to be requested."""
         embed = discord.Embed(
             color=discord.Colour.red(),
             title=f"Unknown {self.__class__.__name__} appeared!",
@@ -119,7 +120,8 @@ class GameDataStorage[VT, PseudoVT](abc.ABC):
 
     @staticmethod
     @abc.abstractmethod
-    def generate_unknown_object(object_id: int) -> PseudoVT: ...
+    def generate_unknown_object(object_id: int) -> PseudoVT:
+        """Generate unknown object."""
 
     async def by_id(self, object_id: int) -> VT | PseudoVT:
         """Get storage object by its ID."""
@@ -131,6 +133,7 @@ class GameDataStorage[VT, PseudoVT](abc.ABC):
             return storage_object
 
     async def all(self) -> list[VT | PseudoVT]:
+        """Get all objects in the storage."""
         data = await self.get_cached_data()
         return list(data.values())
 
@@ -150,6 +153,8 @@ class Item:
 
 
 class Items(GameDataStorage[Item, Item]):
+    """Storage for Dota 2 Items."""
+
     @override
     async def fill_data(self) -> dict[int, Item]:
         items = await self.bot.dota.stratz.get_items()

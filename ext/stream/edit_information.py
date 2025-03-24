@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any
 from twitchio.ext import commands
 
 from bot import IreComponent, ireloop
-from utils import const, formats
+from utils import const, formats, guards
 
 if TYPE_CHECKING:
     import twitchio
@@ -233,6 +233,7 @@ class EditInformation(IreComponent):
         query = "DELETE FROM ttv_stream_titles WHERE edit_time < $1"
         await self.bot.pool.execute(query, cutoff_dt)
 
+    @guards.is_online()
     @commands.cooldown(rate=1, per=60, key=commands.BucketType.channel)
     @commands.command()
     async def marker(self, ctx: IreContext, description: str) -> None:
