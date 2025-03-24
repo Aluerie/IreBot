@@ -233,11 +233,7 @@ class SimpleCommands(IreComponent):
     @commands.command(aliases=["so"])
     async def shoutout(self, ctx: IreContext, user: twitchio.User) -> None:
         """Do /shoutout to a user."""
-        await ctx.broadcaster.send_shoutout(
-            to_broadcaster=user.id,
-            moderator=const.UserID.Bot,
-            token_for=const.UserID.Bot,
-        )
+        await ctx.broadcaster.send_shoutout(to_broadcaster=user.id, moderator=const.UserID.Bot)
 
     @commands.command()
     async def song(self, ctx: IreContext) -> None:

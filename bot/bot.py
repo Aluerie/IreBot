@@ -271,8 +271,9 @@ class IreBot(commands.Bot):
         await super().close()
 
     @override
-    def get_context(self, message: twitchio.ChatMessage, *, cls: Any = IreContext) -> IreContext:
-        return super().get_context(message, cls=cls)
+    def get_context(self, payload: twitchio.ChatMessage, *, cls: Any = IreContext) -> IreContext:
+        # they have channel points commands but I'm not using it (yet)
+        return super().get_context(payload, cls=cls)
 
     # @override  # interesting that it's not an override
     async def event_ready(self) -> None:
@@ -285,7 +286,7 @@ class IreBot(commands.Bot):
     async def event_command_error(self, payload: commands.CommandErrorPayload) -> None:
         """Called when error happens during command invoking."""
         command = payload.context.command
-        ctx = payload.context
+        ctx: IreContext = payload.context  # type: ignore[reportAssignmentType] Channel Point commands lead to these things.
         error = payload.exception
 
         if command and command.has_error and ctx.error_dispatched:

@@ -188,13 +188,22 @@ class EditInformation(IreComponent):
         now = datetime.datetime.now(datetime.UTC)
         # time check is needed so we don't repeat notif that comes from !game !title commands.
 
-        if self.game_tracked != update.category_name and (now - self.game_updated_dt).seconds > 15:
-            await update.broadcaster.send_message(
-                sender=const.UserID.Bot,
-                message=f'{const.STV.donkDetective} Game was changed to "{update.category_name}"',
+        if self.game_tracked != update.category_name:
+            if (now - self.game_updated_dt).seconds > 15:
+                # time condition so the bot doesn't announce changes done via !game command
+                new_category = update.category_name or "No category"
+                await update.broadcaster.send_message(
+                    sender=const.UserID.Bot,
+                    message=f'{const.STV.donkDetective} Game was changed to "{new_category}"',
+                )
+
+            # why it's not a default functionality ?
+            await update.broadcaster.create_stream_marker(
+                token_for=const.UserID.Bot, description=f"Game: {update.category_name}"
             )
 
         if self.title_tracked != update.title and (now - self.title_updated_dt).seconds > 15:
+            # time condition so the bot doesn't announce changes done via !title command
             await update.broadcaster.send_message(
                 sender=const.UserID.Bot,
                 message=f'{const.STV.DankThink} Title was changed to "{update.title}"',
@@ -223,6 +232,16 @@ class EditInformation(IreComponent):
         cutoff_dt = datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=30)
         query = "DELETE FROM ttv_stream_titles WHERE edit_time < $1"
         await self.bot.pool.execute(query, cutoff_dt)
+
+    @commands.cooldown(rate=1, per=60, key=commands.BucketType.channel)
+    @commands.command()
+    async def marker(self, ctx: IreContext, description: str) -> None:
+        """Create a stream marker.
+
+        Stream marker for those unaware is a just a timestamp to mark in Twitch.tv Video Highlighter.
+        """
+        await ctx.broadcaster.create_stream_marker(token_for=const.UserID.Bot, description=description)
+        await ctx.send(f"Successfully created a marker. {const.STV.DankApprove}")
 
 
 async def setup(bot: IreBot) -> None:

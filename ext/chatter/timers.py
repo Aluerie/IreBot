@@ -93,7 +93,6 @@ class Timers(IreComponent):
             await asyncio.sleep(3600 * 2 + 60 * random.randint(0, 120))
             await self.irene.send_announcement(
                 moderator=const.UserID.Bot,
-                token_for=const.UserID.Bot,
                 message=(
                     "hey chat soon I will need to grind an affiliate on @IrenesBot account. "
                     f"{const.STV.please} Any follows and lurks for that account are appreciated. {const.STV.Erm} "

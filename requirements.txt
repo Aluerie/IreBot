@@ -1,7 +1,7 @@
 --extra-index-url https://pip.twitchio.dev  
 
 # TWITCH
-twitchio[starlette] @ git+https://github.com/PythonistaGuild/TwitchIO.git@dev/3.0
+twitchio[starlette] @ git+https://github.com/PythonistaGuild/TwitchIO.git@main
 # py -m pip install "twitchio[starlette] @ git+https://github.com/PythonistaGuild/TwitchIO.git@dev/3.0" --force-reinstall 
 
 # DISCORD

@@ -79,14 +79,9 @@ class Alerts(IreComponent):
         streamer = await raid.to_broadcaster.user()
         raider_channel_info = await raid.from_broadcaster.fetch_channel_info()
 
-        await streamer.send_shoutout(
-            to_broadcaster=raid.from_broadcaster.id,
-            moderator=const.UserID.Bot,
-            token_for=const.UserID.Bot,
-        )
+        await streamer.send_shoutout(to_broadcaster=raid.from_broadcaster.id, moderator=const.UserID.Bot)
         await streamer.send_announcement(
             moderator=const.UserID.Bot,
-            token_for=const.UserID.Bot,
             message=(
                 f"@{raid.from_broadcaster.display_name} just raided us! "
                 f'They were playing {raider_channel_info.game_name} with title "{raider_channel_info.title}". '

@@ -47,11 +47,13 @@ class Counters(IreComponent):
     @commands.is_owner()
     @commands.group()
     async def counter(self, ctx: IreContext) -> None:
+        """Group command for !counter commands."""
         # TODO: I guess, we need to implement "send_help"
         await ctx.send("Use this command together with subcommands delete/create/change")
 
     @counter.command()
     async def create(self, ctx: IreContext, name: str) -> None:
+        """Create a counter."""
         query = """
             INSERT INTO ttv_counters
             (name, value)
