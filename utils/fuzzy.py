@@ -27,6 +27,15 @@ if TYPE_CHECKING:
 
 T = TypeVar("T")
 
+__all__ = (
+    "extract",  # exact matches
+    "extract_one",  # exact best match
+    "extract_or_exact",  # exact match if present or matches
+    "extract_top_matches",  # matches with only top score
+    "find_one",  # regex, only one match
+    "finder",  # regex
+)
+
 
 def ratio(a: str, b: str) -> int:
     """Return a measure of the sequences' similarity as an integer in the range [0, 100]."""
@@ -156,7 +165,7 @@ def extract[T](
 
 def extract[T](
     query: str,
-    choices: dict[str, T] | Sequence[str],
+    choices: Sequence[str] | dict[str, T],
     *,
     scorer: Callable[[str, str], int] = quick_ratio,
     score_cutoff: int = 0,
@@ -244,6 +253,15 @@ def extract_or_exact[T](
     score_cutoff: int = 0,
     limit: int | None = None,
 ) -> list[tuple[str, int]] | list[tuple[str, int, T]]:
+    """Extract: Select the best match in a list or dictionary of choices.
+
+    Find best matches in a list or dictionary of choices, return a
+    list of tuples containing the match and its score. If a dictionary
+    is used, also returns the key for each match.
+
+    However, if "exact" match is present (the top one is exact or more than 30% more correct than the top)
+    then return that instead of "extract" results.
+    """
     matches = extract(query, choices, scorer=scorer, score_cutoff=score_cutoff, limit=limit)
     if len(matches) == 0:
         return []
@@ -262,7 +280,7 @@ def extract_or_exact[T](
 
 
 @overload
-def extract_matches(
+def extract_top_matches(
     query: str,
     choices: Sequence[str],
     *,
@@ -272,7 +290,7 @@ def extract_matches(
 
 
 @overload
-def extract_matches[T](
+def extract_top_matches[T](
     query: str,
     choices: dict[str, T],
     *,
@@ -281,13 +299,18 @@ def extract_matches[T](
 ) -> list[tuple[str, int, T]]: ...
 
 
-def extract_matches[T](
+def extract_top_matches[T](
     query: str,
     choices: dict[str, T] | Sequence[str],
     *,
     scorer: Callable[[str, str], int] = quick_ratio,
     score_cutoff: int = 0,
 ) -> list[tuple[str, int]] | list[tuple[str, int, T]]:
+    """Find matches with the highest score in a list of choices.
+
+    This is a convenience method which only returns top matches.
+    See extract() for the full arguments list.
+    """
     matches = extract(query, choices, scorer=scorer, score_cutoff=score_cutoff, limit=None)
     if len(matches) == 0:
         return []
@@ -347,6 +370,7 @@ def finder(
     key: Callable[[T], str] | None = None,
     raw: bool = False,
 ) -> list[tuple[int, int, T]] | list[T]:
+    """Find best matches using regex."""
     suggestions: list[tuple[int, int, T]] = []
     text = str(text)
     pat = ".*?".join(map(re.escape, text))
@@ -367,7 +391,8 @@ def finder(
     return [z for _, _, z in sorted(suggestions, key=sort_key)]
 
 
-def find(text: str, collection: Iterable[str], *, key: Callable[[str], str] | None = None) -> str | None:
+def find_one(text: str, collection: Iterable[str], *, key: Callable[[str], str] | None = None) -> str | None:
+    """Find one single best match using regex."""
     try:
         return finder(text, collection, key=key)[0]
     except IndexError:

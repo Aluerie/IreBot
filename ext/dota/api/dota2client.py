@@ -38,9 +38,11 @@ class Dota2Client(Client):
         self.items = Items(twitch_bot)
 
     def irene(self) -> PartialUser:
+        """Irene's Dota/Steam Profile (partial user)."""
         return self.instantiate_partial_user(config["STEAM"]["IRENE_ID64"])
 
     async def start_helpers(self) -> None:
+        """Start helping services for steam."""
         if not self.started:
             await self.steam_web_api.__aenter__()  # noqa: PLC2801
             await self.stratz.__aenter__()  # noqa: PLC2801
