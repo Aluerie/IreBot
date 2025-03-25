@@ -87,12 +87,14 @@ class Control(BaseDevComponent):
             fix the problem of soft-locking the commands.
         """
         self.bot.irene_online = True
+        self.bot.dispatch("irene_online")
         await ctx.send(f"I'll treat {ctx.broadcaster.display_name} as online now {const.STV.dankHey}")
 
     @commands.command()
     async def offline(self, ctx: IreContext) -> None:
         """Make the bot treat streamer as offline."""
         self.bot.irene_online = False
+        self.bot.dispatch("irene_offline")
         await ctx.send(f"I'll treat {ctx.broadcaster.display_name} as offline now {const.STV.donkSad}")
 
 

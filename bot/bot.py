@@ -87,9 +87,10 @@ class IreBot(commands.Bot):
             # adapter=adapter,
             # TODO: fill in scopes= argument once we figure out what it's used for :x
         )
-        self.database: asyncpg.Pool[asyncpg.Record] = pool
-        # asyncpg typehinting crutch, read `utils.database` for more
+        self.test: bool = platform.system() == "Windows"
+        """Assume that I do testing things on my home Windows machine and the real bot is hosted on Linux VPS."""
         self.pool: PoolTypedWithAny = pool  # pyright: ignore[reportAttributeAccessIssue]
+        """^asyncpg typehinting crutch, read `utils.database` for more."""
         self.session: ClientSession = session
         self.extensions: tuple[str, ...] = EXTENSIONS
 
@@ -394,7 +395,7 @@ class IreBot(commands.Bot):
     @discord.utils.cached_property
     def error_ping(self) -> str:
         """Error Role ping used to notify the developer(-s) about some errors."""
-        return "<@&1306631362870120600>" if platform.system() == "Windows" else "<@&1116171071528374394>"
+        return "<@&1337106675433340990>" if self.test else "<@&1116171071528374394>"
 
     async def irene_stream(self) -> twitchio.Stream | None:
         """Shortcut to get @Irene's stream."""

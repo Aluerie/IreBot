@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import platform
 from typing import TYPE_CHECKING, Any
 
 from twitchio.ext import commands
@@ -18,8 +17,8 @@ def is_vps() -> Any:
     kill the bot process or reboot it.
     """
 
-    def predicate(_: IreContext) -> bool:
-        if platform.system() == "Windows":
+    def predicate(ctx: IreContext) -> bool:
+        if ctx.bot.test:
             # wrong PC
             msg = f"Only production bot allows usage of this command {const.FFZ.peepoPolice}"
             raise errors.GuardError(msg)

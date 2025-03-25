@@ -150,7 +150,7 @@ class Alerts(IreComponent):
         if ban.user.name:
             self.ban_list.add(ban.user.name.lower())
 
-    @ireloop(count=1, wait_for_ready=True)
+    @ireloop(count=1)
     async def fill_known_chatters(self) -> None:
         """The task that ensures the reward "First" under a specific id exists.
 

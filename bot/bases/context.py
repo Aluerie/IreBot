@@ -16,7 +16,8 @@ class IreContext(commands.Context):
     if TYPE_CHECKING:
         bot: IreBot
 
-        # I will only use IreContext with message commands (twitchio also provides channel points commands).
-        # therefore some type-hints can be reduced.
+        # I will only use IreContext with message commands
+        # (twitchio also provides channel points commands).
+        # therefore some type-hints can be reduced for convenience.
         chatter: twitchio.Chatter
         message: twitchio.ChatMessage

@@ -38,12 +38,12 @@ class MiscellaneousCommands(IreComponent):
     async def run(self, ctx: IreContext) -> None:
         """Explanation of my first Sekiro hitless run."""
         msg = (
-            "Bosses I like %, Sword+Shuriken Focused. "
+            "Bosses I like %."
             "On paper, it's Immortal Severance with 7 extra bosses including loading a save file "
-            "with Inner Father, Fire Isshin and Emma reflections. "
-            "DB NKC LL NC GL. "
-            "The only boss that I blast with MDs is Ape. "
-            "My notes: !notes sekiro."
+            "for Inner Father, Fire Isshin and Emma reflections. "
+            "DB NKC LL NC GL. Sword+Shuriken Focused."
+            "The only boss that I blast with MDs is Ape (I hate that boss). "
+            "My notes (kinda chaotic): !notes sekiro."
         )
         await ctx.send(msg)
 
