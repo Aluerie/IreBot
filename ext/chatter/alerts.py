@@ -175,6 +175,7 @@ class Alerts(IreComponent):
 
         await asyncio.sleep(4.0)  # wait for auto-mod / WizeBot to ban super-sus users.
         if message.chatter.name in self.ban_list:
+            await message.broadcaster.send_message(sender=self.bot.bot_id, message=(const.STV.FirstTimeDentge))
             return
 
         query = "INSERT INTO ttv_chatters (user_id, name_lower) VALUES ($1, $2)"

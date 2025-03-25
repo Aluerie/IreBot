@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 import asyncio
-import itertools
+import datetime
 import random
 from typing import TYPE_CHECKING, Any
 
 from twitchio.ext import commands
 
-from bot import IreComponent, ireloop
+from bot import IreComponent
 from utils import const
 
 if TYPE_CHECKING:
@@ -21,6 +21,12 @@ class Timers(IreComponent):
 
     def __init__(self, bot: IreBot, *args: Any, **kwargs: Any) -> None:
         super().__init__(bot, *args, **kwargs)
+
+        self.lines_count: int = 0
+        self.index: int = 0
+        self.cooldown: datetime.timedelta = datetime.timedelta(hours=1)
+        self._most_recent: datetime.datetime | None = None
+        self._lock: asyncio.Lock = asyncio.Lock()
 
         self.messages: list[str] = [
             f"FIX YOUR POSTURE {const.BTTV.weirdChamp}",
@@ -44,53 +50,57 @@ class Timers(IreComponent):
             # "Discord discord.gg/K8FuDeP",
             # "if you have nothing to do Sadge you can try !randompasta. Maybe you'll like it Okayge",
         ]
-        self.lines_count: int = 0
 
     @commands.Component.listener(name="irene_online")
     async def stream_online_start_the_task(self) -> None:
-        """Start the timer task when stream goes online."""
-        if not self.timer_task.is_running():
-            self.timer_task.start()
+        """Start counting messages when stream goes online."""
+        random.shuffle(self.messages)
+        self.index = 0
+        self.bot.add_listener(self.count_messages, event="event_message")
 
     @commands.Component.listener(name="irene_offline")
     async def stream_offline_cancel_the_task(self) -> None:
-        """Cancel the timer task when stream goes offline."""
-        self.timer_task.cancel()
+        """Cancel the counting messages listener when stream goes offline."""
+        self.bot.remove_listener(self.count_messages)
 
-    @commands.Component.listener(name="message")
+    # @commands.Component.listener(name="message")
     async def count_messages(self, message: twitchio.ChatMessage) -> None:
-        """Count messages between timers so the bot doesn't spam fill up an empty chat."""
+        """The listener responsible for sending timer-messages.
+
+        Timer messages are sent if the following conditions are met
+        * there were X amount of messages in the chat between bot timer-messages
+        * Y time passed between those.
+
+        If these two are fulfilled then the bot sends a semi-periodic message in the chat.
+        """
         if message.chatter.name in const.Bots:
             # do not count messages from known bot accounts
             return
 
         self.lines_count += 1
+        async with self._lock:
+            if self._most_recent and (datetime.datetime.now(datetime.UTC) - self._most_recent) < self.cooldown:
+                # we already have a timer to send
+                return
 
-    @ireloop(count=1, wait_for_ready=True)
-    async def timer_task(self) -> None:
-        """Task to send periodic messages into irene's channel on timer."""
-        await asyncio.sleep(10 * 60)
-        messages = self.messages.copy()
-        random.shuffle(messages)
+            if self.lines_count > 99:
+                await asyncio.sleep(30 + random.randint(1, 5 * 60))
+                await self.deliver(self.messages[self.index % len(self.messages)])
 
-        # refresh lines count so it only counts messages from the current stream.
-        self.lines_count = 0
-        for text in itertools.cycle(messages):
-            while self.lines_count < 99:
-                await asyncio.sleep(100)
-
-            self.lines_count = 0
-            await self.deliver(text)
-            minutes_to_sleep = 69 + random.randint(1, 21)
-            await asyncio.sleep(minutes_to_sleep * 60)
+                # reset the index vars
+                self.index += 1
+                self.lines_count = 0
+                self._most_recent = datetime.datetime.now(datetime.UTC)
 
     @commands.Component.listener(name="irene_online")
     async def periodic_announcements(self) -> None:
         """Send periodic announcements into irene's channel on timer."""
         # lazy implementation
         await asyncio.sleep(60 * 5)
-        for _ in range(10):
-            await asyncio.sleep(3600 * 2 + 60 * random.randint(0, 120))
+        for _ in range(3):
+            if not self.bot.irene_online:
+                return
+
             await self.irene.send_announcement(
                 moderator=const.UserID.Bot,
                 message=(
@@ -99,6 +109,7 @@ class Timers(IreComponent):
                     f"Feel free to {const.STV.catFU} though."
                 ),
             )
+            await asyncio.sleep(3600 * 2 + 60 * random.randint(0, 120))
 
 
 async def setup(bot: IreBot) -> None:
