@@ -1,12 +1,13 @@
 from __future__ import annotations
 
+import asyncio
 import logging
 import random
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, override
 
 from twitchio.ext import commands
 
-from bot import IreComponent
+from bot import IreComponent, ireloop
 from utils import const, formats
 
 if TYPE_CHECKING:
@@ -26,6 +27,17 @@ class Alerts(IreComponent):
     def __init__(self, bot: IreBot, *args: Any, **kwargs: Any) -> None:
         super().__init__(bot, *args, **kwargs)
         self.ban_list: set[str] = set()
+        self.known_chatters: list[str] = []
+
+    @override
+    async def component_load(self) -> None:
+        self.fill_known_chatters.start()
+        await super().component_load()
+
+    @override
+    async def component_teardown(self) -> None:
+        self.fill_known_chatters.cancel()
+        await super().component_teardown()
 
     # SECTION 1.
     # Channel Points beta test event (because it's the easiest event to test out)
@@ -138,22 +150,44 @@ class Alerts(IreComponent):
         if ban.user.name:
             self.ban_list.add(ban.user.name.lower())
 
-    # @commands.Component.listener(name="message")
-    # async def first_message(self, message: twitchio.ChatMessage) -> None:
-    #     """Greet first time chatters with FirstTimeChadder treatment.
+    @ireloop(count=1, wait_for_ready=True)
+    async def fill_known_chatters(self) -> None:
+        """The task that ensures the reward "First" under a specific id exists.
 
-    #     This functions filters out spam-bots that should be perma-banned right away by other features or other bots.
-    #     """
-    #     if not message.first or not message.content:
-    #         return
+        Just a fool proof measure in case I randomly snap and delete it.
+        """
+        query = "SELECT name_lower FROM ttv_chatters"
+        self.known_chatters: list[str] = [r for (r,) in await self.bot.pool.fetch(query)]
 
-    #     await asyncio.sleep(3.3)
-    #     if message.author.name.lower() not in self.ban_list:
-    #         content = (
-    #             f"{const.STV.FirstTimeChadder} or {const.STV.FirstTimeDentge} "
-    #             f"\N{WHITE QUESTION MARK ORNAMENT} {const.STV.DankThink}"
-    #         )
-    #         await message.channel.send(content)
+    @commands.Component.listener(name="message")
+    async def first_message(self, message: twitchio.ChatMessage) -> None:
+        """Greet first time chatters with FirstTimeChadder treatment.
+
+        This functions filters out spam-bots that should be perma-banned right away by other features or other bots.
+        """
+        # todo: change this when twitch adds it to event sub
+        if not message.text:
+            return
+
+        if message.chatter.name in self.known_chatters:
+            # if in database: a known chatter
+            return
+
+        await asyncio.sleep(4.0)  # wait for auto-mod / WizeBot to ban super-sus users.
+        if message.chatter.name in self.ban_list:
+            return
+
+        query = "INSERT INTO ttv_chatters (user_id, name_lower) VALUES ($1, $2)"
+        await self.bot.pool.execute(query, message.chatter.id, message.chatter.name)
+        self.known_chatters.append(message.chatter.name or "")
+
+        await message.broadcaster.send_message(
+            sender=self.bot.bot_id,
+            message=(
+                f"{const.STV.FirstTimeChadder} or {const.STV.FirstTimeDentge} "
+                f"\N{WHITE QUESTION MARK ORNAMENT} {const.STV.DankThink}"
+            ),
+        )
 
     @commands.Component.listener(name="subscription")
     async def subscription(self, subscribe: twitchio.ChannelSubscribe) -> None:

@@ -63,3 +63,9 @@ CREATE TABLE IF NOT EXISTS ttv_tokens (
     token TEXT NOT NULL, 
     refresh TEXT NOT NULL
 );
+
+
+CREATE TABLE IF NOT EXISTS ttv_chatters (
+    user_id TEXT PRIMARY KEY, 
+    name_lower TEXT NOT NULL
+);
