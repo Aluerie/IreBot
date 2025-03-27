@@ -4,14 +4,13 @@ import contextlib
 import datetime
 from typing import TYPE_CHECKING, Any
 
+import twitchio
 from twitchio.ext import commands
 
 from bot import IreComponent, ireloop
 from utils import const, formats, guards
 
 if TYPE_CHECKING:
-    import twitchio
-
     from bot import IreBot, IreContext
 
 
