@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import datetime
 from typing import TYPE_CHECKING, Any
 
@@ -79,6 +80,7 @@ class EditInformation(IreComponent):
             "dota": "Dota 2",
             "er": "Elden Ring",
             "sk": "Sekiro",
+            "code": "Software and Game Development",
         }
         game_name = game_keywords.get(game_name, game_name)
 
@@ -198,9 +200,11 @@ class EditInformation(IreComponent):
                 )
 
             # why it's not a default functionality ?
-            await update.broadcaster.create_stream_marker(
-                token_for=const.UserID.Irene, description=f"Game: {new_category}"
-            )
+            if self.bot.irene_online:
+                with contextlib.suppress(twitchio.HTTPException):
+                    await update.broadcaster.create_stream_marker(
+                        token_for=const.UserID.Irene, description=f"Game: {new_category}"
+                    )
 
         if self.title_tracked != update.title and (now - self.title_updated_dt).seconds > 15:
             # time condition so the bot doesn't announce changes done via !title command

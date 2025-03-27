@@ -291,7 +291,7 @@ class GameFlow(IreComponent):
         """
         account_id = self.streamer.account_id
 
-        partial_user = self.bot.dota.instantiate_partial_user(account_id)
+        partial_user = self.bot.dota.create_partial_user(account_id)
         match_history = await partial_user.match_history()
 
         history_match_ids = {match.id: match for match in match_history}

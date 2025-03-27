@@ -190,7 +190,7 @@ class Streamer:
         history_match: MatchHistoryMatch,
     ) -> tuple[MatchMinimal, PlayerMatchOutcome]:
         """Add completed match to the database."""
-        partial_match = self.bot.dota.instantiate_partial_match(history_match.id)
+        partial_match = self.bot.dota.create_partial_match(history_match.id)
         minimal_match = await partial_match.minimal()
 
         outcome = PlayerMatchOutcome.create_from_history(minimal_match, history_match)
@@ -213,7 +213,7 @@ class Streamer:
 
     async def update_mmr(self, mmr_change: int) -> None:
         """Update streamer's mmr."""
-        partial_user = self.bot.dota.instantiate_partial_user(self.account_id)
+        partial_user = self.bot.dota.create_partial_user(self.account_id)
         profile_card = await partial_user.dota2_profile_card()
         medal = rank_medal_display_name(profile_card)
         query = """
@@ -228,7 +228,7 @@ class Streamer:
         """Task to update streamer's last game."""
         mmr_change: int = 0
 
-        partial_user = self.bot.dota.instantiate_partial_user(self.account_id)
+        partial_user = self.bot.dota.create_partial_user(self.account_id)
         match_history = await partial_user.match_history()
 
         matches_to_pop = []
@@ -281,7 +281,7 @@ class Streamer:
         last_known_match_id: int | None = await self.bot.pool.fetchval(query, self.account_id)
 
         # 2. Fill in Last Game from Match History.
-        partial_user = self.bot.dota.instantiate_partial_user(self.account_id)
+        partial_user = self.bot.dota.create_partial_user(self.account_id)
         history_matches = await partial_user.match_history(start_at_match_id=0)
         latest_match = await history_matches[0].minimal()
         latest_outcome = PlayerMatchOutcome.create_from_history(latest_match, history_matches[0])
@@ -415,7 +415,7 @@ class Player:
 
     @ireloop(seconds=5, count=12)
     async def update(self) -> None:
-        partial_user = self.bot.dota.instantiate_partial_user(self.account_id)
+        partial_user = self.bot.dota.create_partial_user(self.account_id)
         profile_card = await partial_user.dota2_profile_card()
 
         self.lifetime_games = profile_card.lifetime_games
