@@ -10,7 +10,7 @@ from discord import Embed
 from twitchio.ext import commands
 
 from bot import IreComponent, ireloop
-from utils import const, formats
+from utils import const, fmt
 
 if TYPE_CHECKING:
     import twitchio
@@ -165,7 +165,7 @@ class Counters(IreComponent):
         ]  # + const.DIGITS[4:10]
         content += " ".join(
             [
-                f"{rank_medals[i]} {row['user_name']}: {formats.plural(row['first_times']):time};"
+                f"{rank_medals[i]} {row['user_name']}: {fmt.plural(row['first_times']):time};"
                 for i, row in enumerate(rows)
             ],
         )

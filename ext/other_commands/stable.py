@@ -12,7 +12,7 @@ from twitchio.ext import commands
 
 from bot import IreComponent
 from config import config
-from utils import const, formats, guards
+from utils import const, fmt, guards
 
 if TYPE_CHECKING:
     from bot import IreBot, IreContext
@@ -268,7 +268,7 @@ class SimpleCommands(IreComponent):
             await ctx.send(f"Stream is offline {const.BTTV.Offline}")
         else:
             uptime = datetime.datetime.now(datetime.UTC) - stream.started_at
-            await ctx.send(f"{formats.timedelta_to_words(uptime)} {const.STV.peepoDapper}")
+            await ctx.send(f"{fmt.timedelta_to_words(uptime)} {const.STV.peepoDapper}")
 
     @commands.command(aliases=["seppuku"])
     async def vanish(self, ctx: IreContext) -> None:

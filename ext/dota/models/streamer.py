@@ -11,7 +11,7 @@ from steam import ID
 from steam.ext.dota2 import GameMode, Hero, LobbyType
 
 from bot import ireloop
-from utils import errors, formats, fuzzy
+from utils import errors, fmt, fuzzy
 
 from ._utils import convert_id3_to_id64, rank_medal_display_name
 from .constants import HERO_ALIASES, PLAYER_COLOURS
@@ -391,7 +391,7 @@ class LastGame:
         link = self.opendota if self.lobby_type == LobbyType.NewPlayerMode else self.stratz
         return (
             f"Last Game - {game_type}: {outcome} as {self.hero.name} {self.kda} "
-            f"\N{MIDDLE DOT} ended {formats.timedelta_to_words(delta, fmt=formats.TimeDeltaFormat.Letter)} ago "
+            f"\N{MIDDLE DOT} ended {fmt.timedelta_to_words(delta, fmt=fmt.TimeDeltaFormat.Letter)} ago "
             f"\N{MIDDLE DOT} {link}"
         )
 

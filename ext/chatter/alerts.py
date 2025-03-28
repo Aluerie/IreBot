@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any, override
 from twitchio.ext import commands
 
 from bot import IreComponent, ireloop
-from utils import const, formats
+from utils import const, fmt
 
 if TYPE_CHECKING:
     import twitchio
@@ -43,14 +43,14 @@ class Alerts(IreComponent):
     # Channel Points beta test event (because it's the easiest event to test out)
 
     @commands.Component.listener(name="custom_redemption_add")
-    async def channel_points_redeem(self, event: twitchio.ChannelPointsRedemptionAdd) -> None:
+    async def channel_points_redeem(self, payload: twitchio.ChannelPointsRedemptionAdd) -> None:
         """Somebody redeemed a custom channel points reward."""
         # just testing
-        print(f"{event.user.display_name} redeemed {event.reward.title} (id={event.reward.id}).")  # noqa: T201
+        print(f"{payload.user.display_name} redeemed {payload.reward.title} (id={payload.reward.id}).")  # noqa: T201
 
-        if event.user.id == const.UserID.Irene and event.reward.cost < 4:
+        if payload.user.id == const.UserID.Irene and payload.reward.cost < 4:
             # < 4 is a weird way to exclude my "Text-To-Speech" redemption.
-            await event.broadcaster.send_message(
+            await payload.broadcaster.send_message(
                 sender=self.bot.bot_id,
                 message=f"Thanks, I think bot is working {const.FFZ.PepoG}",
             )
@@ -59,7 +59,7 @@ class Alerts(IreComponent):
     # Actual events
 
     @commands.Component.listener(name="follow")
-    async def follows(self, follow: twitchio.ChannelFollow) -> None:
+    async def follows(self, payload: twitchio.ChannelFollow) -> None:
         """Somebody followed the channel."""
         random_phrase = random.choice(
             [
@@ -80,33 +80,33 @@ class Alerts(IreComponent):
                 const.STV.Hey,
             ],
         )
-        await follow.broadcaster.send_message(
+        await payload.broadcaster.send_message(
             sender=self.bot.bot_id,
-            message=f"@{follow.user.display_name} just followed! Thanks, {random_phrase} {random_emote}",
+            message=f"@{payload.user.display_name} just followed! Thanks, {random_phrase} {random_emote}",
         )
 
     @commands.Component.listener(name="raid")
-    async def raids(self, raid: twitchio.ChannelRaid) -> None:
+    async def raids(self, payload: twitchio.ChannelRaid) -> None:
         """Somebody raided the channel."""
-        streamer = await raid.to_broadcaster.user()
-        raider_channel_info = await raid.from_broadcaster.fetch_channel_info()
+        streamer = await payload.to_broadcaster.user()
+        raider_channel_info = await payload.from_broadcaster.fetch_channel_info()
 
-        await streamer.send_shoutout(to_broadcaster=raid.from_broadcaster.id, moderator=const.UserID.Bot)
+        await streamer.send_shoutout(to_broadcaster=payload.from_broadcaster.id, moderator=const.UserID.Bot)
         await streamer.send_announcement(
             moderator=const.UserID.Bot,
             message=(
-                f"@{raid.from_broadcaster.display_name} just raided us! "
+                f"@{payload.from_broadcaster.display_name} just raided us! "
                 f'They were playing {raider_channel_info.game_name} with title "{raider_channel_info.title}". '
                 f"chat be nice to raiders {const.STV.donkHappy} raiders, feel free to raid and run tho."
             ),
         )
 
     @commands.Component.listener(name="stream_online")
-    async def stream_start(self, online: twitchio.StreamOnline) -> None:
+    async def stream_start(self, payload: twitchio.StreamOnline) -> None:
         """Stream started (went live)."""
-        channel_info = await online.broadcaster.fetch_channel_info()
+        channel_info = await payload.broadcaster.fetch_channel_info()
         # notification
-        await online.broadcaster.send_message(
+        await payload.broadcaster.send_message(
             sender=self.bot.bot_id,
             message=(
                 f"Stream just started {const.STV.FeelsBingMan} "
@@ -114,28 +114,28 @@ class Alerts(IreComponent):
             ),
         )
         # reminder for the streamer
-        await online.broadcaster.send_message(
+        await payload.broadcaster.send_message(
             sender=self.bot.bot_id,
             message=(
-                f"{online.broadcaster.mention} remember to pin some message, check if everything is working. "
+                f"{payload.broadcaster.mention} remember to pin some message, check if everything is working. "
                 f"Maybe turn some music on {const.STV.donkJam}"
             ),
         )
 
     @commands.Component.listener(name="stream_offline")
-    async def stream_end(self, offline: twitchio.StreamOffline) -> None:
+    async def stream_end(self, payload: twitchio.StreamOffline) -> None:
         """Stream ended (went offline)."""
-        await offline.broadcaster.send_message(
+        await payload.broadcaster.send_message(
             sender=self.bot.bot_id,
             message=f"Stream is now offline {const.BTTV.Offline}",
         )
 
     @commands.Component.listener(name="ad_break")
-    async def ad_break(self, ad_begin: twitchio.ChannelAdBreakBegin) -> None:
+    async def ad_break(self, payload: twitchio.ChannelAdBreakBegin) -> None:
         """Ad break."""
-        word = "automatic" if ad_begin.automatic else "manual"
-        human_delta = formats.timedelta_to_words(seconds=ad_begin.duration, fmt=formats.TimeDeltaFormat.Short)
-        await ad_begin.broadcaster.send_message(
+        word = "automatic" if payload.automatic else "manual"
+        human_delta = fmt.timedelta_to_words(seconds=payload.duration, fmt=fmt.TimeDeltaFormat.Short)
+        await payload.broadcaster.send_message(
             sender=self.bot.bot_id,
             message=f"{human_delta} {word} ad starting {const.STV.peepoAds}",
         )
@@ -145,10 +145,10 @@ class Alerts(IreComponent):
         # await channel.send("Ad break is over")
 
     @commands.Component.listener(name="ban")
-    async def bans_timeouts(self, ban: twitchio.Ban) -> None:
+    async def bans_timeouts(self, payload: twitchio.Ban) -> None:
         """Bans."""
-        if ban.user.name:
-            self.ban_list.add(ban.user.name.lower())
+        if payload.user.name:
+            self.ban_list.add(payload.user.name.lower())
 
     @ireloop(count=1)
     async def fill_known_chatters(self) -> None:
@@ -160,29 +160,29 @@ class Alerts(IreComponent):
         self.known_chatters: list[str] = [r for (r,) in await self.bot.pool.fetch(query)]
 
     @commands.Component.listener(name="message")
-    async def first_message(self, message: twitchio.ChatMessage) -> None:
+    async def first_message(self, payload: twitchio.ChatMessage) -> None:
         """Greet first time chatters with FirstTimeChadder treatment.
 
         This functions filters out spam-bots that should be perma-banned right away by other features or other bots.
         """
         # todo: change this when twitch adds it to event sub
-        if not message.text:
+        if not payload.text:
             return
 
-        if message.chatter.name in self.known_chatters:
+        if payload.chatter.name in self.known_chatters:
             # if in database: a known chatter
             return
 
         await asyncio.sleep(4.0)  # wait for auto-mod / WizeBot to ban super-sus users.
-        if message.chatter.name in self.ban_list:
-            await message.broadcaster.send_message(sender=self.bot.bot_id, message=(const.STV.FirstTimeDentge))
+        if payload.chatter.name in self.ban_list:
+            await payload.broadcaster.send_message(sender=self.bot.bot_id, message=const.STV.LastTimeChatter)
             return
 
         query = "INSERT INTO ttv_chatters (user_id, name_lower) VALUES ($1, $2)"
-        await self.bot.pool.execute(query, message.chatter.id, message.chatter.name)
-        self.known_chatters.append(message.chatter.name or "")
+        await self.bot.pool.execute(query, payload.chatter.id, payload.chatter.name)
+        self.known_chatters.append(payload.chatter.name or "")
 
-        await message.broadcaster.send_message(
+        await payload.broadcaster.send_message(
             sender=self.bot.bot_id,
             message=(
                 f"{const.STV.FirstTimeChadder} or {const.STV.FirstTimeDentge} "
@@ -191,11 +191,22 @@ class Alerts(IreComponent):
         )
 
     @commands.Component.listener(name="subscription")
-    async def subscription(self, subscribe: twitchio.ChannelSubscribe) -> None:
+    async def subscription(self, payload: twitchio.ChannelSubscribe) -> None:
         """Subscriptions."""
-        await subscribe.broadcaster.send_message(
+        await payload.broadcaster.send_message(
             sender=self.bot.bot_id,
-            message=f"{subscribe.user.mention} just subscribed {const.STV.Donki} thanks",
+            message=f"{payload.user.mention} just subscribed {const.STV.Donki} thanks",
+        )
+
+    @commands.Component.listener(name="subscription_message")
+    async def subscription_message(self, payload: twitchio.ChannelSubscriptionMessage) -> None:
+        """Subscriptions."""
+        await payload.broadcaster.send_message(
+            sender=self.bot.bot_id,
+            message=(
+                f"{payload.user.mention} just subscribed for {fmt.ordinal(payload.months)} months "
+                f"{const.STV.Donki} thanks a lot"
+            ),
         )
 
 

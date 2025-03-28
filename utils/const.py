@@ -106,6 +106,7 @@ class STV(StrEnum):
     heyinoticedyouhaveaprimegamingbadgenexttoyourname = "heyinoticedyouhaveaprimegamingbadgenexttoyourname"
     hi = "hi"
     How2Read = "How2Read"
+    LastTimeChatter = "LastTimeChatter"
     peepoAds = "peepoAds"
     peepoDapper = "peepoDapper"
     please = "please"

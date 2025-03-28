@@ -8,7 +8,7 @@ import twitchio
 from twitchio.ext import commands
 
 from bot import IreComponent, ireloop
-from utils import const, formats, guards
+from utils import const, fmt, guards
 
 if TYPE_CHECKING:
     from bot import IreBot, IreContext
@@ -157,7 +157,7 @@ class EditInformation(IreComponent):
             await ctx.send("No change: the database doesn't keep such title.")
         else:
             await self.update_title(ctx.broadcaster, title=title)
-            await ctx.send(f"Set the title to {formats.ordinal(offset)} in history: {title}")
+            await ctx.send(f"Set the title to {fmt.ordinal(offset)} in history: {title}")
 
     @commands.is_moderator()
     @title_group.command(name="history")

@@ -227,6 +227,9 @@ class IreBot(commands.Bot):
         # ❓ Channel Subscribe (paid)              channel:read:subscriptions
         sub = eventsub.ChannelSubscribeSubscription(broadcaster_user_id=broadcaster)
         await self.subscribe_websocket(payload=sub, token_for=broadcaster, as_bot=False)
+        # ❓ Channel Subscribe Message (paid)              channel:read:subscriptions
+        sub = eventsub.ChannelSubscribeMessageSubscription(broadcaster_user_id=broadcaster)
+        await self.subscribe_websocket(payload=sub, token_for=broadcaster, as_bot=False)
 
     @override
     async def add_token(self, token: str, refresh: str) -> twitchio.authentication.ValidateTokenPayload:
