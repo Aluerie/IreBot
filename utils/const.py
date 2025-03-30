@@ -69,6 +69,7 @@ class STV(StrEnum):
     """Some of 7TV emotes enabled on the channel."""
 
     Adge = "Adge"
+    ALERT = "ALERT"
     ApuBritish = "ApuBritish"
     AYAYA = "AYAYA"
     Cinema = "Cinema"
