@@ -96,19 +96,18 @@ class Timers(IreComponent):
     async def periodic_announcements(self) -> None:
         """Send periodic announcements into irene's channel on timer."""
         # lazy implementation
-        for _ in range(3):
-            if not self.bot.irene_online:
-                return
+        await asyncio.sleep(7200 + 60 * random.randint(0, 240))  # 2 hours + random(0, 4 hours)
+        if not self.bot.irene_online:
+            return
 
-            await asyncio.sleep(3600 * 2 + 60 * random.randint(0, 120))
-            await self.irene.send_announcement(
-                moderator=const.UserID.Bot,
-                message=(
-                    "hey chat soon I will need to grind an affiliate on @IrenesBot account. "
-                    f"{const.STV.please} Any follows and lurks for that account are appreciated. {const.STV.Erm} "
-                    f"Feel free to {const.STV.catFU} though."
-                ),
-            )
+        await self.irene.send_announcement(
+            moderator=const.UserID.Bot,
+            message=(
+                "hey chat soon I will need to grind an affiliate on @IrenesBot account. "
+                f"{const.STV.please} Any follows and lurks for that account are appreciated. {const.STV.Erm} "
+                f"Feel free to {const.STV.catFU} though."
+            ),
+        )
 
 
 async def setup(bot: IreBot) -> None:
