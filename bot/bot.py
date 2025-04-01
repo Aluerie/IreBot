@@ -194,42 +194,34 @@ class IreBot(commands.Bot):
         broadcaster = const.UserID.Irene
         bot = const.UserID.Bot
 
-        # EventSub Subscriptions Table (order - function name sorted by alphabet).
-        # Subscription Name                     Permission
-        # ------------------------------------------------------
-        # ✅ Ad break begin                        channel:read:ads
-        sub = eventsub.AdBreakBeginSubscription(broadcaster_user_id=broadcaster)
-        await self.subscribe_websocket(payload=sub, token_for=broadcaster, as_bot=False)
-        # Bans                                  channel:moderate
-        sub = eventsub.ChannelBanSubscription(broadcaster_user_id=broadcaster)
-        await self.subscribe_websocket(payload=sub, token_for=broadcaster, as_bot=False)
-        # ✅ Follows                               moderator:read:followers
-        sub = eventsub.ChannelFollowSubscription(broadcaster_user_id=broadcaster, moderator_user_id=bot)
-        await self.subscribe_websocket(payload=sub)
-        # ✅ Channel Points Redeem                 channel:read:redemptions or channel:manage:redemptions
-        sub = eventsub.ChannelPointsRedeemAddSubscription(broadcaster_user_id=broadcaster)
-        await self.subscribe_websocket(payload=sub, token_for=broadcaster, as_bot=False)
-        # ✅ Message                               user:read:chat from the chatting user, channel:bot from broadcaster
-        sub = eventsub.ChatMessageSubscription(broadcaster_user_id=broadcaster, user_id=bot)
-        await self.subscribe_websocket(payload=sub)
-        # ❓ Raids to the channel                  No authorization required
-        sub = eventsub.ChannelRaidSubscription(to_broadcaster_user_id=broadcaster)
-        await self.subscribe_websocket(payload=sub)
-        # ✅ Stream went offline                   No authorization required
-        sub = eventsub.StreamOfflineSubscription(broadcaster_user_id=broadcaster)
-        await self.subscribe_websocket(payload=sub)
-        # ✅ Stream went live                      No authorization required
-        sub = eventsub.StreamOnlineSubscription(broadcaster_user_id=broadcaster)
-        await self.subscribe_websocket(payload=sub)
-        # ✅ Channel Update (title/game)           No authorization required
-        sub = eventsub.ChannelUpdateSubscription(broadcaster_user_id=broadcaster)
-        await self.subscribe_websocket(payload=sub)
-        # ❓ Channel Subscribe (paid)              channel:read:subscriptions
-        sub = eventsub.ChannelSubscribeSubscription(broadcaster_user_id=broadcaster)
-        await self.subscribe_websocket(payload=sub, token_for=broadcaster, as_bot=False)
-        # ❓ Channel Subscribe Message (paid)              channel:read:subscriptions
-        sub = eventsub.ChannelSubscribeMessageSubscription(broadcaster_user_id=broadcaster)
-        await self.subscribe_websocket(payload=sub, token_for=broadcaster, as_bot=False)
+        for sub in [
+            # EventSub Subscriptions Table (order - function name sorted by alphabet).
+            # Subscription Name                     Permission
+            # ------------------------------------------------------
+            # ✅ Ad break begin                        channel:read:ads
+            eventsub.AdBreakBeginSubscription(broadcaster_user_id=broadcaster),
+            # ✅ Bans                                  channel:moderate
+            eventsub.ChannelBanSubscription(broadcaster_user_id=broadcaster),
+            # ✅ Follows                               moderator:read:followers
+            eventsub.ChannelFollowSubscription(broadcaster_user_id=broadcaster, moderator_user_id=bot),
+            # ✅ Channel Points Redeem                 channel:read:redemptions or channel:manage:redemptions
+            eventsub.ChannelPointsRedeemAddSubscription(broadcaster_user_id=broadcaster),
+            # ✅ Message                               user:read:chat from the chatbot, channel:bot from broadcaster
+            eventsub.ChatMessageSubscription(broadcaster_user_id=broadcaster, user_id=bot),
+            # ✅ Raids to the channel                  No authorization required
+            eventsub.ChannelRaidSubscription(to_broadcaster_user_id=broadcaster),
+            # ✅ Stream went offline                   No authorization required
+            eventsub.StreamOfflineSubscription(broadcaster_user_id=broadcaster),
+            # ✅ Stream went live                      No authorization required
+            eventsub.StreamOnlineSubscription(broadcaster_user_id=broadcaster),
+            # ✅ Channel Update (title/game)           No authorization required
+            eventsub.ChannelUpdateSubscription(broadcaster_user_id=broadcaster),
+            # ❓ Channel Subscribe (paid)              channel:read:subscriptions
+            eventsub.ChannelSubscribeSubscription(broadcaster_user_id=broadcaster),
+            # ❓ Channel Subscribe Message (paid)              channel:read:subscriptions
+            eventsub.ChannelSubscribeMessageSubscription(broadcaster_user_id=broadcaster),
+        ]:
+            await self.subscribe_websocket(payload=sub)
 
     @override
     async def add_token(self, token: str, refresh: str) -> twitchio.authentication.ValidateTokenPayload:

@@ -56,6 +56,7 @@ class Timers(IreComponent):
         """Start counting messages when stream goes online."""
         random.shuffle(self.messages)
         self.index = 0
+        self.lines_count = 0
         self.bot.add_listener(self.count_messages, event="event_message")
 
     @commands.Component.listener(name="irene_offline")
@@ -83,8 +84,8 @@ class Timers(IreComponent):
                 # we already have a timer to send
                 return
 
-            if self.lines_count > 99:
-                await asyncio.sleep(30 + random.randint(1, 5 * 60))
+            if self.lines_count > 111:
+                await asyncio.sleep(30 + random.randint(1, 6 * 60))
                 await self.deliver(self.messages[self.index % len(self.messages)])
 
                 # reset the index vars
