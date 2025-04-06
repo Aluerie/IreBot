@@ -117,10 +117,10 @@ class Alerts(IreComponent):
         await payload.broadcaster.send_message(
             sender=self.bot.bot_id,
             message=(
-                f"{payload.broadcaster.mention} some reminders {const.STV.ALERT} "
-                f"pin some message {const.STV.ALERT} "
+                f"{payload.broadcaster.mention} a few reminders {const.STV.ALERT} "
+                f"pin some info {const.STV.ALERT} "
                 f"start recording {const.STV.ALERT} "
-                f"Turn some music on {const.STV.ALERT}"
+                f"Turn music on {const.STV.ALERT}"
             ),
         )
 

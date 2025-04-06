@@ -82,6 +82,30 @@ class MiscellaneousCommands(IreComponent):
         stats = f" Success Rate: {success / attempts:.1%} (over {attempts} attempts)"
         await ctx.send(f"Yolo Gunfort is easy {const.STV.EZdodge} {stats}")
 
+    @commands.command(name="is")
+    async def immortal_severance(self, ctx: IreContext) -> None:
+        """Print a proper speed-run order for IS dialog."""
+        msg = (
+            "👶 Kuro: "
+            "1. Quit "
+            '2. Skip → Ask "About the flower" → Skip until item → Quit '
+            "3. Skip until item → Quit "
+            "4. Quit "
+            "5. Skip until item → Quit "
+            "💃 Emma: "
+            "Quit 3 dialogs "
+            "👶 Kuro again: "
+            "1. Quit "
+            "2. Burn incense → Skip till cutscene → Quit"
+        )
+        await ctx.send(msg)
+
+    @commands.command(name="iss")
+    async def immortal_severance_short(self, ctx: IreContext) -> None:
+        """Print a proper speed-run order for IS dialog."""
+        msg = "Kuro: 1️⃣🟥2️⃣🟩🌸🟩3️⃣🟩4️⃣🟥5️⃣🟩 Emma:🟥3x Kuro:1️⃣🟥2️⃣🔥🟩 "
+        await ctx.send(msg)
+
 
 async def setup(bot: IreBot) -> None:
     """Load IreBot extension. Framework of twitchio."""
