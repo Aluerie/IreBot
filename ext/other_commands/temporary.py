@@ -111,7 +111,7 @@ class MiscellaneousCommands(IreComponent):
         """Headless."""
         msg = (
             "One day we will start practicing mini bosses 4Head "
-            "Surely practice headless too 4Head "
+            "clueless Surely practice headless too 4Head "
             "Maybe let's just remove him from the run 4Head "
             "fok this boss 4Head"
         )
@@ -122,10 +122,10 @@ class MiscellaneousCommands(IreComponent):
         """Centipede."""
         msg = (
             "I don't understand this boss BabyRage "
-            "How to stop ADHD'ing on Quicky BabyRage "
+            "How to stop ADHD'ing on Quickie BabyRage "
             "Why do I get a block on 9th hit in combo all the time BabyRage "
             "I don't understand BabyRage "
-            "Do we just MD this trash BabyRage"
+            "Should we just MD this trash BabyRage"
         )
         await ctx.send(msg)
 
