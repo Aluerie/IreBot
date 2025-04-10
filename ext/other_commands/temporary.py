@@ -103,7 +103,30 @@ class MiscellaneousCommands(IreComponent):
     @commands.command(name="iss")
     async def immortal_severance_short(self, ctx: IreContext) -> None:
         """Print a proper speed-run order for IS dialog."""
-        msg = "Kuro: 1️⃣🟥2️⃣🟩🌸🟩3️⃣🟩4️⃣🟥5️⃣🟩 Emma:🟥3x Kuro:1️⃣🟥2️⃣🔥🟩 "
+        msg = "Kuro: 1️⃣🟥2️⃣🟩🌸🟩3️⃣🟩4️⃣🟥5️⃣🟩 → Emma:🟥3x → Kuro:1️⃣🟥2️⃣🔥🟩 "
+        await ctx.send(msg)
+
+    @commands.command()
+    async def headless(self, ctx: IreContext) -> None:
+        """Headless."""
+        msg = (
+            "One day we will start practicing mini bosses 4Head "
+            "Surely practice headless too 4Head "
+            "Maybe let's just remove him from the run 4Head "
+            "fok this boss 4Head"
+        )
+        await ctx.send(msg)
+
+    @commands.command()
+    async def centipede(self, ctx: IreContext) -> None:
+        """Centipede."""
+        msg = (
+            "I don't understand this boss BabyRage "
+            "How to stop ADHD'ing on Quicky BabyRage "
+            "Why do I get a block on 9th hit in combo all the time BabyRage "
+            "I don't understand BabyRage "
+            "Do we just MD this trash BabyRage"
+        )
         await ctx.send(msg)
 
 

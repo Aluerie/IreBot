@@ -96,6 +96,9 @@ class Timers(IreComponent):
     @commands.Component.listener(name="irene_online")
     async def periodic_announcements(self) -> None:
         """Send periodic announcements into irene's channel on timer."""
+        if random.randint(1, 100) > 4:
+            return
+
         # lazy implementation
         await asyncio.sleep(7200 + 60 * random.randint(0, 240))  # 2 hours + random(0, 4 hours)
         if not self.bot.irene_online:
