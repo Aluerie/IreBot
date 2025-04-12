@@ -39,7 +39,7 @@ class MiscellaneousCommands(IreComponent):
         """Explanation of my first Sekiro hitless run."""
         msg = (
             "Bosses I like %."
-            "On paper, it's Immortal Severance with 7 extra bosses including loading a save file "
+            "On paper, it's Immortal Severance with 10 extra bosses including loading a save file "
             "for Inner Father, Fire Isshin and Emma reflections. "
             "DB NKC LL NC GL. Sword+Shuriken Focused."
             "The only boss that I blast with MDs is Ape (I hate that boss). "
@@ -126,6 +126,17 @@ class MiscellaneousCommands(IreComponent):
             "Why do I get a block on 9th hit in combo all the time BabyRage "
             "I don't understand BabyRage "
             "Should we just MD this trash BabyRage"
+        )
+        await ctx.send(msg)
+
+    @commands.command()
+    async def vilehand(self, ctx: IreContext) -> None:
+        """Vilehand."""
+        msg = (
+            "omg how to deflect Vilehand's Sabimaru omg "
+            "fml chat it's so fast omg "
+            "HOOOOOOOOOOOW omg "
+            "It's literally light fast omg "
         )
         await ctx.send(msg)
 
