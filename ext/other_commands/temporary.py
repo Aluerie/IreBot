@@ -136,7 +136,7 @@ class MiscellaneousCommands(IreComponent):
             "omg how to deflect Vilehand's Sabimaru omg "
             "fml chat it's so fast omg "
             "HOOOOOOOOOOOW omg "
-            "It's literally light fast omg "
+            "It's literally lightning fast omg "
         )
         await ctx.send(msg)
 
