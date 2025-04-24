@@ -140,6 +140,28 @@ class MiscellaneousCommands(IreComponent):
         )
         await ctx.send(msg)
 
+    @commands.command()
+    async def rules(self, ctx: IreContext) -> None:
+        """ER Run rules."""
+        msg = (
+            'Hybrid challenge "the best of both Speed/Hitless"'
+            " 1️⃣Aiming at least possible time in running sections: "
+            f"*pretty much* only picking up stones/scadu {const.STV.Speedge}"
+            f" 2️⃣Only hits vs bosses count {const.STV.actually}"
+            f" 3️⃣We use a custom-made starting class with fashion/weapon I choose {const.STV.forsenCD}"
+        )
+        await ctx.send(msg)
+
+    @commands.command()
+    async def ape(self, ctx: IreContext) -> None:
+        """Ape."""
+        msg = (
+            f"Worst boss in Sekiro. {const.STV.UltraMad} "
+            f"Scream not having a cooldown alone brings it to F tier {const.STV.UltraMad} "
+            f"The only boss we blast with MD because it's so bad {const.STV.UltraMad}"
+        )
+        await ctx.send(msg)
+
 
 async def setup(bot: IreBot) -> None:
     """Load IreBot extension. Framework of twitchio."""

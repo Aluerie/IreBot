@@ -68,6 +68,7 @@ class FFZ(StrEnum):
 class STV(StrEnum):
     """Some of 7TV emotes enabled on the channel."""
 
+    actually = "actually"
     Adge = "Adge"
     ALERT = "ALERT"
     ApuBritish = "ApuBritish"
@@ -100,6 +101,7 @@ class STV(StrEnum):
     FeelsBingMan = "FeelsBingMan"
     FirstTimeChadder = "FirstTimeChadder"
     FirstTimeDentge = "FirstTimeDentge"
+    forsenCD = "forsenCD"
     gg = "gg"
     GroupScoots = "GroupScoots"
     hello = "hello"
@@ -116,11 +118,13 @@ class STV(StrEnum):
     POGCRAZY = "POGCRAZY"
     POLICE = "POLICE"
     science = "science"
+    Speedge = "Speedge"
     yo = "yo"
     uuh = "uuh"
     wickedchad = "wickedchad"
     widepeepoHappyRightHeart = "widepeepoHappyRightHeart"
     wow = "wow"
+    UltraMad = "UltraMad"
 
 
 class Bots(StrEnum):
