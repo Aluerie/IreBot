@@ -46,13 +46,13 @@ class Keywords(IreComponent):
         self.keywords: dict[str, str] = {
             keyword: response for response, search in response_search.items() for keyword in itertools.chain(search)
         }
-        self.compiled_regex = re.compile(r"\b" + r"|".join(self.keywords) + r"\b", flags=re.VERBOSE)
+        self.compiled_regex = re.compile(r"\b(" + r"|".join(self.keywords) + r")\b", flags=re.VERBOSE)
 
     @commands.Component.listener(name="message")
     async def keywords_response(self, message: twitchio.ChatMessage) -> None:
         """Sends a flavour message if a keyword/key phrase was spotted in the chat."""
         now = datetime.datetime.now(datetime.UTC)
-        if (now - self.cooldown_dt).seconds < 7:
+        if (now - self.cooldown_dt).seconds < 7 * 60:
             # the keyword was recently triggered
             return
         if message.chatter.name in const.Bots or not message.text or random.randint(1, 100) > 10:

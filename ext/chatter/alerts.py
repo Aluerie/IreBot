@@ -123,6 +123,17 @@ class Alerts(IreComponent):
                 f"Turn music on {const.STV.ALERT}"
             ),
         )
+        await asyncio.sleep(10 * 60)  # 10 minutes
+        # extra reminder for the streamer
+        await payload.broadcaster.send_message(
+            sender=self.bot.bot_id,
+            message=(
+                f"Irene {const.STV.ALERT} "
+                f"last reminder {const.STV.ALERT} "
+                f"start recording please {const.STV.ALERT} "
+                f'chat spam " {const.STV.ALERT} "'
+            ),
+        )
 
     @commands.Component.listener(name="stream_offline")
     async def stream_end(self, payload: twitchio.StreamOffline) -> None:

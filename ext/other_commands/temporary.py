@@ -146,7 +146,7 @@ class MiscellaneousCommands(IreComponent):
         msg = (
             'Hybrid challenge "the best of both Speed/Hitless"'
             " 1️⃣Aiming at least possible time in running sections: "
-            f"*pretty much* only picking up stones/scadu {const.STV.Speedge}"
+            f"only leaderboard speed-run tier picks-ups from are allowed {const.STV.Speedge}"
             f" 2️⃣Only hits vs bosses count {const.STV.actually}"
             f" 3️⃣We use a custom-made starting class with fashion/weapon I choose {const.STV.forsenCD}"
         )
