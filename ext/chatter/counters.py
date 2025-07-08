@@ -24,7 +24,7 @@ if TYPE_CHECKING:
         first_times: int
 
 
-FIRST_ID: str = "013b19fc-8024-4416-99a4-8cf130305b1f"
+FIRST_ID: str = "902e931b-3d09-4a2e-9996-1d1ad599761d"
 
 
 class Counters(IreComponent):
@@ -146,6 +146,18 @@ class Counters(IreComponent):
             message=msg,
         )
 
+        reward = await redemption.reward.fetch_reward(token_for=redemption.broadcaster.id)
+        await reward.update(title=f"@{redemption.user.display_name} was 1st today !")
+
+    @commands.Component.listener(name="irene_offline")
+    async def reset_first_redeem_title(self) -> None:
+        """Reset the title of the "First!" redeem back to its original state.
+
+        Currently, it should be changed when somebody redeems to "@user was first!
+        """
+        first_reward = next(reward for reward in await self.irene.fetch_custom_rewards() if reward.id == FIRST_ID)
+        await first_reward.update(title="First !")
+
     @commands.command(aliases=["first"])
     async def firsts(self, ctx: IreContext) -> None:
         """Get top10 first redeemers."""
@@ -182,7 +194,7 @@ class Counters(IreComponent):
         content = " ".join(const.DIGITS)
         await ctx.send(content)
 
-    @ireloop(time=[datetime.time(hour=4, minute=59)])
+    @ireloop(time=[datetime.time(hour=3, minute=59)])
     async def check_first_reward(self) -> None:
         """The task that ensures the reward "First" under a specific id exists.
 
@@ -196,6 +208,9 @@ class Counters(IreComponent):
         for reward in custom_rewards:
             if reward.id == FIRST_ID:
                 # we good
+                if reward.title != "First !":
+                    # wrong title somehow
+                    await reward.update()
                 break
         else:
             # we bad

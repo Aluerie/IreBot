@@ -140,6 +140,7 @@ class IreBot(commands.Bot):
                 "channel:read:ads",
                 "channel:moderate",
                 "channel:read:redemptions",
+                "channel:manage:redemptions",
                 "channel:manage:broadcast",
                 "channel:read:subscriptions",
             ],
