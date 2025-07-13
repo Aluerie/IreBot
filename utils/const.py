@@ -73,6 +73,8 @@ class STV(StrEnum):
     ALERT = "ALERT"
     ApuBritish = "ApuBritish"
     AYAYA = "AYAYA"
+    buenoSuccess = "buenoSuccess"
+    buenoFail = "buenoFail"
     Cinema = "Cinema"
     catFU = "catFU"
     classic = "classic"

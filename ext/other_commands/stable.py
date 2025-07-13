@@ -324,6 +324,11 @@ class SimpleCommands(IreComponent):
         """Get Irene's current PC setup."""
         await ctx.send("pcpartpicker.com/user/aluerie/saved/dY497P")
 
+    @commands.command()
+    async def controller(self, ctx: IreContext) -> None:
+        """Get Irene's current controller model."""
+        await ctx.send("Razer Wolverine V3 Tournament Edition Xbox Black")
+
 
 async def setup(bot: IreBot) -> None:
     """Load IreBot extension. Framework of twitchio."""

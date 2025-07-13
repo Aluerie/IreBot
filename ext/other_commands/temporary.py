@@ -68,7 +68,7 @@ class MiscellaneousCommands(IreComponent):
         attempts: int = await self.bot.pool.fetchval(query, "gunfort_attempts")
 
         stats = f" Success Rate: {success / attempts:.1%} (over {attempts} attempts)"
-        await ctx.send(f"Failed yolo gunfort? {const.STV.classic} {stats}")
+        await ctx.send(f"Failed yolo gunfort? {const.STV.classic} {stats} {const.STV.buenoFail}")
 
     @commands.is_owner()
     @gunfort.command()
@@ -80,7 +80,7 @@ class MiscellaneousCommands(IreComponent):
         attempts: int = await self.bot.pool.fetchval(query, "gunfort_attempts")
 
         stats = f" Success Rate: {success / attempts:.1%} (over {attempts} attempts)"
-        await ctx.send(f"Yolo Gunfort is easy {const.STV.EZdodge} {stats}")
+        await ctx.send(f"Yolo Gunfort is easy {const.STV.EZdodge} {stats} {const.STV.buenoSuccess}")
 
     @commands.command(name="is")
     async def immortal_severance(self, ctx: IreContext) -> None:
