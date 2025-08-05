@@ -103,6 +103,7 @@ class STV(StrEnum):
     FeelsBingMan = "FeelsBingMan"
     FirstTimeChadder = "FirstTimeChadder"
     FirstTimeDentge = "FirstTimeDentge"
+    FirstTimePlinker = "FirstTimePlinker"
     forsenCD = "forsenCD"
     gg = "gg"
     GroupScoots = "GroupScoots"

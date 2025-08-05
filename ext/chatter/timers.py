@@ -43,10 +43,10 @@ class Timers(IreComponent):
                 "hi chat many features of this bot are WIP so, please, if you notice bugs or incorrect responses "
                 f"- inform me {const.STV.DANKHACKERMANS}"
             ),
-            (
-                "hey chat I'm making a small web-page to describe the bot's features (WIP)."
-                "You can see it here: (not implemented xdd)"  # TODO: add the web page
-            ),
+            # (
+            #     "hey chat I'm making a small web-page to describe the bot's features (WIP)."
+            #     "You can see it here: (not implemented xdd)"
+            # ),
             # "Discord discord.gg/K8FuDeP",
             # "if you have nothing to do Sadge you can try !randompasta. Maybe you'll like it Okayge",
         ]
@@ -84,8 +84,8 @@ class Timers(IreComponent):
                 # we already have a timer to send
                 return
 
-            if self.lines_count > 111:
-                await asyncio.sleep(30 + random.randint(1, 6 * 60))
+            if self.lines_count > 121:
+                await asyncio.sleep(33 + random.randint(1, 6 * 66))
                 await self.deliver(self.messages[self.index % len(self.messages)])
 
                 # reset the index vars
@@ -93,25 +93,25 @@ class Timers(IreComponent):
                 self.lines_count = 0
                 self._most_recent = datetime.datetime.now(datetime.UTC)
 
-    @commands.Component.listener(name="irene_online")
-    async def periodic_announcements(self) -> None:
-        """Send periodic announcements into irene's channel on timer."""
-        if random.randint(1, 100) > 4:
-            return
+    # @commands.Component.listener(name="irene_online")
+    # async def periodic_announcements(self) -> None:
+    #     """Send periodic announcements into irene's channel on timer."""
+    #     if random.randint(1, 100) > 4:
+    #         return
 
-        # lazy implementation
-        await asyncio.sleep(7200 + 60 * random.randint(0, 240))  # 2 hours + random(0, 4 hours)
-        if not self.bot.irene_online:
-            return
+    #     # lazy implementation
+    #     await asyncio.sleep(7200 + 60 * random.randint(0, 240))  # 2 hours + random(0, 4 hours)
+    #     if not self.bot.irene_online:
+    #         return
 
-        await self.irene.send_announcement(
-            moderator=const.UserID.Bot,
-            message=(
-                "hey chat soon I will need to grind an affiliate on @IrenesBot account. "
-                f"{const.STV.please} Any follows and lurks for that account are appreciated. {const.STV.Erm} "
-                f"Feel free to {const.STV.catFU} though."
-            ),
-        )
+    #     await self.irene.send_announcement(
+    #         moderator=const.UserID.Bot,
+    #         message=(
+    #             "hey chat soon I will need to grind an affiliate on @IrenesBot account. "
+    #             f"{const.STV.please} Any follows and lurks for that account are appreciated. {const.STV.Erm} "
+    #             f"Feel free to {const.STV.catFU} though."
+    #         ),
+    #     )
 
 
 async def setup(bot: IreBot) -> None:

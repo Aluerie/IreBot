@@ -11,10 +11,13 @@ if TYPE_CHECKING:
     from bot import IreBot, IreContext
 
 
-class MiscellaneousCommands(IreComponent):
+__all__ = ("TemporaryCommands",)
+
+
+class TemporaryCommands(IreComponent):
     """Miscellaneous commands.
 
-    Commands that are likely to be removed in future.
+    Commands that are likely to be removed in future or edited a lot.
     """
 
     @commands.command()
@@ -28,22 +31,48 @@ class MiscellaneousCommands(IreComponent):
 
     @notes.error
     async def notes_error(self, payload: commands.CommandErrorPayload) -> None:
-        """XD."""
+        """Notes Error."""
         if isinstance(exc := payload.exception, commands.BadArgument):
             await payload.context.send(f'Bad argument: "{exc.value}". Supported notes: "sekiro", "er".')
         else:
             raise payload.exception
 
     @commands.command()
-    async def run(self, ctx: IreContext) -> None:
-        """Explanation of my first Sekiro hitless run."""
+    async def run(self, ctx: IreContext, *, game: Literal["sekiro", "er"]) -> None:
+        """Get a description of a run I'm doing rn in a specified game."""
+        mapping = {
+            "sekiro": (
+                "Bosses I like% (BIL%) "
+                "No Hit (NH) "
+                "Sword+Shuriken Focused (SSF) "
+                "No Kuro Charm (NKC) "
+                "Bell Demon (BD) "
+                "Hybrid Speed (HS) "
+                "Loopless (LL) "
+                "No Cheese (NC) "
+                "Glitchless (GL)"
+            ),
+            "er": "Twin Prodigies% (+Any% ?) Hybrid Speed/Hitless with my own !rules",
+        }
+        await ctx.send(mapping[game.lower()])
+
+    @notes.error
+    async def run_error(self, payload: commands.CommandErrorPayload) -> None:
+        """Run Error."""
+        if isinstance(exc := payload.exception, commands.BadArgument):
+            await payload.context.send(f'Bad argument: "{exc.value}". Supported notes: "sekiro", "er".')
+        else:
+            raise payload.exception
+
+    @commands.command()
+    async def rules(self, ctx: IreContext) -> None:
+        """ER Run rules."""
         msg = (
-            "Bosses I like %."
-            "On paper, it's Immortal Severance with 10 extra bosses including loading a save file "
-            "for Inner Father, Fire Isshin and Emma reflections. "
-            "DB NKC LL NC GL. Sword+Shuriken Focused."
-            "The only boss that I blast with MDs is Ape (I hate that boss). "
-            "My notes (kinda chaotic): !notes sekiro."
+            'Hybrid challenge "the best of both Speed/Hitless"'
+            " 1️⃣Aiming at least possible time in running sections: "
+            f"only speedrun leaderboard tier picks-ups are allowed {const.STV.Speedge}"
+            f" 2️⃣Only hits vs bosses count {const.STV.actually}"
+            f" 3️⃣We use a custom-made starting class with fashion/weapon I choose {const.STV.forsenCD}"
         )
         await ctx.send(msg)
 
@@ -134,21 +163,8 @@ class MiscellaneousCommands(IreComponent):
         """Vilehand."""
         msg = (
             "omg how to deflect Vilehand's Sabimaru omg "
-            "fml chat it's so fast omg "
+            "fml chat omg "
             "HOOOOOOOOOOOW omg "
-            "It's literally lightning fast omg "
-        )
-        await ctx.send(msg)
-
-    @commands.command()
-    async def rules(self, ctx: IreContext) -> None:
-        """ER Run rules."""
-        msg = (
-            'Hybrid challenge "the best of both Speed/Hitless"'
-            " 1️⃣Aiming at least possible time in running sections: "
-            f"only leaderboard speed-run tier picks-ups from are allowed {const.STV.Speedge}"
-            f" 2️⃣Only hits vs bosses count {const.STV.actually}"
-            f" 3️⃣We use a custom-made starting class with fashion/weapon I choose {const.STV.forsenCD}"
         )
         await ctx.send(msg)
 
@@ -165,4 +181,4 @@ class MiscellaneousCommands(IreComponent):
 
 async def setup(bot: IreBot) -> None:
     """Load IreBot extension. Framework of twitchio."""
-    await bot.add_component(MiscellaneousCommands(bot))
+    await bot.add_component(TemporaryCommands(bot))

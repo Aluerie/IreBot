@@ -5,29 +5,122 @@ import datetime
 import logging
 import random
 import unicodedata
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, NamedTuple, TypedDict
 
 import twitchio  # noqa: TC002
 from twitchio.ext import commands
 
 from bot import IreComponent
 from config import config
-from utils import const, fmt, guards
+from utils import const, errors, fmt, guards
 
 if TYPE_CHECKING:
+    from aiohttp import ClientSession
+
     from bot import IreBot, IreContext
+
 
 log = logging.getLogger(__name__)
 
 
-class SimpleCommands(IreComponent):
-    """Simple commands.
+class TranslatedSentence(TypedDict):
+    """TranslatedSentence."""
 
-    Simple in a sense that they are just somewhat static and their implementation is simple.
-    Probably a better name would be "uncategorised code commands"
-    because they are defined here in code, instead of
-    sitting in the database like commands from `custom_commands.py` do.
+    trans: str
+    orig: str
+
+
+class TranslateResult(NamedTuple):
+    """TranslatedResult."""
+
+    original: str
+    translated: str
+    source_lang: str
+    target_lang: str
+
+
+async def translate(
+    text: str,
+    *,
+    source_lang: str = "auto",
+    target_lang: str = "en",
+    session: ClientSession,
+) -> TranslateResult:
+    """Google Translate."""
+    query = {
+        "dj": "1",
+        "dt": ["sp", "t", "ld", "bd"],
+        "client": "dict-chrome-ex",  # Needs to be dict-chrome-ex or else you'll get a 403 error.
+        "sl": source_lang,
+        "tl": target_lang,
+        "q": text,
+    }
+
+    headers = {
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/104.0.0.0 Safari/537.36"
+        ),
+    }
+
+    async with session.get("https://clients5.google.com/translate_a/single", params=query, headers=headers) as resp:
+        if resp.status != 200:
+            raise errors.TranslateError(resp.status, text=await resp.text())
+
+        data = await resp.json()
+        src = data.get("src", "Unknown")
+        sentences: list[TranslatedSentence] = data.get("sentences", [])
+        if not sentences:
+            msg = "Google translate returned no information"
+            raise RuntimeError(msg)
+
+        return TranslateResult(
+            original="".join(sentence.get("orig", "") for sentence in sentences),
+            translated="".join(sentence.get("trans", "") for sentence in sentences),
+            source_lang=src.upper(),
+            target_lang=target_lang.upper(),
+        )
+
+
+class StableCommands(IreComponent):
+    """Stable commands.
+
+    Stable in a sense that unlike commands in `temporary.py` or `custom.py` with their dynamic commands
+    These are supposed to stay with us for a long time.
+    But they couldn't be categorized into other extensions.
+
+    Notes
+    -----
+    * Commands in this file are sorted alphabetically.
     """
+
+    @commands.command()
+    async def about(self, ctx: IreContext) -> None:
+        """A bit bio information about the bot."""
+        await ctx.send(f"I'm a personal Irene's bot, made by Irene. {const.STV.AYAYA}")
+
+    @commands.command(aliases=["char"])
+    async def charinfo(self, ctx: IreContext, *, characters: str) -> None:
+        """Shows information about character(-s).
+
+        Only up to a 10 characters at a time though.
+
+        Parameters
+        ----------
+        characters
+            Input up to 10 characters to get format info about.
+
+        """
+
+        def to_string(c: str) -> str:
+            name = unicodedata.name(c, None)
+            return f"\\N{{{name}}}" if name else "Name not found."
+
+        names = " ".join(to_string(c) for c in characters[:10])
+        if len(characters) > 10:
+            names += "(Output was too long: displaying only first 10 chars)"
+        await ctx.send(names)
 
     @guards.is_online()
     @commands.command()
@@ -40,6 +133,11 @@ class SimpleCommands(IreComponent):
     async def command_list(self, ctx: IreContext) -> None:
         """Get a list of bot commands."""
         await ctx.send("Not implemented yet.")
+
+    @commands.command()
+    async def controller(self, ctx: IreContext) -> None:
+        """Get Irene's current controller model."""
+        await ctx.send("Razer Wolverine V3 Tournament Edition Xbox Black")
 
     @commands.command()
     async def discord(self, ctx: IreContext) -> None:
@@ -61,6 +159,18 @@ class SimpleCommands(IreComponent):
     async def hello(self, ctx: IreContext) -> None:
         """Hello."""
         await ctx.send(const.STV.hello)
+
+    @commands.command(aliases=["lorem", "ipsum"])
+    async def loremipsum(self, ctx: IreContext) -> None:
+        """Lorem ipsum."""
+        await ctx.send(  # cSpell:disable
+            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. "
+            "Sed cursus ante dapibus diam. Sed nisi. Nulla quis sem at nibh elementum imperdiet. "
+            "Duis sagittis ipsum. Praesent mauris. Fusce nec tellus sed augue semper porta. Mauris massa. "
+            "Vestibulum lacinia arcu eget nulla. Class aptent taciti sociosqu ad litora torquent per conubia nostra, "
+            "per inceptos himenaeos. Curabitur sodales ligula in libero. Sed dignissim lacinia nunc. Curabitur tortor. "
+            "Pellentesque nibh.",
+        )  # cSpell:enable
 
     @commands.command()
     async def love(self, ctx: IreContext, *, arg: str) -> None:
@@ -95,18 +205,6 @@ class SimpleCommands(IreComponent):
         else:
             love, emote = choose_love_emote()
             await ctx.send(f"{love}% love between {ctx.chatter.mention} and {arg} {emote}")
-
-    @commands.command(aliases=["lorem", "ipsum"])
-    async def loremipsum(self, ctx: IreContext) -> None:
-        """Lorem ipsum."""
-        await ctx.send(  # cSpell:disable
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. "
-            "Sed cursus ante dapibus diam. Sed nisi. Nulla quis sem at nibh elementum imperdiet. "
-            "Duis sagittis ipsum. Praesent mauris. Fusce nec tellus sed augue semper porta. Mauris massa. "
-            "Vestibulum lacinia arcu eget nulla. Class aptent taciti sociosqu ad litora torquent per conubia nostra, "
-            "per inceptos himenaeos. Curabitur sodales ligula in libero. Sed dignissim lacinia nunc. Curabitur tortor. "
-            "Pellentesque nibh.",
-        )  # cSpell:enable
 
     @commands.command()
     async def lurk(self, ctx: IreContext) -> None:
@@ -185,6 +283,11 @@ class SimpleCommands(IreComponent):
             "geographically🌍🌎ambiguous🌏🗺️accent 🇮🇪",
         )
 
+    @commands.command(aliases=["pcparts", "specs"])
+    async def pc(self, ctx: IreContext) -> None:
+        """Get Irene's current PC setup."""
+        await ctx.send("pcpartpicker.com/user/aluerie/saved/dY497P")
+
     @commands.command()
     async def ping(self, ctx: IreContext) -> None:
         """Ping the bot.
@@ -251,14 +354,29 @@ class SimpleCommands(IreComponent):
         await ctx.send(answer)
 
     @commands.command()
-    async def about(self, ctx: IreContext) -> None:
-        """A bit bio information about the bot."""
-        await ctx.send(f"I'm a personal Irene's bot, made by Irene. {const.STV.AYAYA}")
-
-    @commands.command()
     async def source(self, ctx: IreContext) -> None:
         """Get the link to the bot's GitHub repository."""
         await ctx.send(f"github.com/Aluerie/IreBot {const.STV.DankReading}")
+
+    @commands.command()
+    async def translate(self, ctx: IreContext, *, text: str) -> None:
+        """Translate to English.
+
+        Uses Google Translate. Autodetects source language.
+
+        Sources
+        -------
+        * My own discord bot (but the code there is also taken from other places)
+            https://github.com/Aluerie/AluBot/blob/main/ext/educational/language/translation.py
+        """
+        result = await translate(text, session=self.bot.session)
+        answer = f"{const.STV.ApuBritish} [{result.source_lang} to {result.target_lang}] {result.translated}"
+        await ctx.send(answer)
+
+    @commands.command(aliases=["id", "twitchid"])
+    async def twitch_id(self, ctx: IreContext, *, user: twitchio.User) -> None:
+        """Get mentioned @user numeric twitch_id."""
+        await ctx.send(f"Twitch ID for {user.mention}: {user.id}")
 
     @commands.command()
     async def uptime(self, ctx: IreContext) -> None:
@@ -292,44 +410,7 @@ class SimpleCommands(IreComponent):
         """Get the link to youtube vods archive."""
         await ctx.send(f"youtube.com/@AluerieVODS/ {const.STV.Cinema}")
 
-    @commands.command(aliases=["char"])
-    async def charinfo(self, ctx: IreContext, *, characters: str) -> None:
-        """Shows information about character(-s).
-
-        Only up to a 10 characters at a time though.
-
-        Parameters
-        ----------
-        characters
-            Input up to 10 characters to get format info about.
-
-        """
-
-        def to_string(c: str) -> str:
-            name = unicodedata.name(c, None)
-            return f"\\N{{{name}}}" if name else "Name not found."
-
-        names = " ".join(to_string(c) for c in characters[:10])
-        if len(characters) > 10:
-            names += "(Output was too long: displaying only first 10 chars)"
-        await ctx.send(names)
-
-    @commands.command(aliases=["id", "twitchid"])
-    async def twitch_id(self, ctx: IreContext, *, user: twitchio.User) -> None:
-        """Get mentioned @user numeric twitch_id."""
-        await ctx.send(f"Twitch ID for {user.mention}: {user.id}")
-
-    @commands.command(aliases=["pcparts", "specs"])
-    async def pc(self, ctx: IreContext) -> None:
-        """Get Irene's current PC setup."""
-        await ctx.send("pcpartpicker.com/user/aluerie/saved/dY497P")
-
-    @commands.command()
-    async def controller(self, ctx: IreContext) -> None:
-        """Get Irene's current controller model."""
-        await ctx.send("Razer Wolverine V3 Tournament Edition Xbox Black")
-
 
 async def setup(bot: IreBot) -> None:
     """Load IreBot extension. Framework of twitchio."""
-    await bot.add_component(SimpleCommands(bot))
+    await bot.add_component(StableCommands(bot))

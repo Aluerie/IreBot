@@ -3,9 +3,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from .custom import CustomCommands
-from .stable import SimpleCommands
-from .temporary import MiscellaneousCommands
-from .translation import Translations
+from .stable import StableCommands
+from .temporary import TemporaryCommands
 
 if TYPE_CHECKING:
     from bot import IreBot
@@ -13,9 +12,8 @@ if TYPE_CHECKING:
 
 class OtherCommands(
     CustomCommands,
-    SimpleCommands,
-    MiscellaneousCommands,
-    Translations,
+    StableCommands,
+    TemporaryCommands,
 ):
     """Other Commands.
 
