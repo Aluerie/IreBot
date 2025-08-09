@@ -37,7 +37,7 @@ RUNS: list[RunDict] = [
     {
         "keywords": ["sekiro", "sekiro2"],
         "game": "Sekiro",
-        "desc": "Shura No Hit (NH) Speedrun (SR) Glitchless (GL)",
+        "desc": "Shura No Hit Speedrun (SR) Glitchless (GL) Maybe No Hit (NH)???",
     },
     {
         "keywords": ["er", "elden", "ring"],
@@ -200,6 +200,20 @@ class TemporaryCommands(IreComponent):
             f"The only boss we blast with MD because it's so bad {const.STV.UltraMad}"
         )
         await ctx.send(msg)
+
+    @commands.is_owner()
+    @commands.command()
+    async def brb(self, ctx: IreContext) -> None:
+        """BRB."""
+        gone_text = "—————————————————————— imGlitch Streamer is gone, time to plink ——————————————————————"
+        await ctx.send(gone_text)
+
+    @commands.is_owner()
+    @commands.command()
+    async def back(self, ctx: IreContext) -> None:
+        """BACK."""
+        back_text = "—————————————————————— imGlitch Streamer is back, act normal uuh ——————————————————————"
+        await ctx.send(back_text)
 
 
 async def setup(bot: IreBot) -> None:
