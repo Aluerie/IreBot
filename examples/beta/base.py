@@ -6,7 +6,7 @@ import asyncio
 import itertools
 import logging
 import platform
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 import aiohttp
 import twitchio

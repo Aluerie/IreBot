@@ -71,10 +71,7 @@ class CustomCommands(IreComponent):
 
         for command_name, command_response in channel_commands.items():
             if no_prefix_text.startswith(command_name):
-                await message.broadcaster.send_message(
-                    sender=const.UserID.Bot,
-                    message=command_response,
-                )
+                await message.respond(command_response)
 
     @commands.is_moderator()
     @commands.group(invoke_fallback=True)

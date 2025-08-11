@@ -184,35 +184,29 @@ class EditInformation(IreComponent):
             await ctx.send("Database doesn't have any titles saved.")
 
     @commands.Component.listener(name="channel_update")
-    async def channel_update(self, update: twitchio.ChannelUpdate) -> None:
+    async def channel_update(self, payload: twitchio.ChannelUpdate) -> None:
         """Channel Info (game, title, etc) got updated."""
         now = datetime.datetime.now(datetime.UTC)
         # time check is needed so we don't repeat notif that comes from !game !title commands.
 
-        if self.game_tracked != update.category_name:
-            new_category = update.category_name or "No category"
+        if self.game_tracked != payload.category_name:
+            new_category = payload.category_name or "No category"
             if (now - self.game_updated_dt).seconds > 15:
                 # time condition so the bot doesn't announce changes done via !game command
-                await update.broadcaster.send_message(
-                    sender=const.UserID.Bot,
-                    message=f'{const.STV.donkDetective} Game was changed to "{new_category}"',
-                )
+                await payload.respond(f'{const.STV.donkDetective} Game was changed to "{new_category}"')
 
             # why it's not a default functionality ?
             if self.bot.irene_online:
                 with contextlib.suppress(twitchio.HTTPException):
-                    await update.broadcaster.create_stream_marker(
+                    await payload.broadcaster.create_stream_marker(
                         token_for=const.UserID.Irene, description=f"Game: {new_category}"
                     )
 
-        if self.title_tracked != update.title and (now - self.title_updated_dt).seconds > 15:
+        if self.title_tracked != payload.title and (now - self.title_updated_dt).seconds > 15:
             # time condition so the bot doesn't announce changes done via !title command
-            await update.broadcaster.send_message(
-                sender=const.UserID.Bot,
-                message=f'{const.STV.DankThink} Title was changed to "{update.title}"',
-            )
+            await payload.respond(f'{const.STV.DankThink} Title was changed to "{payload.title}"')
 
-        if self.title_tracked != update.title:
+        if self.title_tracked != payload.title:
             # we need to record the title into the database
             query = """
                 INSERT INTO ttv_stream_titles
@@ -221,10 +215,10 @@ class EditInformation(IreComponent):
                 ON CONFLICT (title) DO
                     UPDATE SET edit_time = $2;
             """
-            await self.bot.pool.execute(query, update.title, now)
+            await self.bot.pool.execute(query, payload.title, now)
 
-        self.game_tracked = update.category_name
-        self.title_tracked = update.title
+        self.game_tracked = payload.category_name
+        self.title_tracked = payload.title
 
     @commands.Component.listener(name="stream_offline")
     async def clear_the_database(self, _: twitchio.StreamOffline) -> None:

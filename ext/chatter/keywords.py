@@ -63,7 +63,7 @@ class Keywords(IreComponent):
             return
 
         if found := self.compiled_regex.search(message.text):
-            await message.broadcaster.send_message(sender=self.bot.bot_id, message=self.keywords[found[0]])
+            await message.respond(self.keywords[found[0]])
             self.cooldown_dt = now
 
 

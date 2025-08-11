@@ -91,10 +91,7 @@ class Counters(IreComponent):
 
         # milestone
         if value % 1000 == 0:
-            await message.broadcaster.send_message(
-                sender=self.bot.bot_id,
-                message=f"{const.STV.wow} we reached a milestone of {value} {const.STV.Erm} in chat",
-            )
+            await message.respond(f"{const.STV.wow} we reached a milestone of {value} {const.STV.Erm} in chat")
             return
 
         # random notification/reminder
@@ -103,10 +100,7 @@ class Counters(IreComponent):
             await asyncio.sleep(3)
             query = "SELECT value FROM ttv_counters WHERE name = $1"
             value: int = await self.bot.pool.fetchval(query, "erm")
-            await message.broadcaster.send_message(
-                sender=self.bot.bot_id,
-                message=f"{value} {const.STV.Erm} in chat.",
-            )
+            await message.respond(f"{value} {const.STV.Erm} in chat.")
             return
 
     @commands.command(aliases=["erm"])
@@ -141,12 +135,9 @@ class Counters(IreComponent):
                 f" {const.STV.gg} {const.Global.EZ}"
             )
 
-        await redemption.broadcaster.send_message(
-            sender=self.bot.bot_id,
-            message=msg,
-        )
+        await redemption.respond(msg)
 
-        reward = await redemption.reward.fetch_reward(token_for=redemption.broadcaster.id)
+        reward = await redemption.reward.fetch_reward()
         await reward.update(title=f"@{redemption.user.display_name} was 1st today !")
 
     @commands.Component.listener(name="irene_offline")
