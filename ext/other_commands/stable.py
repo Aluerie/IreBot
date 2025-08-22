@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import asyncio
 import datetime
+import importlib.metadata
 import logging
 import random
+import sys
 import unicodedata
 from typing import TYPE_CHECKING, NamedTuple, TypedDict
 
@@ -404,6 +406,19 @@ class StableCommands(IreComponent):
                 duration=1,
                 reason="Used !vanish",
             )
+
+    @commands.command(aliases=["version", "packages", "libraries"])
+    async def versions(self, ctx: IreContext) -> None:
+        """🔬 Get info bot's main Python Packages."""
+        curious_packages = [
+            "twitchio",
+        ]  # list of packages versions of which I'm interested the most
+        pv = sys.version_info  # python version
+
+        await ctx.send(
+            f"Python {pv.major}.{pv.minor}.{pv.micro} | "
+            + " | ".join(f"{package}: {importlib.metadata.version(package)}" for package in curious_packages)
+        )
 
     @commands.command()
     async def vods(self, ctx: IreContext) -> None:
