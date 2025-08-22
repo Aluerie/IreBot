@@ -36,7 +36,7 @@ __all__ = ("IreBot",)
 log = logging.getLogger(__name__)
 
 
-class IreBot(commands.Bot):
+class IreBot(commands.AutoBot):
     """Main class for IreBot.
 
     Essentially subclass over TwitchIO's Client.
@@ -85,6 +85,7 @@ class IreBot(commands.Bot):
             owner_id=const.UserID.Irene,
             prefix=self.prefixes,
             # adapter=adapter,
+            subscriptions=self.get_eventsub_subscriptions(),
             # TODO: fill in scopes= argument once we figure out what it's used for :x
         )
         self.test: bool = platform.system() == "Windows"
@@ -172,10 +173,9 @@ class IreBot(commands.Bot):
         for ext in self.extensions:
             (await self.load_module(ext))
 
-        await self.create_eventsub_subscriptions()
         self.check_if_online.start()
 
-    async def create_eventsub_subscriptions(self) -> None:
+    def get_eventsub_subscriptions(self) -> list[twitchio.eventsub.SubscriptionPayload]:
         """Subscribe to all EventSub subscriptions that are required for the bot to work.
 
         The function also includes (in code) a table showcasing which subscriptions/scopes are required for what.
@@ -195,7 +195,7 @@ class IreBot(commands.Bot):
         broadcaster = const.UserID.Irene
         bot = const.UserID.Bot
 
-        for sub in [
+        return [
             # EventSub Subscriptions Table (order - function name sorted by alphabet).
             # Subscription Name                     Permission
             # ------------------------------------------------------
@@ -221,8 +221,7 @@ class IreBot(commands.Bot):
             eventsub.ChannelSubscribeSubscription(broadcaster_user_id=broadcaster),
             # ❓ Channel Subscribe Message (paid)              channel:read:subscriptions
             eventsub.ChannelSubscribeMessageSubscription(broadcaster_user_id=broadcaster),
-        ]:
-            await self.subscribe_websocket(payload=sub)
+        ]
 
     @override
     async def add_token(self, token: str, refresh: str) -> twitchio.authentication.ValidateTokenPayload:
