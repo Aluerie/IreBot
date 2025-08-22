@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import datetime
 import logging
 import platform
 from typing import TYPE_CHECKING, Any, TypedDict, override
@@ -64,6 +65,7 @@ class IreBot(commands.AutoBot):
     if TYPE_CHECKING:
         logs_via_webhook_handler: logging.Handler
         dota: Dota2Client
+        launch_time: datetime.datetime
 
     def __init__(
         self,
@@ -275,6 +277,10 @@ class IreBot(commands.AutoBot):
     async def event_ready(self) -> None:
         """Event that is dispatched when the `Client` is ready and has completed login."""
         log.info("%s is ready as bot_id = %s", self.__class__.__name__, self.bot_id)
+
+        if not hasattr(self, "launch_time"):
+            # who knows maybe it triggers many times like `discord.py`
+            self.launch_time = datetime.datetime.now(datetime.UTC)
         if hasattr(self, "dota"):
             await self.dota.wait_until_ready()
 

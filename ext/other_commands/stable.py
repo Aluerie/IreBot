@@ -333,6 +333,17 @@ class StableCommands(IreComponent):
                 reason="Lost in !russianroulette",
             )
 
+    @commands.command()  # maybe the name "since" isn't the best but "uptime", "online" are already taken
+    async def since(self, ctx: IreContext) -> None:
+        """🔬 Get the bot's uptime.
+
+        Uptime is time for which the bot has been online without any crashes or reboots.
+        """
+        await ctx.send(
+            f"Last reboot {self.bot.launch_time.strftime('%H:%M %d/%b/%y')}; "
+            f"It's been {fmt.timedelta_to_words(datetime.datetime.now(datetime.UTC) - self.bot.launch_time)}."
+        )
+
     @guards.is_online()
     @commands.is_moderator()
     @commands.command(aliases=["so"])
