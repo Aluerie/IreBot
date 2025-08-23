@@ -139,8 +139,7 @@ class Alerts(IreComponent):
     @commands.Component.listener(name="ban")
     async def bans_timeouts(self, payload: twitchio.Ban) -> None:
         """Bans."""
-        if payload.user.name:
-            self.ban_list.add(payload.user.name.lower())
+        self.ban_list.add(payload.user.id)
 
     @ireloop(count=1)
     async def fill_known_chatters(self) -> None:
@@ -148,7 +147,7 @@ class Alerts(IreComponent):
 
         Just a fool proof measure in case I randomly snap and delete it.
         """
-        query = "SELECT name_lower FROM ttv_chatters"
+        query = "SELECT user_id FROM ttv_chatters"
         self.known_chatters: list[str] = [r for (r,) in await self.bot.pool.fetch(query)]
 
     @commands.Component.listener(name="message")
@@ -161,12 +160,12 @@ class Alerts(IreComponent):
         if not payload.text:
             return
 
-        if payload.chatter.name in self.known_chatters:
+        if payload.chatter.id in self.known_chatters:
             # if in database: a known chatter
             return
 
         await asyncio.sleep(4.0)  # wait for auto-mod / WizeBot to ban super-sus users.
-        if payload.chatter.name in self.ban_list:
+        if payload.chatter.id in self.ban_list:
             await payload.respond(const.STV.LastTimeChatter)
             return
 

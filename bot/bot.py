@@ -47,7 +47,7 @@ class IreBot(commands.AutoBot):
     Note on the name
     ----
     The name `IrenesBot` is used mainly for display purposes here:
-        * the bot's twitch account user name (just so it's clear that it's Aluerie's bot);
+        * the bot's twitch account user name (just so it's clear that it's Irene's bot);
         * the bot's Steam account's display name;
 
     Name `IreBot` is pretty much used elsewhere:
@@ -57,7 +57,7 @@ class IreBot(commands.AutoBot):
         * systemd service name;
         * discord notifications webhook names;
         * category name in my own ToDo list;
-        * etc :D
+        * etc.
 
     Maybe I will change this in future to be less confusing, but I think current situation is fine.
     """
@@ -88,6 +88,7 @@ class IreBot(commands.AutoBot):
             prefix=self.prefixes,
             # adapter=adapter,
             subscriptions=self.get_eventsub_subscriptions(),
+            # force_subscribe=True,
             # TODO: fill in scopes= argument once we figure out what it's used for :x
         )
         self.test: bool = platform.system() == "Windows"
@@ -283,6 +284,26 @@ class IreBot(commands.AutoBot):
             self.launch_time = datetime.datetime.now(datetime.UTC)
         if hasattr(self, "dota"):
             await self.dota.wait_until_ready()
+
+    # @override # TODO: look https://github.com/PythonistaGuild/TwitchIO/blob/main/examples/basic_conduits/main.py
+    # async def event_oauth_authorized(self, payload: twitchio.authentication.UserTokenPayload) -> None:
+    #     await self.add_token(payload.access_token, payload.refresh_token)
+
+    #     if not payload.user_id:
+    #         return
+
+    #     if payload.user_id == self.bot_id:
+    #         # We usually don't want subscribe to events on the bots channel...
+    #         return
+
+    #     subs: list[eventsub.SubscriptionPayload] = [
+    #         eventsub.ChatMessageSubscription(broadcaster_user_id=payload.user_id, user_id=self.bot_id),
+    #         eventsub.StreamOnlineSubscription(broadcaster_user_id=payload.user_id),
+    #     ]
+
+    #     resp: twitchio.MultiSubscribePayload = await self.multi_subscribe(subs)
+    #     if resp.errors:
+    #         log.warning("Failed to subscribe to: %r, for user: %s", resp.errors, payload.user_id)
 
     @override
     async def event_command_error(self, payload: commands.CommandErrorPayload) -> None:
