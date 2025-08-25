@@ -164,14 +164,14 @@ class Alerts(IreComponent):
             # if in database: a known chatter
             return
 
-        await asyncio.sleep(4.0)  # wait for auto-mod / WizeBot to ban super-sus users.
+        await asyncio.sleep(4.0)  # wait for auto-mod / WizeBot to ban super-sus users - 4 sec is probably enough.
         if payload.chatter.id in self.ban_list:
             await payload.respond(const.STV.LastTimeChatter)
             return
 
         query = "INSERT INTO ttv_chatters (user_id, name_lower) VALUES ($1, $2)"
         await self.bot.pool.execute(query, payload.chatter.id, payload.chatter.name)
-        self.known_chatters.append(payload.chatter.name or "")
+        self.known_chatters.append(payload.chatter.id)
 
         await payload.respond(
             f"{const.STV.FirstTimeChadder} or {const.STV.FirstTimeDentge} "
