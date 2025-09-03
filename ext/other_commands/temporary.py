@@ -216,7 +216,7 @@ class TemporaryCommands(IreComponent):
         await ctx.send(back_text)
 
     async def abc(self, ctx: IreContext) -> None:
-        """ABC."""
+        """Send all possible *uh emotes to the chat."""
         # fmt: off
         alphabet = [
             "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m",
