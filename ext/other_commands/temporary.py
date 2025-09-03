@@ -215,6 +215,7 @@ class TemporaryCommands(IreComponent):
         back_text = "—————————————————————— imGlitch streamer is back, act normal uuh ——————————————————————"
         await ctx.send(back_text)
 
+    @commands.command()
     async def abc(self, ctx: IreContext) -> None:
         """Send all possible *uh emotes to the chat."""
         # fmt: off
