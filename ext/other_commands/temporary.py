@@ -205,15 +205,26 @@ class TemporaryCommands(IreComponent):
     @commands.command()
     async def brb(self, ctx: IreContext) -> None:
         """BRB."""
-        gone_text = "—————————————————————— imGlitch Streamer is gone, time to plink ——————————————————————"
+        gone_text = "—————————————————————— imGlitch streamer is gone, time to plink ——————————————————————"
         await ctx.send(gone_text)
 
     @commands.is_owner()
     @commands.command()
     async def back(self, ctx: IreContext) -> None:
         """BACK."""
-        back_text = "—————————————————————— imGlitch Streamer is back, act normal uuh ——————————————————————"
+        back_text = "—————————————————————— imGlitch streamer is back, act normal uuh ——————————————————————"
         await ctx.send(back_text)
+
+    async def abc(self, ctx: IreContext) -> None:
+        """ABC."""
+        # fmt: off
+        alphabet = [
+            "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m",
+            "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"
+        ]
+        # fmt: on
+        text = " ".join(f"{letter}uh" for letter in alphabet)
+        await ctx.send(text)
 
 
 async def setup(bot: IreBot) -> None:

@@ -351,6 +351,7 @@ class StableCommands(IreComponent):
         """Do /shoutout to a user."""
         await ctx.broadcaster.send_shoutout(to_broadcaster=user.id, moderator=const.UserID.Bot)
 
+    @commands.cooldown(rate=1, per=10, key=commands.BucketType.channel)
     @commands.command()
     async def song(self, ctx: IreContext) -> None:
         """Get currently played song on Spotify."""
@@ -359,11 +360,19 @@ class StableCommands(IreComponent):
             msg = await resp.text()
 
         if not resp.ok:
-            answer = f"Irene needs to login + authorize {const.STV.dankFix}"
+            answer = f"Irene needs to login + authorize for the tool to work {const.STV.dankFix}"
+
         if msg == "User is currently not playing any music on Spotify.":
             answer = f"{const.STV.Erm} No music is being played"
+        elif msg.startswith("Error:"):
+            # not sure how else to handle "Error: Request failed with status code 429" and such
+            answer = (
+                f"{const.STV.DankReading} {msg} {const.STV.DankThink} "
+                "You can probably look the song title on the screen in one of the corners."
+            )
         else:
             answer = f"{const.STV.donkJam} {msg}"
+
         await ctx.send(answer)
 
     @commands.command()
