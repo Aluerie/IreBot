@@ -80,11 +80,16 @@ class LogsViaWebhook(BaseDevComponent):
     @override
     async def component_load(self) -> None:
         self.logging_worker.start()
+        self.logs_handler = LoggingHandler(self)
+        logging.getLogger().addHandler(self.logs_handler)
         await super().component_load()
 
     @override
     async def component_teardown(self) -> None:
         self.logging_worker.stop()
+        log.warning("Tearing down logger via webhook.")
+        logging.getLogger().removeHandler(self.logs_handler)
+        del self.logs_handler
         await super().component_teardown()
 
     def add_record(self, record: logging.LogRecord) -> None:
@@ -144,5 +149,3 @@ async def setup(bot: IreBot) -> None:
 
         cog = LogsViaWebhook(bot)
         await bot.add_component(cog)
-        bot.logs_via_webhook_handler = handler = LoggingHandler(cog)
-        logging.getLogger().addHandler(handler)
