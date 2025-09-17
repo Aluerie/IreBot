@@ -15,6 +15,29 @@ if TYPE_CHECKING:
 
     from bot import IreBot
 
+MESSAGES: list[str] = [
+    f"FIX YOUR POSTURE {const.BTTV.weirdChamp}",
+    (
+        f"{const.STV.heyinoticedyouhaveaprimegamingbadgenexttoyourname} Use your Twitch Prime to sub for "
+        f"my channel {const.STV.DonkPrime} it's completely free {const.BTTV.PogU}"
+    ),
+    f"{const.STV.Adge} {const.STV.DankApprove}",
+    f"Don't forget to stretch and scoot {const.STV.GroupScoots}",
+    f"{const.STV.plink}",
+    f"{const.STV.uuh}",
+    f"chat don't forget to {const.STV.plink}",
+    (
+        "hi chat many features of this bot are WIP so, please, if you notice bugs or incorrect responses "
+        f"- inform me {const.STV.DANKHACKERMANS}"
+    ),
+    # (
+    #     "hey chat I'm making a small web-page to describe the bot's features (WIP)."
+    #     "You can see it here: (not implemented xdd)"
+    # ),
+    # "Discord discord.gg/K8FuDeP",
+    # "if you have nothing to do Sadge you can try !randompasta. Maybe you'll like it Okayge",
+]
+
 
 class Timers(IreComponent):
     """Periodic messages/announcements in Aluerie's channel."""
@@ -28,28 +51,7 @@ class Timers(IreComponent):
         self._most_recent: datetime.datetime | None = None
         self._lock: asyncio.Lock = asyncio.Lock()
 
-        self.messages: list[str] = [
-            f"FIX YOUR POSTURE {const.BTTV.weirdChamp}",
-            (
-                f"{const.STV.heyinoticedyouhaveaprimegamingbadgenexttoyourname} Use your Twitch Prime to sub for "
-                f"my channel {const.STV.DonkPrime} it's completely free {const.BTTV.PogU}"
-            ),
-            f"{const.STV.Adge} {const.STV.DankApprove}",
-            f"Don't forget to stretch and scoot {const.STV.GroupScoots}",
-            f"{const.STV.plink}",
-            f"{const.STV.uuh}",
-            f"chat don't forget to {const.STV.plink}",
-            (
-                "hi chat many features of this bot are WIP so, please, if you notice bugs or incorrect responses "
-                f"- inform me {const.STV.DANKHACKERMANS}"
-            ),
-            # (
-            #     "hey chat I'm making a small web-page to describe the bot's features (WIP)."
-            #     "You can see it here: (not implemented xdd)"
-            # ),
-            # "Discord discord.gg/K8FuDeP",
-            # "if you have nothing to do Sadge you can try !randompasta. Maybe you'll like it Okayge",
-        ]
+        self.messages = MESSAGES
 
     @commands.Component.listener(name="irene_online")
     async def stream_online_start_the_task(self) -> None:
@@ -84,8 +86,8 @@ class Timers(IreComponent):
                 # we already have a timer to send
                 return
 
-            if self.lines_count > 121:
-                await asyncio.sleep(33 + random.randint(1, 6 * 66))
+            if self.lines_count > 120:
+                await asyncio.sleep(40 + random.randint(1, 60 * 20))
                 await self.deliver(self.messages[self.index % len(self.messages)])
 
                 # reset the index vars

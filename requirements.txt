@@ -16,12 +16,12 @@ aiohttp==3.12.13
 steamio @ git+https://github.com/Aluerie/steam.py@introduce-ext.dota2
 pulsefire==2.0.28
 
-# OPTIMISATION
+# OPTIMIZATION
 orjson==3.10.18
 uvloop==0.21.0; platform_system == 'Linux'  # ignore on non-Linux - because not available
 
 # JUPYTER NOTEBOOKS
 ipykernel; platform_system == 'Windows'
 
-# UNCATEGORISED YET
+# UNCATEGORIZED YET
 click== 8.2.1
