@@ -5,23 +5,23 @@ twitchio[starlette] @ git+https://github.com/PythonistaGuild/TwitchIO.git@main
 # py -m pip install "twitchio[starlette] @ git+https://github.com/PythonistaGuild/TwitchIO.git@dev/3.0" --force-reinstall 
 
 # DISCORD
-discord.py[speed]==2.5.2
+discord.py[speed]==2.6.4
 
 # BOT'S BASE
 asyncpg==0.30.0
 asyncpg-stubs==0.30.2
-aiohttp==3.12.13
+aiohttp==3.13.2
 
 # DOTA 2 
 steamio @ git+https://github.com/Aluerie/steam.py@introduce-ext.dota2
-pulsefire==2.0.28
+pulsefire==2.0.29
 
 # OPTIMIZATION
-orjson==3.10.18
-uvloop==0.21.0; platform_system == 'Linux'  # ignore on non-Linux - because not available
+orjson==3.11.4
+uvloop==0.22.1; platform_system == 'Linux'  # ignore on non-Linux - because not available
 
 # JUPYTER NOTEBOOKS
 ipykernel; platform_system == 'Windows'
 
 # UNCATEGORIZED YET
-click== 8.2.1
+click== 8.3.0
