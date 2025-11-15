@@ -17,11 +17,9 @@ try:
 except ImportError:
     # WINDOWS
     RUNTIME = asyncio.run  # pyright: ignore[reportConstantRedefinition]
-    # TODO: Delete? asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 else:
     # LINUX
     RUNTIME = uvloop.run
-    # TODO: Delete? asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 
 async def create_pool() -> asyncpg.Pool[asyncpg.Record]:
