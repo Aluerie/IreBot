@@ -1,0 +1,17 @@
+; Use the following command to copy-paste the .service file into systemd folder 
+; cp ./irebot.service /etc/systemd/system/irebot.service
+
+[Unit]
+Description=irebot
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/ubuntu/IreBot/
+ExecStart=/home/ubuntu/IreBot/.venv/bin/python3.12 __main__.py
+User=ubuntu
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
