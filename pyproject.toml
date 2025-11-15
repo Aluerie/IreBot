@@ -1,3 +1,33 @@
+[project]
+name = "IreBot"
+version = "0.1.0"
+description = "Personal Twitch.tv Bot"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "aiohttp==3.13.2",
+    "asyncpg==0.30.0",
+    "click==8.3.0",
+    "discord-py[speed]==2.6.4",
+    "orjson==3.11.4",
+    "pulsefire>=2.0.30",
+    "steamio",
+    "twitchio[starlette]",
+    "uvloop==0.22.1 ; sys_platform == 'linux'",
+]
+
+[tool.uv.sources]
+twitchio = { git = "https://github.com/PythonistaGuild/TwitchIO.git", rev = "main" }
+steamio = { git = "https://github.com/Aluerie/steam.py", rev = "introduce-ext.dota2" }
+
+[dependency-groups]
+dev = ["asyncpg-stubs>=0.30.2", "ipykernel>=7.1.0"]
+
+[[tool.uv.index]]
+name = "umbra"
+url = "https://about.abstractumbra.dev/pip/"
+explicit = true
+
 [tool.black]
 # I use ruff over it
 line-length = 120
@@ -216,12 +246,3 @@ allow-star-arg-any = true
 
 [tool.ruff.lint.flake8-quotes]
 inline-quotes = "double"
-
-
-[project]
-name = "IreBot"
-version = "2024.0.0"
-requires-python = ">=3.12"
-authors = [{ name = "Aluerie" }]
-maintainers = [{ name = "Aluerie" }]
-description = "Personal Twitch.tv Bot"

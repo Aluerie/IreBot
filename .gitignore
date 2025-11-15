@@ -1,20 +1,35 @@
+# Python-generated files
 __pycache__/
-venv/
-.idea/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
 
+# Virtual environments
+.venv
+venv
+
+# `.vscode` folder
 .vscode/*
 !.vscode/launch.json
 !.vscode/settings.json
+!.vscode/extensions.json
 
+# iPython Notebooks
 .ipynb_checkpoints
 *.ipynb
 
+# Windows `desktop.ini` memes
 *.ini
 
+# Config
 config.toml
 
+# Temporary
 .temp/
 
+# Testing Only
 ext/_beta.py
 ext/beta.py
 _test.py

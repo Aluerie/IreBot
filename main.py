@@ -16,10 +16,12 @@ try:
     import uvloop  # pyright: ignore[reportMissingImports]
 except ImportError:
     # WINDOWS
-    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+    RUNTIME = asyncio.run  # pyright: ignore[reportConstantRedefinition]
+    # TODO: Delete? asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 else:
     # LINUX
-    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+    RUNTIME = uvloop.run
+    # TODO: Delete? asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 
 async def create_pool() -> asyncpg.Pool[asyncpg.Record]:
@@ -59,7 +61,7 @@ def main(click_ctx: click.Context) -> None:
     if click_ctx.invoked_subcommand is None:
         with setup_logging():
             try:
-                asyncio.run(start_the_bot())
+                RUNTIME(start_the_bot())
             except KeyboardInterrupt:
                 print("Aborted! The bot was interrupted with `KeyboardInterrupt`!")  # noqa: T201
 
