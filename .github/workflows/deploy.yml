@@ -20,9 +20,8 @@ jobs:
         PORT: ${{ secrets.PORT }}
         KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
-          source /etc/profile
           cd ./IreBot
           git pull
-          uv sync --no-dev
+          ~/.local/bin/uv sync --no-dev
           sudo systemctl restart irebot.service
           sudo systemctl start irebot.service
