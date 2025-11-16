@@ -22,6 +22,6 @@ jobs:
         script: |
           cd ./IreBot
           git pull
-          uv sync
+          ~/.local/bin/uv sync
           sudo systemctl restart irebot.service
           sudo systemctl start irebot.service

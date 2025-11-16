@@ -21,7 +21,11 @@ twitchio = { git = "https://github.com/PythonistaGuild/TwitchIO.git", rev = "mai
 steamio = { git = "https://github.com/Aluerie/steam.py", rev = "introduce-ext.dota2" }
 
 [dependency-groups]
-dev = ["asyncpg-stubs>=0.30.2", "ipykernel>=7.1.0"]
+dev = [
+    "asyncpg-stubs>=0.30.2",
+    "ipykernel>=7.1.0",
+    "pyright>=1.1.407",
+]
 
 [[tool.uv.index]]
 name = "umbra"
@@ -43,7 +47,7 @@ line_length = 120
 [tool.pyright]
 pythonVersion = "3.12"
 typeCheckingMode = "strict"  # let's enable the default max setting and go down from here.
-exclude = ["**/__pycache__"]
+exclude = [".venv", "**/__pycache__"]
 # https://github.com/microsoft/pyright/blob/main/docs/configuration.md
 
 deprecateTypingAliases = true
@@ -70,6 +74,7 @@ reportUnknownArgumentType = "none"
 # like `convert(ctx: AluContext, argument: str)` in converters.
 reportIncompatibleVariableOverride = "none"
 reportIncompatibleMethodOverride = "none"
+
 
 [tool.ruff]
 # https://docs.astral.sh/ruff/rules/
