@@ -1,5 +1,5 @@
 name: Deploy
-run-name: Deploy
+run-name: Deploy the code, sync the Venv and restart the Bot
 
 on:
   push:
@@ -22,6 +22,6 @@ jobs:
         script: |
           cd ./IreBot
           git pull
-          ~/.local/bin/uv sync
+          ~/.local/bin/uv sync --no-dev
           sudo systemctl restart irebot.service
           sudo systemctl start irebot.service
