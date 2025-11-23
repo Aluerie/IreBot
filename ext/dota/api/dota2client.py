@@ -39,7 +39,7 @@ class Dota2Client(Client):
 
     def irene(self) -> PartialUser:
         """Irene's Dota/Steam Profile (partial user)."""
-        return self.instantiate_partial_user(config["STEAM"]["IRENE_ID64"])
+        return self.create_partial_user(config["STEAM"]["IRENE_ID64"])
 
     async def start_helpers(self) -> None:
         """Start helping services for steam."""

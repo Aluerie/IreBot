@@ -14,11 +14,11 @@ from bot import ireloop
 from utils import errors, fmt, fuzzy
 
 from ._utils import convert_id3_to_id64, rank_medal_display_name
-from .constants import HERO_ALIASES, PLAYER_COLOURS
+from .constants import HERO_ALIASES, PLAYER_COLORS
 from .enums import LobbyParam0, PlayerMatchOutcome, RPStatus, Team, WinLossCategory
 
 if TYPE_CHECKING:
-    from steam.ext.dota2 import MatchHistoryMatch, MatchMinimal
+    from steam.ext.dota2 import MatchHistoryMatch, MinimalMatch
 
     from bot import IreBot
 
@@ -188,7 +188,7 @@ class Streamer:
     async def add_completed_match_to_database(
         self,
         history_match: MatchHistoryMatch,
-    ) -> tuple[MatchMinimal, PlayerMatchOutcome]:
+    ) -> tuple[MinimalMatch, PlayerMatchOutcome]:
         """Add completed match to the database."""
         partial_match = self.bot.dota.create_partial_match(history_match.id)
         minimal_match = await partial_match.minimal()
@@ -292,9 +292,7 @@ class Streamer:
         cutoff_dt = datetime.datetime.now(datetime.UTC) - datetime.timedelta(hours=48)
         while True:  # monkaGIGA
             for history_match in history_matches:
-                if (
-                    last_known_match_id and history_match.id <= last_known_match_id
-                ) or history_match.start_time < cutoff_dt:
+                if (last_known_match_id and history_match.id <= last_known_match_id) or history_match.start_time < cutoff_dt:
                     break
                 _, outcome = await self.add_completed_match_to_database(history_match)
                 mmr_change += outcome.mmr_change(history_match.lobby_type)
@@ -349,7 +347,7 @@ class Streamer:
 
 
 class LastGame:
-    def __init__(self, match: MatchMinimal, outcome: PlayerMatchOutcome, account_id: int, hero: Hero) -> None:
+    def __init__(self, match: MinimalMatch, outcome: PlayerMatchOutcome, account_id: int, hero: Hero) -> None:
         # print(match.id, [player.hero for player in match.players])
         # find proper player
         streamer_player = next((player for player in match.players if player.id == account_id), None)
@@ -432,7 +430,7 @@ class Player:
         * Either Hero name (i.e. "Windranger") if it's picked;
         * or Player Slot Colour (i.e. "Blue") otherwise.
         """
-        return self.hero.name if self.hero else PLAYER_COLOURS[self.player_slot]
+        return self.hero.name if self.hero else PLAYER_COLORS[self.player_slot]
 
     @property
     def stratz(self) -> str:
@@ -515,7 +513,7 @@ class Match(abc.ABC):
             # first let's look in more official identifiers
             heroes = [player.hero for player in self.players.values()]
             for player_slot, hero in enumerate(heroes):
-                identifiers = [PLAYER_COLOURS[player_slot]]
+                identifiers = [PLAYER_COLORS[player_slot]]
                 if hero:
                     identifiers.extend([hero.name, hero.display_name])
                 find = fuzzy.extract_one(argument, identifiers, score_cutoff=69)

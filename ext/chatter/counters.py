@@ -146,7 +146,7 @@ class Counters(IreComponent):
 
         Currently, it should be changed when somebody redeems to "@user was first!
         """
-        first_reward = next(reward for reward in await self.irene.fetch_custom_rewards() if reward.id == FIRST_ID)
+        first_reward = next(reward for reward in await self.irene.partial().fetch_custom_rewards() if reward.id == FIRST_ID)
         await first_reward.update(title="First !")
 
     @commands.command(aliases=["first"])
@@ -195,7 +195,7 @@ class Counters(IreComponent):
             # simple way to make a task run once/month
             return
 
-        custom_rewards = await self.irene.fetch_custom_rewards()
+        custom_rewards = await self.irene.partial().fetch_custom_rewards()
         for reward in custom_rewards:
             if reward.id == FIRST_ID:
                 # we good

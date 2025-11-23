@@ -88,7 +88,7 @@ class Timers(IreComponent):
 
             if self.lines_count > 120:
                 await asyncio.sleep(40 + random.randint(1, 60 * 20))
-                await self.deliver(self.messages[self.index % len(self.messages)])
+                await self.irene.deliver(self.messages[self.index % len(self.messages)])
 
                 # reset the index vars
                 self.index += 1

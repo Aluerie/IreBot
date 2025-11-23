@@ -16,7 +16,7 @@ log.setLevel(logging.INFO)
 
 
 class measure_time:  # noqa: N801 # it's fine to call classes lowercase if they aren't used as actual classes per PEP-8.
-    """Measure performance time of a contexted codeblock.
+    """Measure performance time of a context'ed codeblock.
 
     Example:
     -------

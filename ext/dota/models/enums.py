@@ -9,7 +9,7 @@ from steam.ext.dota2 import GameMode, LobbyType, MatchOutcome
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
-    from steam.ext.dota2 import MatchHistoryMatch, MatchMinimal
+    from steam.ext.dota2 import MatchHistoryMatch, MinimalMatch
 
 
 class Team(IntEnum):
@@ -52,7 +52,7 @@ class PlayerMatchOutcome(IntEnum):
     #         return PlayerMatchOutcome.Other
 
     @classmethod
-    def create_from_history(cls, minimal_match: MatchMinimal, history_match: MatchHistoryMatch) -> PlayerMatchOutcome:
+    def create_from_history(cls, minimal_match: MinimalMatch, history_match: MatchHistoryMatch) -> PlayerMatchOutcome:
         """Create an enum from MatchHistoryMatch object."""
         if history_match.abandon:
             return PlayerMatchOutcome.Abandon
@@ -98,8 +98,7 @@ class WinLossCategory(IntEnum):
         """Get name that people usually reference this category by."""
         mapping = {1: "Ranked", 3: "Turbo", 4: "New Player Mode"}
 
-        display_name = mapping.get(self.value, None)
-        if display_name:
+        if display_name := mapping.get(self.value):
             return display_name
         return f"{lobby_type.display_name} ({game_mode.display_name})"
 

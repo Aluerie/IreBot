@@ -139,7 +139,7 @@ class LogsViaWebhook(BaseDevComponent):
     @commands.Component.listener(name="ready")
     async def announce_reloaded(self) -> None:
         """Announce that bot is successfully reloaded/restarted."""
-        await self.deliver(f"{const.STV.hi} the bot is reloaded.")
+        await self.irene.deliver(f"{const.STV.hi} the bot is reloaded.")
 
 
 async def setup(bot: IreBot) -> None:

@@ -81,7 +81,7 @@ reportIncompatibleMethodOverride = "none"
 # Examples of good ruff configurations:
 # * https://github.com/AbstractUmbra/Mipha/blob/main/pyproject.toml
 # * https://github.com/mikeshardmind/async-utils/blob/main/pyproject.toml
-line-length = 120
+line-length = 125
 target-version = "py312"
 # requires-python = ">= 3.10"
 

@@ -43,7 +43,7 @@ class EditInformation(IreComponent):
 
         This is why we need to track the past ourselves.
         """
-        channel_info = await self.irene.fetch_channel_info()
+        channel_info = await self.irene.partial().fetch_channel_info()
 
         self.game_tracked = channel_info.game_name
         self.title_tracked = channel_info.title
@@ -196,7 +196,7 @@ class EditInformation(IreComponent):
                 await payload.respond(f'{const.STV.donkDetective} Game was changed to "{new_category}"')
 
             # why it's not a default functionality ?
-            if self.bot.irene_online:
+            if self.bot.irene.online:
                 with contextlib.suppress(twitchio.HTTPException):
                     await payload.broadcaster.create_stream_marker(
                         token_for=const.UserID.Irene, description=f"Game: {new_category}"

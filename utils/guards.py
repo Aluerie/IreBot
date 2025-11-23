@@ -31,6 +31,6 @@ def is_online() -> Any:
     """Allow the command to be completed only when Irene's stream is online."""
 
     def predicate(ctx: IreContext) -> bool:
-        return ctx.bot.irene_online
+        return ctx.bot.irene.online
 
     return commands.guard(predicate)

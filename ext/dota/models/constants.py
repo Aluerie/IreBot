@@ -162,7 +162,7 @@ HERO_ALIASES = {
 }
 # /* cSpell:enable */
 
-PLAYER_COLOURS = [
+PLAYER_COLORS = [
     "Blue",
     "Teal",
     "Purple",

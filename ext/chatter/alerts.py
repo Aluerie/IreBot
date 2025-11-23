@@ -101,24 +101,35 @@ class Alerts(IreComponent):
         channel_info = await payload.broadcaster.fetch_channel_info()
         # notification
         await payload.respond(
-                f"Stream just started {const.STV.FeelsBingMan} "
-                f"Game: {channel_info.game_name} | Title: {channel_info.title}"
+            f"Stream just started {const.STV.FeelsBingMan} Game: {channel_info.game_name} | Title: {channel_info.title}"
         )
         # reminder for the streamer
         await payload.respond(
-                f"{payload.broadcaster.mention} a few reminders {const.STV.ALERT} "
-                f"pin some info {const.STV.ALERT} "
-                f"start recording {const.STV.ALERT} "
-                f"Turn music on {const.STV.ALERT}"
+            f"{payload.broadcaster.mention} a few reminders {const.STV.ALERT} "
+            f"pin some info {const.STV.ALERT} "
+            f"start recording {const.STV.ALERT} "
+            f"Turn music on {const.STV.ALERT}"
         )
         await asyncio.sleep(10 * 60)  # 10 minutes
         # extra reminder for the streamer
         await payload.respond(
-                f"Irene {const.STV.ALERT} "
-                f"last reminder {const.STV.ALERT} "
-                f"start recording please {const.STV.ALERT} "
-                f'chat spam " {const.STV.ALERT} "'
+            f"Irene {const.STV.ALERT} "
+            f"last reminder {const.STV.ALERT} "
+            f"start recording please {const.STV.ALERT} "
+            f'chat spam " {const.STV.ALERT} "'
         )
+
+        # TODO: Maybe rework this into timers-like we have in the Discord bot;
+        # YouTube only allows 12 hours of vods so let's warn ourselves just in case.
+        youtube_vod_limit = 11 * 3600 + 40 * 60  # 11 hours 40 minutes
+        await asyncio.sleep(youtube_vod_limit)
+        if self.bot.irene.online:
+            await payload.respond(
+                f"Irene {const.STV.ALERT} "
+                f"you've been streaming for 11h40m {const.STV.ALERT} "
+                f"remember youtube vod time limit {const.STV.ALERT} "
+                f"{const.STV.OVERWORKING} {const.STV.ALERT} "
+            )
 
     @commands.Component.listener(name="stream_offline")
     async def stream_end(self, payload: twitchio.StreamOffline) -> None:

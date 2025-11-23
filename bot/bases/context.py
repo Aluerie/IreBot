@@ -7,7 +7,7 @@ from twitchio.ext import commands
 if TYPE_CHECKING:
     import twitchio
 
-    from .. import IreBot
+    from ..bot import IreBot
 
 
 class IreContext(commands.Context["IreBot"]):

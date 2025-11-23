@@ -32,9 +32,40 @@ if TYPE_CHECKING:
         refresh: str
 
 
-__all__ = ("IreBot",)
+__all__ = ("IreBot", "Irene")
 
 log = logging.getLogger(__name__)
+
+
+class Irene:
+    """
+    Class describing the streamer (Irene) utilizing IreBot.
+
+    This class meant to provide some utilities and shortcuts to often used TwitchIO features.
+    """
+
+    def __init__(self, user_id: str | None, bot: IreBot) -> None:
+        if not user_id:
+            msg = "Provided `user_id` must be a string."
+            raise TypeError(msg)
+
+        self.id: str = user_id
+        self.bot: IreBot = bot
+
+        # a variable tracking Irene's online status; helps on saving some API calls.
+        self.online: bool = False
+
+    async def stream(self) -> twitchio.Stream | None:
+        """Shortcut to get @Irene's stream."""
+        return next(iter(await self.bot.fetch_streams(user_ids=[self.id])), None)
+
+    def partial(self) -> twitchio.PartialUser:
+        """Get Irene's channel from the cache."""
+        return self.bot.create_partialuser(self.id)
+
+    async def deliver(self, content: str) -> None:
+        """A shortcut to send a message in Irene's twitch channel."""
+        await self.partial().send_message(sender=self.bot.bot_id, message=content)
 
 
 class IreBot(commands.AutoBot):
@@ -99,8 +130,7 @@ class IreBot(commands.AutoBot):
         self.extensions: tuple[str, ...] = EXTENSIONS
 
         self.exc_manager = ExceptionManager(self)
-
-        self.irene_online: bool = False
+        self.irene = Irene(self.owner_id, self)
 
     def print_bot_oauth(self) -> None:
         """Print a link for me (developer) to click and authorize the bot scopes for the bot account.
@@ -195,6 +225,9 @@ class IreBot(commands.AutoBot):
             * Models:   https://twitchio.dev/en/dev-3.0/references/eventsub_models.html
         """
         # it's just a personal bot so things are relatively simple about broadcaster<->bot relation ;)
+
+        # Note, at this point, the bot doesn't have `self.owner_id` or `self.bot_id` filled
+        # so we still have to use direct consts
         broadcaster = const.UserID.Irene
         bot = const.UserID.Bot
 
@@ -202,27 +235,27 @@ class IreBot(commands.AutoBot):
             # EventSub Subscriptions Table (order - function name sorted by alphabet).
             # Subscription Name                     Permission
             # ------------------------------------------------------
-            # ✅ Ad break begin                        channel:read:ads
+            # ✅ Ad break begin                         channel:read:ads
             eventsub.AdBreakBeginSubscription(broadcaster_user_id=broadcaster),
-            # ✅ Bans                                  channel:moderate
+            # ✅ Bans                                   channel:moderate
             eventsub.ChannelBanSubscription(broadcaster_user_id=broadcaster),
-            # ✅ Follows                               moderator:read:followers
+            # ✅ Follows                                moderator:read:followers
             eventsub.ChannelFollowSubscription(broadcaster_user_id=broadcaster, moderator_user_id=bot),
-            # ✅ Channel Points Redeem                 channel:read:redemptions or channel:manage:redemptions
+            # ✅ Channel Points Redeem                  channel:read:redemptions or channel:manage:redemptions
             eventsub.ChannelPointsRedeemAddSubscription(broadcaster_user_id=broadcaster),
-            # ✅ Message                               user:read:chat from the chatbot, channel:bot from broadcaster
+            # ✅ Message                                user:read:chat from the chatbot, channel:bot from broadcaster
             eventsub.ChatMessageSubscription(broadcaster_user_id=broadcaster, user_id=bot),
-            # ✅ Raids to the channel                  No authorization required
+            # ✅ Raids to the channel                   No authorization required
             eventsub.ChannelRaidSubscription(to_broadcaster_user_id=broadcaster),
-            # ✅ Stream went offline                   No authorization required
+            # ✅ Stream went offline                    No authorization required
             eventsub.StreamOfflineSubscription(broadcaster_user_id=broadcaster),
-            # ✅ Stream went live                      No authorization required
+            # ✅ Stream went live                       No authorization required
             eventsub.StreamOnlineSubscription(broadcaster_user_id=broadcaster),
-            # ✅ Channel Update (title/game)           No authorization required
+            # ✅ Channel Update (title/game)            No authorization required
             eventsub.ChannelUpdateSubscription(broadcaster_user_id=broadcaster),
-            # ❓ Channel Subscribe (paid)              channel:read:subscriptions
+            # ❓ Channel Subscribe (paid)               channel:read:subscriptions
             eventsub.ChannelSubscribeSubscription(broadcaster_user_id=broadcaster),
-            # ❓ Channel Subscribe Message (paid)              channel:read:subscriptions
+            # ❓ Channel Subscribe Message (paid)       channel:read:subscriptions
             eventsub.ChannelSubscribeMessageSubscription(broadcaster_user_id=broadcaster),
         ]
 
@@ -419,16 +452,14 @@ class IreBot(commands.AutoBot):
         """Error Role ping used to notify the developer(-s) about some errors."""
         return "<@&1337106675433340990>" if self.test else "<@&1116171071528374394>"
 
-    async def irene_stream(self) -> twitchio.Stream | None:
-        """Shortcut to get @Irene's stream."""
-        return next(iter(await self.fetch_streams(user_ids=[const.UserID.Irene])), None)
+    # Irene's class related events
 
     @ireloop(count=1)
     async def check_if_online(self) -> None:
         """Check if Irene is online - used to make my own (proper) online event instead of twitchio's."""
         await asyncio.sleep(1.0)  # just in case;
-        if await self.irene_stream():
-            self.irene_online = True
+        if await self.irene.stream():
+            self.online = True
             self.dispatch("irene_online")
 
     async def event_stream_online(self, _: twitchio.StreamOnline) -> None:
@@ -436,12 +467,12 @@ class IreBot(commands.AutoBot):
 
         The difference is that my event accounts for the state of my stream when the bot restarts.
         """
-        self.irene_online = True
+        self.irene.online = True
         self.dispatch("irene_online")
 
     async def event_stream_offline(self, _: twitchio.StreamOffline) -> None:
         """Instead of the twitchio event - dispatch my own offline event."""
-        self.irene_online = False
+        self.irene.online = False
         self.dispatch("irene_offline")
 
     # def show_oauth(self) -> None:

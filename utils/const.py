@@ -113,6 +113,7 @@ class STV(StrEnum):
     hi = "hi"
     How2Read = "How2Read"
     LastTimeChatter = "LastTimeChatter"
+    OVERWORKING = "OVERWORKING"
     peepoAds = "peepoAds"
     peepoDapper = "peepoDapper"
     please = "please"

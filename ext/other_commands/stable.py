@@ -406,7 +406,7 @@ class StableCommands(IreComponent):
     @commands.command()
     async def uptime(self, ctx: IreContext) -> None:
         """Get stream uptime."""
-        stream = await self.bot.irene_stream()
+        stream = await self.bot.irene.stream()
         if stream is None:
             await ctx.send(f"Stream is offline {const.BTTV.Offline}")
         else:

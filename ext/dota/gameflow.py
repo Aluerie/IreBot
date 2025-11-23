@@ -47,7 +47,7 @@ class GameFlow(IreComponent):
         The message will be sent to Irene's chat only if debug mode is activated.
         """
         if self.debug_mode:
-            await self.deliver(f"[debug] {message}")
+            await self.irene.deliver(f"[debug] {message}")
 
     @override
     async def component_load(self) -> None:
@@ -147,10 +147,7 @@ class GameFlow(IreComponent):
 
         if match:
             return match
-        if self.streamer.unsupported_error:
-            msg = self.streamer.unsupported_error
-        else:
-            msg = f"No Game Found. Irene's Status: {self.streamer.rp_status.display_name}"
+        msg = self.streamer.unsupported_error or f"No Game Found. Irene's Status: {self.streamer.rp_status.display_name}"
 
         perf_time = perf_counter() - start
         msg = f"[{perf_time:.3f}s] {msg}"
