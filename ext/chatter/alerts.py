@@ -121,14 +121,14 @@ class Alerts(IreComponent):
 
         # TODO: Maybe rework this into timers-like we have in the Discord bot;
         # YouTube only allows 12 hours of vods so let's warn ourselves just in case.
-        youtube_vod_limit = 11 * 3600 + 40 * 60  # 11 hours 40 minutes
+        youtube_vod_limit = 11 * 3600 + 40 * 60  # 11 hours 40 minutes + 10 minute of `asyncio.sleep` above
         await asyncio.sleep(youtube_vod_limit)
         if self.bot.irene.online:
             await payload.respond(
                 f"Irene {const.STV.ALERT} "
-                f"you've been streaming for 11h40m {const.STV.ALERT} "
+                f"you've been streaming for almost 12h {const.STV.ALERT} "
                 f"remember youtube vod time limit {const.STV.ALERT} "
-                f"{const.STV.OVERWORKING} {const.STV.ALERT} "
+                f"{const.STV.OVERWORKING} wrap it up {const.STV.ALERT} "
             )
 
     @commands.Component.listener(name="stream_offline")
