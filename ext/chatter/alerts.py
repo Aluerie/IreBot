@@ -95,6 +95,9 @@ class Alerts(IreComponent):
             ),
         )
 
+    # TODO: There is a conceptuonal problem that if we restart the stream and quickly come back online before 10 minutes
+    # it will send the 10 minute reminder twice
+    # probably solve it by doing a bool "Need to send a message" or a timer when we finally implement that :D
     @commands.Component.listener(name="stream_online")
     async def stream_start(self, payload: twitchio.StreamOnline) -> None:
         """Stream started (went live)."""
@@ -198,8 +201,7 @@ class Alerts(IreComponent):
     async def subscription_message(self, payload: twitchio.ChannelSubscriptionMessage) -> None:
         """Subscriptions."""
         await payload.respond(
-            f"{payload.user.mention} just subscribed for {fmt.ordinal(payload.months)} months "
-            f"{const.STV.Donki} thanks a lot"
+            f"{payload.user.mention} just subscribed for {fmt.ordinal(payload.months)} months {const.STV.Donki} thanks a lot"
         )
 
 

@@ -17,12 +17,12 @@ if TYPE_CHECKING:
 
 MESSAGES: list[str] = [
     f"FIX YOUR POSTURE {const.BTTV.weirdChamp}",
-    (
-        f"{const.STV.heyinoticedyouhaveaprimegamingbadgenexttoyourname} Use your Twitch Prime to sub for "
-        f"my channel {const.STV.DonkPrime} it's completely free {const.BTTV.PogU}"
-    ),
+    # (
+    #     f"{const.STV.heyinoticedyouhaveaprimegamingbadgenexttoyourname} Use your Twitch Prime to sub for "
+    #     f"my channel {const.STV.DonkPrime} it's completely free {const.BTTV.PogU}"
+    # ),
     f"{const.STV.Adge} {const.STV.DankApprove}",
-    f"Don't forget to stretch and scoot {const.STV.GroupScoots}",
+    f"Don't forget to stand up, stretch and scoot {const.STV.GroupScoots}",
     f"{const.STV.plink}",
     f"{const.STV.uuh}",
     f"chat don't forget to {const.STV.plink}",
@@ -37,6 +37,9 @@ MESSAGES: list[str] = [
     # "Discord discord.gg/K8FuDeP",
     # "if you have nothing to do Sadge you can try !randompasta. Maybe you'll like it Okayge",
 ]
+LINES_NEEDED_CD = 150
+MIN_WAIT_TIME = 50
+RANDOM_WAIT_TIME = 60 * 60  # 60 minutes
 
 
 class Timers(IreComponent):
@@ -86,8 +89,8 @@ class Timers(IreComponent):
                 # we already have a timer to send
                 return
 
-            if self.lines_count > 120:
-                await asyncio.sleep(40 + random.randint(1, 60 * 20))
+            if self.lines_count > LINES_NEEDED_CD:
+                await asyncio.sleep(MIN_WAIT_TIME + random.randint(1, RANDOM_WAIT_TIME))
                 await self.irene.deliver(self.messages[self.index % len(self.messages)])
 
                 # reset the index vars
