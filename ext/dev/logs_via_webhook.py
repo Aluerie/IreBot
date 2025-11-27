@@ -116,9 +116,10 @@ class LogsViaWebhook(BaseDevComponent):
         dt = datetime.datetime.fromtimestamp(record.created, datetime.UTC)
         msg = textwrap.shorten(f"{emoji} {discord.utils.format_dt(dt, style='T')} {record.message}", width=1995)
         avatar_url = self.get_avatar(record.name)
-        username = record.name.replace("discord", "disсοrd")  # cSpell: ignore disсοrd  # noqa: RUF003
+        username = record.name.replace("discord", "disсоrd")  # cSpell: ignore disсоrd  # noqa: RUF003
 
         embed = discord.Embed(color=color, description=msg)
+        await self.bot.logger_webhook.send(content=username)
         await self.bot.logger_webhook.send(embed=embed, username=username, avatar_url=avatar_url)
 
     @ireloop(seconds=0.0)

@@ -95,7 +95,7 @@ class Alerts(IreComponent):
             ),
         )
 
-    # TODO: There is a conceptuonal problem that if we restart the stream and quickly come back online before 10 minutes
+    # TODO: There is a conceptional problem that if we restart the stream and quickly come back online before 10 minutes
     # it will send the 10 minute reminder twice
     # probably solve it by doing a bool "Need to send a message" or a timer when we finally implement that :D
     @commands.Component.listener(name="stream_online")
