@@ -116,7 +116,12 @@ class LogsViaWebhook(BaseDevComponent):
         dt = datetime.datetime.fromtimestamp(record.created, datetime.UTC)
         msg = textwrap.shorten(f"{emoji} {discord.utils.format_dt(dt, style='T')} {record.message}", width=1995)
         avatar_url = self.get_avatar(record.name)
-        username = record.name.replace("discord", "disсоrd")  # cSpell: ignore disсоrd  # noqa: RUF003
+
+        # Otherwise we hit the following exception:
+        # 400 Bad Request (error code: 50035): Invalid Form Body In username: Username cannot contain "discord"
+        # PS. Doing "smart" replacement like
+        # "discоrd" with a cyrillic letter "о" still errors out  # noqa: RUF003 cSpell: ignore discоrd
+        username = record.name.replace("discord", "dpy")
 
         embed = discord.Embed(color=color, description=msg)
         await self.bot.logger_webhook.send(content=username)
