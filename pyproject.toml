@@ -6,10 +6,10 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "aiohttp==3.13.2",
-    "asyncpg==0.30.0",
-    "click==8.3.0",
+    "asyncpg==0.31.0",
+    "click==8.3.1",
     "discord-py[speed]==2.6.4",
-    "orjson==3.11.4",
+    "orjson==3.11.5",
     "pulsefire>=2.0.30",
     "steamio",
     "twitchio[starlette]",
