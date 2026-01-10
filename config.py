@@ -25,9 +25,9 @@ DO_NOT_SPOIL_LIST: list[str] = [
 ]
 
 
-SPOIL_PATTERN = re.compile("|".join(map(re.escape, DO_NOT_SPOIL_LIST)))
+DO_NOT_SPOIL_PATTERN = re.compile("|".join(map(re.escape, DO_NOT_SPOIL_LIST)))
 
 
 def replace_secrets(text: str) -> str:
     """Hide Secrets from my config files from a string."""
-    return SPOIL_PATTERN.sub("SECRET", text)
+    return DO_NOT_SPOIL_PATTERN.sub("SECRET", text)

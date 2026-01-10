@@ -2,6 +2,7 @@
 name = "IreBot"
 version = "0.1.0"
 description = "Personal Twitch.tv Bot"
+authors = [{ name = "Aluerie", email = "aluerie@gmail.com" }]
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
@@ -86,7 +87,6 @@ target-version = "py312"
 # requires-python = ">= 3.10"
 
 [tool.ruff.lint]
-preview = true
 select = [
     "A",        # shadowing
     "ANN",      # annotations

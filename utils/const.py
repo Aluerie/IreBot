@@ -8,20 +8,18 @@ class UserID(StrEnum):
 
     Irene = "180499648"
     Bot = "1277023540"  # @IrenesBot
+    Aluerie = "1348167478"
     # AuuBot = "1158666176"  # @AuuBot noqa: ERA001
     # AlueBot = "519438249"  # @AlueBot noqa: ERA001
+
+
+BOT_OWNERS = {UserID.Irene, UserID.Aluerie}
 
 
 class LowerName(StrEnum):
     """Known/special user names."""
 
     Irene = "irene_adler__"
-
-
-class DisplayName(StrEnum):
-    """Known/special user display names."""
-
-    Irene = "Irene_Adler__"
 
 
 class Global(StrEnum):
@@ -175,4 +173,6 @@ DIGITS = [
 class Logo(StrEnum):
     """Images for brands and logos."""
 
-    Twitch = "https://cdn3.iconfinder.com/data/icons/social-messaging-ui-color-shapes-2-free/128/social-twitch-circle-512.png"
+    Twitch = (
+        "https://cdn3.iconfinder.com/data/icons/social-messaging-ui-color-shapes-2-free/128/social-twitch-circle-512.png"
+    )

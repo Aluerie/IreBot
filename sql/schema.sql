@@ -61,7 +61,9 @@ CREATE TABLE IF NOT EXISTS ttv_stream_titles (
 CREATE TABLE IF NOT EXISTS ttv_tokens (
     user_id TEXT PRIMARY KEY, 
     token TEXT NOT NULL, 
-    refresh TEXT NOT NULL
+    refresh TEXT NOT NULL,
+    display TEXT,
+    active BOOLEAN, 
 );
 
 

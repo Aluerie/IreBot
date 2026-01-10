@@ -4,13 +4,17 @@ import asyncio
 import logging
 import platform
 import sys
+from typing import TYPE_CHECKING
 
 import aiohttp
 import asyncpg
 import click
 
-from bot import IreBot, setup_logging
+from bot import IreBot, get_eventsub_subscriptions, setup_logging
 from config import config
+
+if TYPE_CHECKING:
+    from types_.database import PoolTypedWithAny
 
 try:
     import uvloop  # pyright: ignore[reportMissingImports]
@@ -34,32 +38,48 @@ async def create_pool() -> asyncpg.Pool[asyncpg.Record]:
     )
 
 
-async def start_the_bot() -> None:
+async def start_the_bot(*, scopes_only: bool) -> None:
     """Start the bot."""
     log = logging.getLogger()
     try:
-        pool = await create_pool()
+        # Unfortunate `asyncpg` typing crutch. Read `types_.database` for more
+        pool: PoolTypedWithAny = await create_pool()  # pyright: ignore[reportAssignmentType]
     except Exception:
-        click.echo("Could not set up PostgreSQL. Exiting.", file=sys.stderr)
-        log.exception("Could not set up PostgreSQL. Exiting.")
+        msg = "Could not set up PostgreSQL. Exiting."
+        click.echo(msg, file=sys.stderr)
+        log.exception(msg)
         return
+
+    subscriptions = await get_eventsub_subscriptions(pool)
 
     async with (
         aiohttp.ClientSession() as session,
         pool as pool,
-        IreBot(session=session, pool=pool) as irebot,
+        IreBot(
+            session=session,
+            pool=pool,
+            subscriptions=subscriptions,
+            scopes_only=scopes_only,
+        ) as irebot,
     ):
         await irebot.start()
 
 
 @click.group(invoke_without_command=True, options_metavar="[options]")
 @click.pass_context
-def main(click_ctx: click.Context) -> None:
+@click.option(
+    "--scopes-only",
+    "-s",
+    is_flag=True,
+    default=False,
+    help="Show oath urls with scopes for broadcaster and bot accounts to authorize with (bot features won't be activated)",
+)
+def main(click_ctx: click.Context, *, scopes_only: bool) -> None:
     """Launches the bot."""
     if click_ctx.invoked_subcommand is None:
         with setup_logging():
             try:
-                RUNTIME(start_the_bot())
+                RUNTIME(start_the_bot(scopes_only=scopes_only))
             except KeyboardInterrupt:
                 print("Aborted! The bot was interrupted with `KeyboardInterrupt`!")  # noqa: T201
 

@@ -1,39 +1,51 @@
 from __future__ import annotations
 
-import platform
+from pathlib import Path
 from pkgutil import iter_modules
 
-__all__ = ("EXTENSIONS",)
+__all__ = ("get_extensions",)
 
 try:
-    import _test  # noqa: PLC2701
+    import test
 
-    TEST_EXTENSIONS = _test.TEST_EXTENSIONS
-    USE_ALL_EXTENSIONS = _test.TEST_USE_ALL_EXTENSIONS
+    TEST_EXTENSIONS = test.TEST_EXTENSIONS
+    USE_ALL_EXTENSIONS = test.USE_ALL_EXTENSIONS
 except ModuleNotFoundError:
     TEST_EXTENSIONS: tuple[str, ...] = ()  # type: ignore[ConstantRedefinition]
     USE_ALL_EXTENSIONS: bool = True  # type: ignore[reportConstantRedefinition]
 
-# EXTENSIONS
 
-# write extensions (!) with "ext." prefix in the following tuples:
 DISABLED_EXTENSIONS: tuple[str, ...] = (
     # extensions that should not be loaded
     "ext.beta",
     # currently disabled
-    "ext.dota",
+    "ext.public.dota",
 )
 
 
-def get_extensions() -> tuple[str, ...]:
-    if platform.system() == "Windows" and not USE_ALL_EXTENSIONS:
+def get_extensions(*, test: bool) -> tuple[str, ...]:
+    """Get list of bot extensions to load.
+
+    Returns
+    -------
+    tuple[str, ...]
+        Tuple of extensions for the bot to load.
+        The extensions are given in a full dot form.
+        Example: `('ext.personal.chatter', 'ext.personal.dev', 'ext.personal.other_commands', 'ext.personal.stream', )`
+    """
+    if test and not USE_ALL_EXTENSIONS:
         # assume testing specific extensions from `_test.py`
-        return tuple(f"{__package__}.{ext}" for ext in TEST_EXTENSIONS)
+        return TEST_EXTENSIONS
 
     # assume running full bot functionality (besides `DISABLED_EXTENSIONS`)
-    return tuple(
-        module.name for module in iter_modules(__path__, f"{__package__}.") if module.name not in DISABLED_EXTENSIONS
-    )
-
-
-EXTENSIONS = get_extensions()
+    current_folder = str(__package__)
+    extensions: tuple[str, ...] = ()
+    ext_categories = [path for path in Path(current_folder).iterdir() if path.is_dir() and not path.name.startswith("_")]
+    for ext_category in ext_categories:
+        # Personal and Public extensions
+        extensions += tuple(
+            module.name
+            for module in iter_modules([ext_category.absolute()], prefix=f"{__package__}.{ext_category.name}.")
+            if module.name not in DISABLED_EXTENSIONS
+        )
+    return extensions
