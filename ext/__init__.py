@@ -6,10 +6,10 @@ from pkgutil import iter_modules
 __all__ = ("get_extensions",)
 
 try:
-    import test
+    import _test
 
-    TEST_EXTENSIONS = test.TEST_EXTENSIONS
-    USE_ALL_EXTENSIONS = test.USE_ALL_EXTENSIONS
+    TEST_EXTENSIONS = _test.TEST_EXTENSIONS
+    USE_ALL_EXTENSIONS = _test.USE_ALL_EXTENSIONS
 except ModuleNotFoundError:
     TEST_EXTENSIONS: tuple[str, ...] = ()  # type: ignore[ConstantRedefinition]
     USE_ALL_EXTENSIONS: bool = True  # type: ignore[reportConstantRedefinition]

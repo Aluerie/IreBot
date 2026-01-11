@@ -32,5 +32,5 @@ config.toml
 # Testing Only
 ext/_beta.py
 ext/beta.py
-test.py
+_test.py
 scripts/
