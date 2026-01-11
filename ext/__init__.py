@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 from pkgutil import iter_modules
 
@@ -14,6 +15,8 @@ except ModuleNotFoundError:
     TEST_EXTENSIONS: tuple[str, ...] = ()  # type: ignore[ConstantRedefinition]
     USE_ALL_EXTENSIONS: bool = True  # type: ignore[reportConstantRedefinition]
 
+log = logging.getLogger(__name__)
+log.setLevel(logging.INFO)
 
 DISABLED_EXTENSIONS: tuple[str, ...] = (
     # extensions that should not be loaded
@@ -48,4 +51,6 @@ def get_extensions(*, test: bool) -> tuple[str, ...]:
             for module in iter_modules([ext_category.absolute()], prefix=f"{__package__}.{ext_category.name}.")
             if module.name not in DISABLED_EXTENSIONS
         )
+
+    log.debug("The list of extensions to load: %s", extensions)
     return extensions
