@@ -36,6 +36,7 @@ class Global(StrEnum):
 
     # STV
     EZ = "EZ"
+    FeelsDankMan = "FeelsDankMan"
 
 
 class BTTV(StrEnum):

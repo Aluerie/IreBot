@@ -28,6 +28,11 @@ class MetaCommands(IrePublicComponent):
         await ctx.send(f"I'm a personal Irene's bot, made by Irene. {const.STV.AYAYA}")
 
     @commands.command()
+    async def irene(self, ctx: IreContext) -> None:
+        """Just a random command that is unlikely to be in other bots."""
+        await ctx.send(const.Global.FeelsDankMan)
+
+    @commands.command()
     async def ping(self, ctx: IreContext) -> None:
         """Ping the bot.
 
