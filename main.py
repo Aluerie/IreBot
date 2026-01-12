@@ -39,7 +39,7 @@ async def create_pool() -> asyncpg.Pool[asyncpg.Record]:
     )
 
 
-async def start_the_bot(owner_id: str, *, scopes_only: bool, force_subscribe: bool, ngrok: bool) -> None:
+async def start_the_bot(*, scopes_only: bool, owner_id: str, force_subscribe: bool, ngrok: bool) -> None:
     """Start the bot."""
     log = logging.getLogger()
     try:
@@ -126,7 +126,9 @@ def main(
         with setup_logging():
             owner_id: str = {"irene": const.UserID.Irene, "aluerie": const.UserID.Aluerie}[owner]
             try:
-                RUNTIME(start_the_bot(owner_id, scopes_only=scopes_only, force_subscribe=force_subscribe, ngrok=ngrok))
+                RUNTIME(
+                    start_the_bot(scopes_only=scopes_only, owner_id=owner_id, force_subscribe=force_subscribe, ngrok=ngrok)
+                )
             except KeyboardInterrupt:
                 print("Aborted! The bot was interrupted with `KeyboardInterrupt`!")  # noqa: T201
 

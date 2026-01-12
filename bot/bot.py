@@ -271,7 +271,7 @@ class IreBot(commands.AutoBot):
 
         """
         if self.scopes_only:
-            # Scopes Only Mode: show oauth urls and exit.
+            log.warning("Scopes Only Mode: show oauth urls and start the bot in adapter-only mode (no extensions enabled).")
             self.print_bot_oauth()
             self.print_personal_oauth()
             self.print_public_oauth()
