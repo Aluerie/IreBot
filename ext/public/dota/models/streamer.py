@@ -707,6 +707,7 @@ class WatchMatch(Match):
         super().__init__(bot, is_watch=True)
         self.watching_server: str = watching_server
         self.server_steam_id: int = convert_id3_to_id64(watching_server)
+        self.update_data.start()
 
     def reset(self) -> None:
         self.update_data.cancel()

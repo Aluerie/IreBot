@@ -34,12 +34,3 @@ def is_online() -> Any:
         return ctx.bot.irene.online
 
     return commands.guard(predicate)
-
-
-def is_owners() -> Any:
-    """Allow to command to be completed only by Irene's main and secondary accounts."""
-
-    def predicate(ctx: IreContext) -> bool:
-        return ctx.chatter.id in const.BOT_OWNERS
-
-    return commands.guard(predicate)

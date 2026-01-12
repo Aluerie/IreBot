@@ -4,10 +4,8 @@ from typing import TYPE_CHECKING, override
 
 from twitchio.ext import commands
 
-from utils import const
-
 if TYPE_CHECKING:
-    from ..bot import IreBot, IreContext, Irene
+    from bot import IreBot, IreContext
 
 
 __all__ = ("IreComponent", "IrePersonalComponent", "IrePublicComponent")
@@ -18,11 +16,6 @@ class IreComponent(commands.Component):
 
     def __init__(self, bot: IreBot) -> None:
         self.bot: IreBot = bot
-
-    @property
-    def irene(self) -> Irene:
-        """A shortcut to Irene's object."""
-        return self.bot.irene
 
 
 class IrePublicComponent(IreComponent):
@@ -35,11 +28,10 @@ class IrePersonalComponent(IreComponent):
     Features in personal components are only available in Irene's main and secondary twitch channels.
     """
 
-    @staticmethod
-    def is_owners(user_id: str) -> bool:
+    def is_owner(self, user_id: str) -> bool:
         """A check whether the user is a bot owner."""
-        return user_id in const.BOT_OWNERS
+        return user_id == self.bot.owner_id
 
     @override
     async def component_before_invoke(self, ctx: IreContext) -> bool:
-        return self.is_owners(ctx.channel.id)
+        return self.is_owner(ctx.channel.id)

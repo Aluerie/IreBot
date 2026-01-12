@@ -50,11 +50,13 @@ class Dota2Client(Client):
 
     @override
     async def login(self) -> None:
+        await self.start_helpers()
         account_credentials = (
             config["STEAM"]["IRENESTEST"] if platform.system() == "Windows" else config["STEAM"]["IRENESBOT"]
         )
         username, password = account_credentials["USERNAME"], account_credentials["PASSWORD"]
         await super().login(username, password)
+        
 
     @override
     async def close(self) -> None:

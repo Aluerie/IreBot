@@ -45,7 +45,7 @@ class Alerts(IrePersonalComponent):
     @commands.Component.listener(name="custom_redemption_add")
     async def channel_points_redeem(self, redemption: twitchio.ChannelPointsRedemptionAdd) -> None:
         """Somebody redeemed a custom channel points reward."""
-        if not self.is_owners(redemption.broadcaster.id):
+        if not self.is_owner(redemption.broadcaster.id):
             return
 
         # just testing
@@ -57,7 +57,7 @@ class Alerts(IrePersonalComponent):
     @commands.Component.listener(name="follow")
     async def follows(self, follow: twitchio.ChannelFollow) -> None:
         """Somebody followed the channel."""
-        if not self.is_owners(follow.broadcaster.id):
+        if not self.is_owner(follow.broadcaster.id):
             return
 
         random_phrase = random.choice(
@@ -84,7 +84,7 @@ class Alerts(IrePersonalComponent):
     @commands.Component.listener(name="raid")
     async def raids(self, raid: twitchio.ChannelRaid) -> None:
         """Somebody raided the channel."""
-        if not self.is_owners(raid.to_broadcaster.id):
+        if not self.is_owner(raid.to_broadcaster.id):
             return
 
         streamer = await raid.to_broadcaster.user()
@@ -103,10 +103,10 @@ class Alerts(IrePersonalComponent):
     # TODO: There is a conceptional problem that if we restart the stream and quickly come back online before 10 minutes
     # it will send the 10 minute reminder twice
     # probably solve it by doing a bool "Need to send a message" or a timer when we finally implement that :D
-    @commands.Component.listener(name="stream_online")
+    @commands.Component.listener(name="custom_redemption_add")
     async def stream_start(self, online: twitchio.StreamOnline) -> None:
         """Stream started (went live)."""
-        if not self.is_owners(online.broadcaster.id):
+        if not self.is_owner(online.broadcaster.id):
             return
 
         channel_info = await online.broadcaster.fetch_channel_info()
@@ -114,15 +114,33 @@ class Alerts(IrePersonalComponent):
         await online.respond(
             f"Stream just started {const.STV.FeelsBingMan} Game: {channel_info.game_name} | Title: {channel_info.title}"
         )
-        # reminder for the streamer
+        # 0 minutes reminder for the streamer
         await online.respond(
             f"{online.broadcaster.mention} a few reminders {const.STV.ALERT} "
             f"pin some info {const.STV.ALERT} "
             f"start recording {const.STV.ALERT} "
             f"Turn music on {const.STV.ALERT}"
         )
-        await asyncio.sleep(10 * 60)  # 10 minutes
-        # extra reminder for the streamer
+        # 10 minutes reminder about some things
+        if self.reminder_to_turn_recording_on.is_running():
+            self.reminder_to_turn_recording_on.restart(online)
+        else:
+            self.reminder_to_turn_recording_on.start(online)
+
+        # 12 hours reminder to end the stream;
+        if self.reminder_to_stop_streaming.is_running():
+            self.reminder_to_stop_streaming.restart(online)
+        else:
+            self.reminder_to_stop_streaming.start(online)
+
+    @ireloop(count=1)
+    async def reminder_to_turn_recording_on(self, online: twitchio.StreamOnline) -> None:
+        """Reminder task to turn recording on.
+
+        Just an extra reminder for the streamer.
+        """
+        await asyncio.sleep(10 * 60)
+        # if stream goes offline, this task gets cancelled in `.stream_end`
         await online.respond(
             f"Irene {const.STV.ALERT} "
             f"last reminder {const.STV.ALERT} "
@@ -130,30 +148,36 @@ class Alerts(IrePersonalComponent):
             f'chat spam " {const.STV.ALERT} "'
         )
 
-        # TODO: Maybe rework this into timers-like we have in the Discord bot;
-        # YouTube only allows 12 hours of vods so let's warn ourselves just in case.
+    @ireloop(count=1)
+    async def reminder_to_stop_streaming(self, online: twitchio.StreamOnline) -> None:
+        """Reminder task to stop streaming after a long time.
+
+        YouTube only allows 12 hours of VODs so let's warn ourselves just in case.
+        """
         youtube_vod_limit = 11 * 3600 + 40 * 60  # 11 hours 40 minutes + 10 minute of `asyncio.sleep` above
         await asyncio.sleep(youtube_vod_limit)
-        if self.bot.irene.online:
-            await online.respond(
-                f"Irene {const.STV.ALERT} "
-                f"you've been streaming for almost 12h {const.STV.ALERT} "
-                f"remember youtube vod time limit {const.STV.ALERT} "
-                f"{const.STV.OVERWORKING} wrap it up {const.STV.ALERT} "
-            )
+        # if stream goes offline, this task gets cancelled in `.stream_end`
+        await online.respond(
+            f"Irene {const.STV.ALERT} "
+            f"you've been streaming for almost 12h {const.STV.ALERT} "
+            f"remember youtube vod time limit {const.STV.ALERT} "
+            f"{const.STV.OVERWORKING} wrap it up {const.STV.ALERT} "
+        )
 
     @commands.Component.listener(name="stream_offline")
     async def stream_end(self, offline: twitchio.StreamOffline) -> None:
         """Stream ended (went offline)."""
-        if not self.is_owners(offline.broadcaster.id):
+        if not self.is_owner(offline.broadcaster.id):
             return
 
         await offline.respond(f"Stream is now offline {const.BTTV.Offline}")
+        self.reminder_to_turn_recording_on.cancel()
+        self.reminder_to_stop_streaming.cancel()
 
     @commands.Component.listener(name="ad_break")
     async def ad_break(self, ad_break: twitchio.ChannelAdBreakBegin) -> None:
         """Ad break."""
-        if not self.is_owners(ad_break.broadcaster.id):
+        if not self.is_owner(ad_break.broadcaster.id):
             return
 
         word = "automatic" if ad_break.automatic else "manual"
@@ -167,7 +191,7 @@ class Alerts(IrePersonalComponent):
     @commands.Component.listener(name="ban")
     async def bans_timeouts(self, ban: twitchio.Ban) -> None:
         """Bans."""
-        if not self.is_owners(ban.broadcaster.id):
+        if not self.is_owner(ban.broadcaster.id):
             return
 
         self.ban_list.add(ban.user.id)
@@ -187,7 +211,7 @@ class Alerts(IrePersonalComponent):
 
         This functions filters out spam-bots that should be perma-banned right away by other features or other bots.
         """
-        if not self.is_owners(message.broadcaster.id):
+        if not self.is_owner(message.broadcaster.id):
             return
 
         if not message.text:
@@ -214,7 +238,7 @@ class Alerts(IrePersonalComponent):
     @commands.Component.listener(name="subscription")
     async def subscription(self, subscription: twitchio.ChannelSubscribe) -> None:
         """Subscriptions."""
-        if not self.is_owners(subscription.broadcaster.id):
+        if not self.is_owner(subscription.broadcaster.id):
             return
 
         await subscription.respond(f"{subscription.user.mention} just subscribed {const.STV.Donki} thanks")
@@ -222,7 +246,7 @@ class Alerts(IrePersonalComponent):
     @commands.Component.listener(name="subscription_message")
     async def subscription_message(self, subscription_message: twitchio.ChannelSubscriptionMessage) -> None:
         """Subscriptions."""
-        if not self.is_owners(subscription_message.broadcaster.id):
+        if not self.is_owner(subscription_message.broadcaster.id):
             return
 
         await subscription_message.respond(

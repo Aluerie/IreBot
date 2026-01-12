@@ -34,9 +34,9 @@ class Control(BaseDevComponent):
         Note that this will turn off the whole bot functionality so things like main bot alerts will also stop.
         """
         await ctx.send("Shutting down the bot in 3 2 1")
-        await asyncio.sleep(3)
+        await asyncio.sleep(3.0)
         try:
-            await asyncio.create_subprocess_shell("sudo systemctl stop irebot")  # `os.system`
+            await asyncio.create_subprocess_shell("sudo systemctl stop irebot")
         except Exception:
             log.exception("Failed to Stop the bot's process", stack_info=True)
             # it might not go off
@@ -50,10 +50,9 @@ class Control(BaseDevComponent):
         Usable to restart the bot without logging to VPS machine or committing something.
         """
         await ctx.send("Rebooting in 3 2 1")
-        await asyncio.sleep(3)
+        await asyncio.sleep(3.0)
         try:
-            # non systemctl users - sorry
-            await asyncio.create_subprocess_shell("sudo systemctl restart irebot")  # `os.system`
+            await asyncio.create_subprocess_shell("sudo systemctl restart irebot")
         except Exception:
             log.exception("Failed to Restart the bot's process", stack_info=True)
             # it might not go off
@@ -76,26 +75,6 @@ class Control(BaseDevComponent):
         """Load the extension."""
         await self.bot.load_module(extension)
         await ctx.send(f"{const.STV.DankApprove} loaded {extension}")
-
-    @commands.command()
-    async def online(self, ctx: IreContext) -> None:
-        """Make the bot treat streamer as online.
-
-        * forces availability for commands which normally are only allowed during online streams
-            via `@guards.is_online` (useful for debug);
-        * If somehow eventsub missed stream_online notification - this can "manually"
-            fix the problem of soft-locking the commands.
-        """
-        self.bot.irene.online = True
-        self.bot.dispatch("irene_online")
-        await ctx.send(f"I'll treat {ctx.broadcaster.display_name} as online now {const.STV.dankHey}")
-
-    @commands.command()
-    async def offline(self, ctx: IreContext) -> None:
-        """Make the bot treat streamer as offline."""
-        self.bot.irene.online = False
-        self.bot.dispatch("irene_offline")
-        await ctx.send(f"I'll treat {ctx.broadcaster.display_name} as offline now {const.STV.donkSad}")
 
 
 async def setup(bot: IreBot) -> None:

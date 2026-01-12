@@ -13,9 +13,6 @@ class UserID(StrEnum):
     # AlueBot = "519438249"  # @AlueBot noqa: ERA001
 
 
-BOT_OWNERS = {UserID.Irene, UserID.Aluerie}
-
-
 class LowerName(StrEnum):
     """Known/special user names."""
 
@@ -72,6 +69,7 @@ class STV(StrEnum):
     ALERT = "ALERT"
     ApuBritish = "ApuBritish"
     AYAYA = "AYAYA"
+    Boink = "Boink"
     buenoSuccess = "buenoSuccess"
     buenoFail = "buenoFail"
     Cinema = "Cinema"

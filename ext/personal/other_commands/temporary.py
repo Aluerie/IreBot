@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, TypedDict
+from typing import TYPE_CHECKING, TypedDict
 
 from twitchio.ext import commands
 
@@ -18,34 +18,6 @@ if TYPE_CHECKING:
 
 __all__ = ("TemporaryCommands",)
 
-RUNS: list[RunDict] = [
-    {
-        "keywords": ["sekiro", "sekiro1"],
-        "game": "Sekiro",
-        "desc": (
-            "Bosses I like% (BIL%) "
-            "No Hit (NH) "
-            "Sword+Shuriken Focused (SSF) "
-            "No Kuro Charm (NKC) "
-            "Bell Demon (BD) "
-            "Hybrid Speed (HS) "
-            "Loopless (LL) "
-            "No Cheese (NC) "
-            "Glitchless (GL)"
-        ),
-    },
-    {
-        "keywords": ["sekiro", "sekiro2"],
-        "game": "Sekiro",
-        "desc": "Shura No Hit Speedrun (SR) Glitchless (GL) Maybe No Hit (NH)???",
-    },
-    {
-        "keywords": ["er", "elden", "ring"],
-        "game": "Elden Ring",
-        "desc": "Twin Prodigies% (+Any% ?) Hybrid Speed/Hitless with my own !rules",
-    },
-]
-
 
 class TemporaryCommands(IreComponent):
     """Miscellaneous commands.
@@ -53,43 +25,10 @@ class TemporaryCommands(IreComponent):
     Commands that are likely to be removed in future or edited a lot.
     """
 
-    @commands.command()
-    async def notes(self, ctx: IreContext, *, game: Literal["sekiro", "er"]) -> None:
-        """Get a link to one of my notes."""
-        mapping = {
-            "sekiro": "docs.google.com/document/d/1rjp7lhvP0vwwlO7bC7TyFAjKcGDovFuo2EYUaX66QiA",
-            "er": "docs.google.com/document/d/19vTJVS7k1zdmShOAcO41KBWepfybMsTprQ208O7HpLU",
-        }
-        await ctx.send(mapping[game.lower()])
-
-    @notes.error
-    async def notes_error(self, payload: commands.CommandErrorPayload) -> None:
-        """Notes Error."""
-        if isinstance(exc := payload.exception, commands.BadArgument):
-            await payload.context.send(f'Bad argument: "{exc.value}". Supported notes: "sekiro", "er".')
-        else:
-            raise payload.exception
-
-    @commands.command()
-    async def runs(self, ctx: IreContext) -> None:
-        """Get a description of my all planned runs."""
-        for counter, run in enumerate(RUNS, start=1):
-            text = f"#{counter} {run['game']} : {run['desc']}"
-            await ctx.send(text)
-
-    @commands.command()
-    async def run(self, ctx: IreContext, *, query: str) -> None:
-        """Get a description of a run I'm doing rn in a specified game."""
-        query = query.lower()
-
-        run_found = False
-        for run in RUNS:
-            if query in run["keywords"]:
-                await ctx.send(run["desc"])
-                run_found = True
-
-        if not run_found:
-            await ctx.send(f'Your query "{query}" returned 0 results. You can just use !runs to see all planned runs.')
+    @commands.command(name="sekirodoc")
+    async def sekiro_doc(self, ctx: IreContext) -> None:
+        """Get a link to one of my sekiro notes."""
+        await ctx.send("docs.google.com/document/d/1rjp7lhvP0vwwlO7bC7TyFAjKcGDovFuo2EYUaX66QiA")
 
     @commands.command()
     async def rules(self, ctx: IreContext) -> None:
@@ -98,7 +37,7 @@ class TemporaryCommands(IreComponent):
             'Hybrid challenge "the best of both Speed/Hitless"'
             f" 1️⃣Minimize time in running sections: only speed-leaderboard picks-ups are allowed {const.STV.Speedge}"
             f" 2️⃣Only hits vs bosses count {const.STV.actually}"
-            f" 3️⃣We use a custom-made starting class with fashion/weapon I choose {const.STV.forsenCD}"
+            f" 3️⃣We use a custom-made but sensible starting class with fashion/weapon I choose {const.STV.forsenCD}"
             f" 4️⃣No direct damage buffs allowed {const.STV.POLICE}"
         )
         await ctx.send(msg)
@@ -189,16 +128,6 @@ class TemporaryCommands(IreComponent):
     async def vilehand(self, ctx: IreContext) -> None:
         """Vilehand."""
         msg = "omg how to deflect Vilehand's Sabimaru omg fml chat omg HOOOOOOOOOOOW omg "
-        await ctx.send(msg)
-
-    @commands.command()
-    async def ape(self, ctx: IreContext) -> None:
-        """Ape."""
-        msg = (
-            f"Worst boss in Sekiro. {const.STV.UltraMad} "
-            f"Scream not having a cooldown alone brings it to F tier {const.STV.UltraMad} "
-            f"The only boss we blast with MD because it's so bad {const.STV.UltraMad}"
-        )
         await ctx.send(msg)
 
     @commands.is_owner()

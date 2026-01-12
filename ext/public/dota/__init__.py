@@ -3,13 +3,14 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from .gameflow import GameFlow
+from .gameflow_new import GameFlowNew
 
 if TYPE_CHECKING:
     from bot import IreBot
 
 
 class Dota(
-    GameFlow,
+    GameFlowNew,
 ):
     """Dota 2 Features."""
 

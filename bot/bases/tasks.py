@@ -11,7 +11,7 @@ from discord.utils import MISSING
 if TYPE_CHECKING:
     import datetime
 
-    from ..bot import IreBot
+    from bot import IreBot
 
     class HasBotAttribute(Protocol):
         bot: IreBot

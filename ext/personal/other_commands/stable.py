@@ -95,6 +95,12 @@ class StableCommands(IrePersonalComponent):
     * Commands in this file are sorted alphabetically.
     """
 
+    @commands.cooldown(rate=1, per=60, key=commands.BucketType.channel)
+    @commands.command()
+    async def boink(self, ctx: IreContext) -> None:
+        """Send an announcement for an obligatory boink."""
+        await ctx.send_announcement(content=f"it's time to boink {const.STV.Boink}", color="purple")
+
     @commands.command(aliases=["char"])
     async def charinfo(self, ctx: IreContext, *, characters: str) -> None:
         """Shows information about character(-s).
@@ -391,7 +397,7 @@ class StableCommands(IrePersonalComponent):
     @commands.command()
     async def uptime(self, ctx: IreContext) -> None:
         """Get stream uptime."""
-        stream = await self.bot.irene.stream()
+        stream = next(iter(await self.bot.fetch_streams(user_ids=[ctx.broadcaster.id])), None)
         if stream is None:
             await ctx.send(f"Stream is offline {const.BTTV.Offline}")
         else:

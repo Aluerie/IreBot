@@ -58,7 +58,7 @@ class CustomCommands(IrePersonalComponent):
 
         This is a bit different from twitchio commands. This one is just for this cog.
         """
-        if not self.is_owners(message.broadcaster.id):
+        if not self.is_owner(message.broadcaster.id):
             return
 
         if not message.text.startswith(self.bot.prefixes) or message.chatter.id == const.UserID.Bot:

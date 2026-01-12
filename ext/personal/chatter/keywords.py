@@ -51,7 +51,7 @@ class Keywords(IrePersonalComponent):
     @commands.Component.listener(name="message")
     async def keywords_response(self, message: twitchio.ChatMessage) -> None:
         """Sends a flavour message if a keyword/key phrase was spotted in the chat."""
-        if not self.is_owners(message.broadcaster.id):
+        if not self.is_owner(message.broadcaster.id):
             return
 
         now = datetime.datetime.now(datetime.UTC)

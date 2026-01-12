@@ -75,11 +75,9 @@ class Counters(IrePersonalComponent):
     @commands.Component.listener(name="message")
     async def erm_counter(self, message: twitchio.ChatMessage) -> None:
         """Erm Counter."""
-        if not self.is_owners(message.broadcaster.id):
+        if not self.is_owner(message.broadcaster.id):
             return
-
-        if message.chatter.name in const.Bots or not message.text or message.broadcaster.id != const.UserID.Irene:
-            # limit author/channel
+        if message.chatter.name in const.Bots or not message.text:
             return
         if not re.search(r"\bErm\b", message.text):
             return
@@ -118,10 +116,10 @@ class Counters(IrePersonalComponent):
     @commands.Component.listener(name="custom_redemption_add")
     async def first_counter(self, redemption: twitchio.ChannelPointsRedemptionAdd) -> None:
         """Count all redeems for the reward 'First'."""
-        if not self.is_owners(redemption.broadcaster.id):
+        if not self.is_owner(redemption.broadcaster.id):
             return
 
-        if redemption.reward.id != FIRST_ID or redemption.broadcaster.id != const.UserID.Irene:
+        if redemption.reward.id != FIRST_ID:
             return
 
         query = """--sql
@@ -143,13 +141,16 @@ class Counters(IrePersonalComponent):
         reward = await redemption.reward.fetch_reward()
         await reward.update(title=f"@{redemption.user.display_name} was 1st today !")
 
-    @commands.Component.listener(name="irene_offline")
-    async def reset_first_redeem_title(self) -> None:
+    @commands.Component.listener(name="stream_offline")
+    async def reset_first_redeem_title(self, offline: twitchio.StreamOffline) -> None:
         """Reset the title of the "First!" redeem back to its original state.
 
         Currently, it should be changed when somebody redeems to "@user was first!
         """
-        first_reward = next(reward for reward in await self.irene.partial().fetch_custom_rewards() if reward.id == FIRST_ID)
+        if not self.is_owner(offline.broadcaster.id):
+            return
+
+        first_reward = next(reward for reward in await offline.broadcaster.fetch_custom_rewards() if reward.id == FIRST_ID)
         await first_reward.update(title="First !")
 
     @commands.command(aliases=["first"])
@@ -195,7 +196,7 @@ class Counters(IrePersonalComponent):
             # simple way to make a task run once/month
             return
 
-        custom_rewards = await self.irene.partial().fetch_custom_rewards()
+        custom_rewards = await self.bot.create_partialuser(const.UserID.Irene).fetch_custom_rewards()
         for reward in custom_rewards:
             if reward.id == FIRST_ID:
                 # we good

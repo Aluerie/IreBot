@@ -55,17 +55,23 @@ class Timers(IrePersonalComponent):
 
         self.messages = MESSAGES
 
-    @commands.Component.listener(name="irene_online")
-    async def stream_online_start_the_task(self) -> None:
+    @commands.Component.listener(name="stream_online")
+    async def stream_online_start_the_task(self, online: twitchio.StreamOffline) -> None:
         """Start counting messages when stream goes online."""
+        if not self.is_owner(online.broadcaster.id):
+            return
+
         random.shuffle(self.messages)
         self.index = 0
         self.lines_count = 0
         self.bot.add_listener(self.count_messages, event="event_message")
 
-    @commands.Component.listener(name="irene_offline")
-    async def stream_offline_cancel_the_task(self) -> None:
+    @commands.Component.listener(name="stream_offline")
+    async def stream_offline_cancel_the_task(self, offline: twitchio.StreamOffline) -> None:
         """Cancel the counting messages listener when stream goes offline."""
+        if not self.is_owner(offline.broadcaster.id):
+            return
+
         self.bot.remove_listener(self.count_messages)
 
     # @commands.Component.listener(name="message")
@@ -78,7 +84,7 @@ class Timers(IrePersonalComponent):
 
         If these two are fulfilled then the bot sends a semi-periodic message in the chat.
         """
-        if not self.is_owners(message.broadcaster.id):
+        if not self.is_owner(message.broadcaster.id):
             return
 
         if message.chatter.name in const.Bots:
@@ -93,7 +99,7 @@ class Timers(IrePersonalComponent):
 
             if self.lines_count > LINES_NEEDED_CD:
                 await asyncio.sleep(MIN_WAIT_TIME + random.randint(1, RANDOM_WAIT_TIME))
-                await self.irene.deliver(self.messages[self.index % len(self.messages)])
+                await message.respond(self.messages[self.index % len(self.messages)])
 
                 # reset the index vars
                 self.index += 1

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import contextlib
 import datetime
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, TypedDict
 
 import twitchio
 from twitchio.ext import commands
@@ -12,6 +12,15 @@ from utils import const, fmt, guards
 
 if TYPE_CHECKING:
     from bot import IreBot, IreContext
+
+    class Tracked(TypedDict):
+        game: str
+        title: str
+        game_dt: datetime.datetime
+        title_dt: datetime.datetime
+
+
+__all__ = ("EditInformation",)
 
 
 class EditInformation(IrePersonalComponent):
@@ -25,12 +34,11 @@ class EditInformation(IrePersonalComponent):
 
     def __init__(self, bot: IreBot, *args: Any, **kwargs: Any) -> None:
         super().__init__(bot, *args, **kwargs)
-        self.game_tracked: str = "idk"
-        self.title_tracked: str = "idk"
 
-        # datetimes indicating when game/title was changed with specifically IreBot's commands !game/!title
-        self.game_updated_dt: datetime.datetime = datetime.datetime.now(datetime.UTC) - datetime.timedelta(hours=1)
-        self.title_updated_dt: datetime.datetime = datetime.datetime.now(datetime.UTC) - datetime.timedelta(hours=1)
+        self.game: str = "idk"
+        self.game_dt: datetime.datetime = datetime.datetime.now(datetime.UTC) - datetime.timedelta(hours=1)
+        self.title: str = "idk"
+        self.title_dt: datetime.datetime = datetime.datetime.now(datetime.UTC) - datetime.timedelta(hours=1)
 
         self.start_tracking.start()
 
@@ -39,17 +47,16 @@ class EditInformation(IrePersonalComponent):
         """Start tracking my channel info.
 
         Unfortunately, twitch eventSub payloads for channel update events do not have before/after and
-        do not say what exactly changed, they just send new stuff in.
+        do not say what exactly changed, they just send newest `twitchio.ChannelUpdate` payload.
 
         This is why we need to track the past ourselves.
         """
-        channel_info = await self.irene.partial().fetch_channel_info()
+        channel_info = await self.bot.create_partialuser(self.bot.owner_id).fetch_channel_info()
+        self.game = channel_info.game_name
+        self.title = channel_info.title
 
-        self.game_tracked = channel_info.game_name
-        self.title_tracked = channel_info.title
-
-    @commands.command()
-    async def game(self, ctx: IreContext, *, game_name: str | None = None) -> None:
+    @commands.command(name="game")
+    async def game_command(self, ctx: IreContext, *, game_name: str | None = None) -> None:
         """Either get current channel game or update it."""
         if not game_name:
             # 1. No argument
@@ -67,8 +74,8 @@ class EditInformation(IrePersonalComponent):
             return
 
         if game_name.lower() == "clear":
-            # b. A keyword to clear the game category, sets it uncategorised
-            self.game_updated_dt = datetime.datetime.now(datetime.UTC)
+            # b. A keyword to clear the game category, sets it uncategorized
+            self.game_dt = datetime.datetime.now(datetime.UTC)
             await ctx.broadcaster.modify_channel(game_id="0")
             await ctx.send(f'Set game to "No game category" {const.STV.uuh}')
             return
@@ -88,14 +95,14 @@ class EditInformation(IrePersonalComponent):
             await ctx.send(f"Couldn't find any games with such a name {const.STV.How2Read}")
             return
 
-        self.game_updated_dt = datetime.datetime.now(datetime.UTC)
+        self.game_dt = datetime.datetime.now(datetime.UTC)
         await ctx.broadcaster.modify_channel(game_id=game.id)
         await ctx.send(f'Changed game to "{game.name}" {const.STV.DankMods}')
         return
 
     async def update_title(self, streamer: twitchio.PartialUser, title: str) -> None:
         """Helper function to update the streamer's title."""
-        self.title_updated_dt = datetime.datetime.now(datetime.UTC)
+        self.title_dt = datetime.datetime.now(datetime.UTC)
         await streamer.modify_channel(title=title)
 
     @commands.group(name="title", invoke_fallback=True)
@@ -137,7 +144,7 @@ class EditInformation(IrePersonalComponent):
         """Restore title for the stream from the database.
 
         Database keeps some recent titles (cleans up up to last 2 days on stream-offline event).
-        Useful when we switch the title for some activity, i.e. "watching animes" and then
+        Useful when we switch the title for some activity, i.e. "watching anime" and then
         go back to Elden Ring so we just !title restore and it sets to my previous relevant Elden Ring title.
 
         Parameters
@@ -186,15 +193,15 @@ class EditInformation(IrePersonalComponent):
     @commands.Component.listener(name="channel_update")
     async def channel_update(self, update: twitchio.ChannelUpdate) -> None:
         """Channel Info (game, title, etc) got updated."""
-        if not self.is_owners(update.broadcaster.id):
+        if not self.is_owner(update.broadcaster.id):
             return
 
         now = datetime.datetime.now(datetime.UTC)
-        # time check is needed so we don't repeat notif that comes from !game !title commands.
+        # time check is needed so we don't repeat notification that comes from !game !title commands.
 
-        if self.game_tracked != update.category_name:
+        if self.game != update.category_name:
             new_category = update.category_name or "No category"
-            if (now - self.game_updated_dt).seconds > 15:
+            if (now - self.game_dt).seconds > 15:
                 # time condition so the bot doesn't announce changes done via !game command
                 await update.respond(f'{const.STV.donkDetective} Game was changed to "{new_category}"')
 
@@ -205,11 +212,11 @@ class EditInformation(IrePersonalComponent):
                         token_for=const.UserID.Irene, description=f"Game: {new_category}"
                     )
 
-        if self.title_tracked != update.title and (now - self.title_updated_dt).seconds > 15:
+        if self.title != update.title and (now - self.title_dt).seconds > 15:
             # time condition so the bot doesn't announce changes done via !title command
             await update.respond(f'{const.STV.DankThink} Title was changed to "{update.title}"')
 
-        if self.title_tracked != update.title:
+        if self.title != update.title:
             # we need to record the title into the database
             query = """
                 INSERT INTO ttv_stream_titles
@@ -220,8 +227,8 @@ class EditInformation(IrePersonalComponent):
             """
             await self.bot.pool.execute(query, update.title, now)
 
-        self.game_tracked = update.category_name
-        self.title_tracked = update.title
+        self.game = update.category_name
+        self.title = update.title
 
     @commands.Component.listener(name="stream_offline")
     async def clear_the_database(self, offline: twitchio.StreamOffline) -> None:
@@ -229,7 +236,7 @@ class EditInformation(IrePersonalComponent):
 
         I guess stream end is a good event for it - it's rare enough and we don't need old titles after stream is over.
         """
-        if not self.is_owners(offline.broadcaster.id):
+        if not self.is_owner(offline.broadcaster.id):
             return
 
         cutoff_dt = datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=30)
