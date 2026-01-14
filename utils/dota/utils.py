@@ -10,6 +10,12 @@ if TYPE_CHECKING:
     from steam.ext.dota2 import ProfileCard
 
 
+__all__ = (
+    "convert_id3_to_id64",
+    "rank_medal_display_name",
+)
+
+
 def convert_id3_to_id64(steam_id3: str) -> int:
     """Get `steam_id` in a id64 format from steam_id in id3 format.
 

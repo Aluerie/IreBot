@@ -12,64 +12,43 @@ CREATE TABLE
         user_id TEXT PRIMARY KEY,
         token TEXT NOT NULL,
         refresh TEXT NOT NULL,
-        display TEXT,
-        active BOOLEAN,
     );
 
 CREATE TABLE
-    IF NOT EXISTS ttv_chat_commands (
-        command_name TEXT NOT NULL,
-        content TEXT NOT NULL,
-        streamer_id TEXT NOT NULL,
-        PRIMARY KEY (streamer_id, command_name)
-    );
-
-CREATE TABLE
-    IF NOT EXISTS ttv_counters (
-        name TEXT NOT NULL PRIMARY KEY,
-        VALUE BIGINT DEFAULT (0)
-    );
-
-CREATE TABLE
-    IF NOT EXISTS ttv_first_redeems (
+    IF NOT EXISTS ttv_streamers (
         user_id TEXT PRIMARY KEY,
-        user_name TEXT NOT NULL,
-        first_times BIGINT DEFAULT (1)
+        display_name TEXT,
+        active BOOLEAN DEFAULT (TRUE)
     );
 
 CREATE TABLE
-    IF NOT EXISTS ttv_dota_streamers (
-        account_id BIGINT PRIMARY KEY,
+    IF NOT EXISTS ttv_dota_accounts (
+        friend_id BIGINT PRIMARY KEY, -- steam32id (friend id) format;
+        display_name TEXT NOT NULL,
+        steam64_id BIGINT,
+        estimated_mmr INT DEFAULT (0),
+        medal TEXT DEFAULT 'Unknown',
         twitch_id TEXT NOT NULL,
-        twitch_name TEXT NOT NULL,
-        mmr INT DEFAULT (0),
-        medal TEXT DEFAULT 'Unknown'
+        CONSTRAINT fk_twitch_id FOREIGN KEY (twitch_id) REFERENCES ttv_streamers (user_id) ON DELETE CASCADE,
     );
 
 CREATE TABLE
-    IF NOT EXISTS ttv_dota_matches (
-        match_id BIGINT NOT NULL,
-        account_id BIGINT NOT NULL,
-        PRIMARY KEY (match_id, account_id),
-        hero_id INT NOT NULL,
+    IF NOT EXISTS ttv_dota_completed_matches (
+        match_id BIGINT PRIMARY KEY,
         start_time TIMESTAMPTZ DEFAULT (NOW () AT TIME zone 'utc'),
-        -- duration INTERVAL NOT NULL,
-        -- kda TEXT NOT NULL,
         lobby_type INT NOT NULL,
         game_mode INT NOT NULL,
-        team INT,
-        outcome INT NOT NULL,
-        CONSTRAINT fk_account FOREIGN KEY (account_id) REFERENCES ttv_dota_streamers (account_id) ON DELETE CASCADE
+        outcome INT NOT NULL -- Dire or Radiant, independent of players (this table has no player relation)
     );
 
 CREATE TABLE
-    IF NOT EXISTS ttv_stream_titles (
-        title TEXT NOT NULL PRIMARY KEY,
-        edit_time TIMESTAMPTZ DEFAULT (NOW () AT TIME zone 'utc')
-    );
-
-CREATE TABLE
-    IF NOT EXISTS ttv_chatters (
-        user_id TEXT PRIMARY KEY,
-        name_lower TEXT NOT NULL
+    IF NOT EXISTS ttv_dota_completed_match_players (
+        friend_id BIGINT NOT NULL,
+        match_id BIGINT NOT NULL,
+        PRIMARY KEY (friend_id, match_id),
+        hero_id INT NOT NULL,
+        is_radiant BOOLEAN NOT NULL,
+        abandon BOOLEAN NOT NULL,
+        CONSTRAINT fk_account FOREIGN KEY (friend_id) REFERENCES ttv_dota_accounts (friend_id) ON DELETE CASCADE,
+        CONSTRAINT fk_match FOREIGN KEY (match_id) REFERENCES ttv_dota_completed_matches (match_id) ON DELETE CASCADE
     );

@@ -2,18 +2,18 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from .gameflow import GameFlow
+from .online import Online
 
 if TYPE_CHECKING:
     from bot import IreBot
 
 
-class Dota(
-    GameFlow,
+class States(
+    Online,
 ):
-    """Dota 2 Features."""
+    """# TODO."""
 
 
 async def setup(bot: IreBot) -> None:
     """Load IreBot extension. Framework of twitchio."""
-    await bot.add_component(Dota(bot))
+    await bot.add_component(States(bot))

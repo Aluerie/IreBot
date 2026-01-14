@@ -1,8 +1,7 @@
 from __future__ import annotations
 
 import logging
-import platform
-from typing import TYPE_CHECKING, override
+from typing import TYPE_CHECKING, NamedTuple, override
 
 from steam import PersonaState
 from steam.ext.dota2 import Client
@@ -13,13 +12,23 @@ from .pulsefire_clients import SteamWebAPIClient, StratzClient
 from .storage import Items
 
 if TYPE_CHECKING:
-    from steam.ext.dota2 import PartialUser
+    from steam.ext.dota2 import PartialUser, User
 
     from bot import IreBot
 
 log = logging.getLogger(__name__)
 
-__all__ = ("Dota2Client",)
+__all__ = (
+    "Dota2Client",
+    "SteamUserUpdate",
+)
+
+
+class SteamUserUpdate(NamedTuple):
+    """Payload for my custom `steam_user_update` event to mirror `Dota2Client.on_user_update`."""
+
+    before: User
+    after: User
 
 
 class Dota2Client(Client):
@@ -29,7 +38,8 @@ class Dota2Client(Client):
     """
 
     def __init__(self, twitch_bot: IreBot) -> None:
-        super().__init__(state=PersonaState.Online)  # .Invisible
+        persona_state = PersonaState.Invisible if twitch_bot.test else PersonaState.Online
+        super().__init__(state=persona_state)
         self.bot: IreBot = twitch_bot
         self.started: bool = False
 
@@ -51,12 +61,9 @@ class Dota2Client(Client):
     @override
     async def login(self) -> None:
         await self.start_helpers()
-        account_credentials = (
-            config["STEAM"]["IRENESTEST"] if platform.system() == "Windows" else config["STEAM"]["IRENESBOT"]
-        )
+        account_credentials = config["STEAM"]["IRENESTEST"] if self.bot.test else config["STEAM"]["IRENESBOT"]
         username, password = account_credentials["USERNAME"], account_credentials["PASSWORD"]
         await super().login(username, password)
-        
 
     @override
     async def close(self) -> None:
@@ -69,3 +76,10 @@ class Dota2Client(Client):
         log.info("Dota 2 Client: Ready - Successfully %s", self.user.name)
         await self.wait_until_gc_ready()
         log.info("Dota 2 Game Coordinator: Ready")
+
+    @override
+    async def on_user_update(self, before: User, after: User) -> None:
+        """#TODO."""
+        # Let's handle these events in the corresponding components.
+        payload = SteamUserUpdate(before=before, after=after)
+        self.bot.dispatch("steam_user_update", payload)

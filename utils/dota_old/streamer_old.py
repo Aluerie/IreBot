@@ -13,9 +13,9 @@ from steam.ext.dota2 import GameMode, Hero, LobbyType
 from bot import ireloop
 from utils import errors, fmt, fuzzy
 
+from ..dota.enums import LobbyParam0, PlayerMatchOutcome, RPStatus, Team, WinLossCategory
 from ._utils import convert_id3_to_id64, rank_medal_display_name
 from .constants import HERO_ALIASES, PLAYER_COLORS
-from .enums import LobbyParam0, PlayerMatchOutcome, RPStatus, Team, WinLossCategory
 
 if TYPE_CHECKING:
     from steam.ext.dota2 import MatchHistoryMatch, MinimalMatch

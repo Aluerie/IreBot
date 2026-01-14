@@ -4,6 +4,7 @@ import asyncio
 import datetime
 import logging
 import platform
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, TypedDict, override
 
 import discord
@@ -14,8 +15,8 @@ from twitchio.web import StarletteAdapter
 
 from config import config, replace_secrets
 from ext import get_extensions
-from ext.public.dota.api import Dota2Client
-from utils import MISSING, const, errors
+from utils import const, errors
+from utils.dota import Dota2Client
 
 from .bases import IreContext
 from .exc_manager import ExceptionManager
@@ -36,6 +37,7 @@ if TYPE_CHECKING:
 
 __all__ = (
     "IreBot",
+    "Streamer",
     "get_eventsub_subscriptions",
 )
 
@@ -50,6 +52,8 @@ def get_public_subscriptions(member: str, bot: str) -> list[twitchio.eventsub.Su
     """
     return [
         eventsub.ChatMessageSubscription(broadcaster_user_id=member, user_id=bot),
+        eventsub.StreamOfflineSubscription(broadcaster_user_id=member),
+        eventsub.StreamOnlineSubscription(broadcaster_user_id=member),
     ]
 
 
@@ -105,15 +109,25 @@ async def get_eventsub_subscriptions(pool: PoolTypedWithAny, owner: str) -> list
     # 2. Public member accounts (i.e. other people using my bot) only have some public features on
     # so we only need a subset of eventsub-subscriptions.
     query = """
-        SELECT user_id
-        FROM ttv_tokens
-        WHERE active = true AND user_id != ANY($1)
+        SELECT t.user_id
+        FROM ttv_tokens t
+        JOIN ttv_streamers s ON t.user_id = s.user_id
+        WHERE active = TRUE AND t.user_id != ANY($1)
     """
     exclude_ids = {const.UserID.Aluerie, const.UserID.Irene, const.UserID.Bot}
     public_rows: list[GetMemberAccountsQueryRow] = await pool.fetch(query, exclude_ids)
     for user in public_rows:
         subscriptions.extend(get_public_subscriptions(user["user_id"], bot))
     return subscriptions
+
+
+@dataclass
+class Streamer:
+    """#TODO."""
+
+    id: str
+    online: bool = False
+    started_dt: datetime.datetime | None = None
 
 
 class IreBot(commands.AutoBot):
@@ -124,7 +138,7 @@ class IreBot(commands.AutoBot):
     Includes TwitchIO's `ext.commands` extension to organize components/commands framework.
 
     Note on the name
-    ----
+    ----------------
     The name `IrenesBot` is used mainly for display purposes here:
         * the bot's twitch account user name (just so it's clear that it's Irene's bot);
         * the bot's Steam account's display name;
@@ -156,26 +170,27 @@ class IreBot(commands.AutoBot):
         scopes_only: bool,
         owner_id: str,
         force_subscribe: bool,
-        ngrok: bool,
+        local: bool,
     ) -> None:
         """Initiate IreBot."""
         self.prefixes: tuple[str, ...] = ("!", "?", "$")
-        adapter = (
-            StarletteAdapter(
+        if local:
+            self.domain = "http://localhost:4343"
+            adapter = None
+        else:
+            self.domain = "https://parrot-thankful-trivially.ngrok-free.app"
+            adapter = StarletteAdapter(
                 host="0.0.0.0",  # noqa: S104
-                domain="https://parrot-thankful-trivially.ngrok-free.app",
+                domain=self.domain,
                 eventsub_secret=config["TOKENS"]["EVENTSUB"],
             )
-            if ngrok
-            else MISSING
-        )
         super().__init__(
             client_id=config["TWITCH"]["CLIENT_ID"],
             client_secret=config["TWITCH"]["CLIENT_SECRET"],
             bot_id=const.UserID.Bot,
             owner_id=owner_id,
             prefix=self.prefixes,
-            adapter=adapter,
+            adapter=adapter,  # pyright: ignore[reportArgumentType], it's hinted as `NotRequired` while I need to use `None`.
             subscriptions=subscriptions,
             force_subscribe=force_subscribe,  # Set to `True` if we need urgent manual refreshing eventsub subs.
         )
@@ -187,9 +202,10 @@ class IreBot(commands.AutoBot):
         self.extensions: tuple[str, ...] = get_extensions(test=self.test)
         self.exc_manager = ExceptionManager(self)
 
-    @staticmethod
-    def print_oauth_helper(scopes: list[str], prefix: str) -> None:
-        """Helper function for `print_bot_oauth`, `print_personal_oauth`, `print_public_oauth`.
+        self.streamers: dict[str, Streamer] = {}
+
+    def show_oauth_helper(self, scopes: list[str], prefix: str) -> str:
+        """Helper function for `show_bot_oauth`, `show_personal_oauth`, `show_public_oauth`.
 
         The authorization is required for proper work of Twitch Eventsub events and API requests.
         Currently, we separate bot features into two categories:
@@ -199,10 +215,10 @@ class IreBot(commands.AutoBot):
         Therefore, we have 3 distinct links depending on which account should click on it.
 
         """
-        link = f"http://localhost:4343/oauth?scopes={'+'.join(scopes)}&force_verify=true"
-        print(f"{prefix}\n{link}")  # noqa: T201
+        link = f"{self.domain}/oauth?scopes={'+'.join(scopes)}&force_verify=true"
+        return f"{prefix}\n{link}"
 
-    def print_bot_oauth(self) -> None:
+    def show_bot_oauth(self) -> str:
         """Print a link for me (developer) to click and authorize the bot scopes for the bot account.
 
         Note, that we need to login with the bot account (do not use this link for personal accounts).
@@ -218,22 +234,10 @@ class IreBot(commands.AutoBot):
             "moderator:manage:banned_users",
             "clips:edit",
         ]
-        self.print_oauth_helper(scopes, "🤖🤖🤖 BOT OAUTH LINK: 🤖🤖🤖")
+        return self.show_oauth_helper(scopes, "🤖🤖🤖 BOT OAUTH LINK: 🤖🤖🤖")
 
-    def print_personal_oauth(self) -> None:
-        """Print a link for me (personal bot user with all the features) to click and authorize the scopes for the bot.
-
-        Notes
-        -----
-        * Currently my developer console has localhost as a callback: http://localhost:4343/oauth/callback
-            But if we ever switch to multi-streams setup then I already have some things set up with
-            * https://parrot-thankful-trivially.ngrok-free.app/oauth/callback (in developer console)
-            * `ngrok http --url=parrot-thankful-trivially.ngrok-free.app 80` (in my/vps terminal)
-            Look ngrok dashboard for more.
-
-            With it a user needs to go to a link like this:
-            https://parrot-thankful-trivially.ngrok-free.app/oauth?scopes=channel:bot&force_verify=true
-        """
+    def show_personal_oauth(self) -> str:
+        """Print a link for me (personal bot user with all the features) to click and authorize the scopes for the bot."""
         scopes = [
             "channel:bot",
             "channel:read:ads",
@@ -243,14 +247,14 @@ class IreBot(commands.AutoBot):
             "channel:manage:broadcast",
             "channel:read:subscriptions",
         ]
-        self.print_oauth_helper(scopes, "🎬🎬🎬 PERSONAL OAUTH LINK: 🎬🎬🎬")
+        return self.show_oauth_helper(scopes, "🎬🎬🎬 PERSONAL OAUTH LINK: 🎬🎬🎬")
 
-    def print_public_oauth(self) -> None:
+    def show_public_oauth(self) -> str:
         """Print a link for public streamers to click and authorize the scopes for the bot."""
         scopes = [
             "channel:bot",
         ]
-        self.print_oauth_helper(scopes, "🌈🌈🌈 PUBLIC OAUTH LINK: 🌈🌈🌈")
+        return self.show_oauth_helper(scopes, "🌈🌈🌈 PUBLIC OAUTH LINK: 🌈🌈🌈")
 
     @override
     async def setup_hook(self) -> None:
@@ -271,10 +275,14 @@ class IreBot(commands.AutoBot):
 
         """
         if self.scopes_only:
-            log.warning("Scopes Only Mode: show oauth urls and start the bot in adapter-only mode (no extensions enabled).")
-            self.print_bot_oauth()
-            self.print_personal_oauth()
-            self.print_public_oauth()
+            msg = (
+                "Scopes Only Mode: print oauth urls and start the bot in adapter-only mode (no extensions/commands enabled)."
+                "\n"
+                f"{self.show_bot_oauth()}\n"
+                f"{self.show_personal_oauth()}\n"
+                f"{self.show_public_oauth()}\n"
+            )
+            log.warning(msg)
         else:
             for ext in self.extensions:
                 await self.load_module(ext)
@@ -340,7 +348,7 @@ class IreBot(commands.AutoBot):
 
     @override
     async def start(self) -> None:
-        if "ext.public.dota" in self.extensions:
+        if "ext.public.dota" in self.extensions:  # TODO: CHANGE !!!!!!!!!!!!!!!
             self.dota = Dota2Client(self)
             await asyncio.gather(
                 super().start(),
@@ -407,6 +415,7 @@ class IreBot(commands.AutoBot):
                 await ctx.send(guard_mapping.get(error.guard.__qualname__, str(error)))
             case twitchio.HTTPException():
                 await ctx.send(
+                    f"{error.__class__.__name__} - "
                     f"{error.extra.get('error', 'Error')} "
                     f"{error.extra.get('status', 'XXX')}: "
                     f"{error.extra.get('message', 'Unknown')} {const.STV.dankFix}",
@@ -464,6 +473,8 @@ class IreBot(commands.AutoBot):
         )
         await self.exc_manager.register_error(payload.error, embed=embed)
 
+    # SHORTCUTS
+
     def webhook_from_url(self, url: str) -> discord.Webhook:
         """A shortcut function with filled in discord.Webhook.from_url args."""
         return discord.Webhook.from_url(url=url, session=self.session)
@@ -482,3 +493,9 @@ class IreBot(commands.AutoBot):
     def error_ping(self) -> str:
         """Error Role ping used to notify the developer(-s) about some errors."""
         return "<@&1337106675433340990>" if self.test else "<@&1116171071528374394>"
+
+    # UTILITIES
+
+    def is_online(self, user_id: str) -> bool:
+        """#TODO."""
+        return user_id in self.streamers_online

@@ -122,7 +122,7 @@ class RPStatus(MyStrEnum):
     """Enum describing "status" field in Steam's Rich Presence."""
 
     # MY OWN ADDITIONS
-    Offline = "#MY_Offline"
+    NONE = "#MY_NONE"
     """^ Offline is considered as when Rich Presence is None"""
     NoStatus = "#MY_NoStatus"
     """^ Somehow "status" field is missing from Rich Presence"""
@@ -149,7 +149,7 @@ class RPStatus(MyStrEnum):
     def KNOWN_DISPLAY_NAMES(cls: type[Self]) -> Mapping[RPStatus, str]:  # type: ignore[GeneralTypeIssue] # noqa: N802, N805
         """Mapping between RPStatus enum and human-readable display names for them."""
         return {
-            cls.Offline: "Offline/Invisible",
+            cls.NONE: "Offline/Invisible",
             cls.Idle: "Main Menu (Idle)",
             cls.MainMenu: "Main Menu",
             cls.Finding: "Finding A Match",
