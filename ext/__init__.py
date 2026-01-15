@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 from pkgutil import iter_modules
 
-__all__ = ("get_extensions",)
+__all__ = ("get_modules",)
 
 try:
     import _test
@@ -26,7 +26,7 @@ DISABLED_EXTENSIONS: tuple[str, ...] = (
 )
 
 
-def get_extensions(*, test: bool) -> tuple[str, ...]:
+def get_modules(*, test: bool) -> tuple[str, ...]:
     """Get list of bot extensions to load.
 
     Returns
@@ -52,5 +52,5 @@ def get_extensions(*, test: bool) -> tuple[str, ...]:
             if module.name not in DISABLED_EXTENSIONS
         )
 
-    log.debug("The list of extensions to load: %s", extensions)
+    log.debug("The list of extensions (%s total) to load: %s", len(extensions), extensions)
     return extensions

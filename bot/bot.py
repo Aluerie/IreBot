@@ -14,7 +14,7 @@ from twitchio.ext import commands
 from twitchio.web import StarletteAdapter
 
 from config import config, replace_secrets
-from ext import get_extensions
+from ext import get_modules
 from utils import const, errors
 from utils.dota import Dota2Client
 
@@ -42,6 +42,7 @@ __all__ = (
 )
 
 log = logging.getLogger(__name__)
+log.setLevel(logging.DEBUG)
 
 
 def get_public_subscriptions(member: str, bot: str) -> list[twitchio.eventsub.SubscriptionPayload]:
@@ -199,7 +200,7 @@ class IreBot(commands.AutoBot):
         self.scopes_only: bool = scopes_only
 
         self.test: bool = platform.system() == "Windows"  # TODO: I don't like it;
-        self.extensions: tuple[str, ...] = get_extensions(test=self.test)
+        self.modules_to_load: tuple[str, ...] = get_modules(test=self.test)
         self.exc_manager = ExceptionManager(self)
 
         self.streamers: dict[str, Streamer] = {}
@@ -284,8 +285,9 @@ class IreBot(commands.AutoBot):
             )
             log.warning(msg)
         else:
-            for ext in self.extensions:
+            for ext in self.modules_to_load:
                 await self.load_module(ext)
+                log.debug("Loaded module %s", ext)
 
     @override
     async def event_oauth_authorized(self, payload: twitchio.authentication.UserTokenPayload) -> None:
@@ -348,7 +350,7 @@ class IreBot(commands.AutoBot):
 
     @override
     async def start(self) -> None:
-        if "ext.public.dota" in self.extensions:  # TODO: CHANGE !!!!!!!!!!!!!!!
+        if "ext.public.dota" in self.modules_to_load:
             self.dota = Dota2Client(self)
             await asyncio.gather(
                 super().start(),

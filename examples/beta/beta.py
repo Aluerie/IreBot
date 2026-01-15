@@ -16,5 +16,4 @@ class BetaTest(BetaCog):
 
 
 async def setup(bot: IreBot) -> None:
-    if __name__ in bot.extensions:
-        await bot.add_component(BetaTest(bot))
+    await bot.add_component(BetaTest(bot))
