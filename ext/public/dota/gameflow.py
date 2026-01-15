@@ -445,27 +445,21 @@ class GameFlow(IrePublicComponent):
 
     @override
     async def component_load(self) -> None:
-        # Wait for all ready, commenting the following lines may lead to a disaster.
-        if not self.bot.test:
-            # whatever, let's not bother for test runs;
-            # todo: remove this silly "if not test"
-            await self.bot.wait_until_ready()
-            await self.bot.dota.wait_until_ready()
-            await self.bot.dota.wait_until_gc_ready()
-        await self.bot.wait_for("bot_streamers_index_ready")
-
-        log.debug("Loading public.dota's GameFlow component")
-        # Start the component tasks/listeners
         self.starting_fill_friends.start()
-        self.bot.add_listener(self.steam_user_update, event="event_steam_user_update")
-
-        await self.bot.wait_for("self_friends_ready")
+        self.add_steam_user_update_listener.start()
         self.fill_completed_matches_from_gc_match_history.start()
         self.remove_way_too_old_matches.start()
 
     @override
     async def component_teardown(self) -> None:
         self.starting_fill_friends.cancel()
+        self.add_steam_user_update_listener.cancel()
+        self.fill_completed_matches_from_gc_match_history.cancel()
+        self.remove_way_too_old_matches.cancel()
+
+    #################################
+    #           EVENTS              #
+    #################################
 
     @ireloop(count=1)
     async def starting_fill_friends(self) -> None:
@@ -987,6 +981,32 @@ class GameFlow(IrePublicComponent):
         """
         await self.bot.pool.execute(query, steam_user.id, name)
         await ctx.send(f"Added a new notable player (friend_id={steam_user.id}, name={name})")
+
+    #################################
+    #      TASK CARE                #
+    #################################
+
+    @ireloop(count=1)
+    async def add_steam_user_update_listener(self) -> None:
+        """#TODO."""
+        self.bot.add_listener(self.steam_user_update, event="event_steam_user_update")
+
+    @add_steam_user_update_listener.before_loop
+    @starting_fill_friends.before_loop
+    async def wait_for_clients(self) -> None:
+        """#TODO."""
+        await self.bot.wait_until_ready()
+        await self.bot.dota.wait_until_ready()
+        # if not self.bot.test:  # sometimes Coordinator being too slow is annoying for development;
+        await self.bot.dota.wait_until_gc_ready()
+        # await self.bot.wait_for("bot_streamers_index_ready")
+
+    @fill_completed_matches_from_gc_match_history.before_loop
+    @remove_way_too_old_matches.before_loop
+    async def wait_for_friends_cache_as_well(self) -> None:
+        """#TODO."""
+        await self.wait_for_clients()
+        await self.bot.wait_for("self_friends_ready")
 
 
 async def setup(bot: IreBot) -> None:

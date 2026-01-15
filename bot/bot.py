@@ -13,7 +13,7 @@ from twitchio import eventsub
 from twitchio.ext import commands
 from twitchio.web import StarletteAdapter
 
-from config import config, replace_secrets
+from config import config
 from ext import get_modules
 from utils import const, errors
 from utils.dota import Dota2Client
@@ -286,8 +286,8 @@ class IreBot(commands.AutoBot):
             log.warning(msg)
         else:
             for ext in self.modules_to_load:
+                log.debug("Loading module %s", ext)
                 await self.load_module(ext)
-                log.debug("Loaded module %s", ext)
 
     @override
     async def event_oauth_authorized(self, payload: twitchio.authentication.UserTokenPayload) -> None:

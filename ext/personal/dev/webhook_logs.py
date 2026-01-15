@@ -20,6 +20,7 @@ if TYPE_CHECKING:
     from bot import IreBot
 
 log = logging.getLogger(__name__)
+log.setLevel(logging.INFO)
 
 
 class LoggingHandler(logging.Handler):
@@ -124,7 +125,6 @@ class LogsViaWebhook(BaseDevComponent):
         username = record.name.replace("discord", "dpy")
 
         embed = discord.Embed(color=color, description=msg)
-        await self.bot.logger_webhook.send(content=username)
         await self.bot.logger_webhook.send(embed=embed, username=username, avatar_url=avatar_url)
 
     @ireloop(seconds=0.0)
@@ -136,7 +136,7 @@ class LogsViaWebhook(BaseDevComponent):
             if self._most_recent and (delta := datetime.datetime.now(datetime.UTC) - self._most_recent) < self.cooldown:
                 # We have to wait
                 total_seconds = delta.total_seconds()
-                log.debug("Waiting %s seconds to send the error.", total_seconds)
+                log.debug("Waiting %.2f seconds to send the record.", total_seconds)
                 await asyncio.sleep(total_seconds)
 
             self._most_recent = datetime.datetime.now(datetime.UTC)

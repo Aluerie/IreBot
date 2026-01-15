@@ -84,7 +84,18 @@ class Control(BaseDevComponent):
         --------
         * "ext.personal.dev ext.public.states"
         """
-        response = " ".join(module.__name__ for module in ctx.bot.modules.values())
+        index = {"personal": [], "public": [], "other": []}
+        for module in ctx.bot.modules.values():
+            name = module.__name__
+
+            for category in ("public", "personal"):
+                if name.startswith(f"ext.{category}."):
+                    index[category].append(name.removeprefix(f"ext.{category}."))
+                    break
+            else:
+                index["other"].append(name.removeprefix("ext."))
+
+        response = f"  {const.STV.DankDolmes} ".join(f"{c}: {', '.join(m)}" for c, m in index.items() if m)
         await ctx.send(response)
 
 

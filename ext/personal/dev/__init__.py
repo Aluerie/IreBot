@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from .control import Control
-from .logs_via_webhook import LogsViaWebhook
+from .webhook_logs import LogsViaWebhook
 
 if TYPE_CHECKING:
     from bot import IreBot
