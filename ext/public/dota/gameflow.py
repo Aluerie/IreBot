@@ -727,7 +727,11 @@ class GameFlow(IrePublicComponent):
 
     async def add_completed_match_to_database(self, match: MatchHistoryMatch, friend_id: int) -> None:
         """#TODO."""
-        # match history entities do not give proper outcome (Radiant/Dire)
+        if match.start_time < datetime.datetime.now(datetime.UTC) - datetime.timedelta(hours=48):
+            # Match is way too old to care
+            return
+
+        # match history entities on their own do not give proper outcome (Radiant/Dire)
         minimal = await self.bot.dota.create_partial_match(match.id).minimal()
 
         query = """
@@ -804,9 +808,9 @@ class GameFlow(IrePublicComponent):
 
         Currently, 48 hours is considered as "too old".
         """
-        if self.remove_way_too_old_matches.current_loop == 0:
-            # No need to bother on bot reloads.
-            return
+        # if self.remove_way_too_old_matches.current_loop == 0:
+        #     # No need to bother on bot reloads.
+        #     return
 
         log.debug("Removing way too old matches from the database.")
         query = """
