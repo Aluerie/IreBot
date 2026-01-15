@@ -44,7 +44,7 @@ def setup_logging() -> Generator[Any, Any, Any]:
             filename=".temp/irebot.log",
             encoding="utf-8",
             mode="w",
-            maxBytes=24 * 1024 * 1024,  # MiB
+            maxBytes=11 * 1024 * 1024,  # MiB
             backupCount=2,  # Rotate through 2 files
         )
         file_handler.setFormatter(get_log_fmt(handler))

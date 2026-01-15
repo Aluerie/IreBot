@@ -1,5 +1,4 @@
-; Use the following command(-s) to copy-paste the .service file into systemd folder 
-; cp ./irebot.service /etc/systemd/system/irebot.service
+; /etc/systemd/system/irebot.service
 
 [Unit]
 Description=irebot
