@@ -174,7 +174,7 @@ class IreBot(commands.AutoBot):
         local: bool,
     ) -> None:
         """Initiate IreBot."""
-        self.prefixes: tuple[str, ...] = ("!", "?", "$")
+        self.prefixes: tuple[str, ...] = ("!", "?", "$", "%")
         if local:
             self.domain = "http://localhost:4343"
             adapter = None
