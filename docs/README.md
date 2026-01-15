@@ -12,10 +12,11 @@ Use `!say` command.
 * Lifetime Games: Largo 9546 • Morphling 6580 • Zeus 9526 • Lina 5094 • Broodmother 5423 • Timbersaw 2455 • Warlock 6712 • EarthSpirit 926 • TemplarAssassin 994 • MonkeyKing 6056
 * [Spectating] [2m delay] CHLOE TemplarAssassin lvl 12 • NW: 6778 • 0/3/3 • CS: 104 • Mithril Hammer, Magic Wand, Power Treads, Orb of Blight, Falcon Blade • stratz.com/players/886059137
 * 8123456789
-* 
+*
 *
 *
 * Last Game - Ranked: Win as DrowRanger 21/5/21 • ended 1d14h ago • stratz.com/matches/8648472385
+* Dot ♥: Turbo 3 W - 2 L • Unranked 1 W - 1 L
 * dotabuff.com/players/123456789
 
 ## How we made images

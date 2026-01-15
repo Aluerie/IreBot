@@ -955,7 +955,7 @@ class GameFlow(IrePublicComponent):
 
     @commands.group(invoke_fallback=True)
     async def mmr(self, ctx: IreContext) -> None:
-        """#TODO."""
+        """Show streamer's mmr on the current account."""
         friend = await self.find_friend_account(ctx.broadcaster.id, is_green_online_required=False)
         query = """
             SELECT estimated_mmr
@@ -997,7 +997,13 @@ class GameFlow(IrePublicComponent):
         This account is considered to be queried against for the bot's commands.
         """
         friend = await self.find_friend_account(ctx.broadcaster.id, is_green_online_required=False)
-        response = f"{friend.steam_user.name} id={friend.steam_user.id} status={friend.rich_presence.status}"
+        query = "SELECT last_seen FROM ttv_dota_accounts WHERE friend_id = $1"
+        last_seen: datetime.datetime = await self.bot.pool.fetchval(query, friend.steam_user.id)
+        delta = datetime.datetime.now(datetime.UTC) - last_seen
+        response = (
+            f"{friend.steam_user.name} id={friend.steam_user.id} status={friend.rich_presence.status} - "
+            f"last seen {fmt.timedelta_to_words(delta, fmt=fmt.TimeDeltaFormat.Letter)}"
+        )
         await ctx.send(response)
 
     #################################
