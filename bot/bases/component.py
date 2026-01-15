@@ -4,11 +4,13 @@ from typing import TYPE_CHECKING, override
 
 from twitchio.ext import commands
 
+from utils import errors
+
 if TYPE_CHECKING:
     from bot import IreBot, IreContext
 
 
-__all__ = ("IreComponent", "IrePersonalComponent", "IrePublicComponent")
+__all__ = ("IrePersonalComponent", "IrePublicComponent")
 
 
 class IreComponent(commands.Component):
@@ -34,4 +36,8 @@ class IrePersonalComponent(IreComponent):
 
     @override
     async def component_before_invoke(self, ctx: IreContext) -> bool:
-        return self.is_owner(ctx.channel.id)
+        if not self.is_owner(ctx.broadcaster.id):
+            msg = "Command is not allowed anywhere except Irene's channel"
+            raise errors.SilentError(msg)
+        return True
+

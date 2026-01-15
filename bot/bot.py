@@ -395,6 +395,9 @@ class IreBot(commands.AutoBot):
         error = error.original if isinstance(error, commands.CommandInvokeError) and error.original else error
 
         match error:
+            case errors.SilentError():
+                # Silently exit the error handler
+                return
             case errors.IreBotError():
                 # errors defined by me - just send the string
                 await ctx.send(str(error))

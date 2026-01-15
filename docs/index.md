@@ -2,9 +2,9 @@
 
 ## 1. Dota 2
 
-| Command Name | Chat Aliases | Description |
-| :--- | :--- | :--- |
-| Game Medals | !gm | Show players' rank medals in the current game. |
+| Command Name | Chat Aliases | Description | Showcase (7tv emotes on) | 
+| :--- | :--- | :--- | :--- |
+| Game Medals | !gm | Show players' rank medals in the current game. | 
 | Ranked | !ranked | Show whether the current game is ranked or not. |
 | Lifetime Games | !smurfs !lifetime | Show amount of games players in the current game have played on their accounts in total. |
 | Stats | !stats !items !item !player | Fetch item and some profile data about a certain player in the current game (2 minutes delay). Note that you need to provide an argument for the command such as hero name, hero alias, player slot or color (i.e. !stats pa, !stats blue. !stats mireska !stats Templar Assassin). |

@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, TypedDict
 
 from twitchio.ext import commands
 
-from bot import IreComponent
+from bot import IrePersonalComponent
 from utils import const
 
 if TYPE_CHECKING:
@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 __all__ = ("TemporaryCommands",)
 
 
-class TemporaryCommands(IreComponent):
+class TemporaryCommands(IrePersonalComponent):
     """Miscellaneous commands.
 
     Commands that are likely to be removed in future or edited a lot.

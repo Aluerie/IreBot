@@ -81,3 +81,9 @@ class ResponseNotOK(IreBotError):  # noqa: N818
     """
 
     __slots__: tuple[str, ...] = ()
+
+
+class SilentError(IreBotError):
+    """Errors to be ignored by the error handler."""
+
+    __slots__: tuple[str, ...] = ()

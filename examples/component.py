@@ -4,13 +4,13 @@ from typing import TYPE_CHECKING
 
 from twitchio.ext import commands
 
-from bot import IreComponent
+from bot import IrePersonalComponent
 
 if TYPE_CHECKING:
     from bot import IreBot, IreContext
 
 
-class NewCog(IreComponent):
+class NewCog(IrePersonalComponent):
     """."""
 
     @commands.command()

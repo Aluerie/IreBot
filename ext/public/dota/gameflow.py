@@ -994,7 +994,7 @@ class GameFlow(IrePublicComponent):
         await ctx.send(f"Added a new notable player (friend_id={steam_user.id}, name={name})")
 
     #################################
-    #      TASK CARE                #
+    #         TASK CARE             #
     #################################
 
     @ireloop(count=1)
@@ -1010,7 +1010,7 @@ class GameFlow(IrePublicComponent):
         await self.bot.dota.wait_until_ready()
         # if not self.bot.test:  # sometimes Coordinator being too slow is annoying for development;
         await self.bot.dota.wait_until_gc_ready()
-        # await self.bot.wait_for("bot_streamers_index_ready")
+        await self.bot.wait_for("bot_streamers_index_ready")
 
     @fill_completed_matches_from_gc_match_history.before_loop
     @remove_way_too_old_matches.before_loop
