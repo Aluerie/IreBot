@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime
+import logging
 from typing import TYPE_CHECKING, TypedDict, override
 
 from twitchio.ext import commands
@@ -18,6 +19,9 @@ if TYPE_CHECKING:
 
 
 __all__ = ("Online",)
+
+log = logging.getLogger(__name__)
+log.setLevel(logging.DEBUG)
 
 
 class Online(IrePublicComponent):
@@ -37,6 +41,7 @@ class Online(IrePublicComponent):
     @ireloop(count=1)
     async def fill_streamers_index(self) -> None:
         """#TODO."""
+        log.debug("Filling `self.bot.streamers` index")
         query = """
             SELECT user_id
             FROM ttv_streamers
@@ -56,6 +61,7 @@ class Online(IrePublicComponent):
                 streamer.online = True
                 streamer.started_dt = stream.started_at
 
+        log.debug("Finished initial filling of `self.bot.streamers` index")
         self.bot.dispatch("bot_streamers_index_ready")
 
     @commands.Component.listener(name="stream_online")

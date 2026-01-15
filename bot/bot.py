@@ -440,7 +440,12 @@ class IreBot(commands.AutoBot):
             #     await ctx.send(str(error))
 
             case _:
-                await ctx.send(f"{error.__class__.__name__}: {replace_secrets(str(error))}")
+                await ctx.send(
+                    f"Sorry {const.Global.FeelsDankMan} "
+                    f"Something went wrong {const.Global.FeelsDankMan} "
+                    "but I've notified Irene about the error."
+                )
+                # await ctx.send(f"{error.__class__.__name__}: {replace_secrets(str(error))}")
 
                 command_name = getattr(ctx.command, "name", "unknown")
 

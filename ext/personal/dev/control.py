@@ -76,6 +76,12 @@ class Control(BaseDevComponent):
         await self.bot.load_module(extension)
         await ctx.send(f"{const.STV.DankApprove} loaded {extension}")
 
+    @commands.command(name="modules", aliases=["extensions", "components"])  # module != component but whatever
+    async def list_modules(self, ctx: IreContext) -> None:
+        """List modules that are currently loaded by the bot."""
+        response = str(ctx.bot.modules)
+        await ctx.send(response)
+
 
 async def setup(bot: IreBot) -> None:
     """Load IreBot extension. Framework of twitchio."""

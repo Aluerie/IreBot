@@ -453,6 +453,7 @@ class GameFlow(IrePublicComponent):
             await self.bot.dota.wait_until_ready()
             await self.bot.dota.wait_until_gc_ready()
 
+        log.debug("Loading public.dota's GameFlow component")
         # Start the component tasks/listeners
         self.starting_fill_friends.start()
         self.bot.add_listener(self.steam_user_update, event="event_steam_user_update")
