@@ -612,7 +612,7 @@ class GameFlow(IrePublicComponent):
         response = await active_match.ranked()
         await ctx.send(response)
 
-    @commands.command()
+    @commands.command(aliases=["lifetime"])
     async def smurfs(self, ctx: IreContext) -> None:
         """Show amount of total games each player has on their accounts.
 
@@ -650,7 +650,7 @@ class GameFlow(IrePublicComponent):
         response = await active_match.match_id_command()
         await ctx.send(response)
 
-    @commands.command(aliases=["np"])
+    @commands.command(name="notable", aliases=["np"])
     async def notable_players(self, ctx: IreContext) -> None:
         """List notable players for the current match."""
         active_match = await self.find_active_match(ctx.broadcaster.id)
@@ -679,9 +679,9 @@ class GameFlow(IrePublicComponent):
         last_game = await self.bot.dota.create_partial_match(row["match_id"]).minimal()
         return row["friend_id"], row["hero_id"], last_game
 
-    @commands.command(aliases=["last_game", "lg", "lm"])
+    @commands.command(name="played", aliases=["last_game", "lg", "lm"])
     async def played_with(self, ctx: IreContext) -> None:
-        """List recurring players from the last game in the current match."""
+        """List recurring players from the last game present in the current match."""
         active_match = await self.find_active_match(ctx.broadcaster.id)
 
         if isinstance(active_match, PlayMatch):
@@ -956,6 +956,14 @@ class GameFlow(IrePublicComponent):
         await self.bot.pool.fetchval(query, new_mmr, friend.steam_user.id)
         response = f'Successfully set MMR to {new_mmr} for the account "{friend.steam_user.name}"'
         await ctx.send(response)
+
+    @commands.command(aliases=["stratz", "opendota"])
+    async def dotabuff(self, ctx: IreContext) -> None:
+        """Show stats service profile link for the streamer, i.e. dotabuff / stratz / opendota."""
+        friend = await self.find_friend_account(ctx.broadcaster.id)
+        if not (invoked := ctx.invoked_with):
+            invoked = "stratz"
+        await ctx.send(content=f"{invoked}.com/players/{friend.steam_user.id}")
 
     #################################
     #       DEV ONLY COMMANDS       #

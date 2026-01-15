@@ -1,18 +1,25 @@
 --- 
 --- 
+/* What do these --- mean, why everything breaks
+if they are not in this state:
+---
+---
+And why VSCode formatting always breaks them ?!
+*/
+
 
 // Breakpoints
-$large-breakpoint: 64em !default;
-$medium-breakpoint: 42em !default;
+$large-breakpoint: 64em;
+$medium-breakpoint: 42em;
 
 // Headers
-$header-heading-color: #fff !default;
-$header-bg-color: #f312d5 !default;
-$header-bg-color-secondary: #155799 !default;
+$header-heading-color: #fff;
+$header-bg-color: #790069;
+$header-bg-color-secondary: #155799;
 
 // Text
-$section-headings-color: #d508e7 !default;
-$body-text-color: #606c71 !default;
+$section-headings-color: #9d39cc !default;
+$body-text-color: #edf3f5 !default;
 $body-link-color: #1e6bb8 !default;
 $blockquote-text-color: #819198 !default;
 
@@ -22,13 +29,44 @@ $code-text-color: #567482 !default;
 
 // Borders
 $border-color: #dce6f0 !default;
-$table-border-color: #e9ebec !default;
+$table-border-color: #a114ff7e !default; //
 $hr-border-color: #eff0f1 !default;
 
 
 @import "{{ site.theme }}";
 
+body {
+    background-color: #0d1117;
+}
 .main-content {
     min-width: 96rem;
     max-width: 96rem;
+}
+
+.btn {
+    display: inline-flex;
+    padding: 9px 9px;
+    font-size: 14px;
+    align-items: center;
+}
+
+.page-header {
+    padding: 1rem 1rem;
+}
+
+.project-name {
+    margin-top: 0;
+    margin-bottom: 0.1rem;
+
+    @include large {
+        font-size: 2.75rem;
+    }
+
+    @include medium {
+        font-size: 1.75rem;
+    }
+
+    @include small {
+        font-size: 1.25rem;
+    }
 }
