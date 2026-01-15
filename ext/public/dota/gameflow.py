@@ -51,7 +51,11 @@ log.setLevel(logging.DEBUG)
 
 
 class RichPresence:
-    """#TODO."""
+    """Class representing Steam Rich Presence.
+
+    Normally Rich Presence is just a dictionary of data.
+    This class adds some utility for GameFlow component to use.
+    """
 
     def __init__(self, raw: dict[str, str] | None) -> None:
         self.raw: dict[str, str] = raw or {}
@@ -92,7 +96,7 @@ class Friend:
 
     @property
     def is_playing_dota(self) -> bool:
-        """#TODO."""
+        """Whether this friend is playing dota or not."""
         return bool(app := self.steam_user.app) and app.id == 570
 
 
@@ -235,7 +239,7 @@ class Match:
         # Step 2. let's see if hero aliases can beat official
         for player_slot, hero in enumerate(self.heroes):
             if hero:
-                find = fuzzy.extract_one(argument, dota_constants.HERO_ALIASES[hero.id], score_cutoff=69)
+                find = fuzzy.extract_one(argument, dota_constants.HERO_ALIASES.get(hero.id, []), score_cutoff=69)
                 if find and find[1] > the_choice[1]:
                     the_choice = (player_slot, find[1])
 
@@ -248,6 +252,7 @@ class Match:
 
     @format_match_response
     async def stats(self, argument: str) -> str:
+        """A response for chat command !stats."""
         if not self.players:
             return "No player data yet."
         if self.server_steam_id is None:
@@ -274,7 +279,7 @@ class Match:
             msg = "Didn't find the player's team info Oups"
             raise errors.PlaceholderRaiseError(msg)
 
-        prefix = f"[2m delay] {Hero.try_value(api_player['heroid'])} lvl {api_player['level']}"
+        prefix = f"[2m delay] {api_player['name']} {Hero.try_value(api_player['heroid'])} lvl {api_player['level']}"
         net_worth = f"NW: {api_player['net_worth']}"
         kda = f"{api_player['kill_count']}/{api_player['death_count']}/{api_player['assists_count']}"
         cs = f"CS: {api_player['lh_count']}"
@@ -470,19 +475,25 @@ class GameFlow(IrePublicComponent):
         log.debug("Indexing bot's friend list.")
         for friend in await self.bot.dota.user.friends():
             self.friends[friend.id] = Friend(self.bot, friend._user)  # pyright: ignore[reportArgumentType] #TODO: ???
-        log.debug('Friends index ready. Dispatching "self_friends_ready".')
-        self.bot.dispatch("self_friends_ready")
 
-    @commands.Component.listener("self_friends_ready")
-    async def starting_rich_presence_check(self) -> None:
-        """#TODO."""
-        log.debug("Searching for any Dota 2 players in bot's friend list.")
         for friend in self.friends.values():
             await self.analyze_rich_presence(friend)
+
+        log.debug('Friends index ready. Setting "_friends_index_ready".')
+        self.bot._friends_index_ready.set()
 
     async def analyze_rich_presence(self, friend: Friend) -> None:
         """#TODO."""
         rp = friend.rich_presence
+
+        if friend.is_playing_dota:
+            # Update `last_seen` in the database;
+            query = """
+                UPDATE ttv_dota_accounts
+                SET last_seen = $1
+                WHERE friend_id = $2
+            """
+            await self.bot.pool.execute(query, datetime.datetime.now(datetime.UTC), friend.steam_user.id)
 
         match rp.status:
             case dota_enums.Status.Idle | dota_enums.Status.MainMenu | dota_enums.Status.Finding:
@@ -502,7 +513,7 @@ class GameFlow(IrePublicComponent):
                         friend.active_match = UnsupportedMatch(self.bot, tag="Demo mode is not supported")
                         return
                     if lobby_param0 == dota_enums.LobbyParam0.BotMatch:
-                        friend.active_match = UnsupportedMatch(self.bot, tag="Private Lobbies are not  supported")
+                        friend.active_match = UnsupportedMatch(self.bot, tag="Private Lobbies are not supported")
                         return
                     msg = "#todo"
                     raise errors.PlaceholderRaiseError(msg)
@@ -570,21 +581,29 @@ class GameFlow(IrePublicComponent):
     # ACTIVE MATCH RELATED COMMANDS #
     #################################
 
-    async def find_friend_account(self, broadcaster_id: str) -> Friend:
+    async def find_friend_account(self, broadcaster_id: str, *, is_green_online_required: bool = True) -> Friend:
         """#TODO."""
         query = """
             SELECT twitch_id, friend_id
             FROM ttv_dota_accounts
-            WHERE twitch_id = $1;
+            WHERE twitch_id = $1
+            ORDER BY last_seen DESC
+            LIMIT 1;
         """
-        rows = await self.bot.pool.fetch(query, broadcaster_id)
+        row = await self.bot.pool.fetchrow(query, broadcaster_id)
+        friend = self.friends.get(row["friend_id"])
 
-        for row in rows:
-            friend = self.friends.get(row["friend_id"])
-            if friend and friend.is_playing_dota:
-                return friend
+        if friend:
+            if is_green_online_required and not friend.is_playing_dota:
+                msg = "Inactive command \N{BULLET} it requires streamer to be green-online in Dota 2"
+                raise errors.PlaceholderRaiseError(msg)
+            return friend
 
-        msg = "Inactive command \N{BULLET} it requires streamer to be green-online in Dota 2"
+        if self.bot._friends_index_ready.is_set():
+            msg = "Bot's Dota 2 functionality is not fully loaded in. Please, wait a bit."
+            raise errors.PlaceholderRaiseError(msg)
+
+        msg = "Couldn't find streamer's steam account in my friends uuh"
         raise errors.PlaceholderRaiseError(msg)
 
     async def find_active_match(self, broadcaster_id: str) -> ActiveMatch:
@@ -662,7 +681,15 @@ class GameFlow(IrePublicComponent):
     #################################
 
     async def get_last_game(self, broadcaster_id: str) -> tuple[int, int, MinimalMatch]:
-        """#TODO."""
+        """A helper function to get broadcaster's last played game from the database.
+
+        Returns
+        -------
+        tuple[int, int, MinimalMatch]
+            This tuple consists of `friend_id`, `hero_id` and `last_game` of `MinimalMatch` type because
+            both `friend_id` and `hero_id` are useful at identifying the correct player later on.
+            If a player has their data private then MinimalMatch will have zero for that player slot `friend_id`
+        """
         query = """
             SELECT p.match_id, p.friend_id, p.hero_id
             FROM ttv_dota_completed_matches m
@@ -931,7 +958,7 @@ class GameFlow(IrePublicComponent):
     @commands.group(invoke_fallback=True)
     async def mmr(self, ctx: IreContext) -> None:
         """#TODO."""
-        friend = await self.find_friend_account(ctx.broadcaster.id)
+        friend = await self.find_friend_account(ctx.broadcaster.id, is_green_online_required=False)
         query = """
             SELECT estimated_mmr
             FROM ttv_dota_accounts
@@ -947,7 +974,7 @@ class GameFlow(IrePublicComponent):
     @mmr.command(name="set")
     async def mmr_set(self, ctx: IreContext, new_mmr: int) -> None:
         """#TODO."""
-        friend = await self.find_friend_account(ctx.broadcaster.id)
+        friend = await self.find_friend_account(ctx.broadcaster.id, is_green_online_required=False)
         query = """
             UPDATE ttv_dota_accounts
             SET estimated_mmr = $1
@@ -960,10 +987,20 @@ class GameFlow(IrePublicComponent):
     @commands.command(aliases=["stratz", "opendota"])
     async def dotabuff(self, ctx: IreContext) -> None:
         """Show stats service profile link for the streamer, i.e. dotabuff / stratz / opendota."""
-        friend = await self.find_friend_account(ctx.broadcaster.id)
+        friend = await self.find_friend_account(ctx.broadcaster.id, is_green_online_required=False)
         if not (invoked := ctx.invoked_with):
             invoked = "stratz"
         await ctx.send(content=f"{invoked}.com/players/{friend.steam_user.id}")
+
+    @commands.command(name="lastseen")
+    async def last_seen(self, ctx: IreContext) -> None:
+        """Show the steam account the bot has seen you last online on.
+
+        This account is considered to be queried against for the bot's commands.
+        """
+        friend = await self.find_friend_account(ctx.broadcaster.id, is_green_online_required=False)
+        response = f"{friend.steam_user.name} id={friend.steam_user.id} status={friend.rich_presence.status}"
+        await ctx.send(response)
 
     #################################
     #       DEV ONLY COMMANDS       #
@@ -1010,14 +1047,14 @@ class GameFlow(IrePublicComponent):
         await self.bot.dota.wait_until_ready()
         # if not self.bot.test:  # sometimes Coordinator being too slow is annoying for development;
         await self.bot.dota.wait_until_gc_ready()
-        await self.bot.wait_for("bot_streamers_index_ready")
+        await self.bot._streamers_index_ready.wait()
 
     @fill_completed_matches_from_gc_match_history.before_loop
     @remove_way_too_old_matches.before_loop
     async def wait_for_friends_cache_as_well(self) -> None:
         """#TODO."""
         await self.wait_for_clients()
-        await self.bot.wait_for("self_friends_ready")
+        await self.bot._friends_index_ready.wait()
 
 
 async def setup(bot: IreBot) -> None:

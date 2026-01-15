@@ -27,6 +27,7 @@ CREATE TABLE
         steam64_id BIGINT,
         estimated_mmr INT DEFAULT (0),
         twitch_id TEXT NOT NULL,
+        last_seen TIMESTAMPTZ DEFAULT (NOW () AT TIME zone 'utc')
         CONSTRAINT fk_twitch_id FOREIGN KEY (twitch_id) REFERENCES ttv_streamers (user_id) ON DELETE CASCADE
     );
 

@@ -204,6 +204,8 @@ class IreBot(commands.AutoBot):
         self.exc_manager = ExceptionManager(self)
 
         self.streamers: dict[str, Streamer] = {}
+        self._streamers_index_ready: asyncio.Event = asyncio.Event()
+        self._friends_index_ready: asyncio.Event = asyncio.Event()
 
     def show_oauth_helper(self, scopes: list[str], prefix: str) -> str:
         """Helper function for `show_bot_oauth`, `show_personal_oauth`, `show_public_oauth`.

@@ -318,15 +318,6 @@ class StableCommands(IrePersonalComponent):
                 reason="Lost in !russianroulette",
             )
 
-    @commands.is_owner()
-    @commands.command()
-    async def say(self, ctx: IreContext, *, message: str) -> None:
-        """Make the bot repeat your message.
-
-        Useful for making showcase of bot commands with slight edits.
-        """
-        await ctx.send(message)
-
     @commands.command()  # maybe the name "since" isn't the best but "uptime", "online" are already taken
     async def since(self, ctx: IreContext) -> None:
         """🔬 Get the bot's uptime.
