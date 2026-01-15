@@ -452,6 +452,7 @@ class GameFlow(IrePublicComponent):
             await self.bot.wait_until_ready()
             await self.bot.dota.wait_until_ready()
             await self.bot.dota.wait_until_gc_ready()
+        await self.bot.wait_for("bot_streamers_index_ready")
 
         log.debug("Loading public.dota's GameFlow component")
         # Start the component tasks/listeners

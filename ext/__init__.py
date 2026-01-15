@@ -16,7 +16,7 @@ except ModuleNotFoundError:
     USE_ALL_EXTENSIONS: bool = True  # type: ignore[reportConstantRedefinition]
 
 log = logging.getLogger(__name__)
-log.setLevel(logging.INFO)
+log.setLevel(logging.DEBUG)
 
 DISABLED_EXTENSIONS: tuple[str, ...] = (
     # extensions that should not be loaded
