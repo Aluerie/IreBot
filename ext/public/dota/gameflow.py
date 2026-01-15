@@ -65,10 +65,8 @@ class RichPresence:
 
     @override
     def __eq__(self, other: object) -> bool:
-        # we need to exclude `param1` from comparison
-        # because for Dota 2 Rich Presence it's usually a hero level
-        # which is pointless for us to know
-        # Hopefully this decision won't bite me.
+        # we need to exclude `param1` from comparison because for Dota 2 Rich Presence it's usually a hero level
+        # which is pointless for the gameflow logic to know. Hopefully, this decision won't bite me in the future.
 
         # https://stackoverflow.com/a/70145635/19217368
         ignore_keys: set[str] = {"param1"}
@@ -102,7 +100,12 @@ class Friend:
 class Player:
     """#TODO.
 
-    NO HERO DATA.
+    Notes
+    -----
+    * Compared to my all previous implementations of this - the current iteration for Player class **_DOES NOT_**
+        have any data about selected hero or any logic to assign a hero to the player.
+        I found it's better to keep `.players` and `.heroes` data bound to `Match` classes.
+        The order is carefully taken care of anyway.
     """
 
     friend_id: int
@@ -581,7 +584,7 @@ class GameFlow(IrePublicComponent):
             if friend and friend.is_playing_dota:
                 return friend
 
-        msg = "I'm sorry, it seems the streamer isn't playing Dota 2 at the moment."
+        msg = "Inactive command \N{BULLET} it requires streamer to be green-online in Dota 2"
         raise errors.PlaceholderRaiseError(msg)
 
     async def find_active_match(self, broadcaster_id: str) -> ActiveMatch:
@@ -590,7 +593,7 @@ class GameFlow(IrePublicComponent):
 
         active_match = friend.active_match
         if not active_match:
-            msg = f"No Active Game Found. Streamer's status: {friend.rich_presence.status}"
+            msg = f"No Active Game Found \N{BULLET} Streamer's status: {friend.rich_presence.status}"
             raise errors.GameNotFoundError(msg)
 
         return active_match
@@ -909,7 +912,7 @@ class GameFlow(IrePublicComponent):
         """Show streamer's Win - Loss score ratio during the stream."""
         streamer = self.bot.streamers[ctx.broadcaster.id]
         if not streamer.online:
-            response = 'Streamer is offline. To get their offline score use "!wl offline".'
+            response = 'Streamer offline (to get their offline winloss use "!wl offline")'
         else:
             response = await self.score_response_helper(ctx.broadcaster.id, streamer.started_dt)
         await ctx.send(content=response)
@@ -963,7 +966,7 @@ class GameFlow(IrePublicComponent):
     async def notable_dev(self, ctx: IreContext) -> None:
         """#TODO."""
         await ctx.send(
-            '"!notable_dev" is a group command. Use it together with its subcommands, i.e. "!notable_dev add 123 Arteezy"'
+            '"!notable_dev" is a group command: use it together with its subcommands, i.e. "!notable_dev add 123 Arteezy"'
         )
 
     # Remember, group guards apply to children.
