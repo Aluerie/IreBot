@@ -27,6 +27,11 @@ class MetaCommands(IrePublicComponent):
         """A bit bio information about the bot."""
         await ctx.send(f"I'm a personal Irene's bot, made by Irene. {const.STV.AYAYA}")
 
+    @commands.command(name="commands", aliases=["help"])
+    async def command_list(self, ctx: IreContext) -> None:
+        """Get a list of bot commands."""
+        await ctx.send("aluerie.github.io/IreBot/")
+
     @commands.command()
     async def irene(self, ctx: IreContext) -> None:
         """Just a random command that is unlikely to be in other bots."""

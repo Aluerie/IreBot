@@ -130,11 +130,6 @@ class StableCommands(IrePersonalComponent):
         clip = await ctx.broadcaster.create_clip(token_for=const.UserID.Bot)
         await ctx.send(f"https://clips.twitch.tv/{clip.id}")
 
-    @commands.command(name="commands", aliases=["help"])
-    async def command_list(self, ctx: IreContext) -> None:
-        """Get a list of bot commands."""
-        await ctx.send("Not implemented yet.")
-
     @commands.command()
     async def controller(self, ctx: IreContext) -> None:
         """Get Irene's current controller model."""
