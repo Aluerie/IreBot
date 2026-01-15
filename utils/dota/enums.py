@@ -109,3 +109,10 @@ class ScoreCategory(IntEnum):
                 return ScoreCategory.Turbo if game_mode == GameMode.Turbo else ScoreCategory.Unranked
             case _:
                 return ScoreCategory.Other
+
+
+class LobbyParam0(StrEnum):
+    """Known Lobby Param 0."""
+
+    DemoMode = "#demo_hero_mode_name"
+    BotMatch = "#DOTA_lobby_type_name_bot_match"

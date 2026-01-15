@@ -164,6 +164,7 @@ ignore = [
     "S311",     # standard pseudo-random generators are not suitable for cryptographic purposes, so what;
     "TRY003",   # over-eager rule
     "TRY301",   # unrealistic rule
+    "ASYNC230",
     
     # 2. Personal disagreement
     "PLR0904",  # too many public methods

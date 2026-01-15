@@ -24,12 +24,10 @@ CREATE TABLE
 CREATE TABLE
     IF NOT EXISTS ttv_dota_accounts (
         friend_id BIGINT PRIMARY KEY, -- steam32id (friend id) format;
-        display_name TEXT NOT NULL,
         steam64_id BIGINT,
         estimated_mmr INT DEFAULT (0),
-        medal TEXT DEFAULT 'Unknown',
         twitch_id TEXT NOT NULL,
-        CONSTRAINT fk_twitch_id FOREIGN KEY (twitch_id) REFERENCES ttv_streamers (user_id) ON DELETE CASCADE,
+        CONSTRAINT fk_twitch_id FOREIGN KEY (twitch_id) REFERENCES ttv_streamers (user_id) ON DELETE CASCADE
     );
 
 CREATE TABLE
@@ -51,4 +49,10 @@ CREATE TABLE
         abandon BOOLEAN NOT NULL,
         CONSTRAINT fk_account FOREIGN KEY (friend_id) REFERENCES ttv_dota_accounts (friend_id) ON DELETE CASCADE,
         CONSTRAINT fk_match FOREIGN KEY (match_id) REFERENCES ttv_dota_completed_matches (match_id) ON DELETE CASCADE
+    );
+
+CREATE TABLE
+    IF NOT EXISTS ttv_dota_notable_players (
+        friend_id BIGINT PRIMARY KEY,
+        nickname TEXT
     );

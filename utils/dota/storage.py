@@ -2,12 +2,15 @@ from __future__ import annotations
 
 import abc
 import asyncio
+import json
 import logging
+import pathlib
 import random
 import time
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, TypedDict, override
 
+import aiohttp
 import discord
 
 from bot import ireloop
@@ -89,6 +92,10 @@ class GameDataStorage[VT, PseudoVT](abc.ABC):
                 self.__class__.__name__,
                 time.perf_counter() - start_time,
             )
+            # Make a back up for fun
+            await asyncio.sleep(60 * 60)
+            with pathlib.Path(f".temp/{self.__class__.__name__}.json").open("w", encoding="utf-8") as f:
+                json.dump(self.cached_data, f, ensure_ascii=False, indent=4, default=str)
 
     async def get_cached_data(self) -> dict[int, VT]:
         """Get the whole cached data."""
@@ -145,7 +152,7 @@ class Item:
 
     @override
     def __str__(self) -> str:
-        return self.display_name
+        return self.display_name or ""  # Sometimes, Stratz actually sends `None`` into display_name
 
     @override
     def __repr__(self) -> str:
@@ -157,8 +164,12 @@ class Items(GameDataStorage[Item, Item]):
 
     @override
     async def fill_data(self) -> dict[int, Item]:
-        items = await self.bot.dota.stratz.get_items()
-        return {item["id"]: Item(item["id"], item["displayName"]) for item in items["data"]["constants"]["items"]}
+        try:
+            items = await self.bot.dota.stratz.get_items()
+            return {item["id"]: Item(item["id"], item["displayName"]) for item in items["data"]["constants"]["items"]}
+        except aiohttp.ClientResponseError:
+            with pathlib.Path(f".temp/{self.__class__.__name__}.json").open(encoding="utf-8") as f:
+                return json.load(f)
 
     @override
     @staticmethod

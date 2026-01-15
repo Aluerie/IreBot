@@ -407,7 +407,12 @@ class IreBot(commands.AutoBot):
                     "is_vps.<locals>.predicate": (
                         f"Only production bot allows usage of this command {const.FFZ.peepoPolice}"
                     ),
-                    "is_owner.<locals>.predicate": (f"Only Irene is allowed to use this command {const.FFZ.peepoPolice}"),
+                    "is_owner.<locals>.predicate": (
+                        f"Only Irene Adler is allowed to use this command {const.FFZ.peepoPolice}"
+                    ),
+                    "is_broadcaster.<locals>.predicate": (
+                        f"Only broadcaster is allowed to use this command {const.FFZ.peepoPolice}"
+                    ),
                     "is_online.<locals>.predicate": (
                         f"This commands is only allowed when stream is online {const.FFZ.peepoPolice}"
                     ),
@@ -498,4 +503,4 @@ class IreBot(commands.AutoBot):
 
     def is_online(self, user_id: str) -> bool:
         """#TODO."""
-        return user_id in self.streamers_online
+        return s.online if (s := self.streamers.get(user_id, None)) else False

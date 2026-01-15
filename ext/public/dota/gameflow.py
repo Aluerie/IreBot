@@ -1,24 +1,24 @@
 from __future__ import annotations
 
-import abc
 import datetime
 import functools
 import itertools
 import logging
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, TypedDict, override
+from typing import TYPE_CHECKING, Annotated, Any, TypedDict, override
 
-from steam.ext.dota2 import GameMode, Hero, LobbyType, MatchOutcome
+import steam
+from steam.ext.dota2 import GameMode, Hero, LobbyType, MatchOutcome, MinimalMatch, User as Dota2User
 from twitchio.ext import commands
 
-from bot import IreBot, IrePublicComponent, ireloop
-from utils import errors, fuzzy
+from bot import IrePublicComponent, ireloop
+from utils import errors, fmt, fuzzy
 from utils.dota import constants as dota_constants, enums as dota_enums, utils as dota_utils
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Coroutine
 
-    from steam.ext.dota2 import User as Dota2SteamUser
+    from steam.ext.dota2 import MatchHistoryMatch, User as Dota2SteamUser
 
     from bot import IreBot, IreContext
 
@@ -32,7 +32,7 @@ if TYPE_CHECKING:
 
     from utils.dota import SteamUserUpdate
 
-    type ActiveMatch = PlayMatch | WatchMatch
+    type ActiveMatch = PlayMatch | WatchMatch | UnsupportedMatch
 
     class ScoreQueryRow(TypedDict):
         friend_id: int
@@ -86,7 +86,7 @@ class Friend:
         self.bot: IreBot = bot
         self.steam_user: Dota2SteamUser = steam_user
         self.rich_presence: RichPresence = RichPresence(steam_user.rich_presence)
-        self.active_match: PlayMatch | WatchMatch | None = None
+        self.active_match: PlayMatch | WatchMatch | UnsupportedMatch | None = None
 
     @override
     def __repr__(self) -> str:
@@ -105,14 +105,14 @@ class Player:
     NO HERO DATA.
     """
 
-    account_id: int
+    friend_id: int
     player_slot: int
     lifetime_games: int
     medal: str
 
     @override
     def __repr__(self) -> str:
-        return f"<Player id={self.account_id} slot={self.color}>"
+        return f"<Player id={self.friend_id} slot={self.color}>"
 
     @classmethod
     async def create(cls, bot: IreBot, account_id: int, player_slot: int) -> Player:
@@ -120,7 +120,7 @@ class Player:
         profile_card = await partial_user.dota2_profile_card()
 
         return Player(
-            account_id=account_id,
+            friend_id=account_id,
             player_slot=player_slot,
             lifetime_games=profile_card.lifetime_games,
             medal=dota_utils.rank_medal_display_name(profile_card),
@@ -128,7 +128,7 @@ class Player:
 
     @property
     def stratz(self) -> str:
-        return f"stratz.com/players/{self.account_id}"
+        return f"stratz.com/players/{self.friend_id}"
 
     def profile(self) -> str:
         return f"{self.medal} \N{BULLET} {self.lifetime_games} total games \N{BULLET} {self.stratz}"
@@ -141,6 +141,9 @@ class Player:
 def format_match_response(func: Callable[..., Coroutine[Any, Any, str]]) -> Callable[..., Coroutine[Any, Any, str]]:
     @functools.wraps(func)
     async def wrapper(self: Match, *args: Any, **kwargs: Any) -> str:
+        if self.activity_tag.endswith("supported"):  # Remember of this silly crutch
+            return self.activity_tag
+
         prefix = f"[{self.activity_tag}] " if self.activity_tag else ""
         response = await func(self, *args, **kwargs)
         return prefix + response
@@ -148,7 +151,7 @@ def format_match_response(func: Callable[..., Coroutine[Any, Any, str]]) -> Call
     return wrapper
 
 
-class Match(abc.ABC):
+class Match:
     def __init__(
         self,
         bot: IreBot,
@@ -283,6 +286,29 @@ class Match(abc.ABC):
     async def match_id_command(self) -> str:
         return str(self.match_id)
 
+    @format_match_response
+    async def notable_players(self) -> str:
+        if not self.players:
+            return "No player data yet."
+
+        query = """
+            SELECT friend_id, nickname
+            FROM ttv_dota_notable_players
+            WHERE friend_id = ANY($1);
+        """
+        rows = await self.bot.pool.fetch(query, [p.friend_id for p in self.players])
+        if not rows:
+            return "No notable players found"
+
+        nickname_mapping = {row["friend_id"]: row["nickname"] for row in rows}
+
+        response_parts = [
+            f"{hero if hero else player.color} {nick}"
+            for player, hero in zip(self.players, self.heroes, strict=False)
+            if (nick := nickname_mapping.get(player.friend_id))
+        ]
+        return " \N{BULLET} ".join(response_parts)
+
 
 class PlayMatch(Match):
     def __init__(self, bot: IreBot, watchable_game_id: str) -> None:
@@ -327,6 +353,22 @@ class PlayMatch(Match):
         mmr_notice = f"[{self.average_mmr} avg] " if self.average_mmr else ""
         return mmr_notice + await super().game_medals()
 
+    async def played_with(self, friend_id: int, last_game: MinimalMatch) -> str:
+        if not self.players:
+            return "No player data yet."
+
+        last_game_hero_player_index: dict[int, Hero] = {p.id: p.hero for p in last_game.players}
+        last_game_hero_player_index.pop(friend_id)  # remove the streamer themselves
+
+        response_parts = [
+            f"{hero if hero else player.color} as {last_game_played_as}"
+            for player, hero in zip(self.players, self.heroes, strict=False)
+            if (last_game_played_as := last_game_hero_player_index.get(player.friend_id))
+        ]
+        if response_parts:
+            return " \N{BULLET} ".join(response_parts)
+        return "No players from the last game present in the match"
+
 
 class WatchMatch(Match):
     def __init__(self, bot: IreBot, watching_server: str) -> None:
@@ -361,6 +403,35 @@ class WatchMatch(Match):
             self.update_data.stop()
 
 
+class UnsupportedMatch(Match):
+    def __init__(self, bot: IreBot, tag: str = "") -> None:
+        super().__init__(bot, tag)
+
+
+class UserNotFound(commands.BadArgument):
+    """For when a matching user cannot be found."""
+
+    def __init__(self, argument: str) -> None:
+        self.argument = argument
+        super().__init__(f"User {argument!r} not found.", value=argument)
+
+
+class SteamUserConverter(commands.Converter[Dota2User]):
+    """Simple Steam User converter."""
+
+    @override
+    async def convert(self, ctx: IreContext, argument: str) -> Dota2User:
+        try:
+            return await ctx.bot.dota.fetch_user(steam.utils.parse_id64(argument))
+        except steam.InvalidID:
+            id64 = await steam.utils.id64_from_url(argument)
+            if id64 is None:
+                raise UserNotFound(argument) from None
+            return await ctx.bot.dota.fetch_user(id64)
+        except TimeoutError:
+            raise UserNotFound(argument) from None
+
+
 class GameFlow(IrePublicComponent):
     """#TODO."""
 
@@ -368,15 +439,19 @@ class GameFlow(IrePublicComponent):
         super().__init__(bot)
         self.friends: dict[int, Friend] = {}
 
+        self.pending_matches: dict[int, set[int]] = {}
         self.play_matches_index: dict[str, PlayMatch] = {}
         self.watch_matches_index: dict[str, WatchMatch] = {}
 
     @override
     async def component_load(self) -> None:
         # Wait for all ready, commenting the following lines may lead to a disaster.
-        # await self.bot.wait_until_ready()
-        # await self.bot.dota.wait_until_ready()
-        # await self.bot.dota.wait_until_gc_ready()
+        if not self.bot.test:
+            # whatever, let's not bother for test runs;
+            # todo: remove this silly "if not test"
+            await self.bot.wait_until_ready()
+            await self.bot.dota.wait_until_ready()
+            await self.bot.dota.wait_until_gc_ready()
 
         # Start the component tasks/listeners
         self.starting_fill_friends.start()
@@ -384,6 +459,7 @@ class GameFlow(IrePublicComponent):
 
         await self.bot.wait_for("self_friends_ready")
         self.fill_completed_matches_from_gc_match_history.start()
+        self.remove_way_too_old_matches.start()
 
     @override
     async def component_teardown(self) -> None:
@@ -412,6 +488,7 @@ class GameFlow(IrePublicComponent):
         match rp.status:
             case dota_enums.Status.Idle | dota_enums.Status.MainMenu | dota_enums.Status.Finding:
                 # Friend is in a Main Menu
+                self.add_active_match_to_pending(friend)
                 friend.active_match = None
 
             case dota_enums.Status.HeroSelection | dota_enums.Status.Strategy | dota_enums.Status.Playing:
@@ -420,8 +497,26 @@ class GameFlow(IrePublicComponent):
 
                 if watchable_game_id is None:
                     # something is off
+                    lobby_param0 = rp.raw.get("param0")
+
+                    if lobby_param0 == dota_enums.LobbyParam0.DemoMode:
+                        friend.active_match = UnsupportedMatch(self.bot, tag="Demo mode is not supported")
+                        return
+                    if lobby_param0 == dota_enums.LobbyParam0.BotMatch:
+                        friend.active_match = UnsupportedMatch(self.bot, tag="Private Lobbies are not  supported")
+                        return
                     msg = "#todo"
                     raise errors.PlaceholderRaiseError(msg)
+                if watchable_game_id == "0":
+                    # something is off again
+                    party_state = rp.raw.get("party")
+                    if party_state and "party_state: UI" in party_state:
+                        # hacky but this is what happens when we quit the match into main menu sometimes
+                        # let's pass to get a confirmation from other statuses (maybe wrong)
+                        pass
+                    else:
+                        msg = f'RP is "Playing" but {watchable_game_id=} and {party_state=}'
+                        raise errors.PlaceholderRaiseError(msg)
 
                 if watchable_game_id not in self.play_matches_index:
                     self.play_matches_index[watchable_game_id] = PlayMatch(self.bot, watchable_game_id)
@@ -440,12 +535,15 @@ class GameFlow(IrePublicComponent):
                 friend.active_match = self.watch_matches_index[watching_server]
             case _:
                 log.warning(
-                    "Uncategorized Rich Presence Status \n \N{WARNING SIGN} %s %s %s\nrich_presence.raw=%s",
+                    "Uncategorized Rich Presence Status \nfriend=%s rich_presence=%s status=%s\nrich_presence.raw=%s",
                     repr(friend),
                     rp.status,
                     rp.status.value,
                     rp.raw,
                 )
+                # Let's assume that other statuses = not Dota
+                self.add_active_match_to_pending(friend)
+                friend.active_match = None
 
     # @commands.Component.listener("steam_user_update")
     async def steam_user_update(self, update: SteamUserUpdate) -> None:
@@ -460,6 +558,18 @@ class GameFlow(IrePublicComponent):
         friend.rich_presence = rp_after
         log.debug("Recognized rich presence update for %s: %s", repr(friend), repr(friend.rich_presence))
         await self.analyze_rich_presence(friend)
+
+    def add_active_match_to_pending(self, friend: Friend) -> None:
+        """#TODO."""
+        if (match := friend.active_match) and isinstance(match, PlayMatch) and match.match_id:
+            self.pending_matches.setdefault(friend.steam_user.id, set()).add(match.match_id)
+
+        if self.pending_matches and not self.process_pending_matches.is_running():
+            self.process_pending_matches.start()
+
+    #################################
+    # ACTIVE MATCH RELATED COMMANDS #
+    #################################
 
     async def find_friend_account(self, broadcaster_id: str) -> Friend:
         """#TODO."""
@@ -477,10 +587,6 @@ class GameFlow(IrePublicComponent):
 
         msg = "I'm sorry, it seems the streamer isn't playing Dota 2 at the moment."
         raise errors.PlaceholderRaiseError(msg)
-
-    #################################
-    # ACTIVE MATCH RELATED COMMANDS #
-    #################################
 
     async def find_active_match(self, broadcaster_id: str) -> ActiveMatch:
         """#TODO."""
@@ -524,7 +630,7 @@ class GameFlow(IrePublicComponent):
         `argument` can be a hero name, hero alias, player slot or colour.
         """
         active_match = await self.find_active_match(ctx.broadcaster.id)
-        response = await active_match.stats()
+        response = await active_match.stats(argument)
         await ctx.send(response)
 
     @stats.error
@@ -545,9 +651,142 @@ class GameFlow(IrePublicComponent):
         response = await active_match.match_id_command()
         await ctx.send(response)
 
+    @commands.command(aliases=["np"])
+    async def notable_players(self, ctx: IreContext) -> None:
+        """List notable players for the current match."""
+        active_match = await self.find_active_match(ctx.broadcaster.id)
+        response = await active_match.notable_players()
+        await ctx.send(response)
+
     #################################
-    #      COMPLEMENTED MATCHES     #
+    #           LAST GAME           #
     #################################
+
+    async def get_last_game(self, broadcaster_id: str) -> tuple[int, int, MinimalMatch]:
+        """#TODO."""
+        query = """
+            SELECT p.match_id, p.friend_id, p.hero_id
+            FROM ttv_dota_completed_matches m
+            JOIN ttv_dota_completed_match_players p ON m.match_id = p.match_id
+            JOIN ttv_dota_accounts a ON a.friend_id = p.friend_id
+            WHERE a.twitch_id = $1
+            ORDER BY m.start_time DESC
+            LIMIT 1;
+        """
+        row = await self.bot.pool.fetchrow(query, broadcaster_id)
+        if not row:
+            msg = "No last game found: it seems streamer hasn't played Dota in a while"
+            raise errors.PlaceholderRaiseError(msg)
+        last_game = await self.bot.dota.create_partial_match(row["match_id"]).minimal()
+        return row["friend_id"], row["hero_id"], last_game
+
+    @commands.command(aliases=["last_game", "lg", "lm"])
+    async def played_with(self, ctx: IreContext) -> None:
+        """List recurring players from the last game in the current match."""
+        active_match = await self.find_active_match(ctx.broadcaster.id)
+
+        if isinstance(active_match, PlayMatch):
+            friend_id, _, last_game = await self.get_last_game(ctx.broadcaster.id)
+            response = await active_match.played_with(friend_id, last_game)
+        else:
+            response = 'Only matches streamer is playing in support "!last_game" command usage'
+        await ctx.send(response)
+
+    @commands.command(aliases=["pm"])
+    async def previous_match(self, ctx: IreContext) -> None:
+        """Show summary stats for the previous match."""
+        _, hero_id, match = await self.get_last_game(ctx.broadcaster.id)
+
+        slot, player = next(iter((s, p) for s, p in enumerate(match.players) if p.hero.id == hero_id), (None, None))
+        if not slot or not player:
+            msg = "#Todo"
+            raise errors.PlaceholderRaiseError(msg)
+
+        is_radiant = slot < 5
+        score_category = dota_enums.ScoreCategory.create(match.lobby_type, match.game_mode)
+        if match.outcome >= MatchOutcome.NotScoredPoorNetworkConditions:
+            outcome = "Not Scored"
+        elif match.outcome == MatchOutcome.RadiantVictory:
+            outcome = "Win" if is_radiant else "Loss"
+        elif match.outcome == MatchOutcome.DireVictory:
+            outcome = "Loss" if is_radiant else "Win"
+        else:
+            outcome = "Unknown outcome"
+        delta = datetime.datetime.now(datetime.UTC) - (match.start_time + match.duration)
+
+        response = (
+            f"Last Game - {score_category.name}: {outcome} as {player.hero} {player.kills}/{player.deaths}/{player.assists} "
+            f"\N{BULLET} ended {fmt.timedelta_to_words(delta, fmt=fmt.TimeDeltaFormat.Letter)} ago "
+            f"\N{BULLET} stratz.com/matches/{match.id}"
+        )
+        await ctx.send(response)
+
+    #################################
+    #       COMPLETED MATCHES       #
+    #################################
+
+    async def add_completed_match_to_database(self, match: MatchHistoryMatch, friend_id: int) -> None:
+        """#TODO."""
+        # match history entities do not give proper outcome (Radiant/Dire)
+        minimal = await self.bot.dota.create_partial_match(match.id).minimal()
+
+        query = """
+            INSERT INTO ttv_dota_completed_matches
+            (match_id, start_time, lobby_type, game_mode, outcome)
+            VALUES ($1, $2, $3, $4, $5)
+            ON CONFLICT (match_id) DO NOTHING
+            RETURNING match_id;
+        """
+        match_id: int | None = await self.bot.pool.fetchval(
+            query,
+            match.id,
+            match.start_time,
+            match.lobby_type,
+            match.game_mode,
+            minimal.outcome,
+        )
+        if match_id is not None:
+            # if it's None - then it already was in the database
+            # otherwise it's a new match and we can explore mmr_delta
+            # MMR Tracking
+            if match.lobby_type != LobbyType.Ranked:
+                mmr_delta = 0
+            elif match.abandon:
+                mmr_delta = -25
+            elif minimal.outcome >= MatchOutcome.NotScoredPoorNetworkConditions:
+                mmr_delta = 0
+            else:
+                mmr_delta = 25 if match.win else -25
+
+            if mmr_delta:
+                query = """
+                    UPDATE ttv_dota_accounts
+                    SET estimated_mmr = estimated_mmr + $1
+                    WHERE friend_id = $2;
+                """
+                await self.bot.pool.execute(query, mmr_delta, friend_id)
+
+        player_slot = next((slot for slot, player in enumerate(minimal.players) if player.hero == match.hero), None)
+        if player_slot is None:
+            msg = "#TODO"
+            raise errors.PlaceholderRaiseError(msg)
+        is_radiant = player_slot < 5
+
+        query = """
+            INSERT INTO ttv_dota_completed_match_players
+            (friend_id, match_id, hero_id, is_radiant, abandon)
+            VALUES ($1, $2, $3, $4, $5)
+            ON CONFLICT (friend_id, match_id) DO
+                UPDATE SET abandon = $5;
+        """
+        await self.bot.pool.execute(
+            query,
+            friend_id,
+            match.id,
+            match.hero.id,
+            is_radiant,
+            match.abandon,
+        )
 
     @ireloop(hours=3)
     async def fill_completed_matches_from_gc_match_history(self) -> None:
@@ -556,48 +795,47 @@ class GameFlow(IrePublicComponent):
         Useful to keep W-L as precise as possible.
         """
         for friend in self.friends.values():
-            match_history = await friend.steam_user.match_history()
+            for match in await friend.steam_user.match_history():
+                await self.add_completed_match_to_database(match, friend.steam_user.id)
 
+    @ireloop(hours=6)
+    async def remove_way_too_old_matches(self) -> None:
+        """Clean the database from way too old matches.
+
+        Currently, 48 hours is considered as "too old".
+        """
+        if self.remove_way_too_old_matches.current_loop == 0:
+            # No need to bother on bot reloads.
+            return
+
+        log.debug("Removing way too old matches from the database.")
+        query = """
+            DELETE FROM ttv_dota_completed_matches
+            WHERE start_time < $1;
+        """
+        await self.bot.pool.execute(query, datetime.datetime.now(datetime.UTC) - datetime.timedelta(hours=48))
+
+    @ireloop(seconds=20)
+    async def process_pending_matches(self) -> None:
+        """#TODO."""
+        log.debug("Processing pending matches.")
+        for friend_id, pending_matches in self.pending_matches.items():
+            friend = self.bot.dota.get_user(friend_id)
+            if friend:
+                match_history = await friend.match_history()
+            else:
+                match_history = await self.bot.dota.create_partial_user(friend_id).match_history()
             for match in match_history:
-                # match history entities do not give proper outcome (Radiant/Dire)
-                minimal = await self.bot.dota.create_partial_match(match.id).minimal()
+                if match.id in pending_matches:
+                    await self.add_completed_match_to_database(match, friend_id)
+                    pending_matches.remove(match.id)
+            if pending_matches:
+                log.debug("Still pending matches for @%s: %s", friend.name if friend else friend_id, pending_matches)
+            else:
+                self.pending_matches.pop(friend_id)
 
-                query = """
-                    INSERT INTO ttv_dota_completed_matches
-                    (match_id, start_time, lobby_type, game_mode, outcome)
-                    VALUES ($1, $2, $3, $4, $5)
-                    ON CONFLICT (match_id) DO NOTHING;
-                """
-                await self.bot.pool.execute(
-                    query,
-                    match.id,
-                    match.start_time,
-                    match.lobby_type,
-                    match.game_mode,
-                    minimal.outcome,
-                )
-
-                player_slot = next((slot for slot, player in enumerate(minimal.players) if player.hero == match.hero), None)
-                if player_slot is None:
-                    msg = "#TODO"
-                    raise errors.PlaceholderRaiseError(msg)
-                is_radiant = player_slot < 5
-
-                query = """
-                    INSERT INTO ttv_dota_completed_match_players
-                    (friend_id, match_id, hero_id, is_radiant, abandon)
-                    VALUES ($1, $2, $3, $4, $5)
-                    ON CONFLICT (friend_id, match_id) DO
-                        UPDATE SET abandon = $5;
-                """
-                await self.bot.pool.execute(
-                    query,
-                    friend.steam_user.id,
-                    match.id,
-                    match.hero.id,
-                    is_radiant,
-                    match.abandon,
-                )
+        if not self.pending_matches:
+            self.process_pending_matches.stop()
 
     #################################
     #    FRIEND RELATED COMMANDS    #
@@ -619,8 +857,8 @@ class GameFlow(IrePublicComponent):
         else:
             rows: list[ScoreQueryRow] = await self.bot.pool.fetch(query, broadcaster_id)
 
-        # Example: {my_friend_id: {ScoreCategory.Ranked: [0, 4], ScoreCategory.Unranked: [0, 0]}}
-        # So !wl should return Ranked 0 W - 4 L.
+        # Example: {my_friend_id: {ScoreCategory.Ranked: [0, 4, 1], ScoreCategory.Unranked: [0, 0, 0]}}
+        # So !wl should return Ranked 0 W - 4 L, 1 Abandon.
         # Notice the order!
         index: dict[int, dict[dota_enums.ScoreCategory, list[int]]] = {}
 
@@ -632,6 +870,8 @@ class GameFlow(IrePublicComponent):
             cutoff_dt = row["start_time"]
 
             score_category = dota_enums.ScoreCategory.create(row["lobby_type"], row["game_mode"])
+            scores = index.setdefault(row["friend_id"], {}).setdefault(score_category, [0, 0, 0])
+
             if row["outcome"] in (MatchOutcome.RadiantVictory, MatchOutcome.DireVictory):
                 # Normal Win Loss scenario
                 win = (
@@ -639,11 +879,18 @@ class GameFlow(IrePublicComponent):
                     if row["is_radiant"]
                     else row["outcome"] == MatchOutcome.DireVictory
                 )
-                index.setdefault(row["friend_id"], {}).setdefault(score_category, [0, 0])[int(win)] += 1
+                scores[int(win)] += 1
+            elif row["abandon"]:
+                scores[2] += 1
+
+        def format_results(results: list[int]) -> str:
+            abandons = f", Abandons: {a}" if (a := results[2]) else ""
+            return f"{results[1]} W - {results[0]} L" + abandons
 
         response_parts = {
             friend_id: " \N{BULLET} ".join(
-                f"{category.name} {results[1]} W - {results[0]} L" for category, results in scores.items()
+                [f"{category.name} {format_results(results)}" for category, results in scores.items()]
+                + ([f"Pending: {len(pm)} Match(-es)"] if (pm := self.pending_matches.get(friend_id)) else [])
             )
             for friend_id, scores in index.items()
         }
@@ -659,11 +906,7 @@ class GameFlow(IrePublicComponent):
 
     @commands.group(aliases=["wl", "winloss"], invoke_fallback=True)
     async def score(self, ctx: IreContext) -> None:
-        """Show streamer's Win - Loss score ratio for today's gaming session.
-
-        This by design should include offline games as well.
-        Gaming sessions are considered separated if they are for at least 6 hours apart.
-        """
+        """Show streamer's Win - Loss score ratio during the stream."""
         streamer = self.bot.streamers[ctx.broadcaster.id]
         if not streamer.online:
             response = 'Streamer is offline. To get their offline score use "!wl offline".'
@@ -673,9 +916,71 @@ class GameFlow(IrePublicComponent):
 
     @score.command()
     async def offline(self, ctx: IreContext) -> None:
-        """#TODO."""
+        """Show streamer's Win - Loss score ratio during their last gaming session.
+
+        Unlike !wl without any argument - this command counts games that were played off stream.
+        Note that for both commands a "gaming session" is considered to be broken if there was a 6 hours break between
+        their Dota 2 matches.
+        """
         response = await self.score_response_helper(ctx.broadcaster.id)
         await ctx.send(content=response)
+
+    @commands.group(invoke_fallback=True)
+    async def mmr(self, ctx: IreContext) -> None:
+        """#TODO."""
+        friend = await self.find_friend_account(ctx.broadcaster.id)
+        query = """
+            SELECT estimated_mmr
+            FROM ttv_dota_accounts
+            WHERE friend_id = $1;
+        """
+        mmr: int = await self.bot.pool.fetchval(query, friend.steam_user.id)
+
+        profile_card = await friend.steam_user.dota2_profile_card()
+        response = f"Medal: {dota_utils.rank_medal_display_name(profile_card)} \N{BULLET} Database tracked MMR: {mmr}"
+        await ctx.send(response)
+
+    @commands.is_broadcaster()
+    @mmr.command(name="set")
+    async def mmr_set(self, ctx: IreContext, new_mmr: int) -> None:
+        """#TODO."""
+        friend = await self.find_friend_account(ctx.broadcaster.id)
+        query = """
+            UPDATE ttv_dota_accounts
+            SET estimated_mmr = $1
+            WHERE friend_id = $2;
+        """
+        await self.bot.pool.fetchval(query, new_mmr, friend.steam_user.id)
+        response = f'Successfully set MMR to {new_mmr} for the account "{friend.steam_user.name}"'
+        await ctx.send(response)
+
+    #################################
+    #       DEV ONLY COMMANDS       #
+    #################################
+
+    @commands.is_owner()
+    @commands.group(name="notable-dev", invoke_fallback=True)
+    async def notable_dev(self, ctx: IreContext) -> None:
+        """#TODO."""
+        await ctx.send(
+            '"!notable_dev" is a group command. Use it together with its subcommands, i.e. "!notable_dev add 123 Arteezy"'
+        )
+
+    # Remember, group guards apply to children.
+    @notable_dev.command(name="add", aliases=["edit"])
+    async def notable_dev_add(
+        self, ctx: IreContext, steam_user: Annotated[Dota2User, SteamUserConverter], *, name: str
+    ) -> None:
+        """Add a notable player into the database."""
+        query = """
+            INSERT INTO ttv_dota_notable_players
+            (friend_id, nickname)
+            VALUES ($1, $2)
+            ON CONFLICT (friend_id) DO
+                UPDATE SET nickname = $2;
+        """
+        await self.bot.pool.execute(query, steam_user.id, name)
+        await ctx.send(f"Added a new notable player (friend_id={steam_user.id}, name={name})")
 
 
 async def setup(bot: IreBot) -> None:

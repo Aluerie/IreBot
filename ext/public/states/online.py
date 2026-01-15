@@ -86,7 +86,7 @@ class Online(IrePublicComponent):
         rows: list[StreamersUserQueryRow] = await self.bot.pool.fetch(query)
         database_streamers = {row["user_id"]: row["display_name"] for row in rows}
 
-        # TODO: I think it bricks if user_ids is more than 100 ?
+        # TODO: I think it bricks if len(user_ids) is more than 100 ?
         twitch_users = await self.bot.fetch_users(ids=list(database_streamers.keys()))
         for user in twitch_users:
             if user.display_name.lower() != database_streamers[user.id]:
