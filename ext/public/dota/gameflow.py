@@ -889,7 +889,7 @@ class GameFlow(IrePublicComponent):
 
         # Example: {my_friend_id: {ScoreCategory.Ranked: [0, 4, 1], ScoreCategory.Unranked: [0, 0, 0]}}
         # So !wl should return Ranked 0 W - 4 L, 1 Abandon.
-        # Notice the order!
+        # Notice the order!!
         index: dict[int, dict[dota_enums.ScoreCategory, list[int]]] = {}
 
         cutoff_dt = datetime.datetime.now(datetime.UTC)
@@ -926,8 +926,6 @@ class GameFlow(IrePublicComponent):
         }
         if len(index) == 0:
             return "0 W - 0 L"
-        if len(index) == 1:
-            return next(iter(response_parts.values()))
         return " | ".join(
             # Let's make extra query to know name accounts
             f"{u.name if (u := self.bot.dota.get_user(friend_id)) else friend_id}: {part}"
