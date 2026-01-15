@@ -22,7 +22,7 @@ DISABLED_EXTENSIONS: tuple[str, ...] = (
     # extensions that should not be loaded
     "ext.beta",
     # currently disabled
-    "ext.public.dota",
+    # "ext.public.dota",
 )
 
 
