@@ -167,9 +167,13 @@ class Items(GameDataStorage[Item, Item]):
         try:
             items = await self.bot.dota.stratz.get_items()
             return {item["id"]: Item(item["id"], item["displayName"]) for item in items["data"]["constants"]["items"]}
-        except aiohttp.ClientResponseError:
-            with pathlib.Path(f".temp/{self.__class__.__name__}.json").open(encoding="utf-8") as f:
-                return json.load(f)
+        except aiohttp.ClientResponseError as err:
+            log.exception("%s: `%s`.", err.__class__.__name__, exc_info=err)
+            try:
+                with pathlib.Path(f".temp/{self.__class__.__name__}.json").open(encoding="utf-8") as f:
+                    return json.load(f)
+            except FileNotFoundError:
+                raise err from None
 
     @override
     @staticmethod
