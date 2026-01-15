@@ -821,7 +821,7 @@ class GameFlow(IrePublicComponent):
 
     @ireloop(seconds=20)
     async def process_pending_matches(self) -> None:
-        """#TODO."""
+        """Process pending matches."""
         log.debug("Processing pending matches.")
         for friend_id, pending_matches in self.pending_matches.items():
             friend = self.bot.dota.get_user(friend_id)
