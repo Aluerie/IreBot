@@ -17,7 +17,7 @@
 | MMR | !mmr | Show streamer's mmr tracked in the bot database (according to their match history). It is not accurate. | <img src="./images/mmr.png" alt="mmr" width="1100"/> |
 | Set MMR | !mmr set | (Streamer's only command) Allows for streamers to manually update mmr in the bot's database. | --- |
 | Profile | !dotabuff !stratz !opendota | Show link to streamer's stats profile page | <img src="./images/profile.png" alt="profile" width="1100"/> |
-| Last Seen | !lastseen | Show which account the bot has spotted you playing Dota 2 last on. The bot considers this account as "active" for the purposes of the commands above | --- |
+| Last Seen | !lastseen | Show which account the bot has spotted you playing Dota 2 last on. The bot considers this account as "active" for the purposes of the commands above | <img src="./images/lastseen.png" alt="lastseen" width="1100"/> |
 
 ## 2. Meta
 

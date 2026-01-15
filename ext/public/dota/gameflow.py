@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import datetime
 import functools
 import itertools
@@ -148,7 +149,7 @@ class Player:
 def format_match_response(func: Callable[..., Coroutine[Any, Any, str]]) -> Callable[..., Coroutine[Any, Any, str]]:
     @functools.wraps(func)
     async def wrapper(self: Match, *args: Any, **kwargs: Any) -> str:
-        if self.activity_tag.endswith("supported"):  # Remember of this silly crutch
+        if isinstance(self, UnsupportedMatch):
             return self.activity_tag
 
         prefix = f"[{self.activity_tag}] " if self.activity_tag else ""
@@ -177,11 +178,13 @@ class Match:
         self.players: list[Player] = []
         self.heroes: list[Hero] = []
 
-    @property
+        # ready events
+        self.players_data_ready: asyncio.Event = asyncio.Event()
+        self.heroes_data_ready: asyncio.Event = asyncio.Event()
+
     def _is_players_data_ready(self) -> bool:
         return bool(self.game_mode) and len(self.players) == 10
 
-    @property
     def _is_heroes_data_ready(self) -> bool:
         return bool(self.heroes) and all(bool(hero) for hero in self.heroes)
 
@@ -328,7 +331,7 @@ class PlayMatch(Match):
 
         self.update_data.start()
 
-    @ireloop(seconds=10, count=30)
+    @ireloop(seconds=10.1, count=30)
     async def update_data(self) -> None:
         log.debug('Updating %s data for watchable_game_id "%s"', self.__class__.__name__, self.watchable_game_id)
         match = next(iter(await self.bot.dota.live_matches(lobby_ids=[self.lobby_id])), None)
@@ -336,7 +339,7 @@ class PlayMatch(Match):
             msg = f'FindTopSourceTVGames didn\'t find watchable_game_id "{self.watchable_game_id}".'
             raise errors.PlaceholderRaiseError(msg)
 
-        if not self._is_heroes_data_ready:
+        if not self.players_data_ready.is_set():
             # match data
             self.server_steam_id = match.server_steam_id
             self.match_id = match.id
@@ -349,11 +352,17 @@ class PlayMatch(Match):
                 await Player.create(self.bot, gc_player.id, player_slot)
                 for player_slot, gc_player in enumerate(match.players)
             ]
+            if self._is_players_data_ready():
+                self.players_data_ready.set()
+                log.debug('%s players data ready for: "%s"', self.__class__.__name__, self.watchable_game_id)
 
-        if not self._is_heroes_data_ready:
+        if not self.heroes_data_ready.is_set():
             self.heroes = [gc_player.hero for gc_player in match.players]
-        else:
-            log.debug('%s data ready for watchable_game_id: "%s"', self.__class__.__name__, self.watchable_game_id)
+            if self._is_heroes_data_ready():
+                self.heroes_data_ready.set()
+                log.debug('%s heroes data ready for: "%s"', self.__class__.__name__, self.watchable_game_id)
+
+        if self.players_data_ready.is_set() and self.heroes_data_ready.is_set():
             self.update_data.stop()
 
     @override
@@ -386,13 +395,13 @@ class WatchMatch(Match):
 
         self.update_data.start()
 
-    @ireloop(seconds=10, count=30)
+    @ireloop(seconds=10.1, count=30)
     async def update_data(self) -> None:
         log.debug('Updating %s data for watching_server "%s"', self.__class__.__name__, self.watching_server)
         match = await self.bot.dota.steam_web_api.get_real_time_stats(self.server_steam_id)
         api_players = list(itertools.chain(match["teams"][0]["players"], match["teams"][1]["players"]))
 
-        if not self._is_heroes_data_ready:
+        if not self.players_data_ready.is_set():
             # match data
             self.match_id = int(match["match"]["match_id"])
             self.lobby_type = LobbyType.try_value(match["match"]["lobby_type"])
@@ -403,11 +412,17 @@ class WatchMatch(Match):
                 await Player.create(self.bot, api_player["accountid"], player_slot)
                 for player_slot, api_player in enumerate(api_players)
             ]
+            if self._is_players_data_ready():
+                self.players_data_ready.set()
+                log.debug('%s players data ready for: "%s"', self.__class__.__name__, self.watching_server)
 
-        if not self._is_heroes_data_ready:
+        if not self.heroes_data_ready.is_set():
             self.heroes = [Hero.try_value(api_player["heroid"]) for api_player in api_players]
-        else:
-            log.debug('Match data ready for watching_server: "%s"', self.watching_server)
+            if self._is_heroes_data_ready():
+                self.heroes_data_ready.set()
+                log.debug('%s heroes data ready for: "%s"', self.__class__.__name__, self.watching_server)
+
+        if self.players_data_ready.is_set() and self.heroes_data_ready.is_set():
             self.update_data.stop()
 
 
@@ -1002,7 +1017,7 @@ class GameFlow(IrePublicComponent):
         delta = datetime.datetime.now(datetime.UTC) - last_seen
         response = (
             f"{friend.steam_user.name} id={friend.steam_user.id} status={friend.rich_presence.status} - "
-            f"last seen {fmt.timedelta_to_words(delta, fmt=fmt.TimeDeltaFormat.Letter)}"
+            f"last seen green online in Dota 2 {fmt.timedelta_to_words(delta, fmt=fmt.TimeDeltaFormat.Letter)} ago"
         )
         await ctx.send(response)
 
