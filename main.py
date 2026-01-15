@@ -75,28 +75,28 @@ async def start_the_bot(*, scopes_only: bool, owner_id: str, force_subscribe: bo
     "--scopes-only",
     "-s",
     is_flag=True,
-    default=False,  # real default: False ✅
+    default=False,  # usual default: False ✅
     help="Show oath urls with scopes for broadcaster and bot accounts to authorize with (bot features won't be activated)",
 )
 @click.option(
     "--owner",
     "-o",
     type=click.Choice(["irene", "aluerie"]),
-    default="irene",  # real default: "irene" ✅
+    default="irene",  # usual default: "irene" ✅
     help="Which account to assume as the bot owner's account.",
 )
 @click.option(
     "--force-subscribe",
     "-f",
     is_flag=True,
-    default=False,  # real default: False ✅
+    default=False,  # usual default: False ✅
     help="Which value to pass into `force_subscribe` bot's kwarg",
 )
 @click.option(
     "--local",
     "-l",
     is_flag=True,
-    default=True,  # real default: True ✅
+    default=True,  # usual default: True ✅
     help="Whether to use adapter with localhost (default) or remote host (currently ngrok-free for testing purposes).",
 )
 def main(

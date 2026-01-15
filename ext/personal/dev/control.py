@@ -78,8 +78,13 @@ class Control(BaseDevComponent):
 
     @commands.command(name="modules", aliases=["extensions", "components"])  # module != component but whatever
     async def list_modules(self, ctx: IreContext) -> None:
-        """List modules that are currently loaded by the bot."""
-        response = str(ctx.bot.modules)
+        """List modules that are currently loaded by the bot.
+
+        Examples
+        --------
+        * "ext.personal.dev ext.public.states"
+        """
+        response = " ".join(module.__name__ for module in ctx.bot.modules.values())
         await ctx.send(response)
 
 
