@@ -215,7 +215,10 @@ class Match:
 
         response_parts = [
             f"{hero if hero else player.color} {player.lifetime_games}"
-            for player, hero in sorted(zip(self.players, self.heroes, strict=True), key=lambda x: attrgetter("id")(x[1]))
+            for player, hero in sorted(
+                zip(self.players, self.heroes, strict=True),
+                key=lambda x: attrgetter("lifetime_games")(x[0]),
+            )
         ]
         return "Lifetime Games: " + " \N{BULLET} ".join(response_parts)
 

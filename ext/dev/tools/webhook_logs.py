@@ -143,9 +143,10 @@ class LogsViaWebhook(IreDevComponent):
     @commands.Component.listener(name="ready")
     async def announce_reloaded(self) -> None:
         """Announce that bot is successfully reloaded/restarted."""
-        await self.bot.create_partialuser(self.bot.owner_id).send_message(
-            sender=self.bot.bot_id, message=f"{const.STV.hi} the bot is reloaded."
-        )
+        for user_id in (const.UserID.Irene, const.UserID.Aluerie):
+            await self.bot.create_partialuser(user_id).send_message(
+                sender=self.bot.bot_id, message=f"{const.STV.hi} the bot is reloaded."
+            )
 
 
 async def setup(bot: IreBot) -> None:
