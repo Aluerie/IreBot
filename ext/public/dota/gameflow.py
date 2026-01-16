@@ -6,6 +6,7 @@ import functools
 import itertools
 import logging
 from dataclasses import dataclass
+from operator import attrgetter
 from typing import TYPE_CHECKING, Annotated, Any, TypedDict, override
 
 import steam
@@ -195,7 +196,7 @@ class Match:
 
         response_parts = [
             f"{hero if hero else player.color} {player.medal or '?'}"
-            for player, hero in zip(self.players, self.heroes, strict=False)
+            for player, hero in zip(self.players, self.heroes, strict=True)
         ]
         return " \N{BULLET} ".join(response_parts)  # [:5]) + " VS " + ", ".join(response_parts[5:])
 
@@ -214,7 +215,7 @@ class Match:
 
         response_parts = [
             f"{hero if hero else player.color} {player.lifetime_games}"
-            for player, hero in zip(self.players, self.heroes, strict=False)
+            for player, hero in sorted(zip(self.players, self.heroes, strict=True), key=lambda x: attrgetter("id")(x[1]))
         ]
         return "Lifetime Games: " + " \N{BULLET} ".join(response_parts)
 
@@ -315,7 +316,7 @@ class Match:
 
         response_parts = [
             f"{nick} as {hero if hero else player.color}"
-            for player, hero in zip(self.players, self.heroes, strict=False)
+            for player, hero in zip(self.players, self.heroes, strict=True)
             if (nick := nickname_mapping.get(player.friend_id))
         ]
         return " \N{BULLET} ".join(response_parts)
@@ -379,7 +380,7 @@ class PlayMatch(Match):
 
         response_parts = [
             f"{hero if hero else player.color} as {last_game_played_as}"
-            for player, hero in zip(self.players, self.heroes, strict=False)
+            for player, hero in zip(self.players, self.heroes, strict=True)
             if (last_game_played_as := last_game_hero_player_index.get(player.friend_id))
         ]
         if response_parts:
