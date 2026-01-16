@@ -597,7 +597,11 @@ class GameFlow(IrePublicComponent):
     #################################
 
     async def find_friend_account(self, broadcaster_id: str, *, is_green_online_required: bool = True) -> Friend:
-        """#TODO."""
+        """Find broadcaster's friend account.
+
+        Note that we only return their last-seen account.
+        We assume the last-seen account is the one they want to use commands against.
+        """
         query = """
             SELECT twitch_id, friend_id
             FROM ttv_dota_accounts
@@ -610,7 +614,7 @@ class GameFlow(IrePublicComponent):
 
         if friend:
             if is_green_online_required and not friend.is_playing_dota:
-                msg = "Inactive command \N{BULLET} it requires streamer to be green-online in Dota 2"
+                msg = "Inactive command \N{BULLET} it requires streamer to be green-online \N{LARGE GREEN CIRCLE} in Dota 2"
                 raise errors.PlaceholderRaiseError(msg)
             return friend
 
@@ -622,7 +626,7 @@ class GameFlow(IrePublicComponent):
         raise errors.PlaceholderRaiseError(msg)
 
     async def find_active_match(self, broadcaster_id: str) -> ActiveMatch:
-        """#TODO."""
+        """Find broadcaster's active match."""
         friend = await self.find_friend_account(broadcaster_id)
 
         active_match = friend.active_match
@@ -740,7 +744,7 @@ class GameFlow(IrePublicComponent):
 
         slot, player = next(iter((s, p) for s, p in enumerate(match.players) if p.hero.id == hero_id), (None, None))
         if not slot or not player:
-            msg = "#Todo"
+            msg = "Somehow can't find streamer's account in their previous match uuh weird"
             raise errors.PlaceholderRaiseError(msg)
 
         is_radiant = slot < 5
@@ -813,7 +817,7 @@ class GameFlow(IrePublicComponent):
 
         player_slot = next((slot for slot, player in enumerate(minimal.players) if player.hero == match.hero), None)
         if player_slot is None:
-            msg = "#TODO"
+            msg = "Somehow `player_slot` is None in match history match"
             raise errors.PlaceholderRaiseError(msg)
         is_radiant = player_slot < 5
 
@@ -883,7 +887,7 @@ class GameFlow(IrePublicComponent):
             self.process_pending_matches.stop()
 
     #################################
-    #    FRIEND RELATED COMMANDS    #
+    #    FRIEND PROFILE COMMANDS    #
     #################################
 
     async def score_response_helper(self, broadcaster_id: str, stream_started_at: datetime.datetime | None = None) -> str:
@@ -1028,9 +1032,9 @@ class GameFlow(IrePublicComponent):
     @commands.is_owner()
     @commands.group(name="notable-dev", invoke_fallback=True)
     async def notable_dev(self, ctx: IreContext) -> None:
-        """#TODO."""
+        """A group command for the bot developer to manage list of notable players in the database."""
         await ctx.send(
-            '"!notable_dev" is a group command: use it together with its subcommands, i.e. "!notable_dev add 123 Arteezy"'
+            '"!notable-dev" is a group command: use it together with its subcommands, i.e. "!notable_dev add 123 Arteezy"'
         )
 
     # Remember, group guards apply to children.
@@ -1038,7 +1042,7 @@ class GameFlow(IrePublicComponent):
     async def notable_dev_add(
         self, ctx: IreContext, steam_user: Annotated[Dota2User, SteamUserConverter], *, name: str
     ) -> None:
-        """Add a notable player into the database."""
+        """Add a notable player to the database."""
         query = """
             INSERT INTO ttv_dota_notable_players
             (friend_id, nickname)
@@ -1055,23 +1059,29 @@ class GameFlow(IrePublicComponent):
 
     @ireloop(count=1)
     async def add_steam_user_update_listener(self) -> None:
-        """#TODO."""
+        """A crutch task to add `steam_user_update` listener after all the clients are ready."""
         self.bot.add_listener(self.steam_user_update, event="event_steam_user_update")
 
     @add_steam_user_update_listener.before_loop
     @starting_fill_friends.before_loop
     async def wait_for_clients(self) -> None:
-        """#TODO."""
+        """Wait for all the needed clients to get ready.
+
+        Otherwise, such things as Dota 2 Coordinator requests are going to error out.
+        Unfortunately, specifically, Dota 2 Coordinator usually takes ~30 seconds to get ready.
+        """
         await self.bot.wait_until_ready()
         await self.bot.dota.wait_until_ready()
-        # if not self.bot.test:  # sometimes Coordinator being too slow is annoying for development;
         await self.bot.dota.wait_until_gc_ready()
         await self.bot._streamers_index_ready.wait()
 
     @fill_completed_matches_from_gc_match_history.before_loop
     @remove_way_too_old_matches.before_loop
-    async def wait_for_friends_cache_as_well(self) -> None:
-        """#TODO."""
+    async def wait_for_friends_index_as_well(self) -> None:
+        """Extra waiting for friends index to get filled with initial data.
+
+        This calls `.wait_for_clients` which also waits for all the required clients to be ready.
+        """
         await self.wait_for_clients()
         await self.bot._friends_index_ready.wait()
 

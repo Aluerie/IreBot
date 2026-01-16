@@ -54,8 +54,8 @@ class Dota2Client(Client):
     async def start_helpers(self) -> None:
         """Start helping services for steam."""
         if not self.started:
-            await self.steam_web_api.__aenter__()  # noqa: PLC2801
-            await self.stratz.__aenter__()  # noqa: PLC2801
+            await self.steam_web_api.__aenter__()
+            await self.stratz.__aenter__()
             self.items.start()
 
     @override
@@ -79,7 +79,10 @@ class Dota2Client(Client):
 
     @override
     async def on_user_update(self, before: User, after: User) -> None:
-        """#TODO."""
-        # Let's handle these events in the corresponding components.
+        """Called when a steam user is updated, due to one or more of their attributes changing.
+
+        The information from this event is redirected to `self.bot` events
+        so we can process it in the bot components.
+        """
         payload = SteamUserUpdate(before=before, after=after)
         self.bot.dispatch("steam_user_update", payload)

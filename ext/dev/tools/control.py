@@ -6,9 +6,8 @@ from typing import TYPE_CHECKING, Annotated
 
 from twitchio.ext import commands
 
+from bot import IreDevComponent
 from utils import const, guards
-
-from ._base import BaseDevComponent
 
 if TYPE_CHECKING:
     from bot import IreBot, IreContext
@@ -21,7 +20,7 @@ def to_extension(_: IreContext, extension: str) -> str:
     return f"ext.{extension}"
 
 
-class Control(BaseDevComponent):
+class Control(IreDevComponent):
     """Dev Only Commands."""
 
     @guards.is_vps()
@@ -84,18 +83,17 @@ class Control(BaseDevComponent):
         --------
         * "ext.personal.dev ext.public.states"
         """
-        index = {"personal": [], "public": [], "other": []}
+        index = {"personal": [], "public": [], "dev": [], "other": []}
         for module in ctx.bot.modules.values():
             name = module.__name__
-
-            for category in ("public", "personal"):
+            for category in ("public", "personal", "dev"):
                 if name.startswith(f"ext.{category}."):
                     index[category].append(name.removeprefix(f"ext.{category}."))
                     break
             else:
                 index["other"].append(name.removeprefix("ext."))
 
-        response = f"  {const.STV.DankDolmes} ".join(f"{c}: {', '.join(m)}" for c, m in index.items() if m)
+        response = f" {const.STV.DankDolmes} ".join(f"{c}: {', '.join(m)}" for c, m in index.items() if m)
         await ctx.send(response)
 
 

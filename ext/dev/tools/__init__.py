@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     from bot import IreBot
 
 
-class Dev(
+class DevTools(
     Control,
     LogsViaWebhook,
 ):
@@ -21,4 +21,4 @@ class Dev(
 
 async def setup(bot: IreBot) -> None:
     """Load IreBot extension. Framework of twitchio."""
-    await bot.add_component(Dev(bot))
+    await bot.add_component(DevTools(bot))

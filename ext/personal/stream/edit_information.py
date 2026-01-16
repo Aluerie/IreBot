@@ -206,7 +206,7 @@ class EditInformation(IrePersonalComponent):
                 await update.respond(f'{const.STV.donkDetective} Game was changed to "{new_category}"')
 
             # why it's not a default functionality ?
-            if self.bot.irene.online:
+            if self.bot.is_online(update.broadcaster.id):
                 with contextlib.suppress(twitchio.HTTPException):
                     await update.broadcaster.create_stream_marker(
                         token_for=const.UserID.Irene, description=f"Game: {new_category}"

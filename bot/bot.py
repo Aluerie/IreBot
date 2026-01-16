@@ -124,7 +124,10 @@ async def get_eventsub_subscriptions(pool: PoolTypedWithAny, owner: str) -> list
 
 @dataclass
 class Streamer:
-    """#TODO."""
+    """Streamer dataclass.
+
+    Object of such class are stored in `IreBot.streamers` index.
+    """
 
     id: str
     online: bool = False
@@ -514,5 +517,9 @@ class IreBot(commands.AutoBot):
     # UTILITIES
 
     def is_online(self, user_id: str) -> bool:
-        """#TODO."""
+        """Whether the user is online.
+
+        This relies on `self.streamers` index.
+        For proper request - we need to use twitchio's `.fetch_streams` method.
+        """
         return s.online if (s := self.streamers.get(user_id, None)) else False

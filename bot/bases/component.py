@@ -10,7 +10,11 @@ if TYPE_CHECKING:
     from bot import IreBot, IreContext
 
 
-__all__ = ("IrePersonalComponent", "IrePublicComponent")
+__all__ = (
+    "IreDevComponent",
+    "IrePersonalComponent",
+    "IrePublicComponent",
+)
 
 
 class IreComponent(commands.Component):
@@ -41,3 +45,13 @@ class IrePersonalComponent(IreComponent):
             raise errors.SilentError(msg)
         return True
 
+
+class IreDevComponent(IreComponent):
+    """Base component to use for developer extensions.
+
+    Double-ensures that commands have owner-only check.
+    """
+
+    @override
+    async def component_before_invoke(self, ctx: IreContext) -> bool:
+        return ctx.chatter.id == ctx.bot.owner_id

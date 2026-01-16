@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, TypedDict, override
 
 from twitchio.ext import commands
 
-from bot import IrePublicComponent, Streamer, ireloop
+from bot import IreDevComponent, Streamer, ireloop
 
 if TYPE_CHECKING:
     import twitchio
@@ -18,13 +18,13 @@ if TYPE_CHECKING:
         display_name: str
 
 
-__all__ = ("Online",)
+__all__ = ("StreamerIndexManagement",)
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
 
 
-class Online(IrePublicComponent):
+class StreamerIndexManagement(IreDevComponent):
     """# TODO."""
 
     def __init__(self, bot: IreBot) -> None:
@@ -102,4 +102,4 @@ class Online(IrePublicComponent):
 
 async def setup(bot: IreBot) -> None:
     """Load IreBot extension. Framework of twitchio."""
-    await bot.add_component(Online(bot))
+    await bot.add_component(StreamerIndexManagement(bot))

@@ -2,18 +2,18 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from .online import Online
+from .streamers import StreamerIndexManagement
 
 if TYPE_CHECKING:
     from bot import IreBot
 
 
-class States(
-    Online,
+class Required(
+    StreamerIndexManagement,
 ):
-    """# TODO."""
+    """Components required for other bot components to work."""
 
 
 async def setup(bot: IreBot) -> None:
     """Load IreBot extension. Framework of twitchio."""
-    await bot.add_component(States(bot))
+    await bot.add_component(Required(bot))

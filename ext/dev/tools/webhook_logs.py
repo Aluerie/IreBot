@@ -9,10 +9,8 @@ from typing import TYPE_CHECKING, Any, override
 import discord
 from twitchio.ext import commands
 
-from bot import ireloop
+from bot import IreDevComponent, ireloop
 from utils import const
-
-from ._base import BaseDevComponent
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -43,7 +41,7 @@ class LoggingHandler(logging.Handler):
         self.cog.add_record(record)
 
 
-class LogsViaWebhook(BaseDevComponent):
+class LogsViaWebhook(IreDevComponent):
     """Mirroring logs to discord webhook messages.
 
     This cog is responsible for rate-limiting, formatting, fine-tuning and sending the log messages.

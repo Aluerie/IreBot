@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 class DefaultCommands(
     MetaCommands,
 ):
-    """Default Commands."""
+    """Default Public Commands."""
 
 
 async def setup(bot: IreBot) -> None:
