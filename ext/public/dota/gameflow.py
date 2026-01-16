@@ -224,7 +224,7 @@ class Match:
             player_slot = int(argument) - 1
             if not 0 <= player_slot <= 9:
                 msg = "Sorry, player_slot can only be of 1-10 values."
-                raise errors.PlaceholderError(msg)
+                raise errors.RespondWithError(msg)
             return player_slot
 
         # Unfortunate - we have to use the fuzzy search
@@ -250,7 +250,7 @@ class Match:
         player_slot = the_choice[0]
         if player_slot is None:
             msg = 'Sorry, didn\'t understand your query. Try something like !cmd "PA / 7 / Phantom Assassin / Blue".'
-            raise errors.PlaceholderError(msg)
+            raise errors.RespondWithError(msg)
         return player_slot
 
     @format_match_response
@@ -615,15 +615,15 @@ class GameFlow(IrePublicComponent):
         if friend:
             if is_green_online_required and not friend.is_playing_dota:
                 msg = "Inactive command \N{BULLET} it requires streamer to be green-online \N{LARGE GREEN CIRCLE} in Dota 2"
-                raise errors.PlaceholderError(msg)
+                raise errors.RespondWithError(msg)
             return friend
 
         if self.bot._friends_index_ready.is_set():
             msg = "Bot's Dota 2 functionality is not fully loaded in. Please, wait a bit."
-            raise errors.PlaceholderError(msg)
+            raise errors.RespondWithError(msg)
 
         msg = "Couldn't find streamer's steam account in my friends uuh"
-        raise errors.PlaceholderError(msg)
+        raise errors.RespondWithError(msg)
 
     async def find_active_match(self, broadcaster_id: str) -> ActiveMatch:
         """Find broadcaster's active match."""
@@ -632,7 +632,7 @@ class GameFlow(IrePublicComponent):
         active_match = friend.active_match
         if not active_match:
             msg = f"No Active Game Found \N{BULLET} Streamer's status: {friend.rich_presence.status}"
-            raise errors.GameNotFoundError(msg)
+            raise errors.RespondWithError(msg)
 
         return active_match
 
@@ -721,7 +721,7 @@ class GameFlow(IrePublicComponent):
         row = await self.bot.pool.fetchrow(query, broadcaster_id)
         if not row:
             msg = "No last game found: it seems streamer hasn't played Dota in a while"
-            raise errors.PlaceholderError(msg)
+            raise errors.RespondWithError(msg)
         last_game = await self.bot.dota.create_partial_match(row["match_id"]).minimal()
         return row["friend_id"], row["hero_id"], last_game
 
@@ -1054,7 +1054,7 @@ class GameFlow(IrePublicComponent):
         await ctx.send(f"Added a new notable player (friend_id={steam_user.id}, name={name})")
 
     #################################
-    #         TASK CARE             #
+    #          TASK CARE            #
     #################################
 
     @ireloop(count=1)

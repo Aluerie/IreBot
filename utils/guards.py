@@ -21,7 +21,7 @@ def is_vps() -> Any:
         if ctx.bot.test:
             # wrong PC
             msg = f"Only production bot allows usage of this command {const.FFZ.peepoPolice}"
-            raise errors.GuardError(msg)
+            raise errors.RespondWithError(msg)
         return True
 
     return commands.guard(predicate)

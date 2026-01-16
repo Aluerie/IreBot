@@ -41,6 +41,15 @@ class TranslateResult(NamedTuple):
     target_lang: str
 
 
+class TranslateError(errors.IreBotError):
+    """Raised when there is an error in translate functionality."""
+
+    def __init__(self, status_code: int, text: str) -> None:
+        self.status_code: int = status_code
+        self.text: str = text
+        super().__init__(f"Google Translate responded with HTTP Status Code {status_code}")
+
+
 async def translate(
     text: str,
     *,
@@ -66,7 +75,7 @@ async def translate(
 
     async with session.get("https://clients5.google.com/translate_a/single", params=query, headers=headers) as resp:
         if resp.status != 200:
-            raise errors.TranslateError(resp.status, text=await resp.text())
+            raise TranslateError(resp.status, text=await resp.text())
 
         data = await resp.json()
         src = data.get("src", "Unknown")
