@@ -307,11 +307,12 @@ class Match:
             async with self.bot.session.get(url=url) as resp:
                 return await resp.json()
 
-        for _ in range(3):
+        for _ in range(5):
             match = await get_real_time_stats(self.server_steam_id)
             if match:
                 break
             # Sometimes it returns an empty dict `{}` (especially on the very first request)
+            await asyncio.sleep(0.6)
             continue
         else:
             msg = "get_real_time_stats got an empty dict 3 times in a row"
