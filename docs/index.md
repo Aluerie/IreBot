@@ -127,6 +127,14 @@
     </td>
     <td><img src="./images/lastseen.png" alt="lastseen" width="1200"/></td>
   </tr>
+  <tr>
+    <td>D2PT Hero Builds</td>
+    <td class="aliases-column">!d2pt</td>
+    <td>
+      Show Dota 2 ProTracker page for the currently selected hero.
+    </td>
+    <td><img src="./images/d2pt.png" alt="d2pt" width="1200"/></td>
+  </tr>
 </table>
 
 ## 2. Meta

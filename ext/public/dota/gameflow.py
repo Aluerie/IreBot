@@ -1047,7 +1047,7 @@ class GameFlow(IrePublicComponent):
         npc_hero_name = friend.rich_presence.raw.get("param2")
         if npc_hero_name:
             hero = Hero.create_from_npc_dota_hero_name(npc_hero_name.removeprefix("#"))
-            response = url_parse.quote(f"https://dota2protracker.com/hero/{hero.display_name}")
+            response = url_parse.quote(f"dota2protracker.com/hero/{hero.display_name}")
         else:
             response = "The streamer hasn't picked a hero yet."
         await ctx.send(response)
