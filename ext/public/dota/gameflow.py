@@ -542,6 +542,11 @@ class GameFlow(IrePublicComponent):
         The bot tries its best to track friend's gameflow via inspecting their rich presence.
         If the bot detects a new game being played or watched - it will do necessary actions to
         prepare those matches for further inspection.
+
+        Warning
+        -------
+        The code in this function is also quite volatile. Valve are quite inconsistent in their Rich Presence data,
+        so the logic might break any day.
         """
         rp = friend.rich_presence
 
@@ -919,6 +924,7 @@ class GameFlow(IrePublicComponent):
     async def process_pending_matches(self) -> None:
         """Process pending matches."""
         log.debug("Processing pending matches.")
+
         for friend_id, pending_matches in self.pending_matches.items():
             friend = self.bot.dota.get_user(friend_id)
             if friend:
@@ -931,9 +937,13 @@ class GameFlow(IrePublicComponent):
                     pending_matches.remove(match.id)
             if pending_matches:
                 log.debug("Still pending matches for @%s: %s", friend.name if friend else friend_id, pending_matches)
-            else:
+
+        # Pop empty entries
+        for friend_id in list(self.pending_matches.keys()):
+            if not self.pending_matches[friend_id]:
                 self.pending_matches.pop(friend_id)
 
+        # If all entries are empty
         if not self.pending_matches:
             self.process_pending_matches.stop()
 
