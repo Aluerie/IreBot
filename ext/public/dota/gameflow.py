@@ -18,6 +18,7 @@ from bot import IrePublicComponent, ireloop
 from config import config
 from utils import const, errors, fmt, fuzzy, guards
 from utils.dota import constants as dota_constants, enums as dota_enums, utils as dota_utils
+from utils.dota.schemas.steam_web_api import RealTimeStatsResponse
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Coroutine
@@ -264,24 +265,29 @@ class Match:
             return "No player data yet."
         if self.server_steam_id is None:
             return "This match doesn't support real time stats"
+        if self.lobby_type == LobbyType.NewPlayerMode:
+            return "New Player Mode matches do not support real time stats."
 
         player_slot = self.convert_argument_to_player_slot(argument)
 
-        try:
+        async def get_real_time_stats(server_steam_id: int) -> RealTimeStatsResponse:
             url = (
                 "https://api.steampowered.com//IDOTA2MatchStats_570/GetRealtimeStats/v1/"
                 f"?key={config['TOKENS']['STEAM']}"
-                f"&server_steam_id={self.server_steam_id}"
+                f"&server_steam_id={server_steam_id}"
             )
             async with self.bot.session.get(url=url) as resp:
-                match = await resp.json()
+                return await resp.json()
 
-            # match = await self.bot.dota.steam_web_api.get_real_time_stats(self.server_steam_id)
-        except Exception as exc:
-            log.exception("!items errored out at `get_real_time_stats` step", exc_info=exc)
-            if self.lobby_type == LobbyType.NewPlayerMode:
-                return "New Player Mode matches do not support real time stats."
-            return "Failed to get `real_time_stats` for this match."
+        for _ in range(3):
+            match = await get_real_time_stats(self.server_steam_id)
+            if match:
+                break
+            # for some reason, sometimes it returns an empty dict `{}` (especially on the very first request)
+            continue
+        else:
+            msg = "get_real_time_stats got an empty dict 3 times in a row"
+            raise errors.PlaceholderError(msg)
 
         team_ord = int(player_slot > 4)  # team_ord = 1 for Radiant, 2 for Dire
         team_slot = player_slot - 5 * team_ord  # 0 1 2 3 4 for Radiant, 5 6 7 8 9 for Dire
