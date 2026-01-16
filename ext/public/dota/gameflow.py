@@ -312,7 +312,7 @@ class Match:
             if match:
                 break
             # Sometimes it returns an empty dict `{}` (especially on the very first request)
-            await asyncio.sleep(0.6)
+            await asyncio.sleep(0.69)
             continue
         else:
             msg = "get_real_time_stats got an empty dict 3 times in a row"
@@ -381,7 +381,7 @@ class PlayMatch(Match):
         log.debug('Updating %s data for watchable_game_id "%s"', self.__class__.__name__, self.watchable_game_id)
         match = next(iter(await self.bot.dota.live_matches(lobby_ids=[self.lobby_id])), None)
         if not match:
-            msg = f'FindTopSourceTVGames didn\'t find watchable_game_id "{self.watchable_game_id}".'
+            msg = f'FindTopSourceTVGames did not find watchable_game_id "{self.watchable_game_id}".'
             raise errors.PlaceholderError(msg)
 
         if not self.players_data_ready.is_set():
@@ -628,11 +628,10 @@ class GameFlow(IrePublicComponent):
                     party_state = rp.raw.get("party")
                     if party_state and "party_state: UI" in party_state:
                         # hacky but this is what happens when we quit the match into main menu sometimes
-                        # let's pass to get a confirmation from other statuses (maybe wrong)
-                        pass
-                    else:
-                        msg = f'Status is "Playing" but {watchable_game_id=} and {party_state=}'
-                        raise errors.PlaceholderError(msg, raw_rich_presence=rp.raw)
+                        # let's return to get a confirmation from other statuses (maybe wrong)
+                        return
+                    msg = f'Status is "Playing" but {watchable_game_id=} and {party_state=}'
+                    raise errors.PlaceholderError(msg, raw_rich_presence=rp.raw)
 
                 if watchable_game_id not in self.play_matches_index:
                     self.play_matches_index[watchable_game_id] = PlayMatch(self.bot, watchable_game_id)
