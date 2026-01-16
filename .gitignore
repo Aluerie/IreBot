@@ -1,4 +1,6 @@
-*
+/*
 
 !.gitignore
-!stash/*
+
+!deprecated
+!deprecated/*
