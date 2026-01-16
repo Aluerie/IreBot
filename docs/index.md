@@ -67,7 +67,7 @@
     <td>
       Show recurring players from the last game present in the current game.
     </td>
-    <td>---</td>
+    <td><img src="./images/last-game.png" alt="last-game" width="1200"/></td>
   </tr>
   <tr>
     <td>Previous Match Results</td>

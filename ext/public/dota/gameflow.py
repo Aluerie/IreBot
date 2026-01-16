@@ -382,7 +382,7 @@ class PlayMatch(Match):
         last_game_hero_player_index.pop(friend_id, None)  # remove the streamer themselves
 
         response_parts = [
-            f"{hero if hero else player.color} as {last_game_played_as}"
+            f"{hero if hero else player.color} played as {last_game_played_as}"
             for player, hero in zip(self.players, self.heroes, strict=True)
             if (last_game_played_as := last_game_hero_player_index.get(player.friend_id))
         ]
