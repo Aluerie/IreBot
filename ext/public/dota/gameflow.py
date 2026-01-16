@@ -1042,11 +1042,11 @@ class GameFlow(IrePublicComponent):
 
     @commands.command(name="d2pt")
     async def dota2protracker_hero_page(self, ctx: IreContext) -> None:
-        """List notable players for the current match."""
+        """Show Dota 2 Pro Tracker page for the currently played hero."""
         friend = await self.find_friend_account(ctx.broadcaster.id)
         npc_hero_name = friend.rich_presence.raw.get("param2")
         if npc_hero_name:
-            hero = Hero.create_from_npc_dota_hero_name(npc_hero_name)
+            hero = Hero.create_from_npc_dota_hero_name(npc_hero_name.removeprefix("#"))
             response = url_parse.quote(f"https://dota2protracker.com/hero/{hero.display_name}")
         else:
             response = "The streamer hasn't picked a hero yet."
