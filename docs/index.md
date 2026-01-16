@@ -108,7 +108,7 @@
     <td>
       (Streamer's only command) Allows for streamers to manually update their MMR in the bot's database.
     </td>
-    <td>---</td>
+    <td><img src="./images/mmr-set.png" alt="mmr-set" width="1200"/></td>
   </tr>
   <tr>
     <td>Stats Profile</td>
