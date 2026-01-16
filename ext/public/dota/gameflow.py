@@ -8,6 +8,7 @@ import logging
 from dataclasses import dataclass
 from operator import attrgetter
 from typing import TYPE_CHECKING, Annotated, Any, TypedDict, override
+from urllib import parse as url_parse
 
 import steam
 from steam.ext.dota2 import GameMode, Hero, LobbyType, MatchOutcome, MinimalMatch, User as Dota2User
@@ -1037,6 +1038,18 @@ class GameFlow(IrePublicComponent):
             f"{friend.steam_user.name} id={friend.steam_user.id} status={friend.rich_presence.status} - "
             f"last seen green online in Dota 2 {fmt.timedelta_to_words(delta, fmt=fmt.TimeDeltaFormat.Letter)} ago"
         )
+        await ctx.send(response)
+
+    @commands.command(name="d2pt")
+    async def dota2protracker_hero_page(self, ctx: IreContext) -> None:
+        """List notable players for the current match."""
+        friend = await self.find_friend_account(ctx.broadcaster.id)
+        npc_hero_name = friend.rich_presence.raw.get("param2")
+        if npc_hero_name:
+            hero = Hero.create_from_npc_dota_hero_name(npc_hero_name)
+            response = url_parse.quote(f"https://dota2protracker.com/hero/{hero.display_name}")
+        else:
+            response = "The streamer hasn't picked a hero yet."
         await ctx.send(response)
 
     #################################
