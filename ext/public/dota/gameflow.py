@@ -273,7 +273,7 @@ class Match:
         except Exception as exc:
             log.exception("!items errored out at `get_real_time_stats` step", exc_info=exc)
             if self.lobby_type == LobbyType.NewPlayerMode:
-                return "New Player Mode matches don't support `real_time_stats`."
+                return "New Player Mode matches do not support `real_time_stats`."
             return "Failed to get `real_time_stats` for this match."
 
         team_ord = int(player_slot > 4)  # team_ord = 1 for Radiant, 2 for Dire

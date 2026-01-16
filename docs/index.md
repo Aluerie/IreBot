@@ -19,7 +19,7 @@
   </tr>
   <tr>
     <td>Lifetime Games</td>
-    <td class="aliases-column">!smurfs !lifetime</td>
+    <td class="aliases-column">!smurfs<br/>!lifetime</td>
     <td>
       Show total games played for each player in the match.
     </td>
@@ -27,7 +27,7 @@
   </tr>
   <tr>
     <td>Live Match Player Stats</td>
-    <td class="aliases-column">!stats !items !item !player</td>
+    <td class="aliases-column">!stats<br/>!items<br/>!item<br/>!player</td>
     <td>
       Fetch item and some profile data for a player in the current match (2 minutes delay).
       Note, you need to provide an argument for the command such as hero name, hero alias, player slot or player color.
@@ -37,7 +37,7 @@
   </tr>
   <tr>
     <td>Notable players</td>
-    <td class="aliases-column">!notable !np</td>
+    <td class="aliases-column">!notable<br/>!np</td>
     <td>
       Show notable players in the match.
       This includes streamers, twitch chatters and pro-players.
@@ -55,7 +55,7 @@
   </tr>
   <tr>
     <td>Match ID</td>
-    <td class="aliases-column">!match_id !matchid</td>
+    <td class="aliases-column">!match_id<br/>!matchid</td>
     <td>
       Show match id for the current game.
     </td>
@@ -63,7 +63,7 @@
   </tr>
   <tr>
     <td>Played with in Last Game</td>
-    <td class="aliases-column">!lg !lm !played</td>
+    <td class="aliases-column">!lg<br/>!lm<br/>!played</td>
     <td>
       Show recurring players from the last game present in the current game.
     </td>
@@ -79,7 +79,7 @@
   </tr>
   <tr>
     <td>Win Loss Ratio</td>
-    <td class="aliases-column">!wl !score !winloss</td>
+    <td class="aliases-column">!wl<br/>!score<br/>!winloss</td>
     <td>
       Show streamer's win-loss score ratio during the live-stream.
     </td>
@@ -112,7 +112,7 @@
   </tr>
   <tr>
     <td>Stats Profile</td>
-    <td class="aliases-column">!dotabuff !stratz !opendota</td>
+    <td class="aliases-column">!dotabuff<br/>!stratz<br/>!opendota</td>
     <td>
       Show link to the streamer's stats profile page.
     </td>
@@ -147,7 +147,7 @@
   </tr>
   <tr>
     <td>Commands List</td>
-    <td class="aliases-column">!commands !help</td>
+    <td class="aliases-column">!commands<br/>!help</td>
     <td>Show link to this page</td>
   </tr>
   <tr>
