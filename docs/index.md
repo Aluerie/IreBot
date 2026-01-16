@@ -154,7 +154,7 @@
   * Use `#mergeset <Primary set ID> 01JS1XW1PAAKP34984FDYZVDR7` where the second argument is an ID for the mentioned Dota 2 emote set.
   * You can find your `<Primary set ID>` by copying the last part of the URL to your own main emote set.
   * @PotatBotat will create a new emote set trying to merge the provided ones. If there are more then 1000 emotes in total - some emotes from the 2nd set won't make it.
-* Unfortunately, currently for Dota 2 features to work:
+* Unfortunately, due to implementation specifics currently for Dota 2 features to work:
   1. You need to add the bot's steam accounts to friends.
   2. You also need to be green-online 🟢 in Dota 2 (and have rich presence visible to friends) for the bot to be able to see your status live.
 * PS. Another implementation for these features (using Dota 2 Game State Integration) is coming soon™️. It won't have mentioned restrictions but you will have to put a `.cfg` file into the Dota 2 directory.
