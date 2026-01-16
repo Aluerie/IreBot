@@ -139,6 +139,7 @@ class Bots(StrEnum):
 
     # Invited to Irene's channel;
     IrenesBot = "irenesbot"
+    PotatBotat = "potatbotat"
     Supibot = "supibot"
     WizeBot = "wizebot"
 

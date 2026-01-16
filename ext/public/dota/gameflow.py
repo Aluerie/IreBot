@@ -228,21 +228,31 @@ class Match:
             identifiers = [dota_constants.PLAYER_COLORS[player_slot]]
             if hero:
                 identifiers.extend([hero.name, hero.display_name])
-            find = fuzzy.extract_one(argument, identifiers, score_cutoff=69)
+            find = fuzzy.extract_one(
+                argument,
+                identifiers,
+                scorer=fuzzy.quick_token_sort_ratio,
+                score_cutoff=49,
+            )
             if find and find[1] > the_choice[1]:
                 the_choice = (player_slot, find[1])
 
         # Step 2. let's see if hero aliases can beat official
         for player_slot, hero in enumerate(self.heroes):
             if hero:
-                find = fuzzy.extract_one(argument, dota_constants.HERO_ALIASES.get(hero.id, []), score_cutoff=69)
+                find = fuzzy.extract_one(
+                    argument,
+                    dota_constants.HERO_ALIASES.get(hero.id, []),
+                    scorer=fuzzy.quick_token_sort_ratio,
+                    score_cutoff=49,
+                )
                 if find and find[1] > the_choice[1]:
                     the_choice = (player_slot, find[1])
 
         # Back to the dict
         player_slot = the_choice[0]
         if player_slot is None:
-            msg = 'Sorry, didn\'t understand your query. Try something like !cmd "PA / 7 / Phantom Assassin / Blue".'
+            msg = 'Sorry, didn\'t understand your query. Try something like "PA / 7 / Phantom Assassin / Blue".'
             raise errors.RespondWithError(msg)
         return player_slot
 

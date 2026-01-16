@@ -57,6 +57,9 @@
         "supibot",
         "Wize",
         "wizebot",
+        "potat",
+        "botat",
+        "potatbotat"
     ],
     "python.REPL.enableREPLSmartSend": false,
     "yaml.schemas": {
