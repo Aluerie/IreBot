@@ -683,7 +683,7 @@ class GameFlow(IrePublicComponent):
                 raise errors.RespondWithError(msg)
             return friend
 
-        if self.bot._friends_index_ready.is_set():
+        if not self.bot._friends_index_ready.is_set():
             msg = "Bot's Dota 2 functionality is not fully loaded in. Please, wait a bit."
             raise errors.RespondWithError(msg)
 
