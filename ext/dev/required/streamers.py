@@ -25,7 +25,12 @@ log.setLevel(logging.INFO)
 
 
 class StreamerIndexManagement(IreDevComponent):
-    """# TODO."""
+    """Component managing `self.bot.streamers` index.
+
+    This index is used to cache some information about streamers
+    that twitchio does not cache for me by itself, such as their `online` state
+    (twitchio only allows fetching their state at the exact moment).
+    """
 
     def __init__(self, bot: IreBot) -> None:
         super().__init__(bot)
@@ -40,7 +45,7 @@ class StreamerIndexManagement(IreDevComponent):
 
     @ireloop(count=1)
     async def fill_streamers_index(self) -> None:
-        """#TODO."""
+        """Fill `bot.streamers` index on bot's startup."""
         log.debug("Filling `self.bot.streamers` index")
         query = """
             SELECT user_id
@@ -66,14 +71,14 @@ class StreamerIndexManagement(IreDevComponent):
 
     @commands.Component.listener(name="stream_online")
     async def add_stream_to_online_cache(self, online: twitchio.StreamOnline) -> None:
-        """#TODO."""
+        """Set streamer's state to online in the index."""
         streamer = self.bot.streamers[online.broadcaster.id]
         streamer.online = True
         streamer.started_dt = online.started_at
 
     @commands.Component.listener(name="stream_offline")
     async def remove_stream_from_online_cache(self, offline: twitchio.StreamOffline) -> None:
-        """#TODO."""
+        """Set streamer's state to offline in the index."""
         streamer = self.bot.streamers[offline.broadcaster.id]
         streamer.online = False
         streamer.started_dt = None
@@ -92,7 +97,7 @@ class StreamerIndexManagement(IreDevComponent):
         rows: list[StreamersUserQueryRow] = await self.bot.pool.fetch(query)
         database_streamers = {row["user_id"]: row["display_name"] for row in rows}
 
-        # TODO: I think it bricks if len(user_ids) is more than 100 ?
+        # TODO: it's going to brick if len(user_ids) is more than 100.
         twitch_users = await self.bot.fetch_users(ids=list(database_streamers.keys()))
         for user in twitch_users:
             if user.display_name.lower() != database_streamers[user.id]:

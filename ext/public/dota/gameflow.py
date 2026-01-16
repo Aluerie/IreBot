@@ -24,15 +24,6 @@ if TYPE_CHECKING:
     from steam.ext.dota2 import MatchHistoryMatch, User as Dota2SteamUser
 
     from bot import IreBot, IreContext
-
-    class SteamAccountQueryRow(TypedDict):
-        friend_id: int
-        steam64_id: int
-
-    class StreamersUserQueryRow(TypedDict):
-        user_id: str
-        display_name: str
-
     from utils.dota import SteamUserUpdate
 
     type ActiveMatch = PlayMatch | WatchMatch | UnsupportedMatch
@@ -45,6 +36,10 @@ if TYPE_CHECKING:
         outcome: int
         is_radiant: bool
         abandon: bool
+
+    class NotablePlayersQueryRow(TypedDict):
+        friend_id: int
+        nickname: str
 
 
 __all__ = ("GameFlow",)
@@ -105,7 +100,7 @@ class Friend:
 
 @dataclass
 class Player:
-    """#TODO.
+    """A class representing an active Dota 2 match player.
 
     Notes
     -----
@@ -135,13 +130,6 @@ class Player:
             lifetime_games=profile_card.lifetime_games,
             medal=dota_utils.rank_medal_display_name(profile_card),
         )
-
-    @property
-    def stratz(self) -> str:
-        return f"stratz.com/players/{self.friend_id}"
-
-    def profile(self) -> str:
-        return f"{self.medal} \N{BULLET} {self.lifetime_games} total games \N{BULLET} {self.stratz}"
 
     @property
     def color(self) -> str:
@@ -312,7 +300,7 @@ class Match:
             FROM ttv_dota_notable_players
             WHERE friend_id = ANY($1);
         """
-        rows = await self.bot.pool.fetch(query, [p.friend_id for p in self.players])
+        rows: list[NotablePlayersQueryRow] = await self.bot.pool.fetch(query, [p.friend_id for p in self.players])
         if not rows:
             return "No notable players found"
 
@@ -432,11 +420,18 @@ class WatchMatch(Match):
 
 
 class UnsupportedMatch(Match):
+    """A class describing unsupported matches.
+
+    All chat commands for objects of this type should return unsupported message response.
+    For example, if streamer is playing Demo Mode, then the bot should only respond with "Demo Mode is not supported",
+    because, well, there is no data in Demo Mode to insect.
+    """
+
     def __init__(self, bot: IreBot, tag: str = "") -> None:
         super().__init__(bot, tag)
 
 
-class UserNotFound(commands.BadArgument):
+class SteamUserNotFound(commands.BadArgument):
     """For when a matching user cannot be found."""
 
     def __init__(self, argument: str) -> None:
@@ -454,10 +449,10 @@ class SteamUserConverter(commands.Converter[Dota2User]):
         except steam.InvalidID:
             id64 = await steam.utils.id64_from_url(argument)
             if id64 is None:
-                raise UserNotFound(argument) from None
+                raise SteamUserNotFound(argument) from None
             return await ctx.bot.dota.fetch_user(id64)
         except TimeoutError:
-            raise UserNotFound(argument) from None
+            raise SteamUserNotFound(argument) from None
 
 
 def is_allowed_to_add_notable() -> Any:
@@ -472,7 +467,21 @@ def is_allowed_to_add_notable() -> Any:
 
 
 class GameFlow(IrePublicComponent):
-    """#TODO."""
+    """Component with all 9kmmrbot-like Dota 2 features.
+
+    This component uses Dota 2 Rich Presence (RP), Dota 2 web API and Dota 2 Game Coordinator (GC) API calls
+    to figure out current state of each friend in the bot's steam friend list.
+    If they are currently playing - the bot activates special chat commands inspecting their live match.
+    The bot also stores some match history information in the database for some features/commands to use.
+
+    Notes
+    -----
+    * The restrictions of such approach are
+            1. Streamers have to add the bot into their friend list;
+            2. Streamers have to play Dota 2 while being green-online in steam;
+        The other solution that would solve these problems would be using Dota 2 Game State Integration (GSI),
+        which I'm going to implement one day.
+    """
 
     def __init__(self, bot: IreBot) -> None:
         super().__init__(bot)
@@ -502,10 +511,13 @@ class GameFlow(IrePublicComponent):
 
     @ireloop(count=1)
     async def starting_fill_friends(self) -> None:
-        """#TODO."""
+        """Index bot's friend list on bot's startup.
+
+        Also makes initial analyse of their rich presences.
+        """
         log.debug("Indexing bot's friend list.")
         for friend in await self.bot.dota.user.friends():
-            self.friends[friend.id] = Friend(self.bot, friend._user)  # pyright: ignore[reportArgumentType] #TODO: ???
+            self.friends[friend.id] = Friend(self.bot, friend._user)  # pyright: ignore[reportArgumentType]
 
         for friend in self.friends.values():
             await self.analyze_rich_presence(friend)
@@ -514,7 +526,13 @@ class GameFlow(IrePublicComponent):
         self.bot._friends_index_ready.set()
 
     async def analyze_rich_presence(self, friend: Friend) -> None:
-        """#TODO."""
+        """Analyze Rich Presence.
+
+        Central function for this component.
+        The bot tries its best to track friend's gameflow via inspecting their rich presence.
+        If the bot detects a new game being played or watched - it will do necessary actions to
+        prepare those matches for further inspection.
+        """
         rp = friend.rich_presence
 
         if friend.is_playing_dota:
@@ -522,7 +540,7 @@ class GameFlow(IrePublicComponent):
             query = """
                 UPDATE ttv_dota_accounts
                 SET last_seen = $1
-                WHERE friend_id = $2
+                WHERE friend_id = $2;
             """
             await self.bot.pool.execute(query, datetime.datetime.now(datetime.UTC), friend.steam_user.id)
 
@@ -567,8 +585,8 @@ class GameFlow(IrePublicComponent):
                 # Friend is spectating a match
                 watching_server = rp.raw.get("watching_server")
                 if watching_server is None:
-                    msg = f'Status is "Spectating" but {watching_server=}'
-                    raise errors.PlaceholderError(msg, raw_rich_presence=rp.raw)
+                    friend.active_match = UnsupportedMatch(self.bot, tag="Watching replays is not supported")
+                    return
 
                 if watching_server not in self.watch_matches_index:
                     self.watch_matches_index[watching_server] = WatchMatch(self.bot, watching_server)
@@ -587,7 +605,15 @@ class GameFlow(IrePublicComponent):
 
     # @commands.Component.listener("steam_user_update")
     async def steam_user_update(self, update: SteamUserUpdate) -> None:
-        """#TODO."""
+        """Called when bot's steam friend profile is updated.
+
+        For example, this component is interested in Rich Presence changes.
+
+        Note
+        ----
+        This is not `@commands.Component.listener("steam_user_update")` because we have to manually
+        `.add_listener` for this function after waiting for all the clients to start.
+        """
         rp_before = RichPresence(update.before.rich_presence)
         rp_after = RichPresence(update.after.rich_presence)
 
@@ -735,7 +761,7 @@ class GameFlow(IrePublicComponent):
         """
         row = await self.bot.pool.fetchrow(query, broadcaster_id)
         if not row:
-            msg = "No last game found: it seems streamer hasn't played Dota in a while"
+            msg = "No last game found: it seems streamer hasn't played Dota 2 in a while"
             raise errors.RespondWithError(msg)
         last_game = await self.bot.dota.create_partial_match(row["match_id"]).minimal()
         return row["friend_id"], row["hero_id"], last_game
@@ -1005,7 +1031,7 @@ class GameFlow(IrePublicComponent):
     @commands.is_broadcaster()
     @mmr.command(name="set")
     async def mmr_set(self, ctx: IreContext, new_mmr: int) -> None:
-        """#TODO."""
+        """Set streamer's mmr in the database."""
         friend = await self.find_friend_account(ctx.broadcaster.id, is_green_online_required=False)
         query = """
             UPDATE ttv_dota_accounts

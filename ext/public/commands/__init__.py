@@ -8,12 +8,16 @@ if TYPE_CHECKING:
     from bot import IreBot
 
 
-class DefaultCommands(
+class UncategorizedPublicCommands(
     MetaCommands,
 ):
-    """Default Public Commands."""
+    """Uncategorized Public Commands.
+
+    These commands just do not belong to any specific "categorized" public component
+    so they found their place here.
+    """
 
 
 async def setup(bot: IreBot) -> None:
     """Load IreBot extension. Framework of twitchio."""
-    await bot.add_component(DefaultCommands(bot))
+    await bot.add_component(UncategorizedPublicCommands(bot))

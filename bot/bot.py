@@ -390,7 +390,7 @@ class IreBot(commands.AutoBot):
 
     @staticmethod
     def add_args_field(embed: discord.Embed, field_name: str, data: dict[str, Any]) -> discord.Embed:
-        """#TODO."""
+        """A helper method to add arguments as a field for the unknown error report embed."""
         embed.add_field(
             name=field_name,
             value=(

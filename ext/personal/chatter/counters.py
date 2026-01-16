@@ -18,11 +18,11 @@ if TYPE_CHECKING:
     from bot import IreBot, IreContext
 
     class FirstRedeemsRow(TypedDict):
-        """`first_redeems` Table Columns."""
-
         user_name: str
         first_times: int
 
+
+__all__ = ("Counters",)
 
 FIRST_ID: str = "902e931b-3d09-4a2e-9996-1d1ad599761d"
 
@@ -43,32 +43,6 @@ class Counters(IrePersonalComponent):
     async def component_teardown(self) -> None:
         self.check_first_reward.cancel()
         await super().component_teardown()
-
-    @commands.is_owner()
-    @commands.group()
-    async def counter(self, ctx: IreContext) -> None:
-        """Group command for !counter commands."""
-        # TODO: I guess, we need to implement "send_help"
-        await ctx.send("Use this command together with subcommands delete/create/change")
-
-    @counter.command()
-    async def create(self, ctx: IreContext, name: str) -> None:
-        """Create a counter."""
-        query = """
-            INSERT INTO ttv_counters
-            (name, value)
-            VALUES ($1, $2)
-            ON CONFLICT (name)
-                DO NOTHING
-            RETURNING value;
-        """
-        value: int | None = await self.bot.pool.fetchval(query, name, 0)
-        if value is None:
-            await ctx.send(f"Such counter already exists! {const.STV.POLICE}")
-        else:
-            await ctx.send(f"Created a counter `{name}` (current value = {value}) {const.STV.science}")
-
-    # TODO: counter set (change)/increment (add) / remove commands ; maybe do it smarter like !deaths and it understands
 
     # ERM COUNTERS
 

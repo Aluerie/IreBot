@@ -147,7 +147,7 @@
   </tr>
   <tr>
     <td>Commands List</td>
-    <td class="aliases-column">!commands<br/>!help</td>
+    <td class="aliases-column">!commands<br/>!help<br/>!irenesbot</td>
     <td>Show link to this page</td>
   </tr>
   <tr>
