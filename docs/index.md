@@ -139,15 +139,15 @@
 
 ### Notes and tips
 
-* To easily add all Dota 2 7tv-emotes from the emote set have dota 2 emotesYou can merge your main 7tv emote set with provided in showcase column <a href="https://7tv.app/emote-sets/01JS1XW1PAAKP34984FDYZVDR7">Dota 2 7tv emote set</a> using a tool like [potat.app/help/mergeset](<https://potat.app/help/mergeset>).
+* To make bot responses look like in the "Showcase" column you can merge your main 7tv emote set with <a href="https://7tv.app/emote-sets/01JS1XW1PAAKP34984FDYZVDR7">Dota 2 emote set</a> using a tool like [potat.app/help/mergeset](<https://potat.app/help/mergeset>). Some short instructions for @PotatBotat:
   * Add @PotatBotat to your channel
-  * Give it 7tv editor role
-  * Use `#mergeset <YourEmoteSetID> 01JS1XW1PAAKP34984FDYZVDR7` where the second slug text is an emote set id for Dota 2 set.
-  * You can find your `<YourEmoteSetID>` by copying the link to your emote set.
-  * It will create a new emote set while trying to merge the provided ones. If there are more then 1000 emotes in total - some emotes from the 2nd set won't make it.
+  * Give it 7tv editor role, allow it to `Create Emote Sets` in addition to default permissions.
+  * Use `#mergeset <YourEmoteSetID> 01JS1XW1PAAKP34984FDYZVDR7` where the argument is an ID for Dota 2 emote set.
+  * You can find your `<YourEmoteSetID>` by copying a part of the URL to your emote set.
+  * The bot will create a new emote set trying to merge the provided ones. If there are more then 1000 emotes in total - some emotes from the 2nd set won't make it.
 * Unfortunately, currently for Dota 2 features to work:
   1. You need to add the bot's steam accounts to friends.
-  2. You also need to be green-online 🟢 in Dota 2 for the bot to be able to see (and have rich presence visible to friends).
+  2. You also need to be green-online 🟢 in Dota 2 (and have rich presence visible to friends) for the bot to be able to see your status live.
 * PS. Another implementation for these features (using Dota 2 Game State Integration) is coming soon™️. It won't have mentioned restrictions but streamers will have to put `.cfg` file into their Dota 2 directory.
 
 ## 2. Meta
