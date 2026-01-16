@@ -42,7 +42,7 @@
       Show link to stats profile for a player.
       Similarly to above, you need to provide an argument for the command such as hero name, alias; player slot or color.
     </td>
-    <td><img src="./images/profile.png" alt="profile" width="1200"/></td>
+    <td><img src="./images/player.png" alt="player" width="1200"/></td>
   </tr>
   <tr>
     <td>Notable players</td>
