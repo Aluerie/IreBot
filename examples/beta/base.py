@@ -12,9 +12,9 @@ import aiohttp
 import twitchio
 from twitchio.ext import commands
 
-from bot import IrePersonalComponent, ireloop
+from bot import IreDevComponent, ireloop
 from config import config
-from utils import const
+from utils import const, errors
 
 if TYPE_CHECKING:
     from bot import IreBot, IreContext
@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 log = logging.getLogger(__name__)
 
 
-class BetaCog(IrePersonalComponent):
+class BetaCog(IreDevComponent):
     """Base Class for BetaTest cog.
 
     Used to test random code snippets.

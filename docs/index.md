@@ -7,7 +7,7 @@
     <th>Command Name</th>
     <th class="aliases-column">Chat Aliases</th>
     <th>Description</th>
-    <th>Showcase (<a href="[url](https://7tv.app/emote-sets/01JS1XW1PAAKP34984FDYZVDR7)">7tv emote set</a> on)</th>
+    <th>Showcase (<a href="https://7tv.app/emote-sets/01JS1XW1PAAKP34984FDYZVDR7">7tv emote set</a> on)</th>
   </tr>
   <tr>
     <td>Game Medals</td>
@@ -16,14 +16,6 @@
       Show rank medal for each players in the match.
     </td>
     <td><img src="./images/gm.png" alt="gm" width="1200"/></td>
-  </tr>
-  <tr>
-    <td>Ranked</td>
-    <td class="aliases-column">!ranked</td>
-    <td>
-      Show whether the current match is ranked or not.
-    </td>
-    <td><img src="./images/ranked.png" alt="ranked" width="1200"/></td>
   </tr>
   <tr>
     <td>Lifetime Games</td>
@@ -44,22 +36,30 @@
     <td><img src="./images/stats.png" alt="stats" width="1200"/></td>
   </tr>
   <tr>
+    <td>Notable players</td>
+    <td class="aliases-column">!notable !np</td>
+    <td>
+      Show notable players in the match.
+      This includes streamers, twitch chatters and pro-players.
+      Honestly, everybody is welcome to be added as a notable player.
+    </td>
+    <td><img src="./images/notable.png" alt="notable" width="1200"/></td>
+  </tr>
+  <tr>
+    <td>Ranked</td>
+    <td class="aliases-column">!ranked</td>
+    <td>
+      Show whether the current match is ranked or not.
+    </td>
+    <td><img src="./images/ranked.png" alt="ranked" width="1200"/></td>
+  </tr>
+  <tr>
     <td>Match ID</td>
     <td class="aliases-column">!match_id !matchid</td>
     <td>
       Show match id for the current game.
     </td>
     <td><img src="./images/matchid.png" alt="matchid" width="1200"/></td>
-  </tr>
-  <tr>
-    <td>Notable players</td>
-    <td class="aliases-column">!notable !np</td>
-    <td>
-      Show notable players in the match.
-      This includes pro-players, streamers, twitch chatters.
-      Honestly, everybody is welcome to be added as a notable player.
-    </td>
-    <td><img src="./images/notable.png" alt="notable" width="1200"/></td>
   </tr>
   <tr>
     <td>Played with in Last Game</td>
@@ -81,7 +81,7 @@
     <td>Win Loss Ratio</td>
     <td class="aliases-column">!wl !score !winloss</td>
     <td>
-      Show streamer's win - loss score ratio during the live-stream.
+      Show streamer's win-loss score ratio during the live-stream.
     </td>
     <td><img src="./images/score.png" alt="score" width="1200"/></td>
   </tr>
@@ -89,7 +89,7 @@
     <td>Offline Win Loss Ratio</td>
     <td class="aliases-column">!wl offline</td>
     <td>
-      Show win - loss ratio for the last streamer's gaming session but also include offline games.
+      Show win-loss ratio for the last streamer's gaming session but also include offline games.
     </td>
     <td><img src="./images/score.png" alt="score" width="1200"/></td>
   </tr>

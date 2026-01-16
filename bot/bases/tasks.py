@@ -8,6 +8,8 @@ import discord
 from discord.ext import tasks
 from discord.utils import MISSING
 
+from utils import errors
+
 if TYPE_CHECKING:
     import datetime
 
@@ -66,11 +68,9 @@ class IreLoop(tasks.Loop[LF]):
     @override
     async def _error(self, cog: HasBotAttribute, exception: Exception) -> None:
         """Same `_error` as in parent class but with `exc_manager` integrated."""
-        embed = (
-            discord.Embed(title=self.coro.__name__, colour=0x1A7A8A)
-            .set_author(name=f"{self.coro.__module__}: {self.coro.__qualname__}")
-            .set_footer(text=f"{self.__class__.__name__}: {self.coro.__name__}")
-        )
+        embed = discord.Embed(title=f"Task Error {self.coro.__qualname__}", colour=0x1A7A8A)
+        if isinstance(exception, errors.PlaceholderError) and exception.data:
+            embed = cog.bot.add_args_field(embed, f"Extra {exception.__class__.__name__} Debug Data", exception.data)
         await cog.bot.exc_manager.register_error(exception, embed)
 
 

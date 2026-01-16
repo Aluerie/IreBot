@@ -224,7 +224,7 @@ class Match:
             player_slot = int(argument) - 1
             if not 0 <= player_slot <= 9:
                 msg = "Sorry, player_slot can only be of 1-10 values."
-                raise errors.PlaceholderRaiseError(msg)
+                raise errors.PlaceholderError(msg)
             return player_slot
 
         # Unfortunate - we have to use the fuzzy search
@@ -250,7 +250,7 @@ class Match:
         player_slot = the_choice[0]
         if player_slot is None:
             msg = 'Sorry, didn\'t understand your query. Try something like !cmd "PA / 7 / Phantom Assassin / Blue".'
-            raise errors.PlaceholderRaiseError(msg)
+            raise errors.PlaceholderError(msg)
         return player_slot
 
     @format_match_response
@@ -280,7 +280,7 @@ class Match:
                 break
         else:
             msg = "Didn't find the player's team info"
-            raise errors.PlaceholderRaiseError(msg)
+            raise errors.PlaceholderError(msg)
 
         prefix = f"[2m delay] {api_player['name']} {Hero.try_value(api_player['heroid'])} lvl {api_player['level']}"
         net_worth = f"NW: {api_player['net_worth']}"
@@ -337,7 +337,7 @@ class PlayMatch(Match):
         match = next(iter(await self.bot.dota.live_matches(lobby_ids=[self.lobby_id])), None)
         if not match:
             msg = f'FindTopSourceTVGames didn\'t find watchable_game_id "{self.watchable_game_id}".'
-            raise errors.PlaceholderRaiseError(msg)
+            raise errors.PlaceholderError(msg)
 
         if not self.players_data_ready.is_set():
             # match data
@@ -531,7 +531,7 @@ class GameFlow(IrePublicComponent):
                         friend.active_match = UnsupportedMatch(self.bot, tag="Private Lobbies are not supported")
                         return
                     msg = "#todo"
-                    raise errors.PlaceholderRaiseError(msg)
+                    raise errors.PlaceholderError(msg)
                 if watchable_game_id == "0":
                     # something is off again
                     party_state = rp.raw.get("party")
@@ -541,7 +541,7 @@ class GameFlow(IrePublicComponent):
                         pass
                     else:
                         msg = f'RP is "Playing" but {watchable_game_id=} and {party_state=}'
-                        raise errors.PlaceholderRaiseError(msg)
+                        raise errors.PlaceholderError(msg)
 
                 if watchable_game_id not in self.play_matches_index:
                     self.play_matches_index[watchable_game_id] = PlayMatch(self.bot, watchable_game_id)
@@ -553,7 +553,7 @@ class GameFlow(IrePublicComponent):
                 watching_server = rp.raw.get("watching_server")
                 if watching_server is None:
                     msg = f"RP is Playing but {watching_server=}"
-                    raise errors.PlaceholderRaiseError(msg)
+                    raise errors.PlaceholderError(msg)
 
                 if watching_server not in self.watch_matches_index:
                     self.watch_matches_index[watching_server] = WatchMatch(self.bot, watching_server)
@@ -615,15 +615,15 @@ class GameFlow(IrePublicComponent):
         if friend:
             if is_green_online_required and not friend.is_playing_dota:
                 msg = "Inactive command \N{BULLET} it requires streamer to be green-online \N{LARGE GREEN CIRCLE} in Dota 2"
-                raise errors.PlaceholderRaiseError(msg)
+                raise errors.PlaceholderError(msg)
             return friend
 
         if self.bot._friends_index_ready.is_set():
             msg = "Bot's Dota 2 functionality is not fully loaded in. Please, wait a bit."
-            raise errors.PlaceholderRaiseError(msg)
+            raise errors.PlaceholderError(msg)
 
         msg = "Couldn't find streamer's steam account in my friends uuh"
-        raise errors.PlaceholderRaiseError(msg)
+        raise errors.PlaceholderError(msg)
 
     async def find_active_match(self, broadcaster_id: str) -> ActiveMatch:
         """Find broadcaster's active match."""
@@ -721,7 +721,7 @@ class GameFlow(IrePublicComponent):
         row = await self.bot.pool.fetchrow(query, broadcaster_id)
         if not row:
             msg = "No last game found: it seems streamer hasn't played Dota in a while"
-            raise errors.PlaceholderRaiseError(msg)
+            raise errors.PlaceholderError(msg)
         last_game = await self.bot.dota.create_partial_match(row["match_id"]).minimal()
         return row["friend_id"], row["hero_id"], last_game
 
@@ -745,7 +745,7 @@ class GameFlow(IrePublicComponent):
         slot, player = next(iter((s, p) for s, p in enumerate(match.players) if p.hero.id == hero_id), (None, None))
         if not slot or not player:
             msg = "Somehow can't find streamer's account in their previous match uuh weird"
-            raise errors.PlaceholderRaiseError(msg)
+            raise errors.PlaceholderError(msg)
 
         is_radiant = slot < 5
         score_category = dota_enums.ScoreCategory.create(match.lobby_type, match.game_mode)
@@ -818,7 +818,7 @@ class GameFlow(IrePublicComponent):
         player_slot = next((slot for slot, player in enumerate(minimal.players) if player.hero == match.hero), None)
         if player_slot is None:
             msg = "Somehow `player_slot` is None in match history match"
-            raise errors.PlaceholderRaiseError(msg)
+            raise errors.PlaceholderError(msg)
         is_radiant = player_slot < 5
 
         query = """
@@ -945,7 +945,7 @@ class GameFlow(IrePublicComponent):
         }
         if len(index) == 0:
             return "0 W - 0 L"
-        return " | ".join(
+        return " \N{LARGE PURPLE CIRCLE} ".join(
             # Let's make extra query to know name accounts
             f"{u.name if (u := self.bot.dota.get_user(friend_id)) else friend_id}: {part}"
             for friend_id, part in response_parts.items()

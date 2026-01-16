@@ -27,7 +27,7 @@ def convert_id3_to_id64(steam_id3: str) -> int:
     steam_id = ID.from_id3(steam_id3)
     if steam_id is None:
         msg = "Failed to get steam ID from id3."
-        raise errors.PlaceholderRaiseError(msg)
+        raise errors.PlaceholderError(msg)
     return steam_id.id64
 
 

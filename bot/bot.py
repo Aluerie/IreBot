@@ -388,6 +388,20 @@ class IreBot(commands.AutoBot):
         if hasattr(self, "dota"):
             await self.dota.wait_until_ready()
 
+    @staticmethod
+    def add_args_field(embed: discord.Embed, field_name: str, data: dict[str, Any]) -> discord.Embed:
+        """#TODO."""
+        embed.add_field(
+            name=field_name,
+            value=(
+                "```py\n" + "\n".join(f"[{name}]: {value!r}" for name, value in data.items()) + "```"
+                if data
+                else "```py\nNo arguments```"
+            ),
+            inline=False,
+        )
+        return embed
+
     @override
     async def event_command_error(self, payload: commands.CommandErrorPayload) -> None:
         """Called when error happens during command invoking."""
@@ -401,13 +415,40 @@ class IreBot(commands.AutoBot):
         # we aren't interested in the chain traceback:
         error = error.original if isinstance(error, commands.CommandInvokeError) and error.original else error
 
+        # Unknown Error tools
+        something_went_wrong_message = (
+            f"Sorry {const.Global.FeelsDankMan} Something went wrong {const.Global.FeelsDankMan} "
+            "but I've notified Irene about the error."
+        )
+
+        async def get_error_report_embed(ctx: IreContext) -> discord.Embed:
+            command_name = getattr(ctx.command, "name", "unknown")
+            embed = (
+                discord.Embed(
+                    colour=ctx.chatter.colour.code if ctx.chatter.colour else 0x890620,
+                    title=f"Command Error: `!{command_name}`",
+                )
+                .set_author(name=f"Chatter {ctx.chatter.display_name}", icon_url=(await ctx.chatter.user()).profile_image)
+                .set_footer(
+                    text=f"Channel: {ctx.broadcaster.display_name}", icon_url=(await ctx.broadcaster.user()).profile_image
+                )
+            )
+            return self.add_args_field(embed, "Command Args", ctx.kwargs)
+
         match error:
+            # MY CUSTOM ERRORS
             case errors.SilentError():
-                # Silently exit the error handler
                 return
-            case errors.IreBotError():
-                # errors defined by me - just send the string
+            case errors.RespondWithError():
                 await ctx.send(str(error))
+            case errors.PlaceholderError():
+                await ctx.send(something_went_wrong_message)
+                embed = await get_error_report_embed(ctx)
+                if error.data:
+                    embed = self.add_args_field(embed, f"Extra {error.__class__.__name__} Debug Data", error.data)
+                await self.exc_manager.register_error(error, embed=embed)
+
+            # TWITCHIO ERRORS
             case commands.CommandNotFound():
                 #  otherwise we just spam console with commands from other bots and from my event thing
                 log.info("CommandNotFound: %s", error)
@@ -452,47 +493,19 @@ class IreBot(commands.AutoBot):
             #     await ctx.send(str(error))
 
             case _:
-                await ctx.send(
-                    f"Sorry {const.Global.FeelsDankMan} "
-                    f"Something went wrong {const.Global.FeelsDankMan} "
-                    "but I've notified Irene about the error."
-                )
+                await ctx.send(something_went_wrong_message)
                 # await ctx.send(f"{error.__class__.__name__}: {replace_secrets(str(error))}")
-
-                command_name = getattr(ctx.command, "name", "unknown")
-
-                embed = (
-                    discord.Embed(
-                        colour=ctx.chatter.colour.code if ctx.chatter.colour else 0x890620,
-                        title=f"Error in `!{command_name}`",
-                    )
-                    .add_field(
-                        name="Command Args",
-                        value=(
-                            "```py\n" + "\n".join(f"[{name}]: {value!r}" for name, value in ctx.kwargs.items()) + "```"
-                            if ctx.kwargs
-                            else "```py\nNo arguments```"
-                        ),
-                        inline=False,
-                    )
-                    .set_author(
-                        name=ctx.chatter.display_name,
-                        icon_url=(await ctx.chatter.user()).profile_image,
-                    )
-                    .set_footer(
-                        text=f"event_command_error: {command_name}",
-                        icon_url=(await ctx.broadcaster.user()).profile_image,
-                    )
-                )
+                embed = await get_error_report_embed(ctx)
                 await self.exc_manager.register_error(error, embed=embed)
 
     @override
     async def event_error(self, payload: twitchio.EventErrorPayload) -> None:
         embed = (
-            discord.Embed()
+            discord.Embed(title=f"Event Error: `{payload.listener.__qualname__}`")
             .add_field(name="Exception", value=f"`{payload.error.__class__.__name__}`")
-            .set_footer(text=f"event_error: `{payload.listener.__qualname__}`")
         )
+        if isinstance(payload.error, errors.PlaceholderError) and payload.error.data:
+            embed = self.add_args_field(embed, f"Extra {payload.error.__class__.__name__} Debug Data", payload.error.data)
         await self.exc_manager.register_error(payload.error, embed=embed)
 
     # SHORTCUTS

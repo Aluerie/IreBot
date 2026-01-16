@@ -1,12 +1,4 @@
 CREATE TABLE
-    IF NOT EXISTS ttv_chat_commands (
-        command_name TEXT NOT NULL,
-        content TEXT NOT NULL,
-        streamer_id TEXT NOT NULL,
-        PRIMARY KEY (streamer_id, command_name)
-    );
-
-CREATE TABLE
     IF NOT EXISTS ttv_counters (
         name TEXT NOT NULL PRIMARY KEY,
         VALUE BIGINT DEFAULT (0)
