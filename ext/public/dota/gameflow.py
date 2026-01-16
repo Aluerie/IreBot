@@ -18,7 +18,6 @@ from bot import IrePublicComponent, ireloop
 from config import config
 from utils import const, errors, fmt, fuzzy, guards
 from utils.dota import constants as dota_constants, enums as dota_enums, utils as dota_utils
-from utils.dota.schemas.steam_web_api import RealTimeStatsResponse
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Coroutine
@@ -27,6 +26,7 @@ if TYPE_CHECKING:
 
     from bot import IreBot, IreContext
     from utils.dota import SteamUserUpdate
+    from utils.dota.schemas.steam_web_api import RealTimeStatsResponse
 
     type ActiveMatch = PlayMatch | WatchMatch | UnsupportedMatch
 
@@ -222,45 +222,65 @@ class Match:
                 raise errors.RespondWithError(msg)
             return player_slot
 
-        # Unfortunate - we have to use the fuzzy search
-        the_choice = (None, 0)
+        # Otherwise - we have to use the fuzzy search
 
-        # Step 1. let's look in more official identifiers such as colors or hero display names;
-        for player_slot, hero in enumerate(self.heroes):
-            identifiers = [dota_constants.PLAYER_COLORS[player_slot]]
-            if hero:
-                identifiers.extend([hero.name, hero.display_name])
+        # Step 1. Colors;
+        player_slot_choice = (None, 0)
+        for player_slot, color_aliases in dota_constants.COLOR_ALIASES.items():
             find = fuzzy.extract_one(
                 argument,
-                identifiers,
+                color_aliases,
                 scorer=fuzzy.quick_token_sort_ratio,
                 score_cutoff=49,
             )
-            if find and find[1] > the_choice[1]:
-                the_choice = (player_slot, find[1])
+            if find and find[1] > player_slot_choice[1]:
+                player_slot_choice = (player_slot, find[1])
 
         # Step 2. let's see if hero aliases can beat official
-        for player_slot, hero in enumerate(self.heroes):
-            if hero:
-                find = fuzzy.extract_one(
-                    argument,
-                    dota_constants.HERO_ALIASES.get(hero.id, []),
-                    scorer=fuzzy.quick_token_sort_ratio,
-                    score_cutoff=49,
-                )
-                if find and find[1] > the_choice[1]:
-                    the_choice = (player_slot, find[1])
+        hero_slot_choice = (None, 0)
+        # Sort the hero list so heroes in the match come first (i.e. so "es" alias triggers on a hero in the match)
+        for hero, hero_aliases in sorted(dota_constants.HERO_ALIASES.items(), key=lambda x: x in self.heroes, reverse=True):
+            find = fuzzy.extract_one(
+                argument,
+                hero_aliases,
+                scorer=fuzzy.quick_token_sort_ratio,
+                score_cutoff=49,
+            )
+            if find and find[1] > hero_slot_choice[1]:
+                hero_slot_choice = (hero, find[1])
 
-        # Back to the dict
-        player_slot = the_choice[0]
-        if player_slot is None:
-            msg = 'Sorry, didn\'t understand your query. Try something like "PA / 7 / Phantom Assassin / Blue".'
-            raise errors.RespondWithError(msg)
+        if player_slot_choice[1] > hero_slot_choice[1]:
+            # then color matched better
+            player_slot = player_slot_choice[0]
+            if player_slot is None:
+                msg = 'Sorry, didn\'t understand your query. Try something like "PA / 7 / Phantom Assassin / Blue".'
+                raise errors.RespondWithError(msg)
+        else:
+            # hero aliases matched better;
+            hero = hero_slot_choice[0]
+            if hero is None:
+                msg = 'Sorry, didn\'t understand your query. Try something like "PA / 7 / Phantom Assassin / Blue".'
+                raise errors.RespondWithError(msg)
+
+            try:
+                player_slot = self.heroes.index(hero)
+            except ValueError:
+                msg = f"Hero {hero} is not present in the match."
+                raise errors.RespondWithError(msg) from None
         return player_slot
 
     @format_match_response
+    async def profile(self, argument: str) -> str:
+        """Response for chat command !profile."""
+        if not self.players:
+            return "No player data yet."
+
+        player_slot = self.convert_argument_to_player_slot(argument)
+        return f"{self.heroes[player_slot]} stratz.com/players/{self.players[player_slot].friend_id}"
+
+    @format_match_response
     async def stats(self, argument: str) -> str:
-        """A response for chat command !stats."""
+        """Response for chat command !stats."""
         if not self.players:
             return "No player data yet."
         if self.server_steam_id is None:
@@ -271,6 +291,13 @@ class Match:
         player_slot = self.convert_argument_to_player_slot(argument)
 
         async def get_real_time_stats(server_steam_id: int) -> RealTimeStatsResponse:
+            """Get Real Time Stats from Steam Web API.
+
+            Warning
+            -------
+            For some reason, `pulsefire` clients are erroring out for this.
+            Maybe, worth investigating.
+            """
             url = (
                 "https://api.steampowered.com//IDOTA2MatchStats_570/GetRealtimeStats/v1/"
                 f"?key={config['TOKENS']['STEAM']}"
@@ -283,7 +310,7 @@ class Match:
             match = await get_real_time_stats(self.server_steam_id)
             if match:
                 break
-            # for some reason, sometimes it returns an empty dict `{}` (especially on the very first request)
+            # Sometimes it returns an empty dict `{}` (especially on the very first request)
             continue
         else:
             msg = "get_real_time_stats got an empty dict 3 times in a row"
@@ -306,9 +333,7 @@ class Match:
         cs = f"CS: {api_player['lh_count']}"
 
         items = ", ".join([str(await self.bot.dota.items.by_id(item)) for item in api_player["items"] if item != -1])
-        link = f"stratz.com/players/{api_player['accountid']}"
-
-        response_parts = (prefix, net_worth, kda, cs, items, link)
+        response_parts = (prefix, net_worth, kda, cs, items)
         return " \N{BULLET} ".join(response_parts)
 
     @format_match_response
@@ -731,7 +756,7 @@ class GameFlow(IrePublicComponent):
         response = await active_match.smurfs()
         await ctx.send(response)
 
-    @commands.command(aliases=["items", "item", "player"])
+    @commands.command(aliases=["items", "kda"])
     async def stats(self, ctx: IreContext, *, argument: str) -> None:
         """Fetch items and some profile data about a certain player in the game.
 
@@ -741,8 +766,18 @@ class GameFlow(IrePublicComponent):
         response = await active_match.stats(argument)
         await ctx.send(response)
 
+    @commands.command(aliases=["player"])
+    async def profile(self, ctx: IreContext, *, argument: str) -> None:
+        """Get a link to player stats profile.
+
+        `argument` can be a hero name, hero alias, player slot or colour.
+        """
+        active_match = await self.find_active_match(ctx.broadcaster.id)
+        response = await active_match.profile(argument)
+        await ctx.send(response)
+
     @stats.error
-    async def profile_error(self, payload: commands.CommandErrorPayload) -> None:
+    async def stats_error(self, payload: commands.CommandErrorPayload) -> None:
         """Error for !stats argument."""
         if isinstance(payload.exception, commands.MissingRequiredArgument):
             await payload.context.send(

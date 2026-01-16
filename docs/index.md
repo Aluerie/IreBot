@@ -27,11 +27,20 @@
   </tr>
   <tr>
     <td>Live Match Player Stats</td>
-    <td class="aliases-column">!stats<br/>!items<br/>!item<br/>!player</td>
+    <td class="aliases-column">!stats<br/>!items<br/>!kda</td>
     <td>
-      Fetch item and some profile data for a player in the current match (2 minutes delay).
+      Fetch live stats and items for a player in the current match (2 minutes delay).
       Note, you need to provide an argument for the command such as hero name, hero alias, player slot or player color.
       I.e. "!stats pa", "!stats blue", "!stats mireska", "!stats Templar Assassin".
+    </td>
+    <td><img src="./images/stats.png" alt="stats" width="1200"/></td>
+  </tr>
+  <tr>
+    <td>Player Stats Profiles</td>
+    <td class="aliases-column">!profile<br/>!player</td>
+    <td>
+      Show link to stats profile for a player.
+      Similarly to above, you need to provide an argument for the command such as hero name, alias; player slot or color.
     </td>
     <td><img src="./images/stats.png" alt="stats" width="1200"/></td>
   </tr>
