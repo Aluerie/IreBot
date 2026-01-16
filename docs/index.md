@@ -42,7 +42,7 @@
       Show link to stats profile for a player.
       Similarly to above, you need to provide an argument for the command such as hero name, alias; player slot or color.
     </td>
-    <td><img src="./images/stats.png" alt="stats" width="1200"/></td>
+    <td><img src="./images/profile.png" alt="profile" width="1200"/></td>
   </tr>
   <tr>
     <td>Notable players</td>
@@ -125,7 +125,7 @@
     <td>
       Show link to the streamer's stats profile page.
     </td>
-    <td><img src="./images/profile.png" alt="profile" width="1200"/></td>
+    <td><img src="./images/dotabuff.png" alt="dotabuff" width="1200"/></td>
   </tr>
   <tr>
     <td>Last Seen</td>
