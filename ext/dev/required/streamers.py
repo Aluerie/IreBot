@@ -61,8 +61,9 @@ class StreamerIndexManagement(IreDevComponent):
             # And nobody online, I guess;
             pass
         else:
-            for stream in await self.bot.fetch_streams(user_ids=user_ids):
-                streamer = self.bot.streamers[stream.id]
+            streams = await self.bot.fetch_streams(user_ids=user_ids)
+            for stream in streams:
+                streamer = self.bot.streamers[stream.user.id]
                 streamer.online = True
                 streamer.started_dt = stream.started_at
 
