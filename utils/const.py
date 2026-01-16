@@ -10,6 +10,9 @@ class UserID(StrEnum):
     Bot = "1277023540"  # @IrenesBot
     Aluerie = "1348167478"
 
+    # Not me
+    Xas = "101998257"
+
 
 class LowerName(StrEnum):
     """Known/special user names."""

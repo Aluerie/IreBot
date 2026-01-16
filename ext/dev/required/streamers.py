@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 __all__ = ("StreamerIndexManagement",)
 
 log = logging.getLogger(__name__)
-log.setLevel(logging.DEBUG)
+log.setLevel(logging.INFO)
 
 
 class StreamerIndexManagement(IreDevComponent):

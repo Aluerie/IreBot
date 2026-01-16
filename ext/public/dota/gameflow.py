@@ -13,7 +13,7 @@ from steam.ext.dota2 import GameMode, Hero, LobbyType, MatchOutcome, MinimalMatc
 from twitchio.ext import commands
 
 from bot import IrePublicComponent, ireloop
-from utils import errors, fmt, fuzzy
+from utils import const, errors, fmt, fuzzy, guards
 from utils.dota import constants as dota_constants, enums as dota_enums, utils as dota_utils
 
 if TYPE_CHECKING:
@@ -455,6 +455,17 @@ class SteamUserConverter(commands.Converter[Dota2User]):
             raise UserNotFound(argument) from None
 
 
+def is_allowed_to_add_notable() -> Any:
+    """Allow !np add to only be invoked by certain people."""
+
+    def predicate(ctx: IreContext) -> bool:
+        # Maybe we will edit this to be some proper dynamic database thing;
+        allowed_ids = (const.UserID.Irene, const.UserID.Aluerie, const.UserID.Xas)
+        return ctx.chatter.id in allowed_ids
+
+    return commands.guard(predicate)
+
+
 class GameFlow(IrePublicComponent):
     """#TODO."""
 
@@ -530,8 +541,8 @@ class GameFlow(IrePublicComponent):
                     if lobby_param0 == dota_enums.LobbyParam0.BotMatch:
                         friend.active_match = UnsupportedMatch(self.bot, tag="Private Lobbies are not supported")
                         return
-                    msg = "#todo"
-                    raise errors.PlaceholderError(msg)
+                    msg = f'Status is "Playing" but {watchable_game_id=}'
+                    raise errors.PlaceholderError(msg, raw_rich_presence=rp.raw)
                 if watchable_game_id == "0":
                     # something is off again
                     party_state = rp.raw.get("party")
@@ -540,8 +551,8 @@ class GameFlow(IrePublicComponent):
                         # let's pass to get a confirmation from other statuses (maybe wrong)
                         pass
                     else:
-                        msg = f'RP is "Playing" but {watchable_game_id=} and {party_state=}'
-                        raise errors.PlaceholderError(msg)
+                        msg = f'Status is "Playing" but {watchable_game_id=} and {party_state=}'
+                        raise errors.PlaceholderError(msg, raw_rich_presence=rp.raw)
 
                 if watchable_game_id not in self.play_matches_index:
                     self.play_matches_index[watchable_game_id] = PlayMatch(self.bot, watchable_game_id)
@@ -549,11 +560,10 @@ class GameFlow(IrePublicComponent):
 
             case dota_enums.Status.Spectating:
                 # Friend is spectating a match
-
                 watching_server = rp.raw.get("watching_server")
                 if watching_server is None:
-                    msg = f"RP is Playing but {watching_server=}"
-                    raise errors.PlaceholderError(msg)
+                    msg = f'Status is "Spectating" but {watching_server=}'
+                    raise errors.PlaceholderError(msg, raw_rich_presence=rp.raw)
 
                 if watching_server not in self.watch_matches_index:
                     self.watch_matches_index[watching_server] = WatchMatch(self.bot, watching_server)
@@ -1026,23 +1036,23 @@ class GameFlow(IrePublicComponent):
         await ctx.send(response)
 
     #################################
-    #       DEV ONLY COMMANDS       #
+    # SPECIAL PEOPLE ONLY COMMANDS  #
     #################################
 
-    @commands.is_owner()
-    @commands.group(name="notable-dev", invoke_fallback=True)
-    async def notable_dev(self, ctx: IreContext) -> None:
-        """A group command for the bot developer to manage list of notable players in the database."""
-        await ctx.send(
-            '"!notable-dev" is a group command: use it together with its subcommands, i.e. "!notable_dev add 123 Arteezy"'
-        )
-
     # Remember, group guards apply to children.
-    @notable_dev.command(name="add", aliases=["edit"])
-    async def notable_dev_add(
-        self, ctx: IreContext, steam_user: Annotated[Dota2User, SteamUserConverter], *, name: str
-    ) -> None:
-        """Add a notable player to the database."""
+    @is_allowed_to_add_notable()
+    @guards.is_vps()
+    @commands.group(name="npm", aliases=["np-dev"], invoke_fallback=True)
+    async def npm_dev(self, ctx: IreContext) -> None:
+        """A group command for the bot developer to manage list of notable players in the database."""
+        await ctx.send('"!npm" is a group command: use it together with its subcommands, i.e. "!npm add 123 Arteezy"')
+
+    @npm_dev.command(name="add", aliases=["edit"])
+    async def npm_dev_add(self, ctx: IreContext, steam_user: Annotated[Dota2User, SteamUserConverter], *, name: str) -> None:
+        """Add a notable player to the database.
+
+        This command is only available for certain group of people.
+        """
         query = """
             INSERT INTO ttv_dota_notable_players
             (friend_id, nickname)
@@ -1051,7 +1061,30 @@ class GameFlow(IrePublicComponent):
                 UPDATE SET nickname = $2;
         """
         await self.bot.pool.execute(query, steam_user.id, name)
-        await ctx.send(f"Added a new notable player (friend_id={steam_user.id}, name={name})")
+        await ctx.send(f"Added a new notable player <friend_id={steam_user.id}, name={name}>")
+
+    @npm_dev.command(name="help")
+    async def npm_dev_help(self, ctx: IreContext) -> None:
+        """Show small help for !np-dev commands."""
+        response = (
+            'To add a notable player into the database - use "!npm add 123 Arteezy" \N{BULLET} '
+            'To remove a player - use "!npm remove 123" where 123 is their friend_id.'
+        )
+        await ctx.send(response)
+
+    @npm_dev.command(name="remove")
+    async def npm_dev_remove(self, ctx: IreContext, friend_id: int) -> None:
+        """Add a notable player to the database.
+
+        This command is only available for certain group of people.
+        """
+        query = """
+            DELETE FROM ttv_dota_notable_players
+            WHERE friend_id = $1
+            RETURNING nickname;
+        """
+        name: str = await self.bot.pool.fetchval(query, friend_id)
+        await ctx.send(f"Removed player <friend_id={friend_id}, name={name}> from notable players.")
 
     #################################
     #          TASK CARE            #

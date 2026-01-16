@@ -1,13 +1,25 @@
+"""My custom guards.
+
+Notes
+-----
+1. Remember, group guards apply to children as well.
+2. Due to my weird implementation - each guard also needs an error message
+    defined directly in the `IreBot.event_command_error`
+"""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
 from twitchio.ext import commands
 
-from . import const, errors
-
 if TYPE_CHECKING:
     from bot import IreContext
+
+__all__ = (
+    "is_online",
+    "is_vps",
+)
 
 
 def is_vps() -> Any:
@@ -18,11 +30,8 @@ def is_vps() -> Any:
     """
 
     def predicate(ctx: IreContext) -> bool:
-        if ctx.bot.test:
-            # wrong PC
-            msg = f"Only production bot allows usage of this command {const.FFZ.peepoPolice}"
-            raise errors.RespondWithError(msg)
-        return True
+        # Still allow Irene to use the command during the testing;
+        return ctx.bot.test or ctx.chatter.id == ctx.bot.owner_id
 
     return commands.guard(predicate)
 

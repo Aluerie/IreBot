@@ -452,13 +452,14 @@ class IreBot(commands.AutoBot):
             case commands.CommandNotFound():
                 #  otherwise we just spam console with commands from other bots and from my event thing
                 log.info("CommandNotFound: %s", error)
+            case commands.CommandOnCooldown():
+                command_name = f"{ctx.prefix}{command.name}" if command else "this command"
+                await ctx.send(f"Command {command_name} is on cooldown! Try again in {error.remaining:.0f} sec.")
             case commands.GuardFailure():
                 guard_mapping = {
+                    # Default guards from `twitchio`, my custom guards should `raise RespondWithError`
                     "is_moderator.<locals>.predicate": (
                         f"Only moderators are allowed to use this command {const.FFZ.peepoPolice}"
-                    ),
-                    "is_vps.<locals>.predicate": (
-                        f"Only production bot allows usage of this command {const.FFZ.peepoPolice}"
                     ),
                     "is_owner.<locals>.predicate": (
                         f"Only Irene Adler is allowed to use this command {const.FFZ.peepoPolice}"
@@ -466,11 +467,20 @@ class IreBot(commands.AutoBot):
                     "is_broadcaster.<locals>.predicate": (
                         f"Only broadcaster is allowed to use this command {const.FFZ.peepoPolice}"
                     ),
+                    # My own guards
+                    "is_vps.<locals>.predicate": (
+                        "Sorry, this command is currently disabled "
+                        f"while Irene is testing some stuff {const.FFZ.peepoPolice}"
+                    ),
                     "is_online.<locals>.predicate": (
                         f"This commands is only allowed when stream is online {const.FFZ.peepoPolice}"
                     ),
+                    "is_allowed_to_add_notable.<locals>.predicate": (
+                        f"You are not allowed to add notable players into the bot's database {const.FFZ.peepoPolice}"
+                    ),
                 }
-                await ctx.send(guard_mapping.get(error.guard.__qualname__, str(error)))
+                unknown_guard_message = f"For some reason you are not allowed to use this command {const.FFZ.peepoPolice}"
+                await ctx.send(guard_mapping.get(error.guard.__qualname__, unknown_guard_message))
             case twitchio.HTTPException():
                 await ctx.send(
                     f"{error.__class__.__name__} - "
@@ -482,9 +492,6 @@ class IreBot(commands.AutoBot):
                 await ctx.send(
                     f'You need to provide "{error.param.name}" argument for this command {const.FFZ.peepoPolice}',
                 )
-            case commands.CommandOnCooldown():
-                command_name = f"{ctx.prefix}{command.name}" if command else "this command"
-                await ctx.send(f"Command {command_name} is on cooldown! Try again in {error.remaining:.0f} sec.")
 
             # case commands.BadArgument():
             #     log.warning("%s %s", error.name, error)
@@ -500,9 +507,8 @@ class IreBot(commands.AutoBot):
 
     @override
     async def event_error(self, payload: twitchio.EventErrorPayload) -> None:
-        embed = (
-            discord.Embed(title=f"Event Error: `{payload.listener.__qualname__}`")
-            .add_field(name="Exception", value=f"`{payload.error.__class__.__name__}`")
+        embed = discord.Embed(title=f"Event Error: `{payload.listener.__qualname__}`").add_field(
+            name="Exception", value=f"`{payload.error.__class__.__name__}`"
         )
         if isinstance(payload.error, errors.PlaceholderError) and payload.error.data:
             embed = self.add_args_field(embed, f"Extra {payload.error.__class__.__name__} Debug Data", payload.error.data)
