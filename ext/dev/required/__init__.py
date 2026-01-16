@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 class Required(
     StreamerIndexManagement,
 ):
-    """Components required for other bot components to work."""
+    """Components required for other bot components to function."""
 
 
 async def setup(bot: IreBot) -> None:

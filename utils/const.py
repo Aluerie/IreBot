@@ -9,8 +9,6 @@ class UserID(StrEnum):
     Irene = "180499648"
     Bot = "1277023540"  # @IrenesBot
     Aluerie = "1348167478"
-    # AuuBot = "1158666176"  # @AuuBot noqa: ERA001
-    # AlueBot = "519438249"  # @AlueBot noqa: ERA001
 
 
 class LowerName(StrEnum):
@@ -134,25 +132,23 @@ class Bots(StrEnum):
     Used to identify other bots' messages.
     Variable name is supposed to be their display name while
     the value is lowercase name for easier comparing.
-
-    I might enable these bots in the channel so let's keep them all here.
     """
 
-    # the commented bots are currently not invited to irene's channel
-    # commenting them for that extra nano-second performance gain when doing "chatter.name in const.Bots" check.
+    # Invited to Irene's channel;
+    IrenesBot = "irenesbot"
+    Supibot = "supibot"
+    WizeBot = "wizebot"
 
+    # Not invited to Irene's channel;
     # d9kmmrbot = "9kmmrbot"
     # dotabod = "dotabod"
     # Fossabot = "fossabot"
-    IrenesBot = "irenesbot"
     # LolRankBot = "lolrankbot"
     # Moobot = "moobot"
     # Nightbot = "nightbot"
     # Sery_Bot = "sery_bot"
     # StreamLabs = "streamlabs"
     # Streamelements = "streamelements"
-    Supibot = "supibot"
-    WizeBot = "wizebot"
 
 
 DIGITS = [

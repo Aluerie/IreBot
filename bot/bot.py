@@ -202,7 +202,9 @@ class IreBot(commands.AutoBot):
         self.pool: PoolTypedWithAny = pool
         self.scopes_only: bool = scopes_only
 
-        self.test: bool = platform.system() == "Windows"  # TODO: I don't like it;
+        # we use different credentials for some things depending on home/vps
+        self.test: bool = platform.system() == "Windows"
+
         self.modules_to_load: tuple[str, ...] = get_modules(test=self.test)
         self.exc_manager = ExceptionManager(self)
 

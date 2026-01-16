@@ -279,7 +279,7 @@ class Match:
                 api_player = team["players"][team_slot]
                 break
         else:
-            msg = "Didn't find the player's team info Oups"
+            msg = "Didn't find the player's team info"
             raise errors.PlaceholderRaiseError(msg)
 
         prefix = f"[2m delay] {api_player['name']} {Hero.try_value(api_player['heroid'])} lvl {api_player['level']}"
