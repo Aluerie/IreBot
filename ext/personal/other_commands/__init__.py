@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from .custom import CustomCommands
 from .stable import StableCommands
 from .temporary import TemporaryCommands
 
@@ -11,7 +10,6 @@ if TYPE_CHECKING:
 
 
 class OtherCommands(
-    CustomCommands,
     StableCommands,
     TemporaryCommands,
 ):
