@@ -953,7 +953,7 @@ class GameFlow(IrePublicComponent):
 
     async def score_response_helper(self, broadcaster_id: str, stream_started_at: datetime.datetime | None = None) -> str:
         """#TODO."""
-        clause = "AND m.start_time < $2" if stream_started_at else ""
+        clause = "AND m.start_time > $2" if stream_started_at else ""
         query = f"""
             SELECT d.friend_id, m.start_time, m.lobby_type, m.game_mode, m.outcome, p.is_radiant, p.abandon
             FROM ttv_dota_completed_matches m

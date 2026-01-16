@@ -32,6 +32,7 @@ def convert_id3_to_id64(steam_id3: str) -> int:
 
 
 def rank_medal_display_name(profile_card: ProfileCard) -> str:
+    """Get human-readable rank medal string out of player's Dota 2 Profile Card."""
     display_name = profile_card.rank_tier.division
     if stars := profile_card.rank_tier.stars:
         display_name += f" \N{BLACK STAR}{stars}"

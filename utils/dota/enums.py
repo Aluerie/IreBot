@@ -4,7 +4,7 @@ from enum import IntEnum, StrEnum
 from typing import TYPE_CHECKING, Self, override
 
 from steam.enums import Enum, classproperty
-from steam.ext.dota2 import GameMode, LobbyType, MatchOutcome
+from steam.ext.dota2 import GameMode, LobbyType
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
