@@ -15,6 +15,7 @@ from steam.ext.dota2 import GameMode, Hero, LobbyType, MatchOutcome, MinimalMatc
 from twitchio.ext import commands
 
 from bot import IrePublicComponent, ireloop
+from config import config
 from utils import const, errors, fmt, fuzzy, guards
 from utils.dota import constants as dota_constants, enums as dota_enums, utils as dota_utils
 
@@ -262,16 +263,24 @@ class Match:
         if not self.players:
             return "No player data yet."
         if self.server_steam_id is None:
-            return "This match doesn't support real_time_stats"
+            return "This match doesn't support real time stats"
 
         player_slot = self.convert_argument_to_player_slot(argument)
 
         try:
-            match = await self.bot.dota.steam_web_api.get_real_time_stats(self.server_steam_id)
+            url = (
+                "https://api.steampowered.com//IDOTA2MatchStats_570/GetRealtimeStats/v1/"
+                f"?key={config['TOKENS']['STEAM']}"
+                f"&server_steam_id={self.server_steam_id}"
+            )
+            async with self.bot.session.get(url=url) as resp:
+                match = await resp.json()
+
+            # match = await self.bot.dota.steam_web_api.get_real_time_stats(self.server_steam_id)
         except Exception as exc:
             log.exception("!items errored out at `get_real_time_stats` step", exc_info=exc)
             if self.lobby_type == LobbyType.NewPlayerMode:
-                return "New Player Mode matches do not support `real_time_stats`."
+                return "New Player Mode matches do not support real time stats."
             return "Failed to get `real_time_stats` for this match."
 
         team_ord = int(player_slot > 4)  # team_ord = 1 for Radiant, 2 for Dire
