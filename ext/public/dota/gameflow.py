@@ -239,7 +239,9 @@ class Match:
         # Step 2. let's see if hero aliases can beat official
         hero_slot_choice = (None, 0)
         # Sort the hero list so heroes in the match come first (i.e. so "es" alias triggers on a hero in the match)
-        for hero, hero_aliases in sorted(dota_constants.HERO_ALIASES.items(), key=lambda x: x in self.heroes, reverse=True):
+        for hero, hero_aliases in sorted(
+            dota_constants.HERO_ALIASES.items(), key=lambda x: x[0] in self.heroes, reverse=True
+        ):
             find = fuzzy.extract_one(
                 argument,
                 hero_aliases,
@@ -249,18 +251,17 @@ class Match:
             if find and find[1] > hero_slot_choice[1]:
                 hero_slot_choice = (hero, find[1])
 
+        error_message = 'Sorry, didn\'t understand your query. Try something like "PA / 7 / Phantom Assassin / Blue".'
         if player_slot_choice[1] > hero_slot_choice[1]:
             # then color matched better
             player_slot = player_slot_choice[0]
             if player_slot is None:
-                msg = 'Sorry, didn\'t understand your query. Try something like "PA / 7 / Phantom Assassin / Blue".'
-                raise errors.RespondWithError(msg)
+                raise errors.RespondWithError(error_message)
         else:
             # hero aliases matched better;
             hero = hero_slot_choice[0]
             if hero is None:
-                msg = 'Sorry, didn\'t understand your query. Try something like "PA / 7 / Phantom Assassin / Blue".'
-                raise errors.RespondWithError(msg)
+                raise errors.RespondWithError(error_message)
 
             try:
                 player_slot = self.heroes.index(hero)
@@ -715,7 +716,7 @@ class GameFlow(IrePublicComponent):
             return friend
 
         if not self.bot._friends_index_ready.is_set():
-            msg = "Bot's Dota 2 functionality is not fully loaded in. Please, wait a bit."
+            msg = "Bot is restarting. Dota 2 features are not ready yet. Please, wait a bit."
             raise errors.RespondWithError(msg)
 
         msg = "Couldn't find streamer's steam account in my friends uuh"
