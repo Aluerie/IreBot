@@ -2,25 +2,149 @@
 
 ## 1. Dota 2
 
-| Command Name | Chat Aliases | Description | Showcase ([7tv emote set](https://7tv.app/emote-sets/01JS1XW1PAAKP34984FDYZVDR7) on) |
-| :--- | :--- | :--- | :--- |
-| Game Medals | !gm | Show players' rank medals in the current game. | <img src="./images/gm.png" alt="gm" width="1100"/> |
-| Ranked | !ranked | Show whether the current game is ranked or not. | <img src="./images/ranked.png" alt="ranked" width="1100"/> |
-| Lifetime Games | !smurfs !lifetime | Show amount of games players in the current game have played on their accounts in total. | <img src="./images/lifetime.png" alt="lifetime" width="1100"/> |
-| Stats | !stats !items !item !player | Fetch item and some profile data about a certain player in the current game (2 minutes delay). Note that you need to provide an argument for the command such as hero name, hero alias, player slot or color (i.e. !stats pa, !stats blue. !stats mireska !stats Templar Assassin). | <img src="./images/stats.png" alt="stats" width="1100"/> |
-| Match ID | !match_id !matchid | Show match id for the current game. | <img src="./images/matchid.png" alt="matchid" width="1100"/> |
-| Notable players | !notable !np | Show notable players from the current game. This includes pro-players, streamers, twitch chatters. Honestly, everybody is welcome to be added as a notable player. | --- |
-| Played With | !lg !lm !played | Show recurring players from the last game present in the current game. | --- |
-| Previous Match | !pm | Show a short summary for the previous match results. | <img src="./images/pm.png" alt="pm" width="1100"/> |
-| Score | !wl !score !winloss | Show streamer's win - loss score ratio during the stream. | <img src="./images/score.png" alt="score" width="1100"/> |
-| Offline score | !wl offline | Show win - loss ratio for the last streamer's gaming session but also include offline games. | <img src="./images/score.png" alt="score" width="1100"/> |
-| MMR | !mmr | Show streamer's mmr tracked in the bot database (according to their match history). It is not accurate. | <img src="./images/mmr.png" alt="mmr" width="1100"/> |
-| Set MMR | !mmr set | (Streamer's only command) Allows for streamers to manually update mmr in the bot's database. | --- |
-| Profile | !dotabuff !stratz !opendota | Show link to streamer's stats profile page | <img src="./images/profile.png" alt="profile" width="1100"/> |
-| Last Seen | !lastseen | Show which account the bot has spotted you playing Dota 2 last on. The bot considers this account as "active" for the purposes of the commands above | <img src="./images/lastseen.png" alt="lastseen" width="1100"/> |
+<table>
+  <tr>
+    <th>Command Name</th>
+    <th class="aliases-column">Chat Aliases</th>
+    <th>Description</th>
+    <th>Showcase (<a href="[url](https://7tv.app/emote-sets/01JS1XW1PAAKP34984FDYZVDR7)">7tv emote set</a> on)</th>
+  </tr>
+  <tr>
+    <td>Game Medals</td>
+    <td class="aliases-column">!gm</td>
+    <td>
+      Show rank medal for each players in the match.
+    </td>
+    <td><img src="./images/gm.png" alt="gm" width="1200"/></td>
+  </tr>
+  <tr>
+    <td>Ranked</td>
+    <td class="aliases-column">!ranked</td>
+    <td>
+      Show whether the current match is ranked or not.
+    </td>
+    <td><img src="./images/ranked.png" alt="ranked" width="1200"/></td>
+  </tr>
+  <tr>
+    <td>Lifetime Games</td>
+    <td class="aliases-column">!smurfs !lifetime</td>
+    <td>
+      Show total games played for each player in the match.
+    </td>
+    <td><img src="./images/lifetime.png" alt="lifetime" width="1200"/></td>
+  </tr>
+  <tr>
+    <td>Live Match Player Stats</td>
+    <td class="aliases-column">!stats !items !item !player</td>
+    <td>
+      Fetch item and some profile data for a player in the current match (2 minutes delay).
+      Note, you need to provide an argument for the command such as hero name, hero alias, player slot or player color.
+      I.e. "!stats pa", "!stats blue", "!stats mireska", "!stats Templar Assassin".
+    </td>
+    <td><img src="./images/stats.png" alt="stats" width="1200"/></td>
+  </tr>
+  <tr>
+    <td>Match ID</td>
+    <td class="aliases-column">!match_id !matchid</td>
+    <td>
+      Show match id for the current game.
+    </td>
+    <td><img src="./images/matchid.png" alt="matchid" width="1200"/></td>
+  </tr>
+  <tr>
+    <td>Notable players</td>
+    <td class="aliases-column">!notable !np</td>
+    <td>
+      Show notable players in the match.
+      This includes pro-players, streamers, twitch chatters.
+      Honestly, everybody is welcome to be added as a notable player.
+    </td>
+    <td><img src="./images/notable.png" alt="notable" width="1200"/></td>
+  </tr>
+  <tr>
+    <td>Played with in Last Game</td>
+    <td class="aliases-column">!lg !lm !played</td>
+    <td>
+      Show recurring players from the last game present in the current game.
+    </td>
+    <td>---</td>
+  </tr>
+  <tr>
+    <td>Previous Match Results</td>
+    <td class="aliases-column">!pm</td>
+    <td>
+      Show a short summary for the previous match results.
+    </td>
+    <td><img src="./images/pm.png" alt="pm" width="1200"/></td>
+  </tr>
+  <tr>
+    <td>Win Loss Ratio</td>
+    <td class="aliases-column">!wl !score !winloss</td>
+    <td>
+      Show streamer's win - loss score ratio during the live-stream.
+    </td>
+    <td><img src="./images/score.png" alt="score" width="1200"/></td>
+  </tr>
+  <tr>
+    <td>Offline Win Loss Ratio</td>
+    <td class="aliases-column">!wl offline</td>
+    <td>
+      Show win - loss ratio for the last streamer's gaming session but also include offline games.
+    </td>
+    <td><img src="./images/score.png" alt="score" width="1200"/></td>
+  </tr>
+  <tr>
+    <td>MMR</td>
+    <td class="aliases-column">!mmr</td>
+    <td>
+      Show streamer's mmr tracked in the bot database (according to their match history).
+      It is not accurate.
+    </td>
+    <td><img src="./images/mmr.png" alt="mmr" width="1200"/></td>
+  </tr>
+  <tr>
+    <td>Set MMR</td>
+    <td class="aliases-column">!mmr set</td>
+    <td>
+      (Streamer's only command) Allows for streamers to manually update their MMR in the bot's database.
+    </td>
+    <td>---</td>
+  </tr>
+  <tr>
+    <td>Stats Profile</td>
+    <td class="aliases-column">!dotabuff !stratz !opendota</td>
+    <td>
+      Show link to the streamer's stats profile page.
+    </td>
+    <td><img src="./images/profile.png" alt="profile" width="1200"/></td>
+  </tr>
+  <tr>
+    <td>Last Seen</td>
+    <td class="aliases-column">!lastseen</td>
+    <td>
+      Show which account the bot has spotted you playing Dota 2 last on.
+      The bot considers this account as "active" for the purposes of the commands above.
+    </td>
+    <td><img src="./images/lastseen.png" alt="lastseen" width="1200"/></td>
+  </tr>
+</table>
 
 ## 2. Meta
 
-| Command Name | Chat Aliases | Description |
-| Commands List | !commands !help | Show link to this page |
-| Irene | !irene | <img src="./images/FeelsDankMan.png" alt="FeelsDankMan" width="64"/> |
+<table>
+  <tr>
+    <th>Command Name</th>
+    <th class="aliases-column">Chat Aliases</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>Commands List</td>
+    <td class="aliases-column">!commands !help</td>
+    <td>Show link to this page</td>
+  </tr>
+  <tr>
+    <td>Irene</td>
+    <td class="aliases-column">!irene</td>
+    <td><img src="./images/FeelsDankMan.png" alt="FeelsDankMan" width="64"/></td>
+  </tr>
+</table>

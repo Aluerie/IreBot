@@ -314,7 +314,7 @@ class Match:
         nickname_mapping = {row["friend_id"]: row["nickname"] for row in rows}
 
         response_parts = [
-            f"{hero if hero else player.color} {nick}"
+            f"{nick} as {hero if hero else player.color}"
             for player, hero in zip(self.players, self.heroes, strict=False)
             if (nick := nickname_mapping.get(player.friend_id))
         ]
@@ -375,7 +375,7 @@ class PlayMatch(Match):
             return "No player data yet."
 
         last_game_hero_player_index: dict[int, Hero] = {p.id: p.hero for p in last_game.players}
-        last_game_hero_player_index.pop(friend_id)  # remove the streamer themselves
+        last_game_hero_player_index.pop(friend_id, None)  # remove the streamer themselves
 
         response_parts = [
             f"{hero if hero else player.color} as {last_game_played_as}"
