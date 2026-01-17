@@ -53,7 +53,7 @@ class TimeDeltaFormat(IntEnum):
 
 
 def timedelta_to_words(
-    delta: datetime.timedelta = MISSING,
+    timedelta: datetime.timedelta = MISSING,
     seconds: int = MISSING,
     *,
     accuracy: int = 2,
@@ -63,7 +63,7 @@ def timedelta_to_words(
 
     Parameters
     ----------
-    delta: datetime.timedelta = MISSING
+    timedelta: datetime.timedelta = MISSING
         Time delta to convert to words (as datetime.timedelta type)
     seconds: int = MISSING
         Time delta to convert to words (as integer amount of seconds).
@@ -82,17 +82,17 @@ def timedelta_to_words(
 
     Example:
     -------
-        ```
-        x = datetime.timedelta(seconds=66)
-        timedelta_to_words(x)  # "1 minute 6 seconds"
-        ```
+    ```
+    x = datetime.timedelta(seconds=66)
+    timedelta_to_words(x)  # "1 minute 6 seconds"
+    ```
     """
-    if delta is not MISSING and seconds is not MISSING:
+    if timedelta is not MISSING and seconds is not MISSING:
         msg = "Cannot mix `delta` and `seconds` keyword arguments."
         raise TypeError(msg)
 
-    if delta:
-        total_seconds = int(delta.total_seconds())
+    if timedelta:
+        total_seconds = int(timedelta.total_seconds())
     elif seconds:
         total_seconds = seconds
     else:
@@ -105,17 +105,17 @@ def timedelta_to_words(
 
     match fmt:
         case TimeDeltaFormat.Full:  # 1 minute 6 seconds
-            timeunit_dict = {"day": days, "hour": hours, "minute": minutes, "second": seconds}
-            output = [format(plural(number), word) for word, number in timeunit_dict.items() if number]
+            time_units = {"day": days, "hour": hours, "minute": minutes, "second": seconds}
+            output = [format(plural(number), word) for word, number in time_units.items() if number]
             return " ".join(output[:accuracy])
         case TimeDeltaFormat.Short:  # 1 min 30 sec
-            timeunit_dict = {"day(-s)": days, "hr": hours, "min": minutes, "sec": seconds}
-            output = [f"{number} {short}" for short, number in timeunit_dict.items() if number]
+            time_units = {"day(-s)": days, "hr": hours, "min": minutes, "sec": seconds}
+            output = [f"{number} {short}" for short, number in time_units.items() if number]
             return " ".join(output[:accuracy])
         case TimeDeltaFormat.Letter:  # 1m30s
-            timeunit_dict = {"d": days, "h": hours, "m": minutes, "s": seconds}
-            output = [f"{number}{letter}" for letter, number in timeunit_dict.items() if number]
-            return "".join(output[:accuracy])
+            time_units = {"d": days, "h": hours, "m": minutes, "s": seconds}
+            output = [f"{number:02d}{letter}" for letter, number in time_units.items() if number]
+            return "".join(output[:accuracy]).removeprefix("0")  # remove leading zero if it managed to sneak in
 
 
 def ordinal(n: int | str) -> str:
