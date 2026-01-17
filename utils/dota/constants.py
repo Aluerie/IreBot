@@ -3,33 +3,16 @@
 Just a separate file for Dota only constants.
 
 HERO ALIASES.
-
 The list mainly for !profile/!items command where for example people can just write "!items CM"
 and the bot will send Crystal Maiden items.
 
 The list includes mostly
-* abreviations ("cm")
+* abbreviations ("cm")
 * persona names ("wei")
 * dota 1 names ("traxex")
+* official names
 * short forms of any from above ("cent")
 
-This list doesn't include
-* official names because the bot gets them from Hero enum at `steam.ext.dota2`
-
-The list was created using:
-* Stratz aliases data:
-    query HeroAliases {
-        constants {
-            heroes {
-            id
-                aliases
-            }
-        }
-    }
-* tsunami's https://chatwheel.howdoiplay.com/ list
-* my personal ideas
-* my chatters help
-* dotabod alias list https://github.com/dotabod/backend/blob/master/packages/dota/src/dota/lib/heroes.ts
 """
 
 from steam.ext.dota2 import Hero
@@ -66,7 +49,7 @@ HERO_ALIASES = {
     Hero.DragonKnight: ["dk", "davion", "dragon knight"],
     Hero.DrowRanger: ["traxex", "drow", "drow ranger"],
     Hero.EarthSpirit: ["es", "kaolin", "earth", "earth spirit"],
-    Hero.Earthshaker: ["es", "raigor", "earthshaker"],
+    Hero.Earthshaker: ["es", "earthshaker"],
     Hero.ElderTitan: ["et", "elder titan"],
     Hero.EmberSpirit: ["xin", "ember", "es", "ember spirit"],
     Hero.Enchantress: ["ench", "enchantress"],
@@ -74,7 +57,7 @@ HERO_ALIASES = {
     Hero.FacelessVoid: ["fv", "faceless void"],
     Hero.Grimstroke: ["grim", "grimstroke"],
     Hero.Gyrocopter: ["gyro", "gyrocopter"],
-    Hero.Hoodwink: ["hood", "hoodwink"],
+    Hero.Hoodwink: ["hood", "hw", "hoodwink"],
     Hero.Huskar: ["huskar"],
     Hero.Invoker: ["invo", "invoker"],
     Hero.Io: ["wisp", "io"],
@@ -90,14 +73,14 @@ HERO_ALIASES = {
     Hero.Lifestealer: ["ls", "naix", "lifestealer"],
     Hero.Lina: ["slayer", "lina"],
     Hero.Lion: ["demon witch", "lion"],
-    Hero.LoneDruid: ["ld", "bear", "lone druid"],
+    Hero.LoneDruid: ["ld", "lone druid"],
     Hero.Luna: ["moon rider", "luna"],
     Hero.Lycan: ["lycan"],
     Hero.Magnus: ["mag", "magnus"],
     Hero.Marci: ["marci"],
     Hero.Mars: ["mars"],
-    Hero.Medusa: ["medusa", "gorgon"],
-    Hero.Meepo: ["geomancer", "meepo"],
+    Hero.Medusa: ["medusa"],
+    Hero.Meepo: ["meepo"],
     Hero.Mirana: ["potm", "mirana"],
     Hero.MonkeyKing: ["mk", "wukong", "monkey king"],
     Hero.Morphling: ["morph", "morphling"],
@@ -187,7 +170,7 @@ COLOR_ALIASES = {
     4: ["orange"],
     5: ["pink"],
     6: ["olive", "grey"],  # it was originally grey in WC3, but idk, it's easy to confuse with lightblue I feel like.
-    7: ["lightblue"],
-    8: ["darkgreen"],
+    7: ["lightblue", "white"],
+    8: ["darkgreen", "green"],
     9: ["brown"],
 }
