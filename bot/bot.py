@@ -18,7 +18,7 @@ from twitchio.ext import commands
 from twitchio.web import StarletteAdapter
 
 from config import config
-from ext import get_modules
+from modules import get_modules
 from utils import const, errors
 from utils.dota import Dota2Client
 

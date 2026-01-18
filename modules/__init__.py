@@ -19,7 +19,7 @@ log = logging.getLogger(__name__)
 log.setLevel(logging.INFO)
 
 DISABLED_MODULES: tuple[str, ...] = (
-    # extensions that should not be loaded
+    # modules that should not be loaded
     "ext.beta",
     # currently disabled
     # "ext.public.dota",
@@ -27,7 +27,7 @@ DISABLED_MODULES: tuple[str, ...] = (
 
 
 def get_modules(*, test: bool) -> tuple[str, ...]:
-    """Get list of bot extensions to load.
+    """Get list of bot modules to load.
 
     Returns
     -------
@@ -42,15 +42,15 @@ def get_modules(*, test: bool) -> tuple[str, ...]:
 
     # assume running full bot functionality (besides `DISABLED_EXTENSIONS`)
     current_folder = str(__package__)
-    extensions: tuple[str, ...] = ()
+    modules: tuple[str, ...] = ()
     ext_categories = [path for path in Path(current_folder).iterdir() if path.is_dir() and not path.name.startswith("_")]
     for ext_category in ext_categories:
         # Personal and Public extensions
-        extensions += tuple(
+        modules += tuple(
             module.name
             for module in iter_modules([ext_category.absolute()], prefix=f"{__package__}.{ext_category.name}.")
             if module.name not in DISABLED_MODULES
         )
 
-    log.debug("The list of extensions (%s total) to load: %s", len(extensions), extensions)
-    return extensions
+    log.debug("The list of extensions (%s total) to load: %s", len(modules), modules)
+    return modules
