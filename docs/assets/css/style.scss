@@ -1,12 +1,13 @@
---- 
---- 
+---
+---
 /* What do these --- mean, why everything breaks
 if they are not in this state:
 ---
 ---
-And why VSCode formatting always breaks them ?!
+And why VSCode formatting always breaks them into --- --- ?!
 */
 
+// For original values look https://github.com/pages-themes/cayman/blob/master/_sass/jekyll-theme-cayman.scss
 
 // Breakpoints
 $large-breakpoint: 64em;
@@ -38,6 +39,7 @@ $hr-border-color: #eff0f1 !default;
 body {
     background-color: #0d1117;
 }
+
 .main-content {
     min-width: 96rem;
     max-width: 96rem;
@@ -59,18 +61,35 @@ body {
     margin-bottom: 0.1rem;
 
     @include large {
-        font-size: 2.75rem;
+        font-size: 2.9rem;
     }
 
     @include medium {
-        font-size: 1.75rem;
+        font-size: 1.9rem;
     }
 
     @include small {
-        font-size: 1.25rem;
+        font-size: 1.4rem;
     }
 }
 
 .aliases-column {
     background-color: rgba(92, 6, 81, 0.473);
+}
+
+.my-footer-text {
+    margin-top: 0;
+    margin-bottom: 0.1rem;
+
+    @include large {
+        font-size: 1.7rem;
+    }
+
+    @include medium {
+        font-size: 0.85rem;
+    }
+
+    @include small {
+        font-size: 0.43rem;
+    }
 }

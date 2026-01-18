@@ -2,11 +2,8 @@ from __future__ import annotations
 
 import asyncio
 import datetime
-import importlib.metadata
 import logging
 import random
-import sys
-import unicodedata
 from typing import TYPE_CHECKING, NamedTuple, TypedDict
 
 import twitchio  # noqa: TC002
@@ -95,9 +92,8 @@ async def translate(
 class StableCommands(IrePersonalComponent):
     """Stable commands.
 
-    Stable in a sense that unlike commands in `temporary.py` or `custom.py` with their dynamic commands
-    These are supposed to stay with us for a long time.
-    But they couldn't be categorized into other extensions.
+    Stable in a sense that unlike commands in `temporary.py`
+    these commands are unlikely to be axed  for a long time.
 
     Notes
     -----
@@ -109,28 +105,6 @@ class StableCommands(IrePersonalComponent):
     async def boink(self, ctx: IreContext) -> None:
         """Send an announcement for an obligatory boink."""
         await ctx.send_announcement(content=f"it's time to boink {const.STV.Boink}", color="purple")
-
-    @commands.command(aliases=["char"])
-    async def charinfo(self, ctx: IreContext, *, characters: str) -> None:
-        """Shows information about character(-s).
-
-        Only up to a 10 characters at a time though.
-
-        Parameters
-        ----------
-        characters
-            Input up to 10 characters to get format info about.
-
-        """
-
-        def to_string(c: str) -> str:
-            name = unicodedata.name(c, None)
-            return f"\\N{{{name}}}" if name else "Name not found."
-
-        names = " ".join(to_string(c) for c in characters[:10])
-        if len(characters) > 10:
-            names += "(Output was too long: displaying only first 10 chars)"
-        await ctx.send(names)
 
     @guards.is_online()
     @commands.command()
@@ -327,17 +301,6 @@ class StableCommands(IrePersonalComponent):
                 reason="Lost in !russianroulette",
             )
 
-    @commands.command()  # maybe the name "since" isn't the best but "uptime", "online" are already taken
-    async def since(self, ctx: IreContext) -> None:
-        """🔬 Get the bot's uptime.
-
-        Uptime is time for which the bot has been online without any crashes or reboots.
-        """
-        await ctx.send(
-            f"Last reboot {self.bot.launch_time.strftime('%H:%M %d/%b/%y')}; "
-            f"It's been {fmt.timedelta_to_words(datetime.datetime.now(datetime.UTC) - self.bot.launch_time)}."
-        )
-
     @guards.is_online()
     @commands.is_moderator()
     @commands.command(aliases=["so"])
@@ -374,11 +337,6 @@ class StableCommands(IrePersonalComponent):
         await ctx.send(answer)
 
     @commands.command()
-    async def source(self, ctx: IreContext) -> None:
-        """Get the link to the bot's GitHub repository."""
-        await ctx.send(f"github.com/Aluerie/IreBot {const.STV.DankReading}")
-
-    @commands.command()
     async def translate(self, ctx: IreContext, *, text: str) -> None:
         """Translate given text to English.
 
@@ -392,11 +350,6 @@ class StableCommands(IrePersonalComponent):
         result = await translate(text, session=self.bot.session)
         answer = f"{const.STV.ApuBritish} [{result.source_lang} to {result.target_lang}] {result.translated}"
         await ctx.send(answer)
-
-    @commands.command(aliases=["id", "twitchid"])
-    async def twitch_id(self, ctx: IreContext, *, user: twitchio.User) -> None:
-        """Get mentioned @user numeric twitch_id."""
-        await ctx.send(f"Twitch ID for {user.mention}: {user.id}")
 
     @commands.command()
     async def uptime(self, ctx: IreContext) -> None:
@@ -424,19 +377,6 @@ class StableCommands(IrePersonalComponent):
                 duration=1,
                 reason="Used !vanish",
             )
-
-    @commands.command(aliases=["version", "packages", "libraries"])
-    async def versions(self, ctx: IreContext) -> None:
-        """🔬 Get info bot's main Python Packages."""
-        curious_packages = [
-            "twitchio",
-        ]  # list of packages versions of which I'm interested the most
-        pv = sys.version_info  # python version
-
-        await ctx.send(
-            f"Python {pv.major}.{pv.minor}.{pv.micro} | "
-            + " | ".join(f"{package}: {importlib.metadata.version(package)}" for package in curious_packages)
-        )
 
     @commands.command()
     async def vods(self, ctx: IreContext) -> None:

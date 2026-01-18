@@ -45,14 +45,10 @@ class MetaCommands(IrePublicComponent):
         """
         await ctx.send("\N{TABLE TENNIS PADDLE AND BALL} Pong!")
 
-    @commands.is_owner()
     @commands.command()
-    async def say(self, ctx: IreContext, *, message: str) -> None:
-        """Make the bot repeat your message.
-
-        Useful for making showcase of bot commands with slight edits.
-        """
-        await ctx.send(message)
+    async def source(self, ctx: IreContext) -> None:
+        """Get the link to the bot's GitHub repository."""
+        await ctx.send("github.com/Aluerie/IreBot")
 
 
 async def setup(bot: IreBot) -> None:

@@ -146,19 +146,25 @@
   </tr>
 </table>
 
-### Notes and tips
+### Tip for merging 7tv emote sets
 
-* To make bot responses look like in the "Showcase" column you can merge your main 7tv emote set with <a href="https://7tv.app/emote-sets/01JS1XW1PAAKP34984FDYZVDR7">Dota 2 emote set</a> using a tool like [potat.app/help/mergeset](<https://potat.app/help/mergeset>). Some short instructions for @PotatBotat:
-  * Add @PotatBotat to your channel
-  * Give it 7tv editor role, allow it to `Create Emote Sets` in addition to default permissions.
-  * Use `#mergeset <Primary set ID> 01JS1XW1PAAKP34984FDYZVDR7` where the second argument is an ID for the mentioned Dota 2 emote set.
-  * You can find your `<Primary set ID>` by copying the last part of the URL to your own main emote set.
-  * @PotatBotat will create a new emote set trying to merge the provided ones. If there is more then 1000 emotes in total - some emotes from the 2nd set won't make it.
-  * Now you can switch between your main set and a merged version.
-* Unfortunately, due to implementation specifics currently for Dota 2 features to work:
+To make bot responses look like in the "Showcase" column you can add those emotes quickly to your channel by merging your main 7tv emote set with the <a href="https://7tv.app/emote-sets/01JS1XW1PAAKP34984FDYZVDR7">Dota 2 emote set</a> using a tool like [potat.app/help/mergeset](<https://potat.app/help/mergeset>). Some short instructions for @PotatBotat specifically:
+
+* Add @PotatBotat to your channel;
+* Give it 7tv editor role, allow it to `Create Emote Sets` in addition to default permissions;
+* Use `#mergeset <Primary set ID> 01JS1XW1PAAKP34984FDYZVDR7` where the second argument is an ID for the mentioned Dota 2 emote set;
+* You can find your `<Primary set ID>` by copying the last part of the URL to your own main emote set;
+* @PotatBotat will create a new emote set trying to merge the provided ones; if there is more then 1000 emotes in total - some emotes from the 2nd set won't make it;
+* Now you can switch between your main set and a merged version;
+
+### Dota 2 bot functionality restrictions
+
+Unfortunately, due to implementation specifics currently for Dota 2 features to work:
+
   1. You need to add the bot's steam accounts to friends.
   2. You also need to be green-online 🟢 in Dota 2 (and have rich presence visible to friends) for the bot to be able to see your status live.
-* PS. Another implementation for these features (using Dota 2 Game State Integration) is coming soon™️. It won't have mentioned restrictions but you will have to put a `.cfg` file into the Dota 2 directory.
+
+PS. Another implementation for these features (using Dota 2 Game State Integration) is coming soon™️. It won't have mentioned restrictions but you will have to put a `.cfg` file into the Dota 2 directory.
 
 ## 2. Meta
 
@@ -172,6 +178,11 @@
     <td>Commands List</td>
     <td class="aliases-column">!commands<br/>!help<br/>!irenesbot</td>
     <td>Show link to this page.</td>
+    <tr>
+    <td>Source Code</td>
+    <td class="aliases-column">!source<br/>!github</td>
+    <td><a href="https://github.com/Aluerie/IreBot">github.com/Aluerie/IreBot</a></td>
+  </tr>
   </tr>
   <tr>
     <td>Irene</td>

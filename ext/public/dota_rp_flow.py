@@ -175,13 +175,16 @@ class Match:
         self.heroes_data_ready: asyncio.Event = asyncio.Event()
 
     def _is_players_data_ready(self) -> bool:
+        """A condition to check whether match player data is filled properly."""
         return bool(self.game_mode) and len(self.players) == 10
 
     def _is_heroes_data_ready(self) -> bool:
+        """A condition to check whether match hero data is filled properly."""
         return bool(self.heroes) and all(bool(hero) for hero in self.heroes)
 
     @format_match_response
     async def game_medals(self) -> str:
+        """Response for !gm command."""
         if not self.players:
             return "No players data yet."
 
@@ -193,6 +196,7 @@ class Match:
 
     @format_match_response
     async def ranked(self) -> str:
+        """Response for !ranked command."""
         if not self.lobby_type or not self.game_mode:
             return "No lobby data yet."
 
@@ -201,6 +205,7 @@ class Match:
 
     @format_match_response
     async def smurfs(self) -> str:
+        """Response for !smurfs command."""
         if not self.players:
             return "No players data yet."
 
@@ -214,6 +219,13 @@ class Match:
         return "Lifetime Games: " + " \N{BULLET} ".join(response_parts)
 
     def convert_argument_to_player_slot(self, argument: str) -> int:
+        """Convert command argument provided by user (twitch chatter) into a player_slot in the match.
+
+        It supports
+        * player slot as digits;
+        * player colors;
+        * hero aliases (which include hero localized names, abbreviations and some common nicknames);
+        """
         if argument.isdigit():
             # then the user typed only a number and our life is easy because it is a player slot
             player_slot = int(argument) - 1
@@ -227,12 +239,7 @@ class Match:
         # Step 1. Colors;
         player_slot_choice = (None, 0)
         for player_slot, color_aliases in dota_constants.COLOR_ALIASES.items():
-            find = fuzzy.extract_one(
-                argument,
-                color_aliases,
-                scorer=fuzzy.quick_token_sort_ratio,
-                score_cutoff=49,
-            )
+            find = fuzzy.extract_one(argument, color_aliases, scorer=fuzzy.quick_token_sort_ratio, score_cutoff=49)
             if find and find[1] > player_slot_choice[1]:
                 player_slot_choice = (player_slot, find[1])
 
@@ -242,12 +249,7 @@ class Match:
         for hero, hero_aliases in sorted(
             dota_constants.HERO_ALIASES.items(), key=lambda x: x[0] in self.heroes, reverse=True
         ):
-            find = fuzzy.extract_one(
-                argument,
-                hero_aliases,
-                scorer=fuzzy.quick_token_sort_ratio,
-                score_cutoff=49,
-            )
+            find = fuzzy.extract_one(argument, hero_aliases, scorer=fuzzy.quick_token_sort_ratio, score_cutoff=49)
             if find and find[1] > hero_slot_choice[1]:
                 hero_slot_choice = (hero, find[1])
 
@@ -272,7 +274,7 @@ class Match:
 
     @format_match_response
     async def profile(self, argument: str) -> str:
-        """Response for chat command !profile."""
+        """Response for !profile command."""
         if not self.players:
             return "No player data yet."
 
@@ -281,7 +283,7 @@ class Match:
 
     @format_match_response
     async def stats(self, argument: str) -> str:
-        """Response for chat command !stats."""
+        """Response for !stats command."""
         if not self.players:
             return "No player data yet."
         if self.server_steam_id is None:
@@ -294,8 +296,8 @@ class Match:
         async def get_real_time_stats(server_steam_id: int) -> RealTimeStatsResponse:
             """Get Real Time Stats from Steam Web API.
 
-            Warning
-            -------
+            Disclaimer
+            ----------
             For some reason, `pulsefire` clients are erroring out for this.
             Maybe, worth investigating.
             """
@@ -322,15 +324,6 @@ class Match:
         team_slot = player_slot - 5 * team_ord  # 0 1 2 3 4 for Radiant, 5 6 7 8 9 for Dire
         api_player = match["teams"][team_ord]["players"][team_slot]
 
-        # todo: wtf why did i made this: remove if it works
-        # for team in match["teams"]:
-        #     if team["team_number"] == team_ord + 2:  # team_number = 2 for Radiant, 3 for Dire
-        #         api_player = team["players"][team_slot]
-        #         break
-        # else:
-        #     msg = "Didn't find the player's team info"
-        #     raise errors.PlaceholderError(msg)
-
         prefix = f"[2m delay] {api_player['name']} {Hero.try_value(api_player['heroid'])} lvl {api_player['level']}"
         net_worth = f"NW: {api_player['net_worth']}"
         kda = f"{api_player['kill_count']}/{api_player['death_count']}/{api_player['assists_count']}"
@@ -342,10 +335,12 @@ class Match:
 
     @format_match_response
     async def match_id_command(self) -> str:
+        """Response for !match_id command."""
         return str(self.match_id)
 
     @format_match_response
     async def notable_players(self) -> str:
+        """Response for !notable command."""
         if not self.players:
             return "No player data yet."
 
@@ -829,7 +824,7 @@ class GameFlow(IrePublicComponent):
         """
         row = await self.bot.pool.fetchrow(query, broadcaster_id)
         if not row:
-            msg = "No last game found: it seems streamer hasn't played Dota 2 in a while"
+            msg = "No last game found: streamer hasn't played Dota 2 in the last 2 days"
             raise errors.RespondWithError(msg)
         last_game = await self.bot.dota.create_partial_match(row["match_id"]).minimal()
         return row["friend_id"], row["hero_id"], last_game
@@ -880,7 +875,12 @@ class GameFlow(IrePublicComponent):
     #################################
 
     async def add_completed_match_to_database(self, match: MatchHistoryMatch, friend_id: int) -> None:
-        """#TODO."""
+        """#TODO.
+
+        Development Notes
+        -----------------
+        * We use match history endpoint specifically
+        """
         if match.start_time < datetime.datetime.now(datetime.UTC) - datetime.timedelta(hours=48):
             # Match is way too old to care
             return
@@ -975,7 +975,15 @@ class GameFlow(IrePublicComponent):
 
     @ireloop(seconds=20)
     async def process_pending_matches(self) -> None:
-        """Process pending matches."""
+        """Process pending matches.
+
+        Development Notes
+        -----------------
+        * We use match history endpoint specifically because it has `.abandon` attribute.
+            So if we remove that quirk - we can probably be fine with just "minimal_match" data.
+        * Another option is to use opendota api (stratz is too slow -
+            they don't allow access to data until full parse is done)
+        """
         log.debug("Processing pending matches.")
 
         for friend_id, pending_matches in self.pending_matches.items():
@@ -1046,6 +1054,9 @@ class GameFlow(IrePublicComponent):
             elif row["abandon"]:
                 scores[2] += 1
 
+        if len(index) == 0:
+            return "0 W - 0 L" if stream_started_at else "0 W - 0 L (No games played in the last 2 days)"
+
         def format_results(results: list[int]) -> str:
             abandons = f", Abandons: {a}" if (a := results[2]) else ""
             return f"{results[1]} W - {results[0]} L" + abandons
@@ -1057,8 +1068,7 @@ class GameFlow(IrePublicComponent):
             )
             for friend_id, scores in index.items()
         }
-        if len(index) == 0:
-            return "0 W - 0 L"
+
         return " \N{LARGE PURPLE CIRCLE} ".join(
             # Let's make extra query to know name accounts
             f"{u.name if (u := self.bot.dota.get_user(friend_id)) else friend_id}: {part}"
@@ -1135,7 +1145,8 @@ class GameFlow(IrePublicComponent):
         delta = datetime.datetime.now(datetime.UTC) - last_seen
         response = (
             f"{friend.steam_user.name} id={friend.steam_user.id} status={friend.rich_presence.status} - "
-            f"last seen green online in Dota 2 {fmt.timedelta_to_words(delta, fmt=fmt.TimeDeltaFormat.Letter)} ago"
+            f"last changed their status {fmt.timedelta_to_words(delta, fmt=fmt.TimeDeltaFormat.Letter)} ago "
+            "(while being green-online in Dota 2)"
         )
         await ctx.send(response)
 
@@ -1148,7 +1159,7 @@ class GameFlow(IrePublicComponent):
             hero = Hero.create_from_npc_dota_hero_name(npc_hero_name.removeprefix("#"))
             response = url_parse.quote(f"dota2protracker.com/hero/{hero.display_name}")
         else:
-            response = "The streamer hasn't picked a hero yet."
+            response = "The streamer has not picked a hero yet."
         await ctx.send(response)
 
     #################################

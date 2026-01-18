@@ -9,16 +9,16 @@ __all__ = ("get_modules",)
 try:
     import _test
 
-    TEST_EXTENSIONS = _test.TEST_EXTENSIONS
-    USE_ALL_EXTENSIONS = _test.USE_ALL_EXTENSIONS
+    TEST_MODULES = _test.TEST_MODULES
+    USE_ALL_MODULES = _test.USE_ALL_MODULES
 except ModuleNotFoundError:
-    TEST_EXTENSIONS: tuple[str, ...] = ()  # type: ignore[ConstantRedefinition]
-    USE_ALL_EXTENSIONS: bool = True  # type: ignore[reportConstantRedefinition]
+    TEST_MODULES: tuple[str, ...] = ()  # type: ignore[ConstantRedefinition]
+    USE_ALL_MODULES: bool = True  # type: ignore[reportConstantRedefinition]
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.INFO)
 
-DISABLED_EXTENSIONS: tuple[str, ...] = (
+DISABLED_MODULES: tuple[str, ...] = (
     # extensions that should not be loaded
     "ext.beta",
     # currently disabled
@@ -36,9 +36,9 @@ def get_modules(*, test: bool) -> tuple[str, ...]:
         The extensions are given in a full dot form.
         Example: `('ext.personal.chatter', 'ext.personal.dev', 'ext.personal.other_commands', 'ext.personal.stream', )`
     """
-    if test and not USE_ALL_EXTENSIONS:
+    if test and not USE_ALL_MODULES:
         # assume testing specific extensions from `_test.py`
-        return TEST_EXTENSIONS
+        return TEST_MODULES
 
     # assume running full bot functionality (besides `DISABLED_EXTENSIONS`)
     current_folder = str(__package__)
@@ -49,7 +49,7 @@ def get_modules(*, test: bool) -> tuple[str, ...]:
         extensions += tuple(
             module.name
             for module in iter_modules([ext_category.absolute()], prefix=f"{__package__}.{ext_category.name}.")
-            if module.name not in DISABLED_EXTENSIONS
+            if module.name not in DISABLED_MODULES
         )
 
     log.debug("The list of extensions (%s total) to load: %s", len(extensions), extensions)
