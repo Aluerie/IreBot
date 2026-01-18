@@ -85,10 +85,11 @@ class RichPresence:
 
 class Friend:
     def __init__(self, bot: IreBot, steam_user: Dota2SteamUser) -> None:
-        self.bot: IreBot = bot
+        self._bot: IreBot = bot
         self.steam_user: Dota2SteamUser = steam_user
         self.rich_presence: RichPresence = RichPresence(steam_user.rich_presence)
         self.active_match: PlayMatch | WatchMatch | UnsupportedMatch | None = None
+        self.pending_matches: dict[int, PlayMatch] = {}
 
     @override
     def __repr__(self) -> str:
@@ -373,6 +374,10 @@ class PlayMatch(Match):
 
         self.update_data.start()
 
+    @override
+    def __hash__(self) -> int:
+        return self.match_id or super().__hash__()
+
     @ireloop(seconds=10.1, count=30)
     async def update_data(self) -> None:
         log.debug('Updating %s data for watchable_game_id "%s"', self.__class__.__name__, self.watchable_game_id)
@@ -614,21 +619,14 @@ class GameFlow(IrePublicComponent):
 
                     if lobby_param0 == dota_enums.LobbyParam0.DemoMode:
                         friend.active_match = UnsupportedMatch(self.bot, tag="Demo mode is not supported")
-                        return
                     if lobby_param0 == dota_enums.LobbyParam0.BotMatch:
-                        friend.active_match = UnsupportedMatch(self.bot, tag="Private Lobbies are not supported")
-                        return
-                    msg = f'Status is "Playing" but {watchable_game_id=}'
-                    raise errors.PlaceholderError(msg, raw_rich_presence=rp.raw)
+                        friend.active_match = UnsupportedMatch(self.bot, tag="Bot matches are not supported")
+                    return
                 if watchable_game_id == "0":
                     # something is off again
-                    party_state = rp.raw.get("party")
-                    if party_state and "party_state: UI" in party_state:
-                        # hacky but this is what happens when we quit the match into main menu sometimes
-                        # let's return to get a confirmation from other statuses (maybe wrong)
-                        return
-                    msg = f'Status is "Playing" but {watchable_game_id=} and {party_state=}'
-                    raise errors.PlaceholderError(msg, raw_rich_presence=rp.raw)
+                    # usually this happens when a player has just quit the match into the main menu
+                    # the status flickers for a few seconds to be `watchable_game_id=0`
+                    return
 
                 if watchable_game_id not in self.play_matches_index:
                     self.play_matches_index[watchable_game_id] = PlayMatch(self.bot, watchable_game_id)
@@ -681,7 +679,6 @@ class GameFlow(IrePublicComponent):
     def add_active_match_to_pending(self, friend: Friend) -> None:
         """#TODO."""
         if (match := friend.active_match) and isinstance(match, PlayMatch) and match.match_id:
-            self.pending_matches.setdefault(friend.steam_user.id, set()).add(match.match_id)
 
         if self.pending_matches and not self.process_pending_matches.is_running():
             self.process_pending_matches.start()
