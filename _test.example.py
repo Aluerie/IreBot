@@ -1,25 +1,25 @@
 TEST_MODULES: tuple[str, ...] = (
-    "ext.dev.required",
+    "modules.dev.required",
     # 1. BETA
-    "ext.beta",
+    "modules.beta",
     # 2. Testing components
     #
     # 2.1. DEV
-    "ext.dev.control",
-    "ext.dev.other",
-    # "ext.dev.required",
-    "ext.dev.webhook_logs",
+    "modules.dev.control",
+    "modules.dev.other",
+    # "modules.dev.required",
+    "modules.dev.webhook_logs",
     # 2.2. PERSONAL
-    "ext.personal.alerts",
-    "ext.personal.counters",
-    "ext.personal.edit_information",
-    "ext.personal.emotes_check",
-    "ext.personal.keywords",
-    "ext.personal.stable",
-    "ext.personal.temporary",
-    "ext.personal.timers",
+    "modules.personal.alerts",
+    "modules.personal.counters",
+    "modules.personal.edit_information",
+    "modules.personal.emotes_check",
+    "modules.personal.keywords",
+    "modules.personal.stable",
+    "modules.personal.temporary",
+    "modules.personal.timers",
     # 2.3. PUBLIC
-    "ext.public.dota_rp_flow",
-    "ext.public.meta",
+    "modules.public.dota_rp_flow",
+    "modules.public.meta",
 )
 USE_ALL_MODULES = True

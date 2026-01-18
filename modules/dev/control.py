@@ -15,9 +15,12 @@ if TYPE_CHECKING:
 log = logging.getLogger(__name__)
 
 
-def to_extension(_: IreContext, extension: str) -> str:
-    """Just a shortcut to add `ext.` so I can use command like this `!reload emotes_check`."""
-    return f"ext.{extension}"
+def to_module(_: IreContext, module: str) -> str:
+    """Just a shortcut to add `modules.` prefix to user input.
+
+    So I can use command like this `!reload personal.emotes_check`.
+    """
+    return f"modules.{module}"
 
 
 class Control(IreDevComponent):
@@ -58,22 +61,22 @@ class Control(IreDevComponent):
             await ctx.send("Something went wrong.")
 
     @commands.command()
-    async def unload(self, ctx: IreContext, *, extension: Annotated[str, to_extension]) -> None:
-        """Unload the extension."""
-        await self.bot.unload_module(extension)
-        await ctx.send(f"{const.STV.DankApprove} unloaded {extension}")
+    async def unload(self, ctx: IreContext, *, modules: Annotated[str, to_module]) -> None:
+        """Unload the modules."""
+        await self.bot.unload_module(modules)
+        await ctx.send(f"{const.STV.DankApprove} unloaded {modules}")
 
     @commands.command()
-    async def reload(self, ctx: IreContext, *, extension: Annotated[str, to_extension]) -> None:
-        """Reload the extension."""
-        await self.bot.reload_module(extension)
-        await ctx.send(f"{const.STV.DankApprove} reloaded {extension}")
+    async def reload(self, ctx: IreContext, *, modules: Annotated[str, to_module]) -> None:
+        """Reload the modules."""
+        await self.bot.reload_module(modules)
+        await ctx.send(f"{const.STV.DankApprove} reloaded {modules}")
 
     @commands.command()
-    async def load(self, ctx: IreContext, *, extension: Annotated[str, to_extension]) -> None:
-        """Load the extension."""
-        await self.bot.load_module(extension)
-        await ctx.send(f"{const.STV.DankApprove} loaded {extension}")
+    async def load(self, ctx: IreContext, *, modules: Annotated[str, to_module]) -> None:
+        """Load the modules."""
+        await self.bot.load_module(modules)
+        await ctx.send(f"{const.STV.DankApprove} loaded {modules}")
 
     @commands.command(name="modules", aliases=["extensions", "components"])  # module != component but whatever
     async def list_modules(self, ctx: IreContext) -> None:
@@ -81,22 +84,22 @@ class Control(IreDevComponent):
 
         Examples
         --------
-        * "ext.personal.dev ext.public.states"
+        * "modules.personal.dev modules.public.states"
         """
         index = {"personal": [], "public": [], "dev": [], "other": []}
         for module in ctx.bot.modules.values():
             name = module.__name__
             for category in ("public", "personal", "dev"):
-                if name.startswith(f"ext.{category}."):
-                    index[category].append(name.removeprefix(f"ext.{category}."))
+                if name.startswith(f"modules.{category}."):
+                    index[category].append(name.removeprefix(f"modules.{category}."))
                     break
             else:
-                index["other"].append(name.removeprefix("ext."))
+                index["other"].append(name.removeprefix("modules."))
 
         response = f" {const.STV.DankDolmes} ".join(f"{c}: {', '.join(m)}" for c, m in index.items() if m)
         await ctx.send(response)
 
 
 async def setup(bot: IreBot) -> None:
-    """Load IreBot extension. Framework of twitchio."""
+    """Load IreBot module. Framework of twitchio."""
     await bot.add_component(Control(bot))

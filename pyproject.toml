@@ -226,7 +226,7 @@ unfixable = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"ext/beta.py" = ["ANN201"]
+"modules/beta.py" = ["ANN201"]
 "*.ipynb" = ["ANN204", "D", "DOC", "ERA001", "F404", "T20", "W391"]
 "scripts/*.py" = ["D"]
 

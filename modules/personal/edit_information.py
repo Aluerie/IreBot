@@ -256,5 +256,5 @@ class EditInformation(IrePersonalComponent):
 
 
 async def setup(bot: IreBot) -> None:
-    """Load IreBot extension. Framework of twitchio."""
+    """Load IreBot module. Framework of twitchio."""
     await bot.add_component(EditInformation(bot))

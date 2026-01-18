@@ -150,6 +150,6 @@ class LogsViaWebhook(IreDevComponent):
 
 
 async def setup(bot: IreBot) -> None:
-    """Load IreBot extension. Framework of twitchio."""
+    """Load IreBot module. Framework of twitchio."""
     cog = LogsViaWebhook(bot)
     await bot.add_component(cog)

@@ -20,9 +20,9 @@ log.setLevel(logging.INFO)
 
 DISABLED_MODULES: tuple[str, ...] = (
     # modules that should not be loaded
-    "ext.beta",
+    "modules.beta",
     # currently disabled
-    # "ext.public.dota",
+    # "modules.public.dota",
 )
 
 
@@ -32,25 +32,25 @@ def get_modules(*, test: bool) -> tuple[str, ...]:
     Returns
     -------
     tuple[str, ...]
-        Tuple of extensions for the bot to load.
-        The extensions are given in a full dot form.
-        Example: `('ext.personal.chatter', 'ext.personal.dev', 'ext.personal.other_commands', 'ext.personal.stream', )`
+        Tuple of modules for the bot to load.
+        The modules are given in a full dot form.
+        Example: `('modules.personal.alerts', 'modules.dev.control', 'modules.public.dota_rp_flow', )`
     """
     if test and not USE_ALL_MODULES:
-        # assume testing specific extensions from `_test.py`
+        # assume testing specific modules from `_test.py`
         return TEST_MODULES
 
-    # assume running full bot functionality (besides `DISABLED_EXTENSIONS`)
+    # assume running full bot functionality (besides `DISABLED_MODULES`)
     current_folder = str(__package__)
     modules: tuple[str, ...] = ()
-    ext_categories = [path for path in Path(current_folder).iterdir() if path.is_dir() and not path.name.startswith("_")]
-    for ext_category in ext_categories:
-        # Personal and Public extensions
+    module_categories = [path for path in Path(current_folder).iterdir() if path.is_dir() and not path.name.startswith("_")]
+    for module_category in module_categories:
+        # Personal and Public modules
         modules += tuple(
             module.name
-            for module in iter_modules([ext_category.absolute()], prefix=f"{__package__}.{ext_category.name}.")
+            for module in iter_modules([module_category.absolute()], prefix=f"{__package__}.{module_category.name}.")
             if module.name not in DISABLED_MODULES
         )
 
-    log.debug("The list of extensions (%s total) to load: %s", len(modules), modules)
+    log.debug("The list of modules (%s total) to load: %s", len(modules), modules)
     return modules

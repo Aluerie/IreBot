@@ -288,7 +288,7 @@ class IreBot(commands.AutoBot):
         """
         if self.scopes_only:
             msg = (
-                "Scopes Only Mode: print oauth urls and start the bot in adapter-only mode (no extensions/commands enabled)."
+                "Scopes Only Mode: print oauth urls and start the bot in adapter-only mode (no modules enabled)."
                 "\n"
                 f"{self.show_bot_oauth()}\n"
                 f"{self.show_personal_oauth()}\n"
@@ -296,9 +296,9 @@ class IreBot(commands.AutoBot):
             )
             log.warning(msg)
         else:
-            for ext in self.modules_to_load:
-                log.debug("Loading module %s", ext)
-                await self.load_module(ext)
+            for module in self.modules_to_load:
+                log.debug("Loading module %s", module)
+                await self.load_module(module)
 
     @override
     async def event_oauth_authorized(self, payload: twitchio.authentication.UserTokenPayload) -> None:
@@ -361,7 +361,7 @@ class IreBot(commands.AutoBot):
 
     @override
     async def start(self) -> None:
-        if "ext.public.dota" in self.modules_to_load:
+        if "modules.public.dota_rp_flow" in self.modules_to_load:
             self.dota = Dota2Client(self)
             # try:
             await asyncio.gather(
