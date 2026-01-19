@@ -706,11 +706,15 @@ class GameFlow(IrePublicComponent):
         await self.analyze_rich_presence(friend)
 
     async def conclude_friend_match(self, friend: Friend) -> None:
-        """#TODO."""
+        """Conclude match as finished for a friend.
+
+        This nulls `Friend.active_match` attribute as well as adds the match into the database
+        if it's a play match.
+        """
         if (match := friend.active_match) and isinstance(match, PlayMatch) and match.match_id:
             player_slot = next(iter(s for (s, p) in enumerate(match.players) if p.friend_id == friend.steam_user.id), None)
             if player_slot is None:
-                msg = "Somehow `player_slot` is `None` in `add_active_match_to_pending"
+                msg = "Somehow `player_slot` is `None` in `conclude_friend_match`"
                 raise errors.PlaceholderError(msg)
             hero = match.heroes[player_slot]
             query = """
@@ -722,10 +726,10 @@ class GameFlow(IrePublicComponent):
             """
             await self.bot.pool.execute(query, friend.steam_user.id, match.match_id, hero.id, player_slot < 5)
 
-            friend.active_match = None
-
             if not self.process_pending_matches.is_running():
                 self.process_pending_matches.start()
+
+        friend.active_match = None
 
     #################################
     # ACTIVE MATCH RELATED COMMANDS #
@@ -947,7 +951,7 @@ class GameFlow(IrePublicComponent):
             await self.bot.pool.execute(query, mmr_delta, friend_id)
 
     async def add_completed_match_to_database(self, match: MatchHistoryMatch, friend_id: int) -> None:
-        """#TODO.
+        """Add matches from match history check loop into the database.
 
         Development Notes
         -----------------
@@ -1101,7 +1105,7 @@ class GameFlow(IrePublicComponent):
     #################################
 
     async def score_response_helper(self, broadcaster_id: str, stream_started_at: datetime.datetime | None = None) -> str:
-        """#TODO."""
+        """Helper function to get !wl commands response."""
         clause = "AND m.start_time > $2" if stream_started_at else ""
         query = f"""
             SELECT d.friend_id, m.start_time, m.lobby_type, m.game_mode, m.outcome, p.player_slot, p.abandon
