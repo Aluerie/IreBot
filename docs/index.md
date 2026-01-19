@@ -129,7 +129,7 @@
   </tr>
   <tr>
     <td>Last Seen</td>
-    <td class="aliases-column">!lastseen</td>
+    <td class="aliases-column">!lastseen<br/>!status</td>
     <td>
       Show which account the bot has spotted you playing Dota 2 last on.
       The bot considers this account as "active" for the purposes of the commands above.

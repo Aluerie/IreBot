@@ -10,6 +10,7 @@ from operator import attrgetter
 from typing import TYPE_CHECKING, Annotated, Any, TypedDict, override
 from urllib import parse as url_parse
 
+import orjson
 import steam
 from steam.ext.dota2 import GameMode, Hero, LobbyType, MatchOutcome, MinimalMatch, User as Dota2User
 from twitchio.ext import commands
@@ -35,8 +36,8 @@ if TYPE_CHECKING:
         start_time: datetime.datetime
         lobby_type: int
         game_mode: int
-        outcome: int
-        is_radiant: bool
+        outcome: int | None
+        player_slot: int
         abandon: bool
 
     class NotablePlayersQueryRow(TypedDict):
@@ -48,6 +49,14 @@ __all__ = ("GameFlow",)
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
+
+
+@dataclass
+class Score:
+    wins: int
+    losses: int
+    abandons: int
+    pending: int
 
 
 class RichPresence:
@@ -89,7 +98,6 @@ class Friend:
         self.steam_user: Dota2SteamUser = steam_user
         self.rich_presence: RichPresence = RichPresence(steam_user.rich_presence)
         self.active_match: PlayMatch | WatchMatch | UnsupportedMatch | None = None
-        self.pending_matches: dict[int, PlayMatch] = {}
 
     @override
     def __repr__(self) -> str:
@@ -308,7 +316,7 @@ class Match:
                 f"&server_steam_id={server_steam_id}"
             )
             async with self.bot.session.get(url=url) as resp:
-                return await resp.json()
+                return await resp.json(loads=orjson.loads)
 
         for _ in range(5):
             match = await get_real_time_stats(self.server_steam_id)
@@ -410,6 +418,15 @@ class PlayMatch(Match):
                 log.debug('%s heroes data ready for: "%s"', self.__class__.__name__, self.watchable_game_id)
 
         if self.players_data_ready.is_set() and self.heroes_data_ready.is_set():
+            # add to the database
+            query = """
+                INSERT INTO ttv_dota_matches
+                (match_id, start_time, lobby_time, game_mode)
+                VALUES ($1, $2, $3, $4)
+                ON CONFLICT (match_id)
+                    DO NOTHING;
+            """
+            await self.bot.pool.execute(query, self.match_id, match.start_time, self.lobby_type, self.game_mode)
             self.update_data.stop()
 
     @override
@@ -541,7 +558,6 @@ class GameFlow(IrePublicComponent):
         super().__init__(bot)
         self.friends: dict[int, Friend] = {}
 
-        self.pending_matches: dict[int, set[int]] = {}
         self.play_matches_index: dict[str, PlayMatch] = {}
         self.watch_matches_index: dict[str, WatchMatch] = {}
 
@@ -606,8 +622,7 @@ class GameFlow(IrePublicComponent):
         match rp.status:
             case dota_enums.Status.Idle | dota_enums.Status.MainMenu | dota_enums.Status.Finding:
                 # Friend is in a Main Menu
-                self.add_active_match_to_pending(friend)
-                friend.active_match = None
+                await self.conclude_friend_match(friend)
 
             case dota_enums.Status.HeroSelection | dota_enums.Status.Strategy | dota_enums.Status.Playing:
                 # Friend is in a match as a player
@@ -619,7 +634,7 @@ class GameFlow(IrePublicComponent):
 
                     if lobby_param0 == dota_enums.LobbyParam0.DemoMode:
                         friend.active_match = UnsupportedMatch(self.bot, tag="Demo mode is not supported")
-                    if lobby_param0 == dota_enums.LobbyParam0.BotMatch:
+                    elif lobby_param0 == dota_enums.LobbyParam0.BotMatch:
                         friend.active_match = UnsupportedMatch(self.bot, tag="Bot matches are not supported")
                     return
                 if watchable_game_id == "0":
@@ -636,6 +651,7 @@ class GameFlow(IrePublicComponent):
                 # Friend is spectating a match
                 watching_server = rp.raw.get("watching_server")
                 if watching_server is None:
+                    # something is off
                     friend.active_match = UnsupportedMatch(self.bot, tag="Watching replays is not supported")
                     return
 
@@ -650,9 +666,8 @@ class GameFlow(IrePublicComponent):
                     rp.status.value,
                     rp.raw,
                 )
-                # Let's assume that other statuses = not Dota
-                self.add_active_match_to_pending(friend)
-                friend.active_match = None
+                # Let's assume that other statuses = not active match Dota
+                await self.conclude_friend_match(friend)
 
     # @commands.Component.listener("steam_user_update")
     async def steam_user_update(self, update: SteamUserUpdate) -> None:
@@ -676,12 +691,27 @@ class GameFlow(IrePublicComponent):
         log.debug("Recognized rich presence update for %s: %s", repr(friend), repr(friend.rich_presence))
         await self.analyze_rich_presence(friend)
 
-    def add_active_match_to_pending(self, friend: Friend) -> None:
+    async def conclude_friend_match(self, friend: Friend) -> None:
         """#TODO."""
         if (match := friend.active_match) and isinstance(match, PlayMatch) and match.match_id:
+            player_slot = next(iter(s for (s, p) in enumerate(match.players) if p.friend_id == friend.steam_user.id), None)
+            if player_slot is None:
+                msg = "Somehow `player_slot` is `None` in `add_active_match_to_pending"
+                raise errors.PlaceholderError(msg)
+            hero = match.heroes[player_slot]
+            query = """
+                INSERT INTO ttv_dota_match_players
+                (friend_id, match_id, hero_id, is_radiant)
+                VALUES ($1, $2, $3, $4)
+                ON CONFLICT (friend_id, match_id)
+                    DO NOTHING
+            """
+            await self.bot.pool.execute(query, friend.steam_user.id, match.match_id, hero.id, player_slot < 5)
 
-        if self.pending_matches and not self.process_pending_matches.is_running():
-            self.process_pending_matches.start()
+            friend.active_match = None
+
+            if not self.process_pending_matches.is_running():
+                self.process_pending_matches.start()
 
     #################################
     # ACTIVE MATCH RELATED COMMANDS #
@@ -812,8 +842,8 @@ class GameFlow(IrePublicComponent):
         """
         query = """
             SELECT p.match_id, p.friend_id, p.hero_id
-            FROM ttv_dota_completed_matches m
-            JOIN ttv_dota_completed_match_players p ON m.match_id = p.match_id
+            FROM ttv_dota_matches m
+            JOIN ttv_dota_match_players p ON m.match_id = p.match_id
             JOIN ttv_dota_accounts a ON a.friend_id = p.friend_id
             WHERE a.twitch_id = $1
             ORDER BY m.start_time DESC
@@ -871,6 +901,30 @@ class GameFlow(IrePublicComponent):
     #       COMPLETED MATCHES       #
     #################################
 
+    async def update_mmr(self, *, friend_id: int, lobby_type: int, player_slot: int, outcome: int, is_abandon: bool) -> None:
+        """Update MMR for friend under friend_id."""
+        if lobby_type != LobbyType.Ranked:
+            return
+        if outcome >= MatchOutcome.NotScoredPoorNetworkConditions:
+            return
+
+        if is_abandon:
+            mmr_delta = -25
+        elif outcome == MatchOutcome.RadiantVictory:
+            mmr_delta = 25 if player_slot < 5 else -25
+        elif outcome == MatchOutcome.DireVictory:
+            mmr_delta = 25 if player_slot > 4 else -25
+        else:
+            mmr_delta = 0
+
+        if mmr_delta:
+            query = """
+                UPDATE ttv_dota_accounts
+                SET estimated_mmr = estimated_mmr + $1
+                WHERE friend_id = $2;
+            """
+            await self.bot.pool.execute(query, mmr_delta, friend_id)
+
     async def add_completed_match_to_database(self, match: MatchHistoryMatch, friend_id: int) -> None:
         """#TODO.
 
@@ -886,7 +940,7 @@ class GameFlow(IrePublicComponent):
         minimal = await self.bot.dota.create_partial_match(match.id).minimal()
 
         query = """
-            INSERT INTO ttv_dota_completed_matches
+            INSERT INTO ttv_dota_matches
             (match_id, start_time, lobby_type, game_mode, outcome)
             VALUES ($1, $2, $3, $4, $5)
             ON CONFLICT (match_id) DO NOTHING
@@ -900,36 +954,26 @@ class GameFlow(IrePublicComponent):
             match.game_mode,
             minimal.outcome,
         )
+        player_slot = next((slot for slot, player in enumerate(minimal.players) if player.hero == match.hero), None)
+        if player_slot is None:
+            msg = "Somehow `player_slot` is `None` in match history match"
+            raise errors.PlaceholderError(msg)
+
         if match_id is not None:
             # if it's None - then it already was in the database
             # otherwise it's a new match and we can explore mmr_delta
             # MMR Tracking
-            if match.lobby_type != LobbyType.Ranked:
-                mmr_delta = 0
-            elif match.abandon:
-                mmr_delta = -25
-            elif minimal.outcome >= MatchOutcome.NotScoredPoorNetworkConditions:
-                mmr_delta = 0
-            else:
-                mmr_delta = 25 if match.win else -25
-
-            if mmr_delta:
-                query = """
-                    UPDATE ttv_dota_accounts
-                    SET estimated_mmr = estimated_mmr + $1
-                    WHERE friend_id = $2;
-                """
-                await self.bot.pool.execute(query, mmr_delta, friend_id)
-
-        player_slot = next((slot for slot, player in enumerate(minimal.players) if player.hero == match.hero), None)
-        if player_slot is None:
-            msg = "Somehow `player_slot` is None in match history match"
-            raise errors.PlaceholderError(msg)
-        is_radiant = player_slot < 5
+            await self.update_mmr(
+                friend_id=friend_id,
+                lobby_type=match.lobby_type,
+                player_slot=player_slot,
+                outcome=minimal.outcome,
+                is_abandon=match.abandon,
+            )
 
         query = """
-            INSERT INTO ttv_dota_completed_match_players
-            (friend_id, match_id, hero_id, is_radiant, abandon)
+            INSERT INTO ttv_dota_match_players
+            (friend_id, match_id, hero_id, player_slot, abandon)
             VALUES ($1, $2, $3, $4, $5)
             ON CONFLICT (friend_id, match_id) DO
                 UPDATE SET abandon = $5;
@@ -939,11 +983,11 @@ class GameFlow(IrePublicComponent):
             friend_id,
             match.id,
             match.hero.id,
-            is_radiant,
+            player_slot,
             match.abandon,
         )
 
-    @ireloop(hours=3)
+    @ireloop(hours=1)
     async def fill_completed_matches_from_gc_match_history(self) -> None:
         """A backup task to double check if we haven't missed any games.
 
@@ -965,7 +1009,7 @@ class GameFlow(IrePublicComponent):
 
         log.debug("Removing way too old matches from the database.")
         query = """
-            DELETE FROM ttv_dota_completed_matches
+            DELETE FROM ttv_dota_matches
             WHERE start_time < $1;
         """
         await self.bot.pool.execute(query, datetime.datetime.now(datetime.UTC) - datetime.timedelta(hours=48))
@@ -983,27 +1027,53 @@ class GameFlow(IrePublicComponent):
         """
         log.debug("Processing pending matches.")
 
-        for friend_id, pending_matches in self.pending_matches.items():
-            friend = self.bot.dota.get_user(friend_id)
-            if friend:
-                match_history = await friend.match_history()
-            else:
-                match_history = await self.bot.dota.create_partial_user(friend_id).match_history()
-            for match in match_history:
-                if match.id in pending_matches:
-                    await self.add_completed_match_to_database(match, friend_id)
-                    pending_matches.remove(match.id)
-            if pending_matches:
-                log.debug("Still pending matches for @%s: %s", friend.name if friend else friend_id, pending_matches)
+        query = """
+            SELECT m.match_id, p.friend_id, p.player_slot
+            FROM ttv_dota_matches m
+            JOIN ttv_dota_match_players p ON m.match_id = p.match_id
+            WHERE outcome IS NULL;
+        """
+        rows = await self.bot.pool.fetch(query)
+        if not rows:
+            # I guess no pending matches left
+            self.process_pending_matches.cancel()
 
-        # Pop empty entries
-        for friend_id in list(self.pending_matches.keys()):
-            if not self.pending_matches[friend_id]:
-                self.pending_matches.pop(friend_id)
+        pending: dict[int, set[tuple[int, int]]] = {}
+        for row in rows:
+            pending.setdefault(row["match_id"], set()).add((row["friend_id"], row["player_slot"]))
 
-        # If all entries are empty
-        if not self.pending_matches:
-            self.process_pending_matches.stop()
+        for match_id, friend_slots in pending.items():
+            minimal = await self.bot.dota.create_partial_match(match_id).minimal()
+
+            query = """
+                UPDATE ttv_dota_matches
+                SET outcome = $1
+                WHERE match_id = $2;
+            """
+            await self.bot.pool.execute(query, minimal.outcome, match_id)
+
+            # can do with match history too but it feels annoying
+            url = f"https://api.opendota.com/api/matches/{match_id}"
+
+            async with self.bot.session.get(url=url) as resp:
+                opendota_match = await resp.json(loads=orjson.loads)
+
+            for friend_id, player_slot in friend_slots:
+                player = opendota_match["players"][player_slot]
+                is_abandon = bool(player["abandons"])
+                query = """
+                    UPDATE ttv_dota_match_players
+                    SET abandon = $1
+                    WHERE match_id = $2 AND friend_id = $3;
+                """
+                await self.bot.pool.execute(query, is_abandon, match_id, friend_id)
+                await self.update_mmr(
+                    friend_id=friend_id,
+                    lobby_type=minimal.lobby_type,
+                    player_slot=player_slot,
+                    outcome=minimal.outcome,
+                    is_abandon=is_abandon,
+                )
 
     #################################
     #    FRIEND PROFILE COMMANDS    #
@@ -1013,9 +1083,9 @@ class GameFlow(IrePublicComponent):
         """#TODO."""
         clause = "AND m.start_time > $2" if stream_started_at else ""
         query = f"""
-            SELECT d.friend_id, m.start_time, m.lobby_type, m.game_mode, m.outcome, p.is_radiant, p.abandon
-            FROM ttv_dota_completed_matches m
-            JOIN ttv_dota_completed_match_players p ON m.match_id = p.match_id
+            SELECT d.friend_id, m.start_time, m.lobby_type, m.game_mode, m.outcome, p.player_slot, p.abandon
+            FROM ttv_dota_matches m
+            JOIN ttv_dota_match_players p ON m.match_id = p.match_id
             JOIN ttv_dota_accounts d ON d.friend_id = p.friend_id
             WHERE d.twitch_id = $1 {clause}
             ORDER BY m.start_time DESC;
@@ -1025,10 +1095,7 @@ class GameFlow(IrePublicComponent):
         else:
             rows: list[ScoreQueryRow] = await self.bot.pool.fetch(query, broadcaster_id)
 
-        # Example: {my_friend_id: {ScoreCategory.Ranked: [0, 4, 1], ScoreCategory.Unranked: [0, 0, 0]}}
-        # So !wl should return Ranked 0 W - 4 L, 1 Abandon.
-        # Notice the order!!
-        index: dict[int, dict[dota_enums.ScoreCategory, list[int]]] = {}
+        index: dict[int, dict[dota_enums.ScoreCategory, Score]] = {}
 
         cutoff_dt = datetime.datetime.now(datetime.UTC)
         for row in rows:
@@ -1038,30 +1105,37 @@ class GameFlow(IrePublicComponent):
             cutoff_dt = row["start_time"]
 
             score_category = dota_enums.ScoreCategory.create(row["lobby_type"], row["game_mode"])
-            scores = index.setdefault(row["friend_id"], {}).setdefault(score_category, [0, 0, 0])
+            score = index.setdefault(row["friend_id"], {}).setdefault(score_category, Score(0, 0, 0, 0))
 
-            if row["outcome"] in (MatchOutcome.RadiantVictory, MatchOutcome.DireVictory):
-                # Normal Win Loss scenario
-                win = (
-                    row["outcome"] == MatchOutcome.RadiantVictory
-                    if row["is_radiant"]
-                    else row["outcome"] == MatchOutcome.DireVictory
-                )
-                scores[int(win)] += 1
+            if row["outcome"] == MatchOutcome.RadiantVictory:
+                if row["player_slot"] < 5:
+                    score.wins += 1
+                else:
+                    score.losses += 1
+            elif row["outcome"] == MatchOutcome.DireVictory:
+                if row["player_slot"] > 4:
+                    score.wins += 1
+                else:
+                    score.losses += 1
             elif row["abandon"]:
-                scores[2] += 1
+                score.abandons += 1
+            elif row["outcome"] is None:
+                score.pending += 1
 
         if len(index) == 0:
             return "0 W - 0 L" if stream_started_at else "0 W - 0 L (No games played in the last 2 days)"
 
-        def format_results(results: list[int]) -> str:
-            abandons = f", Abandons: {a}" if (a := results[2]) else ""
-            return f"{results[1]} W - {results[0]} L" + abandons
+        def format_results(score: Score) -> str:
+            wl = f"{score.wins} W - {score.losses} L"
+            if a := score.abandons:
+                wl += f", Abandons: {a}"
+            if p := score.pending:
+                wl += f", Pending: {p}"
+            return wl
 
         response_parts = {
             friend_id: " \N{BULLET} ".join(
-                [f"{category.name} {format_results(results)}" for category, results in scores.items()]
-                + ([f"Pending: {len(pm)} Match(-es)"] if (pm := self.pending_matches.get(friend_id)) else [])
+                f"{category.name} {format_results(results)}" for category, results in scores.items()
             )
             for friend_id, scores in index.items()
         }
@@ -1130,8 +1204,8 @@ class GameFlow(IrePublicComponent):
             invoked = "stratz"
         await ctx.send(content=f"{invoked}.com/players/{friend.steam_user.id}")
 
-    @commands.command(name="lastseen")
-    async def last_seen(self, ctx: IreContext) -> None:
+    @commands.command(aliases=["lastseen"])
+    async def status(self, ctx: IreContext) -> None:
         """Show the steam account the bot has seen you last online on.
 
         This account is considered to be queried against for the bot's commands.
@@ -1142,7 +1216,7 @@ class GameFlow(IrePublicComponent):
         delta = datetime.datetime.now(datetime.UTC) - last_seen
         response = (
             f"{friend.steam_user.name} id={friend.steam_user.id} status={friend.rich_presence.status} - "
-            f"last changed their status {fmt.timedelta_to_words(delta, fmt=fmt.TimeDeltaFormat.Letter)} ago "
+            f"changed to it {fmt.timedelta_to_words(delta, fmt=fmt.TimeDeltaFormat.Letter)} ago "
             "(while being green-online in Dota 2)"
         )
         await ctx.send(response)

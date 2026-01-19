@@ -4,6 +4,7 @@ import asyncio
 import datetime
 import logging
 import platform
+import pprint
 
 # import sys
 from dataclasses import dataclass
@@ -340,7 +341,8 @@ class IreBot(commands.AutoBot):
 
         # Store our tokens in a simple SQLite Database when they are authorized...
         query = """
-            INSERT INTO ttv_tokens (user_id, token, refresh)
+            INSERT INTO ttv_tokens
+            (user_id, token, refresh)
             VALUES ($1, $2, $3)
             ON CONFLICT(user_id)
             DO UPDATE SET
@@ -405,7 +407,9 @@ class IreBot(commands.AutoBot):
         embed.add_field(
             name=field_name,
             value=(
-                "```py\n" + "\n".join(f"[{name}]: {value!r}" for name, value in data.items()) + "```"
+                "```py\n"
+                + "\n".join(f"[{name}]: {pprint.pformat(repr(value), indent=4)}" for name, value in data.items())
+                + "```"
                 if data
                 else "```py\nNo arguments```"
             ),
