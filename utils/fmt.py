@@ -129,25 +129,3 @@ def ordinal(n: int | str) -> str:
     n = int(n)
     suffix = "th" if 11 <= n % 100 <= 13 else ["th", "st", "nd", "rd", "th"][min(n % 10, 4)]
     return str(n) + suffix
-
-
-def magnitude(number: float) -> str:
-    """_summary_.
-
-    Parameters
-    ----------
-    number
-        _description_
-
-    Examples
-    --------
-    * 10_000 -> '10k'
-    * 999999 -> '1m'
-    * 1234 -> 1.1k
-    """
-    number = float(f"{number:.2g}")
-    magnitude = 0
-    while abs(number) >= 1000:
-        magnitude += 1
-        number /= 1000.0
-    return f"{number:f}".rstrip("0").rstrip(".") + ["", "k", "m", "b", "t"][magnitude]
