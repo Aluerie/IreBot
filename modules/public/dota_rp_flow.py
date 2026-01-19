@@ -496,6 +496,7 @@ class PlayMatch(Match):
             query = """
                 INSERT INTO ttv_dota_matches
                 (match_id, start_time, lobby_time, game_mode)
+                (match_id, start_time, lobby_type, game_mode)
                 VALUES ($1, $2, $3, $4)
                 ON CONFLICT (match_id)
                     DO NOTHING;
