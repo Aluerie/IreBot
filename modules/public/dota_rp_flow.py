@@ -354,7 +354,9 @@ class Match:
         lead = radiant["net_worth"] - dire["net_worth"]
         word = "Radiant" if lead > 0 else "Dire"
 
-        return f"[2m delay] Radiant {radiant['score']} - Dire {dire['score']}: {word} is leading by {abs(lead)}"
+        return (
+            f"[2m delay] Radiant {radiant['score']} - Dire {dire['score']}: {word} is leading by {fmt.magnitude(abs(lead))}"
+        )
 
     @format_match_response
     async def match_id_command(self) -> str:
