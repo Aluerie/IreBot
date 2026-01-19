@@ -6,6 +6,7 @@ import functools
 import itertools
 import logging
 from dataclasses import dataclass
+from enum import IntEnum
 from operator import attrgetter
 from typing import TYPE_CHECKING, Annotated, Any, TypedDict, override
 from urllib import parse as url_parse
@@ -45,7 +46,7 @@ if TYPE_CHECKING:
         nickname: str
 
 
-__all__ = ("GameFlow",)
+__all__ = ("Dota2RichPresenceFlow",)
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
@@ -57,6 +58,16 @@ class Score:
     losses: int
     abandons: int
     pending: int
+
+
+class StatusEnum(IntEnum):
+    SomethingIsOff = 0  # means something is off
+    Dashboard = 1
+    Playing = 2
+    Watching = 3
+    DemoMode = 4
+    BotMatch = 5
+    Replay = 6
 
 
 class RichPresence:
@@ -90,6 +101,45 @@ class RichPresence:
     @override
     def __hash__(self) -> int:
         return hash(self.raw)
+
+    def status_type(self, friend: Friend) -> StatusEnum:
+        # Dashboard
+        if self.status in {dota_enums.Status.Idle, dota_enums.Status.MainMenu, dota_enums.Status.Finding}:
+            return StatusEnum.Dashboard
+
+        # Playing somewhere
+        if self.status in {dota_enums.Status.HeroSelection, dota_enums.Status.Strategy, dota_enums.Status.Playing}:
+            if (watchable_game_id := self.raw.get("WatchableGameID")) is None:
+                # something is off
+                lobby_param0 = self.raw.get("param0") or "_missing"
+                lobby_map: dict[str, StatusEnum] = {
+                    dota_enums.LobbyParam0.DemoMode: StatusEnum.DemoMode,
+                    dota_enums.LobbyParam0.BotMatch: StatusEnum.BotMatch,
+                }
+                return lobby_map.get(lobby_param0, StatusEnum.SomethingIsOff)
+
+            if watchable_game_id == "0":
+                # something is off again
+                # usually this happens when a player has just quit the match into the main menu
+                # the status flickers for a few seconds to be `watchable_game_id=0`
+                return StatusEnum.SomethingIsOff
+            return StatusEnum.Playing
+
+        # Watching
+        if self.status == dota_enums.Status.Spectating:
+            if self.raw.get("watching_server") is None:
+                return StatusEnum.Replay
+            return StatusEnum.Watching
+
+        # Unrecognized
+        log.warning(
+            "Uncategorized Rich Presence Status \nfriend=%s rich_presence=%s status=%s\nrich_presence.raw=%s",
+            repr(friend),
+            self.status,
+            self.status.value,
+            self.raw,
+        )
+        return StatusEnum.SomethingIsOff
 
 
 class Friend:
@@ -551,7 +601,7 @@ def is_allowed_to_add_notable() -> Any:
     return commands.guard(predicate)
 
 
-class GameFlow(IrePublicComponent):
+class Dota2RichPresenceFlow(IrePublicComponent):
     """Component with all 9kmmrbot-like Dota 2 features.
 
     This component uses Dota 2 Rich Presence (RP), Dota 2 web API and Dota 2 Game Coordinator (GC) API calls
@@ -632,56 +682,33 @@ class GameFlow(IrePublicComponent):
                 WHERE friend_id = $2;
             """
             await self.bot.pool.execute(query, datetime.datetime.now(datetime.UTC), friend.steam_user.id)
+        else:
+            # not interested if not playing Dota 2
+            await self.conclude_friend_match(friend)
+            return
 
-        match rp.status:
-            case dota_enums.Status.Idle | dota_enums.Status.MainMenu | dota_enums.Status.Finding:
-                # Friend is in a Main Menu
+        match rp.status_type(friend):
+            case StatusEnum.Dashboard | StatusEnum.SomethingIsOff:
                 await self.conclude_friend_match(friend)
-
-            case dota_enums.Status.HeroSelection | dota_enums.Status.Strategy | dota_enums.Status.Playing:
+            case StatusEnum.Playing:
                 # Friend is in a match as a player
                 watchable_game_id = rp.raw.get("WatchableGameID")
-
-                if watchable_game_id is None:
-                    # something is off
-                    lobby_param0 = rp.raw.get("param0")
-
-                    if lobby_param0 == dota_enums.LobbyParam0.DemoMode:
-                        friend.active_match = UnsupportedMatch(self.bot, tag="Demo mode is not supported")
-                    elif lobby_param0 == dota_enums.LobbyParam0.BotMatch:
-                        friend.active_match = UnsupportedMatch(self.bot, tag="Bot matches are not supported")
-                    return
-                if watchable_game_id == "0":
-                    # something is off again
-                    # usually this happens when a player has just quit the match into the main menu
-                    # the status flickers for a few seconds to be `watchable_game_id=0`
-                    return
-
-                if watchable_game_id not in self.play_matches_index:
-                    self.play_matches_index[watchable_game_id] = PlayMatch(self.bot, watchable_game_id)
-                friend.active_match = self.play_matches_index[watchable_game_id]
-
-            case dota_enums.Status.Spectating:
-                # Friend is spectating a match
+                if watchable_game_id:
+                    if watchable_game_id not in self.play_matches_index:
+                        self.play_matches_index[watchable_game_id] = PlayMatch(self.bot, watchable_game_id)
+                    friend.active_match = self.play_matches_index[watchable_game_id]
+            case StatusEnum.Watching:
                 watching_server = rp.raw.get("watching_server")
-                if watching_server is None:
-                    # something is off
-                    friend.active_match = UnsupportedMatch(self.bot, tag="Watching replays is not supported")
-                    return
-
-                if watching_server not in self.watch_matches_index:
-                    self.watch_matches_index[watching_server] = WatchMatch(self.bot, watching_server)
-                friend.active_match = self.watch_matches_index[watching_server]
-            case _:
-                log.warning(
-                    "Uncategorized Rich Presence Status \nfriend=%s rich_presence=%s status=%s\nrich_presence.raw=%s",
-                    repr(friend),
-                    rp.status,
-                    rp.status.value,
-                    rp.raw,
-                )
-                # Let's assume that other statuses = not active match Dota
-                await self.conclude_friend_match(friend)
+                if watching_server:
+                    if watching_server not in self.watch_matches_index:
+                        self.watch_matches_index[watching_server] = WatchMatch(self.bot, watching_server)
+                    friend.active_match = self.watch_matches_index[watching_server]
+            case StatusEnum.DemoMode:
+                friend.active_match = UnsupportedMatch(self.bot, tag="Demo mode is not supported")
+            case StatusEnum.BotMatch:
+                friend.active_match = UnsupportedMatch(self.bot, tag="Bot matches are not supported")
+            case StatusEnum.Replay:
+                friend.active_match = UnsupportedMatch(self.bot, tag="Data in watching replays is not supported")
 
     # @commands.Component.listener("steam_user_update")
     async def steam_user_update(self, update: SteamUserUpdate) -> None:
@@ -1120,9 +1147,12 @@ class GameFlow(IrePublicComponent):
         else:
             rows: list[ScoreQueryRow] = await self.bot.pool.fetch(query, broadcaster_id)
 
+        if not rows:
+            return "0 W - 0 L" if stream_started_at else "0 W - 0 L (No games played in the last 2 days)"
+
         index: dict[int, dict[dota_enums.ScoreCategory, Score]] = {}
 
-        cutoff_dt = datetime.datetime.now(datetime.UTC)
+        cutoff_dt = rows[0]["start_time"]
         for row in rows:
             # Let's assume gaming sessions to be separated by 6 hours from each other;
             if row["start_time"] < cutoff_dt - datetime.timedelta(hours=6):
@@ -1146,9 +1176,6 @@ class GameFlow(IrePublicComponent):
                 score.abandons += 1
             elif row["outcome"] is None:
                 score.pending += 1
-
-        if len(index) == 0:
-            return "0 W - 0 L" if stream_started_at else "0 W - 0 L (No games played in the last 2 days)"
 
         def format_results(score: Score) -> str:
             wl = f"{score.wins} W - {score.losses} L"
@@ -1176,7 +1203,7 @@ class GameFlow(IrePublicComponent):
         """Show streamer's Win - Loss score ratio during the stream."""
         streamer = self.bot.streamers[ctx.broadcaster.id]
         if not streamer.online:
-            response = f"Offline score: {await self.score_response_helper(ctx.broadcaster.id)}"
+            response = f"Offline score - {await self.score_response_helper(ctx.broadcaster.id)}"
         else:
             response = await self.score_response_helper(ctx.broadcaster.id, streamer.started_dt)
         await ctx.send(content=response)
@@ -1344,4 +1371,4 @@ class GameFlow(IrePublicComponent):
 
 async def setup(bot: IreBot) -> None:
     """Load IreBot module. Framework of twitchio."""
-    await bot.add_component(GameFlow(bot))
+    await bot.add_component(Dota2RichPresenceFlow(bot))
