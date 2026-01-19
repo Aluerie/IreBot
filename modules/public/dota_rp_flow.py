@@ -354,9 +354,7 @@ class Match:
         lead = radiant["net_worth"] - dire["net_worth"]
         word = "Radiant" if lead > 0 else "Dire"
 
-        return (
-            f"[2m delay] Radiant {radiant['score']} - Dire {dire['score']}: {word} is leading by {abs(lead)/1000:.1f}k"
-        )
+        return f"[2m delay] Radiant {radiant['score']} - Dire {dire['score']}: {word} is leading by {abs(lead) / 1000:.1f}k"
 
     @format_match_response
     async def match_id_command(self) -> str:
@@ -1174,7 +1172,7 @@ class GameFlow(IrePublicComponent):
         """Show streamer's Win - Loss score ratio during the stream."""
         streamer = self.bot.streamers[ctx.broadcaster.id]
         if not streamer.online:
-            response = 'Streamer offline (to get their offline winloss use "!wl offline")'
+            response = f"Offline score: {await self.score_response_helper(ctx.broadcaster.id)}"
         else:
             response = await self.score_response_helper(ctx.broadcaster.id, streamer.started_dt)
         await ctx.send(content=response)
