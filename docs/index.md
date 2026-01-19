@@ -36,6 +36,14 @@
     <td><img src="./images/stats.png" alt="stats" width="1200"/></td>
   </tr>
   <tr>
+    <td>Lead</td>
+    <td class="aliases-column">!d2pt</td>
+    <td>
+      Show which team has a gold lead and by how much.
+    </td>
+    <td><img src="./images/lead.png" alt="lead" width="1200"/></td>
+  </tr>
+  <tr>
     <td>Player Stats Profiles</td>
     <td class="aliases-column">!profile<br/>!player</td>
     <td>

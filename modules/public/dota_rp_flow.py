@@ -290,6 +290,33 @@ class Match:
         player_slot = self.convert_argument_to_player_slot(argument)
         return f"{self.heroes[player_slot]} stratz.com/players/{self.players[player_slot].friend_id}"
 
+    async def get_real_time_stats(self) -> RealTimeStatsResponse:
+        """Get Real Time Stats from Steam Web API.
+
+        Disclaimer
+        ----------
+        For some reason, `pulsefire` clients are erroring out for this.
+        Maybe, worth investigating.
+        """
+        for _ in range(5):
+            url = (
+                "https://api.steampowered.com//IDOTA2MatchStats_570/GetRealtimeStats/v1/"
+                f"?key={config['TOKENS']['STEAM']}"
+                f"&server_steam_id={self.server_steam_id}"
+            )
+            async with self.bot.session.get(url=url) as resp:
+                match = await resp.json(loads=orjson.loads)
+            if match:
+                break
+            # Sometimes it returns an empty dict `{}` (especially on the very first request)
+            await asyncio.sleep(0.69)
+            continue
+        else:
+            msg = "get_real_time_stats got an empty dict 5 times in a row"
+            raise errors.PlaceholderError(msg)
+
+        return match
+
     @format_match_response
     async def stats(self, argument: str) -> str:
         """Response for !stats command."""
@@ -302,32 +329,7 @@ class Match:
 
         player_slot = self.convert_argument_to_player_slot(argument)
 
-        async def get_real_time_stats(server_steam_id: int) -> RealTimeStatsResponse:
-            """Get Real Time Stats from Steam Web API.
-
-            Disclaimer
-            ----------
-            For some reason, `pulsefire` clients are erroring out for this.
-            Maybe, worth investigating.
-            """
-            url = (
-                "https://api.steampowered.com//IDOTA2MatchStats_570/GetRealtimeStats/v1/"
-                f"?key={config['TOKENS']['STEAM']}"
-                f"&server_steam_id={server_steam_id}"
-            )
-            async with self.bot.session.get(url=url) as resp:
-                return await resp.json(loads=orjson.loads)
-
-        for _ in range(5):
-            match = await get_real_time_stats(self.server_steam_id)
-            if match:
-                break
-            # Sometimes it returns an empty dict `{}` (especially on the very first request)
-            await asyncio.sleep(0.69)
-            continue
-        else:
-            msg = "get_real_time_stats got an empty dict 5 times in a row"
-            raise errors.PlaceholderError(msg)
+        match = await self.get_real_time_stats()
 
         team_ord = int(player_slot > 4)  # team_ord = 0 for Radiant, 1 for Dire
         team_slot = player_slot - 5 * team_ord  # 0 1 2 3 4 for Radiant, 5 6 7 8 9 for Dire
@@ -341,6 +343,18 @@ class Match:
         items = ", ".join([str(await self.bot.dota.items.by_id(item)) for item in api_player["items"] if item != -1])
         response_parts = (prefix, net_worth, kda, cs, items)
         return " \N{BULLET} ".join(response_parts)
+
+    @format_match_response
+    async def lead(self) -> str:
+        """Response for !lead command."""
+        match = await self.get_real_time_stats()
+        radiant = match["teams"][0]
+        dire = match["teams"][1]
+
+        lead = radiant["net_worth"] - dire["net_worth"]
+        word = "Radiant" if lead > 0 else "Dire"
+
+        return f"[2m delay] Radiant {radiant['score']} - Dire {dire['score']}: {word} is leading by {abs(lead)}"
 
     @format_match_response
     async def match_id_command(self) -> str:
@@ -811,6 +825,13 @@ class GameFlow(IrePublicComponent):
             )
         else:
             raise payload.exception
+
+    @commands.command()
+    async def lead(self, ctx: IreContext) -> None:
+        """Show which team has a gold lead and by how much."""
+        active_match = await self.find_active_match(ctx.broadcaster.id)
+        response = await active_match.lead()
+        await ctx.send(response)
 
     @commands.command(aliases=["matchid"])
     async def match_id(self, ctx: IreContext) -> None:
