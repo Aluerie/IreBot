@@ -68,6 +68,8 @@ class StatusEnum(IntEnum):
     DemoMode = 4
     BotMatch = 5
     Replay = 6
+    PrivateLobby = 7
+    CustomGames = 8
 
 
 class RichPresence:
@@ -130,6 +132,14 @@ class RichPresence:
             if self.raw.get("watching_server") is None:
                 return StatusEnum.Replay
             return StatusEnum.Watching
+
+        # Private Lobby
+        if self.status == dota_enums.Status.PrivateLobby:
+            return StatusEnum.PrivateLobby
+
+        # Custom games
+        if self.status == dota_enums.Status.CustomGame:
+            return StatusEnum.CustomGames
 
         # Unrecognized
         log.warning(
@@ -709,6 +719,10 @@ class Dota2RichPresenceFlow(IrePublicComponent):
                 friend.active_match = UnsupportedMatch(self.bot, tag="Bot matches are not supported")
             case StatusEnum.Replay:
                 friend.active_match = UnsupportedMatch(self.bot, tag="Data in watching replays is not supported")
+            case StatusEnum.PrivateLobby:
+                friend.active_match = UnsupportedMatch(self.bot, tag="Private lobbies are not supported")
+            case StatusEnum.CustomGames:
+                friend.active_match = UnsupportedMatch(self.bot, tag="Custom Games are not supported")
 
     # @commands.Component.listener("steam_user_update")
     async def steam_user_update(self, update: SteamUserUpdate) -> None:
