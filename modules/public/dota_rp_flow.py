@@ -72,6 +72,19 @@ class StatusEnum(IntEnum):
     CustomGames = 8
 
 
+@dataclass
+class Activity: ...
+
+
+@dataclass
+class Dashboard(Activity): ...
+
+
+@dataclass
+class Playing(Activity):
+    watchable_game_id: str
+
+
 class RichPresence:
     """Class representing Steam Rich Presence.
 
@@ -495,11 +508,8 @@ class PlayMatch(Match):
             # add to the database
             query = """
                 INSERT INTO ttv_dota_matches
-                (match_id, start_time, lobby_time, game_mode)
                 (match_id, start_time, lobby_type, game_mode)
                 VALUES ($1, $2, $3, $4)
-                ON CONFLICT (match_id)
-                    DO NOTHING;
                 ON CONFLICT (match_id) DO NOTHING;
             """
             await self.bot.pool.execute(query, self.match_id, match.start_time, self.lobby_type, self.game_mode)
@@ -764,8 +774,6 @@ class Dota2RichPresenceFlow(IrePublicComponent):
                 INSERT INTO ttv_dota_match_players
                 (friend_id, match_id, hero_id, player_slot)
                 VALUES ($1, $2, $3, $4)
-                ON CONFLICT (friend_id, match_id)
-                    DO NOTHING
                 ON CONFLICT (friend_id, match_id) DO NOTHING;
             """
             await self.bot.pool.execute(query, friend.steam_user.id, match.match_id, hero.id, player_slot)
