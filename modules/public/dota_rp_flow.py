@@ -500,6 +500,7 @@ class PlayMatch(Match):
                 VALUES ($1, $2, $3, $4)
                 ON CONFLICT (match_id)
                     DO NOTHING;
+                ON CONFLICT (match_id) DO NOTHING;
             """
             await self.bot.pool.execute(query, self.match_id, match.start_time, self.lobby_type, self.game_mode)
             self.update_data.stop()
@@ -765,6 +766,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
                 VALUES ($1, $2, $3, $4)
                 ON CONFLICT (friend_id, match_id)
                     DO NOTHING
+                ON CONFLICT (friend_id, match_id) DO NOTHING;
             """
             await self.bot.pool.execute(query, friend.steam_user.id, match.match_id, hero.id, player_slot)
 
