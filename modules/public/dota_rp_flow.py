@@ -760,12 +760,12 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             hero = match.heroes[player_slot]
             query = """
                 INSERT INTO ttv_dota_match_players
-                (friend_id, match_id, hero_id, is_radiant)
+                (friend_id, match_id, hero_id, player_slot)
                 VALUES ($1, $2, $3, $4)
                 ON CONFLICT (friend_id, match_id)
                     DO NOTHING
             """
-            await self.bot.pool.execute(query, friend.steam_user.id, match.match_id, hero.id, player_slot < 5)
+            await self.bot.pool.execute(query, friend.steam_user.id, match.match_id, hero.id, player_slot)
 
             if not self.process_pending_matches.is_running():
                 self.process_pending_matches.start()
