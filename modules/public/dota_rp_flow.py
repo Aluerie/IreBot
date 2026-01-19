@@ -28,7 +28,7 @@ if TYPE_CHECKING:
 
     from bot import IreBot, IreContext
     from utils.dota import SteamUserUpdate
-    from utils.dota.schemas.steam_web_api import RealTimeStatsResponse
+    from utils.dota.schemas import opendota, steam_web_api
 
     type ActiveMatch = PlayMatch | WatchMatch | UnsupportedMatch
 
@@ -44,6 +44,13 @@ if TYPE_CHECKING:
     class NotablePlayersQueryRow(TypedDict):
         friend_id: int
         nickname: str
+
+    class PendingAbandonsQueryRow(TypedDict):
+        friend_id: int
+        match_id: int
+        outcome: int
+        lobby_type: int
+        player_slot: int
 
 
 __all__ = ("Dota2RichPresenceFlow",)
@@ -363,7 +370,7 @@ class Match:
         player_slot = self.convert_argument_to_player_slot(argument)
         return f"{self.heroes[player_slot]} stratz.com/players/{self.players[player_slot].friend_id}"
 
-    async def get_real_time_stats(self) -> RealTimeStatsResponse:
+    async def get_real_time_stats(self) -> steam_web_api.RealTimeStatsResponse:
         """Get Real Time Stats from Steam Web API.
 
         Disclaimer
@@ -1105,52 +1112,75 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         log.debug("Processing pending matches.")
 
         query = """
-            SELECT m.match_id, p.friend_id, p.player_slot
-            FROM ttv_dota_matches m
-            JOIN ttv_dota_match_players p ON m.match_id = p.match_id
+            SELECT match_id
+            FROM ttv_dota_matches
             WHERE outcome IS NULL;
         """
         rows = await self.bot.pool.fetch(query)
         if not rows:
             # I guess no pending matches left
             self.process_pending_matches.cancel()
+            return
 
-        pending: dict[int, set[tuple[int, int]]] = {}
         for row in rows:
-            pending.setdefault(row["match_id"], set()).add((row["friend_id"], row["player_slot"]))
-
-        for match_id, friend_slots in pending.items():
-            minimal = await self.bot.dota.create_partial_match(match_id).minimal()
-
+            minimal = await self.bot.dota.create_partial_match(row["match_id"]).minimal()
             query = """
                 UPDATE ttv_dota_matches
                 SET outcome = $1
                 WHERE match_id = $2;
             """
-            await self.bot.pool.execute(query, minimal.outcome, match_id)
+            await self.bot.pool.execute(query, minimal.outcome, row["match_id"])
 
-            # can do with match history too but it feels annoying
-            url = f"https://api.opendota.com/api/matches/{match_id}"
+    async def get_match_from_opendota(self, match_id: int) -> opendota.Match:
+        """Get match from opendota API via GET matches endpoint."""
+        url = f"https://api.opendota.com/api/matches/{match_id}"
+        async with self.bot.session.get(url=url) as resp:
+            return await resp.json(loads=orjson.loads)
 
-            async with self.bot.session.get(url=url) as resp:
-                opendota_match = await resp.json(loads=orjson.loads)
+    @ireloop(seconds=20)
+    async def process_pending_abandons(self) -> None:
+        """#TODO."""
+        query = """
+            SELECT p.match_id, p.friend_id, p.player_slot, m.outcome, m.lobby_type
+            FROM ttv_dota_match_players p
+            JOIN ttv_dota_matches m ON m.match_id = p.match_id
+            WHERE abandon IS NULL;
+        """
+        rows: list[PendingAbandonsQueryRow] = await self.bot.pool.fetch(query)
+        if not rows:
+            # I guess no pending matches left
+            self.process_pending_abandons.cancel()
+            return
 
-            for friend_id, player_slot in friend_slots:
-                player = opendota_match["players"][player_slot]
-                is_abandon = bool(player["abandons"])
-                query = """
-                    UPDATE ttv_dota_match_players
-                    SET abandon = $1
-                    WHERE match_id = $2 AND friend_id = $3;
-                """
-                await self.bot.pool.execute(query, is_abandon, match_id, friend_id)
-                await self.update_mmr(
-                    friend_id=friend_id,
-                    lobby_type=minimal.lobby_type,
-                    player_slot=player_slot,
-                    outcome=minimal.outcome,
-                    is_abandon=is_abandon,
-                )
+        players_cache: dict[int, list[opendota.Player]] = {}
+
+        for row in rows:
+            players = players_cache.get(row["match_id"])
+            if not players:
+                match = await self.get_match_from_opendota(row["match_id"])
+                try:
+                    match["players"]
+                except KeyError:
+                    continue
+                else:
+                    players = match["players"]
+                    players_cache[match["match_id"]] = match["players"]
+
+            player = players[row["player_slot"]]
+            is_abandon = bool(player["abandons"])
+            query = """
+                UPDATE ttv_dota_match_players
+                SET abandon = $1
+                WHERE match_id = $2 AND friend_id = $3;
+            """
+            await self.bot.pool.execute(query, is_abandon, row["match_id"], row["friend_id"])
+            await self.update_mmr(
+                friend_id=row["friend_id"],
+                lobby_type=row["lobby_type"],
+                player_slot=row["player_slot"],
+                outcome=row["outcome"],
+                is_abandon=is_abandon,
+            )
 
     #################################
     #    FRIEND PROFILE COMMANDS    #
