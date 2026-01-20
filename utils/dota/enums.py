@@ -35,22 +35,20 @@ class Status(MyStrEnum):
     """^ Somehow "status" field is missing from Rich Presence"""
 
     # DOTA_RP
-    Idle = "#DOTA_RP_IDLE"
-    MainMenu = "#DOTA_RP_INIT"
-    Finding = "#DOTA_RP_FINDING_MATCH"
-    WaitingToLoad = "#DOTA_RP_WAIT_FOR_PLAYERS_TO_LOAD"
-    HeroSelection = "#DOTA_RP_HERO_SELECTION"
-    Strategy = "#DOTA_RP_STRATEGY_TIME"
-    PreGame = "#DOTA_RP_PRE_GAME"
-    Playing = "#DOTA_RP_PLAYING_AS"
-    Spectating = "#DOTA_RP_SPECTATING"
-    PrivateLobby = "#DOTA_RP_PRIVATE_LOBBY"
-    BotPractice = "#DOTA_RP_BOTPRACTICE"
-    Coaching = "#DOTA_RP_COACHING"
-    WatchingTournament = "#DOTA_RP_WATCHING_TOURNAMENT"
-
-    # EXTRA
-    CustomGame = "#DOTA_RP_GAME_IN_PROGRESS_CUSTOM"
+    Idle = "#DOTA_RP_IDLE"  # ✅
+    MainMenu = "#DOTA_RP_INIT"  # ✅
+    Finding = "#DOTA_RP_FINDING_MATCH"  # ✅
+    WaitingToLoad = "#DOTA_RP_WAIT_FOR_PLAYERS_TO_LOAD"  # ✅
+    HeroSelection = "#DOTA_RP_HERO_SELECTION"  # ✅
+    Strategy = "#DOTA_RP_STRATEGY_TIME"  # ✅
+    PreGame = "#DOTA_RP_PRE_GAME"  # ❓
+    Playing = "#DOTA_RP_PLAYING_AS"  # ✅
+    Spectating = "#DOTA_RP_SPECTATING"  # ✅
+    PrivateLobby = "#DOTA_RP_PRIVATE_LOBBY"  # ✅
+    BotPractice = "#DOTA_RP_BOTPRACTICE"  # ❓
+    Coaching = "#DOTA_RP_COACHING"  # ❓
+    WatchingTournament = "#DOTA_RP_WATCHING_TOURNAMENT"  # ❓
+    CustomGame = "#DOTA_RP_GAME_IN_PROGRESS_CUSTOM"  # ❓
 
     @classproperty
     def KNOWN_DISPLAY_NAMES(cls: type[Self]) -> Mapping[Status, str]:  # type: ignore[GeneralTypeIssue] # noqa: N802, N805

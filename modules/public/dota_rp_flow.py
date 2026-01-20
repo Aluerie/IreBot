@@ -675,7 +675,12 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             return Dashboard()
 
         # Playing somewhere
-        if rp.status in {dota_enums.Status.HeroSelection, dota_enums.Status.Strategy, dota_enums.Status.Playing}:
+        if rp.status in {
+            dota_enums.Status.WaitingToLoad,
+            dota_enums.Status.HeroSelection,
+            dota_enums.Status.Strategy,
+            dota_enums.Status.Playing,
+        }:
             if (watchable_game_id := rp.raw.get("WatchableGameID")) is None:
                 # something is off
                 lobby_param0 = rp.raw.get("param0") or "_missing"
