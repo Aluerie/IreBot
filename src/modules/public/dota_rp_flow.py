@@ -698,7 +698,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             return Playing(watchable_game_id)
 
         # Watching
-        if rp.status == dota_enums.Status.Spectating:
+        if rp.status in {dota_enums.Status.Spectating, dota_enums.Status.WatchingTournament}:
             watching_server = rp.raw.get("watching_server")
             if watching_server is None:
                 return Replay()

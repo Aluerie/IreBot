@@ -165,9 +165,9 @@ To make bot responses look like in the "Showcase" column you can add those emote
 * @PotatBotat will create a new emote set trying to merge the provided ones; if there is more then 1000 emotes in total - some emotes from the 2nd set won't make it;
 * Now you can switch between your main set and a merged version;
 
-### Dota 2 bot functionality restrictions
+### Dota 2 functionality restrictions
 
-Unfortunately, due to implementation specifics currently for Dota 2 features to work:
+Unfortunately, due to implementation specifics currently for the Dota 2 features to work:
 
   1. You need to add the bot's steam accounts to friends.
   2. You also need to be green-online 🟢 in Dota 2 (and have rich presence visible to friends) for the bot to be able to see your status live.
