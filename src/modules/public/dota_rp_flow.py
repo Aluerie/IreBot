@@ -638,12 +638,15 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         self.play_matches_index: dict[str, PlayMatch] = {}
         self.watch_matches_index: dict[str, WatchMatch] = {}
 
+        self.debug: bool = True
+
     @override
     async def component_load(self) -> None:
         self.starting_fill_friends.start()
         self.add_steam_user_update_listener.start()
         self.fill_completed_matches_from_gc_match_history.start()
         self.remove_way_too_old_matches.start()
+        self.debug_announce_gc_ready.start()
 
     @override
     async def component_teardown(self) -> None:
@@ -651,6 +654,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         self.add_steam_user_update_listener.cancel()
         self.fill_completed_matches_from_gc_match_history.cancel()
         self.remove_way_too_old_matches.cancel()
+        self.debug_announce_gc_ready.cancel()
 
     #################################
     #           EVENTS              #
@@ -714,8 +718,8 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             return DemoMode()
 
         # Private Lobby
-        # if rp.status == dota_enums.Status.PrivateLobby:
-        #     return PrivateLobby()
+        if rp.status == dota_enums.Status.PrivateLobby:
+            return PrivateLobby()
 
         # Custom games
         if rp.status == dota_enums.Status.CustomGame:
@@ -790,7 +794,9 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             case Replay():
                 friend.active_match = UnsupportedMatch(self.bot, tag="Data in watching replays is not supported")
             case PrivateLobby():
-                friend.active_match = UnsupportedMatch(self.bot, tag="Private lobbies are not supported")
+                friend.active_match = UnsupportedMatch(
+                    self.bot, tag="Private lobbies (this includes draft in public lobbies) are not supported"
+                )
             case CustomGames():
                 friend.active_match = UnsupportedMatch(self.bot, tag="Custom Games are not supported")
             case SomethingIsOff():
@@ -1484,18 +1490,35 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         await self.bot._friends_index_ready.wait()
 
     #################################
-    #          MORE OR LESS DEBUG COMMANDS            #
+    #  MORE OR LESS DEBUG COMMANDS  #
     #################################
+
+    async def debug_deliver(self, message: str) -> None:
+        """Deliver a debug message directly to Irene's twitch channel.
+
+        Idk, sometimes it's nice to have a direct twitch message for debug purposes.
+        """
+        if not self.debug:
+            return
+
+        partial_user = self.bot.create_partialuser(self.bot.owner_id)
+        await partial_user.send_message(sender=self.bot.bot_id, message=f"[debug] {message}")
 
     @commands.command()
     async def server_steam_id(self, ctx: IreContext) -> None:
         """Show server steam id for the match.
 
-        Useful if I want to manually request GetRealTimeStats.
+        Useful if I want to manually request `GetRealTimeStats`.
         """
         active_match = await self.find_active_match(ctx.broadcaster.id)
         response = await active_match.server_steam_id_command_response()
         await ctx.send(content=response)
+
+    @ireloop(count=1)
+    async def debug_announce_gc_ready(self) -> None:
+        """Announce in Irene's twitch chat that Dota 2 GC is ready."""
+        await self.bot.dota.wait_until_gc_ready()
+        await self.debug_deliver("Connection to Dota 2 Game Coordinator is ready")
 
 
 async def setup(bot: IreBot) -> None:
