@@ -443,6 +443,10 @@ class Match:
         ]
         return " \N{BULLET} ".join(response_parts)
 
+    @format_match_response
+    async def command_server_steam_id(self) -> str:
+        return str(self.server_steam_id)
+
 
 class PlayMatch(Match):
     def __init__(self, bot: IreBot, watchable_game_id: str) -> None:
@@ -1470,6 +1474,16 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         """
         await self.wait_for_clients()
         await self.bot._friends_index_ready.wait()
+
+    #################################
+    #          MORE OR LESS DEBUG COMMANDS            #
+    #################################
+
+    @commands.command()
+    async def server_steam_id(self, ctx: IreContext, friend_id: int) -> None:
+        active_match = await self.find_active_match(ctx.broadcaster.id)
+        response = await active_match.command_server_steam_id()
+        await ctx.send(content=response)
 
 
 async def setup(bot: IreBot) -> None:
