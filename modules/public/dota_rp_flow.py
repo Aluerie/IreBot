@@ -719,11 +719,13 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         # Unrecognized
         text = (
             f"Uncategorized Rich Presence Status \n"
-            f"friend={friend!r} status={rp.status.value}\n"
-            f"```\nrich_presence.raw={pprint.pformat(rp.raw)}```"
+            f"friend=`{friend!r}`\n"
+            f"status=`{rp.status.value}`\n"
+            "rich_presence.raw="
+            f"```json\n{pprint.pformat(rp.raw)}```"
         )
         log.warning(text)
-        await self.bot.error_webhook.send(content=self.bot.error_ping + " " + text)
+        await self.bot.error_webhook.send(content=self.bot.error_ping + "\n" + text)
 
         return SomethingIsOff()
 
