@@ -1,7 +1,8 @@
 ; sudo nano /etc/systemd/system/irebot.service
 ; sudo systemctl daemon-reload
+; sudo systemctl enable irebot
 ; sudo systemctl start irebot
-; sudo systemctl start irebot
+; journalctl -u irebot -e
 
 [Unit]
 Description=irebot

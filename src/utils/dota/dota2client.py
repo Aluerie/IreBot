@@ -38,7 +38,7 @@ class Dota2Client(Client):
     """
 
     def __init__(self, twitch_bot: IreBot) -> None:
-        persona_state = PersonaState.Invisible if twitch_bot.test else PersonaState.Online
+        persona_state = PersonaState.Invisible  # if twitch_bot.test else PersonaState.Online
         super().__init__(state=persona_state)
         self.bot: IreBot = twitch_bot
         self.started: bool = False
