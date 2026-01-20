@@ -6,12 +6,12 @@ from typing import TYPE_CHECKING, TypedDict, override
 
 from twitchio.ext import commands
 
-from bot import IreDevComponent, Streamer, ireloop
+from core import IreDevComponent, Streamer, ireloop
 
 if TYPE_CHECKING:
     import twitchio
 
-    from bot import IreBot
+    from core import IreBot
 
     class StreamersUserQueryRow(TypedDict):
         user_id: str

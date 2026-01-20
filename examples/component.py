@@ -4,10 +4,10 @@ from typing import TYPE_CHECKING
 
 from twitchio.ext import commands
 
-from bot import IrePersonalComponent
+from core import IrePersonalComponent
 
 if TYPE_CHECKING:
-    from bot import IreBot, IreContext
+    from core import IreBot, IreContext
 
 
 class NewCog(IrePersonalComponent):

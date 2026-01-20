@@ -9,13 +9,13 @@ from typing import TYPE_CHECKING, Any, TypedDict, override
 from discord import Embed
 from twitchio.ext import commands
 
-from bot import IrePersonalComponent, ireloop
+from core import IrePersonalComponent, ireloop
 from utils import const, fmt
 
 if TYPE_CHECKING:
     import twitchio
 
-    from bot import IreBot, IreContext
+    from core import IreBot, IreContext
 
     class FirstRedeemsRow(TypedDict):
         user_name: str

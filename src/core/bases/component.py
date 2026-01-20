@@ -7,7 +7,7 @@ from twitchio.ext import commands
 from utils import errors
 
 if TYPE_CHECKING:
-    from bot import IreBot, IreContext
+    from core import IreBot, IreContext
 
 
 __all__ = (

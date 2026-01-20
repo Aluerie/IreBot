@@ -8,13 +8,13 @@ from typing import TYPE_CHECKING, Any, TypedDict
 
 from twitchio.ext import commands
 
-from bot import IrePersonalComponent
+from core import IrePersonalComponent
 from utils import const
 
 if TYPE_CHECKING:
     import twitchio
 
-    from bot import IreBot
+    from core import IreBot
 
     class KeywordDict(TypedDict):
         aliases: list[str]

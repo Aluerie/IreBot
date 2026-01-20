@@ -9,11 +9,11 @@ from typing import TYPE_CHECKING, TypedDict
 import twitchio  # noqa: TC002
 from twitchio.ext import commands
 
-from bot import IreDevComponent
+from core import IreDevComponent
 from utils import fmt
 
 if TYPE_CHECKING:
-    from bot import IreBot, IreContext
+    from core import IreBot, IreContext
 
     class RunDict(TypedDict):
         keywords: list[str]

@@ -13,10 +13,10 @@ from typing import TYPE_CHECKING, TypedDict, override
 import aiohttp
 import discord
 
-from bot import ireloop
+from core import ireloop
 
 if TYPE_CHECKING:
-    from bot import IreBot
+    from core import IreBot
 
     class DotaCacheDict(TypedDict):
         item_by_id: dict[int, str]  # id -> item name

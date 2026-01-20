@@ -13,7 +13,7 @@ from utils import errors
 if TYPE_CHECKING:
     import datetime
 
-    from bot import IreBot
+    from core import IreBot
 
     class HasBotAttribute(Protocol):
         bot: IreBot

@@ -9,14 +9,14 @@ from typing import TYPE_CHECKING, NamedTuple, TypedDict
 import twitchio  # noqa: TC002
 from twitchio.ext import commands
 
-from bot import IrePersonalComponent
 from config import config
+from core import IrePersonalComponent
 from utils import const, errors, fmt, guards
 
 if TYPE_CHECKING:
     from aiohttp import ClientSession
 
-    from bot import IreBot, IreContext
+    from core import IreBot, IreContext
 
 
 log = logging.getLogger(__name__)

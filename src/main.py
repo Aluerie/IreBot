@@ -10,8 +10,8 @@ import aiohttp
 import asyncpg
 import click
 
-from bot import IreBot, get_eventsub_subscriptions, setup_logging
 from config import config
+from core import IreBot, get_eventsub_subscriptions, setup_logging
 from utils import const
 
 if TYPE_CHECKING:

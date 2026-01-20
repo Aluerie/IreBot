@@ -85,6 +85,7 @@ reportIncompatibleMethodOverride = "none"
 line-length = 125
 target-version = "py312"
 # requires-python = ">= 3.10"
+src = ['src']
 
 [tool.ruff.lint]
 select = [

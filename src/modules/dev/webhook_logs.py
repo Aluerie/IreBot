@@ -9,13 +9,13 @@ from typing import TYPE_CHECKING, Any, override
 import discord
 from twitchio.ext import commands
 
-from bot import IreDevComponent, ireloop
+from core import IreDevComponent, ireloop
 from utils import const
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
-    from bot import IreBot
+    from core import IreBot
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.INFO)

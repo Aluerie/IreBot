@@ -7,11 +7,11 @@ from typing import TYPE_CHECKING, Any, TypedDict
 import twitchio
 from twitchio.ext import commands
 
-from bot import IrePersonalComponent, ireloop
+from core import IrePersonalComponent, ireloop
 from utils import const, fmt, guards
 
 if TYPE_CHECKING:
-    from bot import IreBot, IreContext
+    from core import IreBot, IreContext
 
     class Tracked(TypedDict):
         game: str

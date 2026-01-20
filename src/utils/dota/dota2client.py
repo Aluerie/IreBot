@@ -14,7 +14,7 @@ from .storage import Items
 if TYPE_CHECKING:
     from steam.ext.dota2 import PartialUser, User
 
-    from bot import IreBot
+    from core import IreBot
 
 log = logging.getLogger(__name__)
 

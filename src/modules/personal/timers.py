@@ -7,13 +7,13 @@ from typing import TYPE_CHECKING, Any
 
 from twitchio.ext import commands
 
-from bot import IrePersonalComponent
+from core import IrePersonalComponent
 from utils import const
 
 if TYPE_CHECKING:
     import twitchio
 
-    from bot import IreBot
+    from core import IreBot
 
 MESSAGES: list[str] = [
     f"FIX YOUR POSTURE {const.BTTV.weirdChamp}",

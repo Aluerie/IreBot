@@ -4,11 +4,11 @@ from typing import TYPE_CHECKING, TypedDict
 
 from twitchio.ext import commands
 
-from bot import IrePersonalComponent
+from core import IrePersonalComponent
 from utils import const
 
 if TYPE_CHECKING:
-    from bot import IreBot, IreContext
+    from core import IreBot, IreContext
 
     class RunDict(TypedDict):
         keywords: list[str]

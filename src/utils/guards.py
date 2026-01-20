@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING, Any
 from twitchio.ext import commands
 
 if TYPE_CHECKING:
-    from bot import IreContext
+    from core import IreContext
 
 __all__ = (
     "is_online",

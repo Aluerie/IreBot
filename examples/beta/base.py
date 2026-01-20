@@ -12,12 +12,12 @@ import aiohttp
 import twitchio
 from twitchio.ext import commands
 
-from bot import IreDevComponent, ireloop
+from core import IreDevComponent, ireloop
 from config import config
 from utils import const, errors
 
 if TYPE_CHECKING:
-    from bot import IreBot, IreContext
+    from core import IreBot, IreContext
 
 log = logging.getLogger(__name__)
 

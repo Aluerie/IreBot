@@ -6,11 +6,11 @@ from typing import TYPE_CHECKING, Annotated
 
 from twitchio.ext import commands
 
-from bot import IreDevComponent
+from core import IreDevComponent
 from utils import const, guards
 
 if TYPE_CHECKING:
-    from bot import IreBot, IreContext
+    from core import IreBot, IreContext
 
 log = logging.getLogger(__name__)
 

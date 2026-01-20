@@ -16,8 +16,8 @@ import steam
 from steam.ext.dota2 import GameMode, Hero, LobbyType, MatchOutcome, MinimalMatch, User as Dota2User
 from twitchio.ext import commands
 
-from bot import IrePublicComponent, ireloop
 from config import config
+from core import IrePublicComponent, ireloop
 from utils import const, errors, fmt, fuzzy, guards
 from utils.dota import constants as dota_constants, enums as dota_enums, utils as dota_utils
 
@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 
     from steam.ext.dota2 import MatchHistoryMatch, User as Dota2SteamUser
 
-    from bot import IreBot, IreContext
+    from core import IreBot, IreContext
     from utils.dota import SteamUserUpdate
     from utils.dota.schemas import opendota, steam_web_api
 

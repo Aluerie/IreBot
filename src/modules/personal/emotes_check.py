@@ -5,13 +5,13 @@ from typing import TYPE_CHECKING, Any, override
 
 from discord import Embed
 
-from bot import IrePersonalComponent, ireloop
+from core import IrePersonalComponent, ireloop
 from utils import const
 
 if TYPE_CHECKING:
     from enum import StrEnum
 
-    from bot import IreBot
+    from core import IreBot
 
 
 class EmoteChecker(IrePersonalComponent):
