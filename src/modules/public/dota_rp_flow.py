@@ -714,8 +714,8 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             return DemoMode()
 
         # Private Lobby
-        if rp.status == dota_enums.Status.PrivateLobby:
-            return PrivateLobby()
+        # if rp.status == dota_enums.Status.PrivateLobby:
+        #     return PrivateLobby()
 
         # Custom games
         if rp.status == dota_enums.Status.CustomGame:
