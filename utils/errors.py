@@ -12,13 +12,9 @@ from typing import Any
 class IreBotError(Exception):
     """The base exception for IreBot. All other exceptions should inherit from this."""
 
-    __slots__: tuple[str, ...] = ()
-
 
 class SilentError(IreBotError):
     """Errors to be ignored by the error handler."""
-
-    __slots__: tuple[str, ...] = ()
 
 
 class RespondWithError(IreBotError):
@@ -28,8 +24,6 @@ class RespondWithError(IreBotError):
     that requires an early exit but still with a command response.
     """
 
-    __slots__: tuple[str, ...] = ()
-
 
 class PlaceholderError(IreBotError):
     """Placeholder Error for "Something went wrong" moments.
@@ -37,8 +31,6 @@ class PlaceholderError(IreBotError):
     An error type I mostly use for the debugging purposes in places I'm not sure what to do about.
     Can attach some debug data into `.data` attribute for more debugging information.
     """
-
-    __slots__: tuple[str, ...] = ()
 
     def __init__(self, message: str, **kwargs: Any) -> None:
         self.data: dict[str, Any] = kwargs
@@ -55,5 +47,3 @@ class ResponseNotOK(IreBotError):  # noqa: N818
     when response from `self.bot.session.get(url)` is not OK.
     I.e. Cache Updates.
     """
-
-    __slots__: tuple[str, ...] = ()

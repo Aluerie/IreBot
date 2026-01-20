@@ -5,8 +5,8 @@ import datetime
 import functools
 import itertools
 import logging
+import pprint
 from dataclasses import dataclass
-from enum import IntEnum
 from operator import attrgetter
 from typing import TYPE_CHECKING, Annotated, Any, TypedDict, override
 from urllib import parse as url_parse
@@ -67,29 +67,53 @@ class Score:
     pending: int
 
 
-class StatusEnum(IntEnum):
-    SomethingIsOff = 0  # means something is off
-    Dashboard = 1
-    Playing = 2
-    Watching = 3
-    DemoMode = 4
-    BotMatch = 5
-    Replay = 6
-    PrivateLobby = 7
-    CustomGames = 8
+@dataclass(slots=True)
+class Activity:
+    """Activity.
+
+    Dev Note
+    --------
+    * I'm not sure if I like this implementation.
+        Maybe we need to combine Play Watch Match with this and combine all the classes?
+    """
 
 
-@dataclass
-class Activity: ...
+@dataclass(slots=True)
+class SomethingIsOff(Activity): ...
 
 
-@dataclass
+@dataclass(slots=True)
 class Dashboard(Activity): ...
 
 
-@dataclass
+@dataclass(slots=True)
 class Playing(Activity):
     watchable_game_id: str
+
+
+@dataclass(slots=True)
+class Watching(Activity):
+    watching_server: str
+
+
+@dataclass(slots=True)
+class DemoMode(Activity): ...
+
+
+@dataclass(slots=True)
+class BotMatch(Activity): ...
+
+
+@dataclass(slots=True)
+class Replay(Activity): ...
+
+
+@dataclass(slots=True)
+class PrivateLobby(Activity): ...
+
+
+@dataclass(slots=True)
+class CustomGames(Activity): ...
 
 
 class RichPresence:
@@ -124,53 +148,6 @@ class RichPresence:
     def __hash__(self) -> int:
         return hash(self.raw)
 
-    def status_type(self, friend: Friend) -> StatusEnum:
-        # Dashboard
-        if self.status in {dota_enums.Status.Idle, dota_enums.Status.MainMenu, dota_enums.Status.Finding}:
-            return StatusEnum.Dashboard
-
-        # Playing somewhere
-        if self.status in {dota_enums.Status.HeroSelection, dota_enums.Status.Strategy, dota_enums.Status.Playing}:
-            if (watchable_game_id := self.raw.get("WatchableGameID")) is None:
-                # something is off
-                lobby_param0 = self.raw.get("param0") or "_missing"
-                lobby_map: dict[str, StatusEnum] = {
-                    dota_enums.LobbyParam0.DemoMode: StatusEnum.DemoMode,
-                    dota_enums.LobbyParam0.BotMatch: StatusEnum.BotMatch,
-                }
-                return lobby_map.get(lobby_param0, StatusEnum.SomethingIsOff)
-
-            if watchable_game_id == "0":
-                # something is off again
-                # usually this happens when a player has just quit the match into the main menu
-                # the status flickers for a few seconds to be `watchable_game_id=0`
-                return StatusEnum.SomethingIsOff
-            return StatusEnum.Playing
-
-        # Watching
-        if self.status == dota_enums.Status.Spectating:
-            if self.raw.get("watching_server") is None:
-                return StatusEnum.Replay
-            return StatusEnum.Watching
-
-        # Private Lobby
-        if self.status == dota_enums.Status.PrivateLobby:
-            return StatusEnum.PrivateLobby
-
-        # Custom games
-        if self.status == dota_enums.Status.CustomGame:
-            return StatusEnum.CustomGames
-
-        # Unrecognized
-        log.warning(
-            "Uncategorized Rich Presence Status \nfriend=%s rich_presence=%s status=%s\nrich_presence.raw=%s",
-            repr(friend),
-            self.status,
-            self.status.value,
-            self.raw,
-        )
-        return StatusEnum.SomethingIsOff
-
 
 class Friend:
     def __init__(self, bot: IreBot, steam_user: Dota2SteamUser) -> None:
@@ -178,6 +155,7 @@ class Friend:
         self.steam_user: Dota2SteamUser = steam_user
         self.rich_presence: RichPresence = RichPresence(steam_user.rich_presence)
         self.active_match: PlayMatch | WatchMatch | UnsupportedMatch | None = None
+        self.activity: Activity = SomethingIsOff()
 
     @override
     def __repr__(self) -> str:
@@ -688,6 +666,62 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         log.debug('Friends index ready. Setting "_friends_index_ready".')
         self.bot._friends_index_ready.set()
 
+    async def get_activity(self, friend: Friend) -> Activity:
+        """Get Activity."""
+        rp = friend.rich_presence
+
+        # Dashboard
+        if rp.status in {dota_enums.Status.Idle, dota_enums.Status.MainMenu, dota_enums.Status.Finding}:
+            return Dashboard()
+
+        # Playing somewhere
+        if rp.status in {dota_enums.Status.HeroSelection, dota_enums.Status.Strategy, dota_enums.Status.Playing}:
+            if (watchable_game_id := rp.raw.get("WatchableGameID")) is None:
+                # something is off
+                lobby_param0 = rp.raw.get("param0") or "_missing"
+                lobby_map: dict[str, Activity] = {
+                    dota_enums.LobbyParam0.DemoMode: DemoMode(),
+                    dota_enums.LobbyParam0.BotMatch: BotMatch(),
+                }
+                return lobby_map.get(lobby_param0, SomethingIsOff())
+
+            if watchable_game_id == "0":
+                # something is off again
+                # usually this happens when a player has just quit the match into the main menu
+                # the status flickers for a few seconds to be `watchable_game_id=0`
+                return SomethingIsOff()
+            return Playing(watchable_game_id)
+
+        # Watching
+        if rp.status == dota_enums.Status.Spectating:
+            watching_server = rp.raw.get("watching_server")
+            if watching_server is None:
+                return Replay()
+            return Watching(watching_server)
+
+        # Private Lobby
+        if rp.status == dota_enums.Status.PrivateLobby:
+            return PrivateLobby()
+
+        # Custom games
+        if rp.status == dota_enums.Status.CustomGame:
+            return CustomGames()
+
+        if rp.status == dota_enums.Status.NoStatus:
+            # usually this happens in exact moment when the player closes Dota
+            return SomethingIsOff()
+
+        # Unrecognized
+        text = (
+            f"Uncategorized Rich Presence Status \n"
+            f"friend={friend!r} status={rp.status.value}\n"
+            f"```\nrich_presence.raw={pprint.pformat(rp.raw)}```"
+        )
+        log.warning(text)
+        await self.bot.error_webhook.send(content=self.bot.error_ping + " " + text)
+
+        return SomethingIsOff()
+
     async def analyze_rich_presence(self, friend: Friend) -> None:
         """Analyze Rich Presence.
 
@@ -701,8 +735,6 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         The code in this function is also quite volatile. Valve are quite inconsistent in their Rich Presence data,
         so the logic might break any day.
         """
-        rp = friend.rich_presence
-
         if friend.is_playing_dota:
             # Update `last_seen` in the database;
             query = """
@@ -716,32 +748,41 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             await self.conclude_friend_match(friend)
             return
 
-        match rp.status_type(friend):
-            case StatusEnum.Dashboard | StatusEnum.SomethingIsOff:
+        new_activity = await self.get_activity(friend)
+        if friend.activity != new_activity:
+            friend.activity = new_activity
+        else:
+            # no activity changes = no need to do anything
+            return
+
+        match new_activity:
+            case Dashboard():
                 await self.conclude_friend_match(friend)
-            case StatusEnum.Playing:
+            case Playing():
                 # Friend is in a match as a player
-                watchable_game_id = rp.raw.get("WatchableGameID")
-                if watchable_game_id:
-                    if watchable_game_id not in self.play_matches_index:
-                        self.play_matches_index[watchable_game_id] = PlayMatch(self.bot, watchable_game_id)
-                    friend.active_match = self.play_matches_index[watchable_game_id]
-            case StatusEnum.Watching:
-                watching_server = rp.raw.get("watching_server")
-                if watching_server:
-                    if watching_server not in self.watch_matches_index:
-                        self.watch_matches_index[watching_server] = WatchMatch(self.bot, watching_server)
-                    friend.active_match = self.watch_matches_index[watching_server]
-            case StatusEnum.DemoMode:
+                if (w_id := new_activity.watchable_game_id) not in self.play_matches_index:
+                    self.play_matches_index[w_id] = PlayMatch(self.bot, w_id)
+                friend.active_match = self.play_matches_index[w_id]
+            case Watching():
+                if (w_s := new_activity.watching_server) not in self.watch_matches_index:
+                    self.watch_matches_index[w_s] = WatchMatch(self.bot, w_s)
+                friend.active_match = self.watch_matches_index[w_s]
+            case DemoMode():
                 friend.active_match = UnsupportedMatch(self.bot, tag="Demo mode is not supported")
-            case StatusEnum.BotMatch:
+            case BotMatch():
                 friend.active_match = UnsupportedMatch(self.bot, tag="Bot matches are not supported")
-            case StatusEnum.Replay:
+            case Replay():
                 friend.active_match = UnsupportedMatch(self.bot, tag="Data in watching replays is not supported")
-            case StatusEnum.PrivateLobby:
+            case PrivateLobby():
                 friend.active_match = UnsupportedMatch(self.bot, tag="Private lobbies are not supported")
-            case StatusEnum.CustomGames:
+            case CustomGames():
                 friend.active_match = UnsupportedMatch(self.bot, tag="Custom Games are not supported")
+            case SomethingIsOff():
+                # Wait for confirmed statuses
+                return
+            case _:
+                # Wait for confirmed statuses
+                return
 
     # @commands.Component.listener("steam_user_update")
     async def steam_user_update(self, update: SteamUserUpdate) -> None:
