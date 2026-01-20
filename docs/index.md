@@ -37,7 +37,7 @@
   </tr>
   <tr>
     <td>Lead</td>
-    <td class="aliases-column">!d2pt</td>
+    <td class="aliases-column">!lead</td>
     <td>
       Show which team has a gold lead and by how much.
     </td>
