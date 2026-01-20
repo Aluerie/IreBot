@@ -537,7 +537,7 @@ class WatchMatch(Match):
     @ireloop(seconds=10.1, count=30)
     async def update_data(self) -> None:
         log.debug('Updating %s data for watching_server "%s"', self.__class__.__name__, self.watching_server)
-        match = await self.bot.dota.steam_web_api.get_real_time_stats(self.server_steam_id)
+        match = await self.get_real_time_stats()
         api_players = list(itertools.chain(match["teams"][0]["players"], match["teams"][1]["players"]))
 
         if not self.players_data_ready.is_set():
