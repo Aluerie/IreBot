@@ -1480,7 +1480,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
     #################################
 
     @commands.command()
-    async def server_steam_id(self, ctx: IreContext, friend_id: int) -> None:
+    async def server_steam_id(self, ctx: IreContext) -> None:
         active_match = await self.find_active_match(ctx.broadcaster.id)
         response = await active_match.command_server_steam_id()
         await ctx.send(content=response)
