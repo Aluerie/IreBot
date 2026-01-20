@@ -363,7 +363,8 @@ class Match:
                 f"&server_steam_id={self.server_steam_id}"
             )
             async with self.bot.session.get(url=url) as resp:
-                match = await resp.json(loads=orjson.loads)
+                # 'utf-8' errored out one day
+                match = await resp.json(loads=orjson.loads, encoding="ISO-8859-1")
             if match:
                 break
             # Sometimes it returns an empty dict `{}` (especially on the very first request)

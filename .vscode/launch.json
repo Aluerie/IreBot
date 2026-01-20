@@ -8,7 +8,7 @@
             "name": "IreBot",
             "type": "debugpy",
             "request": "launch",
-            "program": "main.py",
+            "program": "src/main.py",
             "console": "integratedTerminal",
             "justMyCode": true
         }
