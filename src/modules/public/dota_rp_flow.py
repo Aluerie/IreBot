@@ -363,7 +363,7 @@ class Match:
                 f"&server_steam_id={self.server_steam_id}"
             )
             async with self.bot.session.get(url=url) as resp:
-                # 'utf-8' errored out one day
+                # encoding='utf-8' errored out one day
                 match = await resp.json(loads=orjson.loads, encoding="ISO-8859-1")
             if match:
                 break
@@ -445,7 +445,8 @@ class Match:
         return " \N{BULLET} ".join(response_parts)
 
     @format_match_response
-    async def command_server_steam_id(self) -> str:
+    async def server_steam_id_command_response(self) -> str:
+        """Command response for !server_steam_id."""
         return str(self.server_steam_id)
 
 
@@ -708,6 +709,9 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             if watching_server is None:
                 return Replay()
             return Watching(watching_server)
+
+        if rp.status == dota_enums.Status.BotPractice:
+            return DemoMode()
 
         # Private Lobby
         if rp.status == dota_enums.Status.PrivateLobby:
@@ -1482,8 +1486,12 @@ class Dota2RichPresenceFlow(IrePublicComponent):
 
     @commands.command()
     async def server_steam_id(self, ctx: IreContext) -> None:
+        """Show server steam id for the match.
+
+        Useful if I want to manually request GetRealTimeStats.
+        """
         active_match = await self.find_active_match(ctx.broadcaster.id)
-        response = await active_match.command_server_steam_id()
+        response = await active_match.server_steam_id_command_response()
         await ctx.send(content=response)
 
 
