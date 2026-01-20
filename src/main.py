@@ -164,6 +164,7 @@ def main(
             except KeyboardInterrupt:
                 print("Aborted! The bot was interrupted with `KeyboardInterrupt`!")  # noqa: T201
             except asyncio.CancelledError:
+                # todo: not sure about this one;
                 print("Aborted! The bot was interrupted with `asyncio.CancelledError`!")  # noqa: T201
 
 
