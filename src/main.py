@@ -163,6 +163,8 @@ def main(
                 )
             except KeyboardInterrupt:
                 print("Aborted! The bot was interrupted with `KeyboardInterrupt`!")  # noqa: T201
+            except asyncio.CancelledError:
+                print("Aborted! The bot was interrupted with `asyncio.CancelledError`!")  # noqa: T201
 
 
 if __name__ == "__main__":

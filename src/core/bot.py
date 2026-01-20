@@ -298,7 +298,7 @@ class IreBot(commands.AutoBot):
             log.warning(msg)
         else:
             for module in self.modules_to_load:
-                log.debug("Loading module %s", module)
+                log.debug("Loading module: %s", module)
                 await self.load_module(module)
 
     @override

@@ -41,7 +41,7 @@ def get_modules(*, test: bool) -> tuple[str, ...]:
         return TEST_MODULES
 
     # assume running full bot functionality (besides `DISABLED_MODULES`)
-    current_folder = str(__package__)
+    current_folder = "src/" + str(__package__)
     modules: tuple[str, ...] = ()
     module_categories = [path for path in Path(current_folder).iterdir() if path.is_dir() and not path.name.startswith("_")]
     for module_category in module_categories:
