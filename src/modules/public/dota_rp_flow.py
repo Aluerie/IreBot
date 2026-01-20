@@ -1196,7 +1196,10 @@ class Dota2RichPresenceFlow(IrePublicComponent):
 
     @ireloop(seconds=20)
     async def process_pending_abandons(self) -> None:
-        """#TODO."""
+        """Process pending abandons.
+
+        This task is separate from pending matches due to fetching matches from opendota.
+        """
         query = """
             SELECT p.match_id, p.friend_id, p.player_slot, m.outcome, m.lobby_type
             FROM ttv_dota_match_players p

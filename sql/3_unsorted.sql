@@ -12,12 +12,6 @@ CREATE TABLE
     );
 
 CREATE TABLE
-    IF NOT EXISTS ttv_stream_titles (
-        title TEXT NOT NULL PRIMARY KEY,
-        edit_time TIMESTAMPTZ DEFAULT (NOW () AT TIME zone 'utc')
-    );
-
-CREATE TABLE
     IF NOT EXISTS ttv_chatters (
         user_id TEXT PRIMARY KEY,
         name_lower TEXT NOT NULL

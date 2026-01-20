@@ -12,7 +12,7 @@ from .pulsefire_clients import SteamWebAPIClient, StratzClient
 from .storage import Items
 
 if TYPE_CHECKING:
-    from steam.ext.dota2 import PartialUser, User
+    from steam.ext.dota2 import User
 
     from core import IreBot
 
@@ -46,10 +46,6 @@ class Dota2Client(Client):
         self.steam_web_api = SteamWebAPIClient()
         self.stratz = StratzClient()
         self.items = Items(twitch_bot)
-
-    def irene(self) -> PartialUser:
-        """Irene's Dota/Steam Profile (partial user)."""
-        return self.create_partial_user(config["STEAM"]["IRENE_ID64"])
 
     async def start_helpers(self) -> None:
         """Start helping services for steam."""
