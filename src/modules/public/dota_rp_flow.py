@@ -1336,7 +1336,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         """Show streamer's Win - Loss score ratio during the stream."""
         streamer = self.bot.streamers[ctx.broadcaster.id]
         if not streamer.online:
-            response = f"Offline score - {await self.score_response_helper(ctx.broadcaster.id)}"
+            response = f"[Offline score for last gaming session] {await self.score_response_helper(ctx.broadcaster.id)}"
         else:
             response = await self.score_response_helper(ctx.broadcaster.id, streamer.started_dt)
         await ctx.send(content=response)
