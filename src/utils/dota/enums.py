@@ -38,6 +38,7 @@ class Status(MyStrEnum):
     Idle = "#DOTA_RP_IDLE"  # ✅
     MainMenu = "#DOTA_RP_INIT"  # ✅
     Finding = "#DOTA_RP_FINDING_MATCH"  # ✅
+    WaitingForMapToLoad = "#DOTA_RP_WAIT_FOR_MAP_TO_LOAD"
     WaitingToLoad = "#DOTA_RP_WAIT_FOR_PLAYERS_TO_LOAD"  # ✅
     HeroSelection = "#DOTA_RP_HERO_SELECTION"  # ✅
     Strategy = "#DOTA_RP_STRATEGY_TIME"  # ✅

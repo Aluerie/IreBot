@@ -721,6 +721,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             dota_enums.Status.HeroSelection,
             dota_enums.Status.Strategy,
             dota_enums.Status.PreGame,
+            dota_enums.Status.WaitingForMapToLoad,
             dota_enums.Status.Playing,
             dota_enums.Status.CustomGameProgress,
             dota_enums.Status.CustomGameProgress,
