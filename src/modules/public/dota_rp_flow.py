@@ -1300,6 +1300,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         for row in rows:
             # Let's assume gaming sessions to be separated by 6 hours from each other;
             if row["start_time"] < cutoff_dt - datetime.timedelta(hours=6):
+                gaming_session_dt = row["start_time"]
                 break
             cutoff_dt = row["start_time"]
 
@@ -1320,6 +1321,8 @@ class Dota2RichPresenceFlow(IrePublicComponent):
                     score.wins += 1
                 else:
                     score.losses += 1
+        else:
+            gaming_session_dt = rows[-1]["start_time"]
 
         def format_results(score: Score) -> str:
             wl = f"{score.wins} W - {score.losses} L"
@@ -1336,18 +1339,24 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             for friend_id, scores in index.items()
         }
 
-        return " \N{LARGE PURPLE CIRCLE} ".join(
+        response = " \N{LARGE PURPLE CIRCLE} ".join(
             # Let's make extra query to know name accounts
             f"{u.name if (u := self.bot.dota.get_user(friend_id)) else friend_id}: {part}"
             for friend_id, part in response_parts.items()
         )
+        if not stream_started_at:
+            response = (
+                "[Offline score for the last gaming session "
+                f"{fmt.timedelta_to_words(datetime.datetime.now(datetime.UTC) - gaming_session_dt)} ago] {response}"
+            )
+        return response
 
     @commands.group(aliases=["wl", "winloss"], invoke_fallback=True)
     async def score(self, ctx: IreContext) -> None:
         """Show streamer's Win - Loss score ratio during the stream."""
         streamer = self.bot.streamers[ctx.broadcaster.id]
         if not streamer.online:
-            response = f"[Offline score for last gaming session] {await self.score_response_helper(ctx.broadcaster.id)}"
+            response = await self.score_response_helper(ctx.broadcaster.id)
         else:
             response = await self.score_response_helper(ctx.broadcaster.id, streamer.started_dt)
         await ctx.send(content=response)
