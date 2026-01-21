@@ -1347,7 +1347,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         if not stream_started_at:
             timedelta = datetime.datetime.now(datetime.UTC) - gaming_session_dt
             response = (
-                "[Offline score for the last gaming session "
+                "[Offline WL for the last gaming session that started"
                 f"{fmt.timedelta_to_words(timedelta, fmt=fmt.TimeDeltaFormat.Letter)} ago] {response}"
             )
         return response
