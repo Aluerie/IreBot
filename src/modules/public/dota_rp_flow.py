@@ -1306,7 +1306,11 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             score_category = dota_enums.ScoreCategory.create(row["lobby_type"], row["game_mode"])
             score = index.setdefault(row["friend_id"], {}).setdefault(score_category, Score(0, 0, 0, 0))
 
-            if row["outcome"] == MatchOutcome.RadiantVictory:
+            if row["abandon"]:
+                score.abandons += 1
+            elif row["outcome"] is None:
+                score.pending += 1
+            elif row["outcome"] == MatchOutcome.RadiantVictory:
                 if row["player_slot"] < 5:
                     score.wins += 1
                 else:
@@ -1316,10 +1320,6 @@ class Dota2RichPresenceFlow(IrePublicComponent):
                     score.wins += 1
                 else:
                     score.losses += 1
-            elif row["abandon"]:
-                score.abandons += 1
-            elif row["outcome"] is None:
-                score.pending += 1
 
         def format_results(score: Score) -> str:
             wl = f"{score.wins} W - {score.losses} L"
