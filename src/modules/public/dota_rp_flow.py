@@ -1218,9 +1218,10 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         log.debug("Processing pending matches.")
 
         query = """
-            SELECT match_id
-            FROM ttv_dota_matches
-            WHERE outcome IS NULL;
+            SELECT m.match_id
+            FROM ttv_dota_matches m
+            JOIN ttv_dota_match_players p ON m.match_id = p.match_id
+            WHERE m.outcome IS NULL;
         """
         rows = await self.bot.pool.fetch(query)
         if not rows:
