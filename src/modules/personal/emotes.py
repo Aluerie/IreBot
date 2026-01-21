@@ -4,6 +4,7 @@ import datetime
 from typing import TYPE_CHECKING, Any, override
 
 from discord import Embed
+from twitchio.ext import commands
 
 from core import IrePersonalComponent, ireloop
 from utils import const
@@ -11,7 +12,7 @@ from utils import const
 if TYPE_CHECKING:
     from enum import StrEnum
 
-    from core import IreBot
+    from core import IreBot, IreContext
 
 
 class EmoteChecker(IrePersonalComponent):
@@ -75,6 +76,14 @@ class EmoteChecker(IrePersonalComponent):
             bttv_json = await resp.json()
             bttv_emote_list = [emote["code"] for emote in bttv_json["channelEmotes"] + bttv_json["sharedEmotes"]]
             await self.cross_check_emotes(bttv_emote_list, const.BTTV, 0xD50014)
+
+    @commands.command(aliases=["potatbotat"])
+    async def potat(self, ctx: IreContext) -> None:
+        """Get reminder on what command to use to merge 7tv sets using potatbotat tool.
+
+        Link to the tool potat.app/help/mergeset.
+        """
+        await ctx.send('#mergeset 01FAQVCS500002EV4FV330P46A 01JS1XW1PAAKP34984FDYZVDR7 as:"Default but Dota 2"')
 
 
 async def setup(bot: IreBot) -> None:
