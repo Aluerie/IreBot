@@ -295,7 +295,7 @@ class Match:
         ]
         return "Lifetime Games: " + " \N{BULLET} ".join(response_parts)
 
-    def convert_argument_to_player_slot(self, argument: str) -> int:
+    def convert_argument_to_tuple(self, argument: str) -> tuple[Hero, int]:
         """Convert command argument provided by user (twitch chatter) into a player_slot in the match.
 
         It supports
@@ -309,7 +309,7 @@ class Match:
             if not 0 <= player_slot <= 9:
                 msg = "Sorry, player_slot can only be of 1-10 values."
                 raise errors.RespondWithError(msg)
-            return player_slot
+            return self.heroes[player_slot], player_slot
 
         # Otherwise - we have to use the fuzzy search
 
@@ -336,18 +336,20 @@ class Match:
             player_slot = player_slot_choice[0]
             if player_slot is None:
                 raise errors.RespondWithError(error_message)
-        else:
-            # hero aliases matched better;
-            hero = hero_slot_choice[0]
-            if hero is None:
-                raise errors.RespondWithError(error_message)
+            return self.heroes[player_slot], player_slot
 
-            try:
-                player_slot = self.heroes.index(hero)
-            except ValueError:
-                msg = f"Hero {hero} is not present in the match."
-                raise errors.RespondWithError(msg) from None
-        return player_slot
+        # Else: hero aliases matched better;
+        hero = hero_slot_choice[0]
+        if hero is None:
+            raise errors.RespondWithError(error_message)
+
+        try:
+            player_slot = self.heroes.index(hero)
+        except ValueError:
+            msg = f"Hero {hero} is not present in the match."
+            raise errors.RespondWithError(msg) from None
+
+        return hero, player_slot
 
     @format_match_response
     async def profile(self, argument: str) -> str:
@@ -355,8 +357,8 @@ class Match:
         if not self.players:
             return "No player data yet."
 
-        player_slot = self.convert_argument_to_player_slot(argument)
-        return f"{self.heroes[player_slot]} stratz.com/players/{self.players[player_slot].friend_id}"
+        hero, player_slot = self.convert_argument_to_tuple(argument)
+        return f"{hero} stratz.com/players/{self.players[player_slot].friend_id}"
 
     async def get_real_time_stats(self) -> steam_web_api.RealTimeStatsResponse:
         """Get Real Time Stats from Steam Web API.
@@ -396,13 +398,23 @@ class Match:
         if self.lobby_type == LobbyType.NewPlayerMode:
             return "New Player Mode matches do not support real time stats."
 
-        player_slot = self.convert_argument_to_player_slot(argument)
+        hero, player_slot = self.convert_argument_to_tuple(argument)
 
         match = await self.get_real_time_stats()
 
-        team_ord = int(player_slot > 4)  # team_ord = 0 for Radiant, 1 for Dire
-        team_slot = player_slot - 5 * team_ord  # 0 1 2 3 4 for Radiant, 5 6 7 8 9 for Dire
-        api_player = match["teams"][team_ord]["players"][team_slot]
+        # We have to loop through teams in order to support Custom and Event Games
+        # Since the amount of players in the team can be variable.
+        for team in match["teams"]:
+            for player in team["players"]:
+                if player["heroid"] == hero:
+                    api_player = player
+                    break
+            else:
+                continue
+            break
+        else:
+            msg = f"Somehow couldn't find the player {player_slot=} with {hero=} in the game."
+            raise errors.PlaceholderError(msg)
 
         prefix = f"[2m delay] {api_player['name']} {Hero.try_value(api_player['heroid'])} lvl {api_player['level']}"
         net_worth = f"NW: {api_player['net_worth']}"
@@ -823,7 +835,8 @@ class Dota2RichPresenceFlow(IrePublicComponent):
                 )
             case CustomGames():
                 friend.active_match = UnsupportedMatch(
-                    self.bot, tag="Custom Games Lobbies (in draft stage) are not supported - wait for the game to start."
+                    self.bot,
+                    tag="Custom Games Lobbies (in draft stage) are not supported - wait for the game to start.",
                 )
             case SomethingIsOff():
                 # Wait for confirmed statuses
