@@ -19,6 +19,7 @@ class SteamAccount(TypedDict):
 
 
 class Steam(TypedDict):
+    IRENE_ID32: int
     IRENE_ID64: int
     IRENESTEST: SteamAccount
     IRENESBOT: SteamAccount

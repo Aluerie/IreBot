@@ -241,6 +241,9 @@ class Match:
         self.players_data_ready: asyncio.Event = asyncio.Event()
         self.heroes_data_ready: asyncio.Event = asyncio.Event()
 
+        # friends
+        self.friends: set[Friend] = set()
+
     def _is_players_data_ready(self) -> bool:
         """A condition to check whether match player data is filled properly."""
         return bool(self.game_mode) and len(self.players) == 10
@@ -509,6 +512,7 @@ class PlayMatch(Match):
                     ON CONFLICT (match_id) DO NOTHING;
                 """
                 await self.bot.pool.execute(query, self.match_id, match.start_time, self.lobby_type, self.game_mode)
+            self.bot.dispatch("match_data_ready", self)
             self.update_data.stop()
 
     @override
@@ -569,6 +573,7 @@ class WatchMatch(Match):
                 log.debug('%s heroes data ready for: "%s"', self.__class__.__name__, self.watching_server)
 
         if self.players_data_ready.is_set() and self.heroes_data_ready.is_set():
+            self.bot.dispatch("match_data_ready", self)
             self.update_data.stop()
 
 
@@ -788,10 +793,12 @@ class Dota2RichPresenceFlow(IrePublicComponent):
                 if (w_id := new_activity.watchable_game_id) not in self.play_matches_index:
                     self.play_matches_index[w_id] = PlayMatch(self.bot, w_id)
                 friend.active_match = self.play_matches_index[w_id]
+                friend.active_match.friends.add(friend)
             case Watching():
                 if (w_s := new_activity.watching_server) not in self.watch_matches_index:
                     self.watch_matches_index[w_s] = WatchMatch(self.bot, w_s)
                 friend.active_match = self.watch_matches_index[w_s]
+                friend.active_match.friends.add(friend)
             case DemoMode():
                 friend.active_match = UnsupportedMatch(self.bot, tag="Demo mode is not supported")
             case BotMatch():
@@ -1524,6 +1531,12 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         """Announce in Irene's twitch chat that Dota 2 GC is ready."""
         await self.bot.dota.wait_until_gc_ready()
         await self.debug_deliver("Connection to Dota 2 Game Coordinator is ready")
+
+    @commands.Component.listener("match_data_ready")
+    async def debug_announce_data_ready(self, match: Match) -> None:
+        """Announce in Irene's twitch chat that match data is ready."""
+        if config["STEAM"]["IRENE_ID32"] in [f.steam_user.id for f in match.friends]:
+            await self.debug_deliver(f"Match Data for {match.match_id} is ready")
 
 
 async def setup(bot: IreBot) -> None:
