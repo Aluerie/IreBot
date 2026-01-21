@@ -1561,7 +1561,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
 
     @commands.Component.listener("activity_change")
     async def debug_announce_activity_change(self, friend: Friend) -> None:
-        """Announce in Irene's twitch chat that activity data has changed."""
+        """Announce in Irene's twitch chat that their activity data has changed."""
         if friend.steam_user.id == config["STEAM"]["IRENE_ID32"]:
             await self.debug_deliver(f"Activity changed to: {friend.activity}")
 
