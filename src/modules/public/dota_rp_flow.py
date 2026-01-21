@@ -709,7 +709,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             dota_enums.Status.HeroSelection,
             dota_enums.Status.Strategy,
             dota_enums.Status.Playing,
-            dota_enums.Status.TestCustom,
+            dota_enums.Status.CustomGameProgress,
             dota_enums.Status.CustomGameProgress,
         }:
             if (watchable_game_id := rp.raw.get("WatchableGameID")) is None:
@@ -1354,7 +1354,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         if not stream_started_at:
             timedelta = datetime.datetime.now(datetime.UTC) - gaming_session_dt
             response = (
-                "[Offline WL for the last gaming session that started"
+                "[Offline WL for the last gaming session that started "
                 f"{fmt.timedelta_to_words(timedelta, fmt=fmt.TimeDeltaFormat.Letter)} ago] {response}"
             )
         return response
