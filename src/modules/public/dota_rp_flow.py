@@ -77,6 +77,10 @@ class Activity:
         Maybe we need to combine Play Watch Match with this and combine all the classes?
     """
 
+    @override
+    def __str__(self) -> str:
+        return f"<{self.__class__.__name__}>"
+
 
 @dataclass(slots=True)
 class SomethingIsOff(Activity): ...
@@ -491,12 +495,14 @@ class PlayMatch(Match):
             if self._is_players_data_ready():
                 self.players_data_ready.set()
                 log.debug('%s players data ready for: "%s"', self.__class__.__name__, self.watchable_game_id)
+                self.bot.dispatch("players_data_ready", self)
 
         if not self.heroes_data_ready.is_set():
             self.heroes = [gc_player.hero for gc_player in match.players]
             if self._is_heroes_data_ready():
                 self.heroes_data_ready.set()
                 log.debug('%s heroes data ready for: "%s"', self.__class__.__name__, self.watchable_game_id)
+                self.bot.dispatch("heroes_data_ready", self)
 
         if self.players_data_ready.is_set() and self.heroes_data_ready.is_set():
             # add to the database
@@ -512,7 +518,6 @@ class PlayMatch(Match):
                     ON CONFLICT (match_id) DO NOTHING;
                 """
                 await self.bot.pool.execute(query, self.match_id, match.start_time, self.lobby_type, self.game_mode)
-            self.bot.dispatch("match_data_ready", self)
             self.update_data.stop()
 
     @override
@@ -565,15 +570,16 @@ class WatchMatch(Match):
             if self._is_players_data_ready():
                 self.players_data_ready.set()
                 log.debug('%s players data ready for: "%s"', self.__class__.__name__, self.watching_server)
+                self.bot.dispatch("players_data_ready", self)
 
         if not self.heroes_data_ready.is_set():
             self.heroes = [Hero.try_value(api_player["heroid"]) for api_player in api_players]
             if self._is_heroes_data_ready():
                 self.heroes_data_ready.set()
                 log.debug('%s heroes data ready for: "%s"', self.__class__.__name__, self.watching_server)
+                self.bot.dispatch("heroes_data_ready", self)
 
         if self.players_data_ready.is_set() and self.heroes_data_ready.is_set():
-            self.bot.dispatch("match_data_ready", self)
             self.update_data.stop()
 
 
@@ -781,6 +787,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         new_activity = await self.get_activity(friend)
         if friend.activity != new_activity:
             friend.activity = new_activity
+            self.bot.dispatch("activity_change", friend)
         else:
             # no activity changes = no need to do anything
             return
@@ -1532,11 +1539,23 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         await self.bot.dota.wait_until_gc_ready()
         await self.debug_deliver("Connection to Dota 2 Game Coordinator is ready")
 
-    @commands.Component.listener("match_data_ready")
-    async def debug_announce_data_ready(self, match: Match) -> None:
-        """Announce in Irene's twitch chat that match data is ready."""
+    @commands.Component.listener("heroes_data_ready")
+    async def debug_announce_hero_data_ready(self, match: Match) -> None:
+        """Announce in Irene's twitch chat that match heroes data is ready."""
         if config["STEAM"]["IRENE_ID32"] in [f.steam_user.id for f in match.friends]:
-            await self.debug_deliver(f"Match Data for {match.match_id} is ready")
+            await self.debug_deliver(f"Heroes Data for {match.match_id} is ready")
+
+    @commands.Component.listener("players_data_ready")
+    async def debug_announce_players_data_ready(self, match: Match) -> None:
+        """Announce in Irene's twitch chat that match players data is ready."""
+        if config["STEAM"]["IRENE_ID32"] in [f.steam_user.id for f in match.friends]:
+            await self.debug_deliver(f"Players Data for {match.match_id} is ready")
+
+    @commands.Component.listener("activity_change")
+    async def debug_announce_activity_change(self, friend: Friend) -> None:
+        """Announce in Irene's twitch chat that activity data has changed."""
+        if friend.steam_user.id == config["STEAM"]["IRENE_ID32"]:
+            await self.debug_deliver(f"Activity changed to: {friend.activity}")
 
 
 async def setup(bot: IreBot) -> None:
