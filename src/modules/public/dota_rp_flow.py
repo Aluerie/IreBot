@@ -890,6 +890,10 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             LIMIT 1;
         """
         row = await self.bot.pool.fetchrow(query, broadcaster_id)
+        if row is None:
+            msg = "There is no steam accounts associated with your twitch channel"
+            raise errors.RespondWithError(msg)
+
         friend = self.friends.get(row["friend_id"])
 
         if friend:
@@ -1437,11 +1441,13 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         """A group command for the bot developer to manage list of notable players in the database."""
         await ctx.send('"!npm" is a group command: use it together with its subcommands, i.e. "!npm add 123 Arteezy"')
 
-    @npm_dev.command(name="add", aliases=["edit"])
+    @npm_dev.command(name="add", aliases=["edit", "rename"])
     async def npm_dev_add(self, ctx: IreContext, steam_user: Annotated[Dota2User, SteamUserConverter], *, name: str) -> None:
         """Add a notable player to the database.
 
         This command is only available for certain group of people.
+        Since if the player already exists - it will just replace the entry - this command
+        also works as `!npm rename` just fine (we don't need to raise anything)
         """
         query = """
             INSERT INTO ttv_dota_notable_players
@@ -1457,8 +1463,10 @@ class Dota2RichPresenceFlow(IrePublicComponent):
     async def npm_dev_help(self, ctx: IreContext) -> None:
         """Show small help for !np-dev commands."""
         response = (
-            'To add a notable player into the database - use "!npm add 123 Arteezy" \N{BULLET} '
-            'To remove a player - use "!npm remove 123" where 123 is their friend_id.'
+            "!npm add 123 Arteezy \N{BULLET} "
+            "!npm remove 123 \N{BULLET} "
+            "!npm rename 123 \N{BULLET} "
+            "where 123 is their friend_id."
         )
         await ctx.send(response)
 
