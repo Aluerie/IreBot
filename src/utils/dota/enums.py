@@ -47,8 +47,9 @@ class Status(MyStrEnum):
     PrivateLobby = "#DOTA_RP_PRIVATE_LOBBY"  # ✅
     BotPractice = "#DOTA_RP_BOTPRACTICE"  # ❓
     Coaching = "#DOTA_RP_COACHING"  # ❓
-    WatchingTournament = "#DOTA_RP_WATCHING_TOURNAMENT"  # ❓
-    CustomGame = "#DOTA_RP_GAME_IN_PROGRESS_CUSTOM"  # ❓
+    WatchingTournament = "#DOTA_RP_WATCHING_TOURNAMENT"  # ✅
+    CustomGameProgress = "#DOTA_RP_GAME_IN_PROGRESS_CUSTOM"  # ✅
+    CustomGameLobby = "#DOTA_RP_LOBBY_CUSTOM"  # ✅
 
     @classproperty
     def KNOWN_DISPLAY_NAMES(cls: type[Self]) -> Mapping[Status, str]:  # type: ignore[GeneralTypeIssue] # noqa: N802, N805
@@ -69,7 +70,7 @@ class Status(MyStrEnum):
             cls.BotPractice: "Bot Practice",
             cls.Coaching: "Coaching",
             cls.WatchingTournament: "Watching Tournament",
-            cls.CustomGame: "Custom Game",
+            cls.CustomGameProgress: "Custom Game",
         }
 
     @property

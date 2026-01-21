@@ -79,9 +79,9 @@ class EmoteChecker(IrePersonalComponent):
 
     @commands.command(aliases=["potatbotat"])
     async def potat(self, ctx: IreContext) -> None:
-        """Get reminder on what command to use to merge 7tv sets using potatbotat tool.
+        """Get reminder on what command to use to merge 7tv sets using @PotatBotat tool.
 
-        Link to the tool potat.app/help/mergeset.
+        Link to the tool: https://potat.app/help/mergeset.
         """
         await ctx.send('#mergeset 01FAQVCS500002EV4FV330P46A 01JS1XW1PAAKP34984FDYZVDR7 as:"Default but Dota 2"')
 

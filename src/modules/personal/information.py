@@ -20,7 +20,7 @@ if TYPE_CHECKING:
         title_dt: datetime.datetime
 
 
-__all__ = ("EditInformation",)
+__all__ = ("StreamInformation",)
 
 
 # specific exception so I can type "!game dota" without 2;
@@ -32,7 +32,7 @@ GAME_KEYWORDS = {
 }
 
 
-class EditInformation(IrePersonalComponent):
+class StreamInformation(IrePersonalComponent):
     """Commands replicating "Edit Stream Information" window.
 
     Such as
@@ -176,7 +176,7 @@ class EditInformation(IrePersonalComponent):
     async def marker(self, ctx: IreContext, description: str) -> None:
         """Create a stream marker.
 
-        Stream marker for those unaware is a just a timestamp to mark in Twitch.tv Video Highlighter.
+        Stream marker is a just a timestamp to mark in Twitch.tv Video Highlighter.
         """
         await ctx.broadcaster.create_stream_marker(token_for=const.UserID.Irene, description=description)
         await ctx.send(f"Successfully created a marker. {const.STV.DankApprove}")
@@ -184,4 +184,4 @@ class EditInformation(IrePersonalComponent):
 
 async def setup(bot: IreBot) -> None:
     """Load IreBot module. Framework of twitchio."""
-    await bot.add_component(EditInformation(bot))
+    await bot.add_component(StreamInformation(bot))

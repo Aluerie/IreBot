@@ -192,6 +192,9 @@ class Player:
     def __repr__(self) -> str:
         return f"<Player id={self.friend_id} slot={self.color}>"
 
+    def __bool__(self) -> bool:
+        return bool(self.friend_id)
+
     @classmethod
     async def create(cls, bot: IreBot, account_id: int, player_slot: int) -> Player:
         partial_user = bot.dota.create_partial_user(account_id)
@@ -250,7 +253,7 @@ class Match:
 
     def _is_players_data_ready(self) -> bool:
         """A condition to check whether match player data is filled properly."""
-        return bool(self.game_mode) and len(self.players) == 10
+        return bool(self.game_mode) and all(bool(player) for player in self.players)
 
     def _is_heroes_data_ready(self) -> bool:
         """A condition to check whether match hero data is filled properly."""
@@ -706,6 +709,8 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             dota_enums.Status.HeroSelection,
             dota_enums.Status.Strategy,
             dota_enums.Status.Playing,
+            dota_enums.Status.TestCustom,
+            dota_enums.Status.CustomGameProgress,
         }:
             if (watchable_game_id := rp.raw.get("WatchableGameID")) is None:
                 # something is off
@@ -738,7 +743,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             return PrivateLobby()
 
         # Custom games
-        if rp.status == dota_enums.Status.CustomGame:
+        if rp.status == dota_enums.Status.CustomGameLobby:
             return CustomGames()
 
         if rp.status == dota_enums.Status.NoStatus:
@@ -817,7 +822,9 @@ class Dota2RichPresenceFlow(IrePublicComponent):
                     self.bot, tag="Private lobbies (this includes draft in public lobbies) are not supported"
                 )
             case CustomGames():
-                friend.active_match = UnsupportedMatch(self.bot, tag="Custom Games are not supported")
+                friend.active_match = UnsupportedMatch(
+                    self.bot, tag="Custom Games Lobbies (in draft stage) are not supported - wait for the game to start."
+                )
             case SomethingIsOff():
                 # Wait for confirmed statuses
                 return
