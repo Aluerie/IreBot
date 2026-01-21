@@ -1300,7 +1300,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         for row in rows:
             # Let's assume gaming sessions to be separated by 6 hours from each other;
             if row["start_time"] < cutoff_dt - datetime.timedelta(hours=6):
-                gaming_session_dt = row["start_time"]
+                gaming_session_dt = cutoff_dt
                 break
             cutoff_dt = row["start_time"]
 
@@ -1345,9 +1345,10 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             for friend_id, part in response_parts.items()
         )
         if not stream_started_at:
+            timedelta = datetime.datetime.now(datetime.UTC) - gaming_session_dt
             response = (
                 "[Offline score for the last gaming session "
-                f"{fmt.timedelta_to_words(datetime.datetime.now(datetime.UTC) - gaming_session_dt)} ago] {response}"
+                f"{fmt.timedelta_to_words(timedelta, fmt=fmt.TimeDeltaFormat.Letter)} ago] {response}"
             )
         return response
 
