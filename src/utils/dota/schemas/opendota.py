@@ -2,21 +2,21 @@ from __future__ import annotations
 
 from typing import Literal, NotRequired, TypedDict
 
-__all__ = ("Match",)
+__all__ = ("Matches",)
 
 
-class Match(TypedDict):
-    """Typing Dict for response json for opendota GET matches endpoint.
+class Matches(TypedDict):
+    """Typing Dict for response json for the OpenDota's `GET matches` endpoint.
 
     I didn't include all fields; just those that I need at the moment.
     """
 
-    players: list[Player]
+    players: list[MatchesPlayer]
     match_id: int
     lobby_type: int
     game_mode: int
 
 
-class Player(TypedDict):
+class MatchesPlayer(TypedDict):
     abandons: Literal[0, 1]
     account_id: NotRequired[int]

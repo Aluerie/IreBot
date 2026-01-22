@@ -6,12 +6,12 @@ from enum import StrEnum
 class UserID(StrEnum):
     """Known/special user IDs."""
 
-    Irene = "180499648"
+    Irene = "180499648"  # @Irene_Adler__
     Bot = "1277023540"  # @IrenesBot
     Aluerie = "1348167478"
 
     # Not me
-    Xas = "101998257"
+    Xas = "101998257"  # @Xasthurize
 
 
 class LowerName(StrEnum):

@@ -4,22 +4,23 @@ from __future__ import annotations
 
 from typing import Literal, TypedDict
 
-__all__ = ("RealTimeStatsResponse",)
+__all__ = ("RealTimeStats",)
+
+##########################
+# 1. GET REAL TIME STATS #
+##########################
 
 
-# 1. GET REAL TIME STATS
-
-
-class RealTimeStatsResponse(TypedDict):
+class RealTimeStats(TypedDict):
     """Schema for `get_real_time_stats` response."""
 
-    match: Match
-    teams: list[Team]
-    buildings: list[Building]
-    graph_data: GraphData
+    match: RealTimeStatsMatch
+    teams: list[RealTimeStatsTeam]
+    buildings: list[RealTimeStatsBuilding]
+    graph_data: RealTimeStatsGraphData
 
 
-class Match(TypedDict):
+class RealTimeStatsMatch(TypedDict):
     server_steam_id: str
     match_id: str
     timestamp: int
@@ -32,7 +33,7 @@ class Match(TypedDict):
     start_timestamp: int
 
 
-class Team(TypedDict):
+class RealTimeStatsTeam(TypedDict):
     team_number: Literal[2, 3]
     team_id: int
     team_name: str
@@ -41,10 +42,10 @@ class Team(TypedDict):
     score: int
     net_worth: int
     team_logo_url: str
-    players: list[TeamPlayer]
+    players: list[RealTimeStatsTeamPlayer]
 
 
-class TeamPlayer(TypedDict):
+class RealTimeStatsTeamPlayer(TypedDict):
     accountid: int
     playerid: Literal[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     name: str
@@ -65,7 +66,7 @@ class TeamPlayer(TypedDict):
     team_slot: Literal[0, 1, 2, 3, 4]
 
 
-class Building(TypedDict):
+class RealTimeStatsBuilding(TypedDict):
     team: Literal[2, 3]
     heading: float
     type: int
@@ -76,5 +77,5 @@ class Building(TypedDict):
     destroyed: bool
 
 
-class GraphData(TypedDict):
+class RealTimeStatsGraphData(TypedDict):
     graph_gold: list[int]

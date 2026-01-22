@@ -4,13 +4,13 @@ from __future__ import annotations
 
 from typing import TypedDict
 
-__all__ = ("ItemsResponse",)
+__all__ = ("Items",)
 
 
 # STRATZ: GET ITEMS
 
 
-class ItemsResponse(TypedDict):
+class Items(TypedDict):
     """Schema for `get_items` response."""
 
     data: ItemData

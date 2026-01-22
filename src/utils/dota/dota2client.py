@@ -8,8 +8,10 @@ from steam.ext.dota2 import Client
 
 from config import config
 
-from .pulsefire_clients import SteamWebAPIClient, StratzClient
+from .opendota import OpenDotaClient
 from .storage import Items
+from .stratz import StratzClient
+from .web_api import WebAPIClient
 
 if TYPE_CHECKING:
     from steam.ext.dota2 import User
@@ -43,15 +45,15 @@ class Dota2Client(Client):
         self.bot: IreBot = twitch_bot
         self.started: bool = False
 
-        self.steam_web_api = SteamWebAPIClient()
-        self.stratz = StratzClient()
+        self.opendota = OpenDotaClient(session=self.bot.session)
+        self.stratz = StratzClient(bearer_token=config["TOKENS"]["STRATZ_BEARER"], session=self.bot.session)
+        self.web_api = WebAPIClient(api_key=config["TOKENS"]["STEAM"], session=self.bot.session)
+
         self.items = Items(twitch_bot)
 
     async def start_helpers(self) -> None:
         """Start helping services for steam."""
         if not self.started:
-            await self.steam_web_api.__aenter__()
-            await self.stratz.__aenter__()
             self.items.start()
 
     @override
@@ -63,8 +65,6 @@ class Dota2Client(Client):
 
     @override
     async def close(self) -> None:
-        await self.stratz.__aexit__()
-        await self.steam_web_api.__aexit__()
         self.items.close()
 
     @override
@@ -78,7 +78,7 @@ class Dota2Client(Client):
         """Called when a steam user is updated, due to one or more of their attributes changing.
 
         The information from this event is redirected to `self.bot` events
-        so we can process it in the bot components.
+        so we can process it in the bot components' listeners.
         """
         payload = SteamUserUpdate(before=before, after=after)
         self.bot.dispatch("steam_user_update", payload)

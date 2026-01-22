@@ -1,17 +1,20 @@
 from __future__ import annotations
 
-from enum import IntEnum, StrEnum
+from enum import Enum, StrEnum
 from typing import TYPE_CHECKING, Self, override
 
-from steam.enums import Enum, classproperty
+from steam.enums import Enum as SteampyEnum, classproperty
 from steam.ext.dota2 import GameMode, LobbyType
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
 
-class MyStrEnum(Enum, str):
-    """An enumeration where all the values are integers, emulates `enum.StrEnum`."""
+class SteampyStrEnum(SteampyEnum, str):
+    """An enumeration where all the values are strings, emulates `enum.StrEnum`.
+
+    Note, that Enum class is from `steam` package, not from the `enum` stdlib.
+    """
 
     __slots__ = ()
 
@@ -25,32 +28,30 @@ class MyStrEnum(Enum, str):
         def try_value(cls, value: str) -> Self: ...
 
 
-class Status(MyStrEnum):
+class Status(SteampyStrEnum):
     """Enum describing "status" field in Steam's Rich Presence."""
 
     # MY OWN ADDITIONS
-    RichPresenceNone = "#MY_RP_NONE"
-    """^ Offline is considered as when Rich Presence is None"""
-    NoStatus = "#MY_NO_STATUS"
-    """^ Somehow "status" field is missing from Rich Presence"""
+    RichPresenceNone = "#MY_RP_NONE"  # Rich Presence is None
+    NoStatus = "#MY_NO_STATUS"  # Somehow "status" field is missing from Rich Presence
 
     # DOTA_RP
-    Idle = "#DOTA_RP_IDLE"  # ✅
-    MainMenu = "#DOTA_RP_INIT"  # ✅
-    Finding = "#DOTA_RP_FINDING_MATCH"  # ✅
+    Idle = "#DOTA_RP_IDLE"
+    MainMenu = "#DOTA_RP_INIT"
+    Finding = "#DOTA_RP_FINDING_MATCH"
     WaitingForMapToLoad = "#DOTA_RP_WAIT_FOR_MAP_TO_LOAD"
-    WaitingToLoad = "#DOTA_RP_WAIT_FOR_PLAYERS_TO_LOAD"  # ✅
-    HeroSelection = "#DOTA_RP_HERO_SELECTION"  # ✅
-    Strategy = "#DOTA_RP_STRATEGY_TIME"  # ✅
-    PreGame = "#DOTA_RP_PRE_GAME"  # ❓
-    Playing = "#DOTA_RP_PLAYING_AS"  # ✅
-    Spectating = "#DOTA_RP_SPECTATING"  # ✅
-    PrivateLobby = "#DOTA_RP_PRIVATE_LOBBY"  # ✅
-    BotPractice = "#DOTA_RP_BOTPRACTICE"  # ❓
-    Coaching = "#DOTA_RP_COACHING"  # ❓
-    WatchingTournament = "#DOTA_RP_WATCHING_TOURNAMENT"  # ✅
-    CustomGameProgress = "#DOTA_RP_GAME_IN_PROGRESS_CUSTOM"  # ✅
-    CustomGameLobby = "#DOTA_RP_LOBBY_CUSTOM"  # ✅
+    WaitingToLoad = "#DOTA_RP_WAIT_FOR_PLAYERS_TO_LOAD"
+    HeroSelection = "#DOTA_RP_HERO_SELECTION"
+    Strategy = "#DOTA_RP_STRATEGY_TIME"
+    PreGame = "#DOTA_RP_PRE_GAME"
+    Playing = "#DOTA_RP_PLAYING_AS"
+    Spectating = "#DOTA_RP_SPECTATING"
+    PrivateLobby = "#DOTA_RP_PRIVATE_LOBBY"
+    BotPractice = "#DOTA_RP_BOTPRACTICE"
+    Coaching = "#DOTA_RP_COACHING"
+    WatchingTournament = "#DOTA_RP_WATCHING_TOURNAMENT"
+    CustomGameProgress = "#DOTA_RP_GAME_IN_PROGRESS_CUSTOM"
+    CustomGameLobby = "#DOTA_RP_LOBBY_CUSTOM"
 
     @classproperty
     def KNOWN_DISPLAY_NAMES(cls: type[Self]) -> Mapping[Status, str]:  # type: ignore[GeneralTypeIssue] # noqa: N802, N805
@@ -84,7 +85,7 @@ class Status(MyStrEnum):
             return self.value
 
 
-class ScoreCategory(IntEnum):
+class ScoreCategory(Enum):
     """Match categories for !score (!wl !winloss) command.
 
     The bot will group matches into !wl command by this parameter, i.e. !wl -> "Ranked 3 W - 1 L, Turbo 2 W - 0 L."

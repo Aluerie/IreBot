@@ -11,15 +11,17 @@ from operator import attrgetter
 from typing import TYPE_CHECKING, Annotated, Any, TypedDict, override
 from urllib import parse as url_parse
 
-import orjson
 import steam
 from steam.ext.dota2 import GameMode, Hero, LobbyType, MatchOutcome, MinimalMatch, User as Dota2User
 from twitchio.ext import commands
 
 from config import config
 from core import IrePublicComponent, ireloop
-from utils import const, errors, fmt, fuzzy, guards
-from utils.dota import constants as dota_constants, enums as dota_enums, utils as dota_utils
+from utils import const, errors, fmt, guards
+from utils.dota import constants as dota_constants, utils as dota_utils
+
+from .enums import LobbyParam0, ScoreCategory, Status
+from .tools import extract_hero_index
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Coroutine
@@ -28,7 +30,7 @@ if TYPE_CHECKING:
 
     from core import IreBot, IreContext
     from utils.dota import SteamUserUpdate
-    from utils.dota.schemas import opendota, steam_web_api
+    from utils.dota.schemas import opendota
 
     type ActiveMatch = PlayMatch | WatchMatch | UnsupportedMatch
 
@@ -129,9 +131,7 @@ class RichPresence:
 
     def __init__(self, raw: dict[str, str] | None) -> None:
         self.raw: dict[str, str] = raw or {}
-        self.status = (
-            dota_enums.Status.try_value(raw.get("status", "#MY_NO_STATUS")) if raw else dota_enums.Status.RichPresenceNone
-        )
+        self.status = Status.try_value(raw.get("status", "#MY_NO_STATUS")) if raw else Status.RichPresenceNone
 
     @override
     def __repr__(self) -> str:
@@ -295,98 +295,14 @@ class Match:
         ]
         return "Lifetime Games: " + " \N{BULLET} ".join(response_parts)
 
-    def convert_argument_to_tuple(self, argument: str) -> tuple[Hero, int]:
-        """Convert command argument provided by user (twitch chatter) into a player_slot in the match.
-
-        It supports
-        * player slot as digits;
-        * player colors;
-        * hero aliases (which include hero localized names, abbreviations and some common nicknames);
-        """
-        if argument.isdigit():
-            # then the user typed only a number and our life is easy because it is a player slot
-            player_slot = int(argument) - 1
-            if not 0 <= player_slot <= 9:
-                msg = "Sorry, player_slot can only be of 1-10 values."
-                raise errors.RespondWithError(msg)
-            return self.heroes[player_slot], player_slot
-
-        # Otherwise - we have to use the fuzzy search
-
-        # Step 1. Colors;
-        player_slot_choice = (None, 0)
-        for player_slot, color_aliases in dota_constants.COLOR_ALIASES.items():
-            find = fuzzy.extract_one(argument, color_aliases, scorer=fuzzy.quick_token_sort_ratio, score_cutoff=49)
-            if find and find[1] > player_slot_choice[1]:
-                player_slot_choice = (player_slot, find[1])
-
-        # Step 2. let's see if hero aliases can beat official
-        hero_slot_choice = (None, 0)
-        # Sort the hero list so heroes in the match come first (i.e. so "es" alias triggers on a hero in the match)
-        for hero, hero_aliases in sorted(
-            dota_constants.HERO_ALIASES.items(), key=lambda x: x[0] in self.heroes, reverse=True
-        ):
-            find = fuzzy.extract_one(argument, hero_aliases, scorer=fuzzy.quick_token_sort_ratio, score_cutoff=49)
-            if find and find[1] > hero_slot_choice[1]:
-                hero_slot_choice = (hero, find[1])
-
-        error_message = 'Sorry, didn\'t understand your query. Try something like "PA / 7 / Phantom Assassin / Blue".'
-        if player_slot_choice[1] > hero_slot_choice[1]:
-            # then color matched better
-            player_slot = player_slot_choice[0]
-            if player_slot is None:
-                raise errors.RespondWithError(error_message)
-            return self.heroes[player_slot], player_slot
-
-        # Else: hero aliases matched better;
-        hero = hero_slot_choice[0]
-        if hero is None:
-            raise errors.RespondWithError(error_message)
-
-        try:
-            player_slot = self.heroes.index(hero)
-        except ValueError:
-            msg = f"Hero {hero} is not present in the match."
-            raise errors.RespondWithError(msg) from None
-
-        return hero, player_slot
-
     @format_match_response
     async def profile(self, argument: str) -> str:
         """Response for !profile command."""
         if not self.players:
             return "No player data yet."
 
-        hero, player_slot = self.convert_argument_to_tuple(argument)
+        hero, player_slot = extract_hero_index(argument, self.heroes)
         return f"{hero} stratz.com/players/{self.players[player_slot].friend_id}"
-
-    async def get_real_time_stats(self) -> steam_web_api.RealTimeStatsResponse:
-        """Get Real Time Stats from Steam Web API.
-
-        Disclaimer
-        ----------
-        For some reason, `pulsefire` clients are erroring out for this.
-        Maybe, worth investigating.
-        """
-        for _ in range(5):
-            url = (
-                "https://api.steampowered.com//IDOTA2MatchStats_570/GetRealtimeStats/v1/"
-                f"?key={config['TOKENS']['STEAM']}"
-                f"&server_steam_id={self.server_steam_id}"
-            )
-            async with self.bot.session.get(url=url) as resp:
-                # encoding='utf-8' errored out one day
-                match = await resp.json(loads=orjson.loads, encoding="ISO-8859-1")
-            if match:
-                break
-            # Sometimes it returns an empty dict `{}` (especially on the very first request)
-            await asyncio.sleep(0.69)
-            continue
-        else:
-            msg = "get_real_time_stats got an empty dict 5 times in a row"
-            raise errors.PlaceholderError(msg)
-
-        return match
 
     @format_match_response
     async def stats(self, argument: str) -> str:
@@ -398,9 +314,9 @@ class Match:
         if self.lobby_type == LobbyType.NewPlayerMode:
             return "New Player Mode matches do not support real time stats."
 
-        hero, player_slot = self.convert_argument_to_tuple(argument)
+        hero, player_slot = extract_hero_index(argument, self.heroes)
 
-        match = await self.get_real_time_stats()
+        match = await self.bot.dota.web_api.get_real_time_stats(self.server_steam_id)
 
         # We have to loop through teams in order to support Custom and Event Games
         # Since the amount of players in the team can be variable.
@@ -428,7 +344,9 @@ class Match:
     @format_match_response
     async def lead(self) -> str:
         """Response for !lead command."""
-        match = await self.get_real_time_stats()
+        if self.server_steam_id is None:
+            return "This match doesn't support real time stats"
+        match = await self.bot.dota.web_api.get_real_time_stats(self.server_steam_id)
         radiant = match["teams"][0]
         dire = match["teams"][1]
 
@@ -568,7 +486,7 @@ class WatchMatch(Match):
     @ireloop(seconds=10.1, count=30)
     async def update_data(self) -> None:
         log.debug('Updating %s data for watching_server "%s"', self.__class__.__name__, self.watching_server)
-        match = await self.get_real_time_stats()
+        match = await self.bot.dota.web_api.get_real_time_stats(self.server_steam_id)
         api_players = list(itertools.chain(match["teams"][0]["players"], match["teams"][1]["players"]))
 
         if not self.players_data_ready.is_set():
@@ -712,26 +630,26 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         rp = friend.rich_presence
 
         # Dashboard
-        if rp.status in {dota_enums.Status.Idle, dota_enums.Status.MainMenu, dota_enums.Status.Finding}:
+        if rp.status in {Status.Idle, Status.MainMenu, Status.Finding}:
             return Dashboard()
 
         # Playing somewhere
         if rp.status in {
-            dota_enums.Status.WaitingToLoad,
-            dota_enums.Status.HeroSelection,
-            dota_enums.Status.Strategy,
-            dota_enums.Status.PreGame,
-            dota_enums.Status.WaitingForMapToLoad,
-            dota_enums.Status.Playing,
-            dota_enums.Status.CustomGameProgress,
-            dota_enums.Status.CustomGameProgress,
+            Status.WaitingToLoad,
+            Status.HeroSelection,
+            Status.Strategy,
+            Status.PreGame,
+            Status.WaitingForMapToLoad,
+            Status.Playing,
+            Status.CustomGameProgress,
+            Status.CustomGameProgress,
         }:
             if (watchable_game_id := rp.raw.get("WatchableGameID")) is None:
                 # something is off
                 lobby_param0 = rp.raw.get("param0") or "_missing"
                 lobby_map: dict[str, Activity] = {
-                    dota_enums.LobbyParam0.DemoMode: DemoMode(),
-                    dota_enums.LobbyParam0.BotMatch: BotMatch(),
+                    LobbyParam0.DemoMode: DemoMode(),
+                    LobbyParam0.BotMatch: BotMatch(),
                 }
                 return lobby_map.get(lobby_param0, SomethingIsOff())
 
@@ -743,24 +661,24 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             return Playing(watchable_game_id)
 
         # Watching
-        if rp.status in {dota_enums.Status.Spectating, dota_enums.Status.WatchingTournament}:
+        if rp.status in {Status.Spectating, Status.WatchingTournament}:
             watching_server = rp.raw.get("watching_server")
             if watching_server is None:
                 return Replay()
             return Watching(watching_server)
 
-        if rp.status == dota_enums.Status.BotPractice:
+        if rp.status == Status.BotPractice:
             return DemoMode()
 
         # Private Lobby
-        if rp.status == dota_enums.Status.PrivateLobby:
+        if rp.status == Status.PrivateLobby:
             return PrivateLobby()
 
         # Custom games
-        if rp.status == dota_enums.Status.CustomGameLobby:
+        if rp.status == Status.CustomGameLobby:
             return CustomGames()
 
-        if rp.status == dota_enums.Status.NoStatus:
+        if rp.status == Status.NoStatus:
             # usually this happens in exact moment when the player closes Dota
             return SomethingIsOff()
 
@@ -1071,7 +989,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             raise errors.PlaceholderError(msg)
 
         is_radiant = slot < 5
-        score_category = dota_enums.ScoreCategory.create(match.lobby_type, match.game_mode)
+        score_category = ScoreCategory.create(match.lobby_type, match.game_mode)
         if match.outcome >= MatchOutcome.NotScoredPoorNetworkConditions:
             outcome = "Not Scored"
         elif match.outcome == MatchOutcome.RadiantVictory:
@@ -1240,12 +1158,6 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             """
             await self.bot.pool.execute(query, minimal.outcome, row["match_id"])
 
-    async def get_match_from_opendota(self, match_id: int) -> opendota.Match:
-        """Get match from opendota API via GET matches endpoint."""
-        url = f"https://api.opendota.com/api/matches/{match_id}"
-        async with self.bot.session.get(url=url) as resp:
-            return await resp.json(loads=orjson.loads)
-
     @ireloop(seconds=20)
     async def process_pending_abandons(self) -> None:
         """Process pending abandons.
@@ -1264,12 +1176,12 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             self.process_pending_abandons.cancel()
             return
 
-        players_cache: dict[int, list[opendota.Player]] = {}
+        players_cache: dict[int, list[opendota.MatchesPlayer]] = {}
 
         for row in rows:
             players = players_cache.get(row["match_id"])
             if not players:
-                match = await self.get_match_from_opendota(row["match_id"])
+                match = await self.bot.dota.opendota.matches(row["match_id"])
                 try:
                     match["players"]
                 except KeyError:
@@ -1317,7 +1229,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         if not rows:
             return "0 W - 0 L" if stream_started_at else "0 W - 0 L (No games played in the last 2 days)"
 
-        index: dict[int, dict[dota_enums.ScoreCategory, Score]] = {}
+        index: dict[int, dict[ScoreCategory, Score]] = {}
 
         cutoff_dt = rows[0]["start_time"]
         for row in rows:
@@ -1327,7 +1239,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
                 break
             cutoff_dt = row["start_time"]
 
-            score_category = dota_enums.ScoreCategory.create(row["lobby_type"], row["game_mode"])
+            score_category = ScoreCategory.create(row["lobby_type"], row["game_mode"])
             score = index.setdefault(row["friend_id"], {}).setdefault(score_category, Score(0, 0, 0, 0))
 
             if row["abandon"]:
@@ -1597,8 +1509,3 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         """Announce in Irene's twitch chat that their activity data has changed."""
         if friend.steam_user.id == config["STEAM"]["IRENE_ID32"]:
             await self.debug_deliver(f"Activity changed to: {friend.activity}")
-
-
-async def setup(bot: IreBot) -> None:
-    """Load IreBot module. Framework of twitchio."""
-    await bot.add_component(Dota2RichPresenceFlow(bot))
