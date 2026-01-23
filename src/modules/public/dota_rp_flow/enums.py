@@ -52,6 +52,7 @@ class Status(SteampyStrEnum):
     WatchingTournament = "#DOTA_RP_WATCHING_TOURNAMENT"
     CustomGameProgress = "#DOTA_RP_GAME_IN_PROGRESS_CUSTOM"
     CustomGameLobby = "#DOTA_RP_LOBBY_CUSTOM"
+    CrownfallNestOfThorns = "#DOTA_Crownfall_EncounterStatus_NestOfThorns_WithDifficulty"
 
     @classproperty
     def KNOWN_DISPLAY_NAMES(cls: type[Self]) -> Mapping[Status, str]:  # type: ignore[GeneralTypeIssue] # noqa: N802, N805

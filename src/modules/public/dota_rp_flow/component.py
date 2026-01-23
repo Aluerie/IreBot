@@ -37,7 +37,7 @@ if TYPE_CHECKING:
     from utils.dota import SteamUserUpdate
     from utils.dota.schemas import opendota
 
-    type ActiveMatch = PlayMatch | WatchMatch | UnsupportedMatch
+    type ActiveMatch = PlayingMatch | SpectatingMatch | UnsupportedActivity
 
     class ScoreQueryRow(TypedDict):
         friend_id: int
@@ -93,45 +93,35 @@ class Activity:
 
 
 @dataclass(slots=True)
-class NotInDota(Activity): ...
-
-
-@dataclass(slots=True)
-class Transition(Activity): ...
-
-
-@dataclass(slots=True)
 class Dashboard(Activity): ...
 
 
 @dataclass(slots=True)
-class Playing(Activity):
+class PlayingPartial(Activity):
     watchable_game_id: str
 
 
 @dataclass(slots=True)
-class Watching(Activity):
+class SpectatingPartial(Activity):
     watching_server: str
 
 
 @dataclass(slots=True)
-class DemoMode(Activity): ...
+class UnsupportedPartial(Activity):
+    msg: str
 
 
 @dataclass(slots=True)
-class BotMatch(Activity): ...
+class NotInDota(Activity): ...
 
 
 @dataclass(slots=True)
-class Replay(Activity): ...
+class Transition(Activity):
+    msg: str
 
 
 @dataclass(slots=True)
-class PrivateLobby(Activity): ...
-
-
-@dataclass(slots=True)
-class CustomGames(Activity): ...
+class Unknown(Activity): ...
 
 
 class RichPresence:
@@ -170,8 +160,8 @@ class Friend:
         self._bot: IreBot = bot
         self.steam_user: Dota2SteamUser = steam_user
         self.rich_presence: RichPresence = RichPresence(steam_user.rich_presence)
-        self.active_match: PlayMatch | WatchMatch | UnsupportedMatch | None = None
-        self.activity: Activity = Transition()
+        self.active_match: PlayingMatch | SpectatingMatch | UnsupportedActivity | None = None
+        self.activity: Activity = Transition("Haven't received any RP updates yet.")
 
     @override
     def __repr__(self) -> str:
@@ -230,9 +220,9 @@ class Player:
 
 def format_match_response(func: Callable[..., Coroutine[Any, Any, str]]) -> Callable[..., Coroutine[Any, Any, str]]:
     @functools.wraps(func)
-    async def wrapper(self: Match, *args: Any, **kwargs: Any) -> str:
-        if isinstance(self, UnsupportedMatch):
-            return self.activity_tag
+    async def wrapper(self: LiveMatch, *args: Any, **kwargs: Any) -> str:
+        if isinstance(self, UnsupportedActivity):
+            return self.message
 
         prefix = f"[{self.activity_tag}] " if self.activity_tag else ""
         response = await func(self, *args, **kwargs)
@@ -241,7 +231,7 @@ def format_match_response(func: Callable[..., Coroutine[Any, Any, str]]) -> Call
     return wrapper
 
 
-class Match:
+class LiveMatch:
     def __init__(
         self,
         bot: IreBot,
@@ -406,7 +396,7 @@ class Match:
         return str(self.server_steam_id)
 
 
-class PlayMatch(Match):
+class PlayingMatch(LiveMatch):
     def __init__(self, bot: IreBot, watchable_game_id: str) -> None:
         super().__init__(bot)
         self.watchable_game_id: str = watchable_game_id
@@ -491,7 +481,7 @@ class PlayMatch(Match):
         return "No players from the last game present in the match"
 
 
-class WatchMatch(Match):
+class SpectatingMatch(LiveMatch):
     def __init__(self, bot: IreBot, watching_server: str) -> None:
         super().__init__(bot, tag="Spectating")
         self.watching_server: str = watching_server
@@ -538,7 +528,7 @@ class WatchMatch(Match):
             self.update_data.stop()
 
 
-class UnsupportedMatch(Match):
+class UnsupportedActivity(LiveMatch):
     """A class describing unsupported matches.
 
     All chat commands for objects of this type should return unsupported message response.
@@ -546,8 +536,9 @@ class UnsupportedMatch(Match):
     because, well, there is no data in Demo Mode to insect.
     """
 
-    def __init__(self, bot: IreBot, tag: str = "") -> None:
-        super().__init__(bot, tag)
+    def __init__(self, bot: IreBot, message: str = "") -> None:
+        super().__init__(bot, "")
+        self.message = message
 
 
 class Dota2RichPresenceFlow(IrePublicComponent):
@@ -571,8 +562,8 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         super().__init__(bot)
         self.friends: dict[int, Friend] = {}
 
-        self.play_matches_index: dict[str, PlayMatch] = {}
-        self.watch_matches_index: dict[str, WatchMatch] = {}
+        self.play_matches_index: dict[str, PlayingMatch] = {}
+        self.watch_matches_index: dict[str, SpectatingMatch] = {}
 
         self.debug: bool = True
 
@@ -636,39 +627,37 @@ class Dota2RichPresenceFlow(IrePublicComponent):
                 # something is off
                 lobby_param0 = rp.raw.get("param0") or "_missing"
                 lobby_map: dict[str, Activity] = {
-                    LobbyParam0.DemoMode: DemoMode(),
-                    LobbyParam0.BotMatch: BotMatch(),
+                    LobbyParam0.DemoMode: UnsupportedPartial("Demo mode is not supported"),
+                    LobbyParam0.BotMatch: UnsupportedPartial("Bot matches are not supported"),
                 }
-                return lobby_map.get(lobby_param0, Transition())
+                return lobby_map.get(lobby_param0, Transition("RP is `playing` but watchable_game_id=None"))
 
             if watchable_game_id == "0":
                 # something is off again
                 # usually this happens when a player has just quit the match into the main menu
                 # the status flickers for a few seconds to be `watchable_game_id=0`
-                return Transition()
-            return Playing(watchable_game_id)
+                return Transition("RP is `playing` but watchable_game_id=0")
+            return PlayingPartial(watchable_game_id)
 
         # Watching
         if rp.status in {Status.Spectating, Status.WatchingTournament}:
             watching_server = rp.raw.get("watching_server")
             if watching_server is None:
-                return Replay()
-            return Watching(watching_server)
-
-        if rp.status == Status.BotPractice:
-            return DemoMode()
-
-        # Private Lobby
-        if rp.status == Status.PrivateLobby:
-            return PrivateLobby()
-
-        # Custom games
-        if rp.status == Status.CustomGameLobby:
-            return CustomGames()
+                return UnsupportedPartial("Data in watching replays is not supported")
+            return SpectatingPartial(watching_server)
 
         if rp.status == Status.NoStatus:
             # usually this happens in exact moment when the player closes Dota
-            return Transition()
+            return Transition("Closed Dota")
+
+        other_statuses = {
+            Status.BotPractice: "Demo mode is not supported",
+            Status.PrivateLobby: "Bot matches are not supported",
+            Status.CustomGameLobby: "Private lobbies (this includes draft in public lobbies) are not supported",
+            Status.CrownfallNestOfThorns: "Nest of Thorns is not supported."
+        }
+        if msg := other_statuses.get(rp.status):
+            return UnsupportedPartial(msg)
 
         # Unrecognized
         text = (
@@ -681,7 +670,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         log.warning(text)
         await self.bot.error_webhook.send(content=self.bot.error_ping + "\n" + text)
 
-        return Transition()
+        return Unknown()
 
     async def analyze_rich_presence(self, friend: Friend) -> None:
         """Analyze Rich Presence.
@@ -718,41 +707,25 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             # no activity changes = no need to do anything
             return
 
-        match new_activity:
-            case Dashboard():
-                await self.conclude_friend_match(friend)
-            case Playing():
-                # Friend is in a match as a player
-                if (w_id := new_activity.watchable_game_id) not in self.play_matches_index:
-                    self.play_matches_index[w_id] = PlayMatch(self.bot, w_id)
-                friend.active_match = self.play_matches_index[w_id]
-                friend.active_match.friends.add(friend)
-            case Watching():
-                if (w_s := new_activity.watching_server) not in self.watch_matches_index:
-                    self.watch_matches_index[w_s] = WatchMatch(self.bot, w_s)
-                friend.active_match = self.watch_matches_index[w_s]
-                friend.active_match.friends.add(friend)
-            case DemoMode():
-                friend.active_match = UnsupportedMatch(self.bot, tag="Demo mode is not supported")
-            case BotMatch():
-                friend.active_match = UnsupportedMatch(self.bot, tag="Bot matches are not supported")
-            case Replay():
-                friend.active_match = UnsupportedMatch(self.bot, tag="Data in watching replays is not supported")
-            case PrivateLobby():
-                friend.active_match = UnsupportedMatch(
-                    self.bot, tag="Private lobbies (this includes draft in public lobbies) are not supported"
-                )
-            case CustomGames():
-                friend.active_match = UnsupportedMatch(
-                    self.bot,
-                    tag="Custom Games Lobbies (in draft stage) are not supported - wait for the game to start.",
-                )
-            case Transition():
-                # Wait for confirmed statuses
-                return
-            case _:
-                # Wait for confirmed statuses
-                return
+        if isinstance(new_activity, Dashboard):
+            await self.conclude_friend_match(friend)
+        elif isinstance(new_activity, PlayingPartial):
+            # Friend is in a match as a player
+            if (w_id := new_activity.watchable_game_id) not in self.play_matches_index:
+                self.play_matches_index[w_id] = PlayingMatch(self.bot, w_id)
+            friend.active_match = self.play_matches_index[w_id]
+            friend.active_match.friends.add(friend)
+        elif isinstance(new_activity, SpectatingPartial):
+            if (w_s := new_activity.watching_server) not in self.watch_matches_index:
+                self.watch_matches_index[w_s] = SpectatingMatch(self.bot, w_s)
+            friend.active_match = self.watch_matches_index[w_s]
+            friend.active_match.friends.add(friend)
+        elif isinstance(new_activity, UnsupportedPartial):
+            friend.active_match = UnsupportedActivity(self.bot, message=new_activity.msg)
+        else:
+            # Transition, Unknown or (???)
+            # wait for confirmed statuses
+            return
 
     # @commands.Component.listener("steam_user_update")
     async def steam_user_update(self, update: SteamUserUpdate) -> None:
@@ -782,7 +755,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         This nulls `Friend.active_match` attribute as well as adds the match into the database
         if it's a play match.
         """
-        if (match := friend.active_match) and isinstance(match, PlayMatch) and match.match_id:
+        if (match := friend.active_match) and isinstance(match, PlayingMatch) and match.match_id:
             player_slot = next(iter(s for (s, p) in enumerate(match.players) if p.friend_id == friend.steam_user.id), None)
             if player_slot is None:
                 msg = "Somehow `player_slot` is `None` in `conclude_friend_match`"
@@ -960,7 +933,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         """List recurring players from the last game present in the current match."""
         active_match = await self.find_active_match(ctx.broadcaster.id)
 
-        if isinstance(active_match, PlayMatch):
+        if isinstance(active_match, PlayingMatch):
             friend_id, _, last_game = await self.get_last_game(ctx.broadcaster.id)
             response = await active_match.played_with(friend_id, last_game)
         else:
@@ -1208,6 +1181,9 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             msg = "Streamer is not in a party."
             await ctx.send(msg)
             return
+        if party2 := friend.rich_presence.raw.get("party2"):
+            # Apparently if a party is too big, valve just slice the string into party2
+            party += party2
 
         steam32_ids = [m.id for m in map(steam.ID, PARTY_MEMBERS_PATTERN.findall(party))]
 
@@ -1508,13 +1484,13 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         await self.debug_deliver("Connection to Dota 2 Game Coordinator is ready")
 
     @commands.Component.listener("heroes_data_ready")
-    async def debug_announce_hero_data_ready(self, match: Match) -> None:
+    async def debug_announce_hero_data_ready(self, match: LiveMatch) -> None:
         """Announce in Irene's twitch chat that match heroes data is ready."""
         if config["STEAM"]["IRENE_ID32"] in [f.steam_user.id for f in match.friends]:
             await self.debug_deliver(f"Heroes Data for {match.match_id} is ready")
 
     @commands.Component.listener("players_data_ready")
-    async def debug_announce_players_data_ready(self, match: Match) -> None:
+    async def debug_announce_players_data_ready(self, match: LiveMatch) -> None:
         """Announce in Irene's twitch chat that match players data is ready."""
         if config["STEAM"]["IRENE_ID32"] in [f.steam_user.id for f in match.friends]:
             await self.debug_deliver(f"Players Data for {match.match_id} is ready")
