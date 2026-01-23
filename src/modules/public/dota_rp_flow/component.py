@@ -17,11 +17,10 @@ from twitchio.ext import commands
 
 from config import config
 from core import IrePublicComponent, ireloop
-from utils import const, errors, fmt, guards
-from utils.dota import constants as dota_constants, utils as dota_utils
+from utils import errors, fmt, guards
 
 from .enums import LobbyParam0, ScoreCategory, Status
-from .tools import extract_hero_index
+from .tools import SteamUserConverter, extract_hero_index, is_allowed_to_add_notable, rank_medal_display_name
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Coroutine
@@ -71,7 +70,10 @@ class Score:
 
 @dataclass(slots=True)
 class Activity:
-    """Activity.
+    """A base class for Activities.
+
+    Activity is a somehow umbrella-term. The purpose of this term is to group Steam Rich Presence statuses
+    into certain categories that make sense from bot's view.
 
     Dev Note
     --------
@@ -85,7 +87,11 @@ class Activity:
 
 
 @dataclass(slots=True)
-class SomethingIsOff(Activity): ...
+class NotInDota(Activity): ...
+
+
+@dataclass(slots=True)
+class Transition(Activity): ...
 
 
 @dataclass(slots=True)
@@ -159,7 +165,7 @@ class Friend:
         self.steam_user: Dota2SteamUser = steam_user
         self.rich_presence: RichPresence = RichPresence(steam_user.rich_presence)
         self.active_match: PlayMatch | WatchMatch | UnsupportedMatch | None = None
-        self.activity: Activity = SomethingIsOff()
+        self.activity: Activity = Transition()
 
     @override
     def __repr__(self) -> str:
@@ -204,12 +210,16 @@ class Player:
             friend_id=account_id,
             player_slot=player_slot,
             lifetime_games=profile_card.lifetime_games,
-            medal=dota_utils.rank_medal_display_name(profile_card),
+            medal=rank_medal_display_name(profile_card),
         )
 
     @property
     def color(self) -> str:
-        return dota_constants.PLAYER_COLORS[self.player_slot]
+        colors = ["Blue", "Teal", "Purple", "Yellow", "Orange", "Pink", "Olive", "LightBlue", "DarkGreen", "Brown"]
+        try:
+            return colors[self.player_slot]
+        except IndexError:
+            return "Colorless"
 
 
 def format_match_response(func: Callable[..., Coroutine[Any, Any, str]]) -> Callable[..., Coroutine[Any, Any, str]]:
@@ -479,7 +489,13 @@ class WatchMatch(Match):
     def __init__(self, bot: IreBot, watching_server: str) -> None:
         super().__init__(bot, tag="Spectating")
         self.watching_server: str = watching_server
-        self.server_steam_id: int = dota_utils.convert_id3_to_id64(watching_server)
+        # Steam Web API uses Steam IDs for servers in id64 format, but Rich Presence provides them in id3.
+        # Example: id3: [A:1:3513917470:30261] -> id64: 90201966066671646.
+        steam_id = steam.ID.from_id3(watching_server)
+        if steam_id is None:
+            msg = "Failed to get steam ID from id3."
+            raise errors.PlaceholderError(msg)
+        self.server_steam_id: int = steam_id.id64
 
         self.update_data.start()
 
@@ -526,41 +542,6 @@ class UnsupportedMatch(Match):
 
     def __init__(self, bot: IreBot, tag: str = "") -> None:
         super().__init__(bot, tag)
-
-
-class SteamUserNotFound(commands.BadArgument):
-    """For when a matching user cannot be found."""
-
-    def __init__(self, argument: str) -> None:
-        self.argument = argument
-        super().__init__(f"User {argument!r} not found.", value=argument)
-
-
-class SteamUserConverter(commands.Converter[Dota2User]):
-    """Simple Steam User converter."""
-
-    @override
-    async def convert(self, ctx: IreContext, argument: str) -> Dota2User:
-        try:
-            return await ctx.bot.dota.fetch_user(steam.utils.parse_id64(argument))
-        except steam.InvalidID:
-            id64 = await steam.utils.id64_from_url(argument)
-            if id64 is None:
-                raise SteamUserNotFound(argument) from None
-            return await ctx.bot.dota.fetch_user(id64)
-        except TimeoutError:
-            raise SteamUserNotFound(argument) from None
-
-
-def is_allowed_to_add_notable() -> Any:
-    """Allow !np add to only be invoked by certain people."""
-
-    def predicate(ctx: IreContext) -> bool:
-        # Maybe we will edit this to be some proper dynamic database thing;
-        allowed_ids = (const.UserID.Irene, const.UserID.Aluerie, const.UserID.Xas)
-        return ctx.chatter.id in allowed_ids
-
-    return commands.guard(predicate)
 
 
 class Dota2RichPresenceFlow(IrePublicComponent):
@@ -643,6 +624,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             Status.Playing,
             Status.CustomGameProgress,
             Status.CustomGameProgress,
+            Status.Coaching,
         }:
             if (watchable_game_id := rp.raw.get("WatchableGameID")) is None:
                 # something is off
@@ -651,13 +633,13 @@ class Dota2RichPresenceFlow(IrePublicComponent):
                     LobbyParam0.DemoMode: DemoMode(),
                     LobbyParam0.BotMatch: BotMatch(),
                 }
-                return lobby_map.get(lobby_param0, SomethingIsOff())
+                return lobby_map.get(lobby_param0, Transition())
 
             if watchable_game_id == "0":
                 # something is off again
                 # usually this happens when a player has just quit the match into the main menu
                 # the status flickers for a few seconds to be `watchable_game_id=0`
-                return SomethingIsOff()
+                return Transition()
             return Playing(watchable_game_id)
 
         # Watching
@@ -680,7 +662,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
 
         if rp.status == Status.NoStatus:
             # usually this happens in exact moment when the player closes Dota
-            return SomethingIsOff()
+            return Transition()
 
         # Unrecognized
         text = (
@@ -693,7 +675,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         log.warning(text)
         await self.bot.error_webhook.send(content=self.bot.error_ping + "\n" + text)
 
-        return SomethingIsOff()
+        return Transition()
 
     async def analyze_rich_presence(self, friend: Friend) -> None:
         """Analyze Rich Presence.
@@ -718,6 +700,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             await self.bot.pool.execute(query, datetime.datetime.now(datetime.UTC), friend.steam_user.id)
         else:
             # not interested if not playing Dota 2
+            friend.activity = NotInDota()
             await self.conclude_friend_match(friend)
             return
 
@@ -758,7 +741,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
                     self.bot,
                     tag="Custom Games Lobbies (in draft stage) are not supported - wait for the game to start.",
                 )
-            case SomethingIsOff():
+            case Transition():
                 # Wait for confirmed statuses
                 return
             case _:
@@ -1320,7 +1303,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         mmr: int = await self.bot.pool.fetchval(query, friend.steam_user.id)
 
         profile_card = await friend.steam_user.dota2_profile_card()
-        response = f"Medal: {dota_utils.rank_medal_display_name(profile_card)} \N{BULLET} Database tracked MMR: {mmr}"
+        response = f"Medal: {rank_medal_display_name(profile_card)} \N{BULLET} Database tracked MMR: {mmr}"
         await ctx.send(response)
 
     @commands.is_broadcaster()

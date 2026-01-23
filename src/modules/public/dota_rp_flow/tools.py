@@ -1,13 +1,53 @@
 from __future__ import annotations
 
-from steam.ext.dota2 import Hero
+from typing import TYPE_CHECKING, Any, override
 
-from utils import errors, fuzzy
+import steam
+from steam.ext.dota2 import Hero, User as Dota2User
+from twitchio.ext import commands
 
-__all__ = ("extract_hero_index",)
+try:
+    from utils import const, errors, fuzzy
+except ModuleNotFoundError:
+    import sys
+
+    # Just for lazy testing (in the end of this file);
+    sys.path.append("D:/CODE/IreBot/src")
+
+    from utils import const, errors, fuzzy
+
+if TYPE_CHECKING:
+    from steam.ext.dota2 import ProfileCard
+
+    from core import IreContext
+
+
+__all__ = (
+    "SteamUserConverter",
+    "SteamUserNotFound",
+    "extract_hero_index",
+    "rank_medal_display_name",
+)
+
 
 # /* cSpell:disable */
 HERO_ALIASES = {
+    # HERO ALIASES.
+    #
+    # The list mainly for !profile/!items command so people can just write "!items CM"
+    # and the bot will send Crystal Maiden's items.
+    #
+    # The list includes mostly
+    # * abbreviations, i.e. "cm";
+    # * persona names i.e. "wei";
+    # * dota 1 names , i.e. "traxex"
+    # * official names, i.e. "beastmaster";
+    # * short forms of any from above, i.e. "cent";
+    # * just nicknames, aliases or common names that people sometimes *actually* use for Dota 2 heroes ;
+    #
+    # It doesn't include aliases that people don't use
+    # i.e. nobody calls techies as "Squee, Spleen & Spoon"
+    #
     Hero.Abaddon: ["abaddon", "aba"],
     Hero.Alchemist: ["alch", "alchemist"],
     Hero.AncientApparition: ["aa", "apparition", "ancient apparition"],
@@ -153,6 +193,51 @@ COLOR_ALIASES = {
 }
 
 
+class SteamUserNotFound(commands.BadArgument):
+    """For when a matching user cannot be found."""
+
+    def __init__(self, argument: str) -> None:
+        self.argument = argument
+        super().__init__(f"User {argument!r} not found.", value=argument)
+
+
+class SteamUserConverter(commands.Converter[Dota2User]):
+    """Simple Steam User converter."""
+
+    @override
+    async def convert(self, ctx: IreContext, argument: str) -> Dota2User:
+        try:
+            return await ctx.bot.dota.fetch_user(steam.utils.parse_id64(argument))
+        except steam.InvalidID:
+            id64 = await steam.utils.id64_from_url(argument)
+            if id64 is None:
+                raise SteamUserNotFound(argument) from None
+            return await ctx.bot.dota.fetch_user(id64)
+        except TimeoutError:
+            raise SteamUserNotFound(argument) from None
+
+
+def rank_medal_display_name(profile_card: ProfileCard) -> str:
+    """Get human-readable rank medal string out of player's Dota 2 Profile Card."""
+    display_name = profile_card.rank_tier.division
+    if stars := profile_card.rank_tier.stars:
+        display_name += f" \N{BLACK STAR}{stars}"
+    if number_rank := profile_card.leaderboard_rank:
+        display_name += f" #{number_rank}"
+    return display_name
+
+
+def is_allowed_to_add_notable() -> Any:
+    """Allow !npm add/remove/rename to only be invoked by certain people."""
+
+    def predicate(ctx: IreContext) -> bool:
+        # Maybe we will edit this to be some proper dynamic database thing;
+        allowed_ids = (const.UserID.Irene, const.UserID.Aluerie, const.UserID.Xas)
+        return ctx.chatter.id in allowed_ids
+
+    return commands.guard(predicate)
+
+
 def extract_hero_index(argument: str, heroes: list[Hero]) -> tuple[Hero, int]:
     """Convert command argument provided by user (twitch chatter) into a player_slot in the match.
 
@@ -169,49 +254,53 @@ def extract_hero_index(argument: str, heroes: list[Hero]) -> tuple[Hero, int]:
         Matched hero as well as its index in the provided `heroes` list.
         This is because usually when this function is called, the `player slot` is also of a big interest.
     """
-    if argument.isdigit():
+    if argument.isnumeric():
         # then the user typed only a number and our life is easy because it is a player slot
         # let's consider users normal: they start enumerating slots from 1 instead of 0.
-        player_slot = int(argument) - 1
-        if not 0 <= player_slot <= 9:
-            msg = "Sorry, player_slot can only be of 1-10 values."
+        index = int(argument) - 1
+        if index < 0:
+            msg = f'Detected numeric input "{argument}" but player slot cannot be a negative number.'
             raise errors.RespondWithError(msg)
-        return heroes[player_slot], player_slot
+
+        try:
+            return heroes[index], index
+        except IndexError:
+            msg = f"Detected numeric input for player slot #{argument} but there are {len(heroes)} players in this match."
+            raise errors.RespondWithError(msg) from None
 
     # Otherwise - we have to use the fuzzy search
+    result: tuple[Hero | None, int] = (None, 0)
 
-    # Step 1. Colors;
-    player_slot_choice = (None, 0)
+    # Step 1. Color aliases;
     for player_slot, color_aliases in COLOR_ALIASES.items():
         find = fuzzy.extract_one(argument, color_aliases, scorer=fuzzy.quick_token_sort_ratio, score_cutoff=49)
-        if find and find[1] > player_slot_choice[1]:
-            player_slot_choice = (player_slot, find[1])
+        if find and find[1] > result[1]:
+            try:
+                result = (heroes[player_slot], find[1])
+            except ValueError:
+                continue
 
-    # Step 2. let's see if hero aliases can beat official
-    hero_slot_choice = (None, 0)
-    # Sort the hero list so heroes in the match come first (i.e. so "es" alias triggers on a hero in the match)
+    # Step 2. Hero aliases
+    # Sort the hero list so heroes in the match come first (i.e. so "es" alias triggers on a hero in the match first)
     for hero, hero_aliases in sorted(HERO_ALIASES.items(), key=lambda x: x[0] in heroes, reverse=True):
         find = fuzzy.extract_one(argument, hero_aliases, scorer=fuzzy.quick_token_sort_ratio, score_cutoff=49)
-        if find and find[1] > hero_slot_choice[1]:
-            hero_slot_choice = (hero, find[1])
+        if find and find[1] > result[1]:
+            result = (hero, find[1])
 
-    error_message = 'Sorry, didn\'t understand your query. Try something like "PA / 7 / Phantom Assassin / Blue".'
-    if player_slot_choice[1] > hero_slot_choice[1]:
-        # then color matched better
-        player_slot = player_slot_choice[0]
-        if player_slot is None:
-            raise errors.RespondWithError(error_message)
-        return heroes[player_slot], player_slot
+    if result[0] is None:
+        msg = 'Sorry, didn\'t understand your query. Try something like "PA / 7 / Phantom Assassin / Blue".'
+        raise errors.RespondWithError(msg)
+    if result[0] not in heroes:
+        msg = f"Hero {result[0]} is not present in the match."
+        raise errors.RespondWithError(msg)
 
-    # Else: hero aliases matched better;
-    hero = hero_slot_choice[0]
-    if hero is None:
-        raise errors.RespondWithError(error_message)
+    return result
 
-    try:
-        player_slot = heroes.index(hero)
-    except ValueError:
-        msg = f"Hero {hero} is not present in the match."
-        raise errors.RespondWithError(msg) from None
 
-    return hero, player_slot
+if __name__ == "__main__":
+    # A little test.
+    argument = "PA"
+    self_heroes = [Hero.PhantomAssassin, Hero.Kez, Hero.KeeperOfTheLight, Hero.Io]
+
+    res = extract_hero_index(argument, self_heroes)
+    print(res)  # noqa: T201
