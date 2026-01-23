@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from typing import TYPE_CHECKING, Any, override
 
 import steam
@@ -23,12 +24,14 @@ if TYPE_CHECKING:
 
 
 __all__ = (
+    "PARTY_MEMBERS_PATTERN",
     "SteamUserConverter",
     "SteamUserNotFound",
     "extract_hero_index",
     "rank_medal_display_name",
 )
 
+PARTY_MEMBERS_PATTERN = re.compile(r"members\s{\ssteam_id:\s([0-9]+)")
 
 # /* cSpell:disable */
 HERO_ALIASES = {

@@ -152,6 +152,14 @@
     </td>
     <td><img src="./images/d2pt.png" alt="d2pt" width="1200"/></td>
   </tr>
+  <tr>
+    <td>Party Members</td>
+    <td class="aliases-column">!party</td>
+    <td>
+      Show known members from the current party.
+    </td>
+    <td><img src="./images/party.png" alt="d2pt" width="1200"/></td>
+  </tr>
 </table>
 
 ### Tip for merging 7tv emote sets

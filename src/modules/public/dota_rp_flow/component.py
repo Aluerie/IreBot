@@ -20,7 +20,13 @@ from core import IrePublicComponent, ireloop
 from utils import errors, fmt, guards
 
 from .enums import LobbyParam0, ScoreCategory, Status
-from .tools import SteamUserConverter, extract_hero_index, is_allowed_to_add_notable, rank_medal_display_name
+from .tools import (
+    PARTY_MEMBERS_PATTERN,
+    SteamUserConverter,
+    extract_hero_index,
+    is_allowed_to_add_notable,
+    rank_medal_display_name,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Coroutine
@@ -1192,6 +1198,32 @@ class Dota2RichPresenceFlow(IrePublicComponent):
     #################################
     #    FRIEND PROFILE COMMANDS    #
     #################################
+
+    @commands.command()
+    async def party(self, ctx: IreContext) -> None:
+        """Show notable players in the current party."""
+        friend = await self.find_friend_account(ctx.broadcaster.id)
+        party = friend.rich_presence.raw.get("party")
+        if party is None:
+            msg = "Streamer is not in a party."
+            await ctx.send(msg)
+            return
+
+        steam32_ids = [m.id for m in map(steam.ID, PARTY_MEMBERS_PATTERN.findall(party))]
+
+        query = """
+            SELECT nickname, friend_id
+            FROM ttv_dota_notable_players
+            WHERE friend_id = ANY($1);
+        """
+        rows = await self.bot.pool.fetch(query, steam32_ids)
+        nickname_mapping = {row["friend_id"]: row["nickname"] for row in rows}
+
+        known_party_members = " \N{BULLET} ".join(nickname_mapping.values())
+        unknown_party_members = " \N{BULLET} ".join(str(id_) for id_ in steam32_ids if id_ not in nickname_mapping)
+
+        response = f"{known_party_members} | Unknown party members: {unknown_party_members}"
+        await ctx.send(response)
 
     async def score_response_helper(self, broadcaster_id: str, stream_started_at: datetime.datetime | None = None) -> str:
         """Helper function to get !wl commands response."""

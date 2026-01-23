@@ -50,8 +50,8 @@ class ExceptionManager:
         traceback_string = (
             "".join(traceback.format_exception(error))
             # Just making code blocks shorter without losing information;
-            .replace(str(Path.cwd()), "<IreBot>")
-            .replace("<IreBot>/.venv/lib/python3.12/site-packages", "<venv>")
+            .replace(f"{Path.cwd()}/src", "<src>")
+            .replace(f"{Path.cwd()}/.venv/lib/python3.12/site-packages", "<venv>")
         )
 
         async with self._lock:
