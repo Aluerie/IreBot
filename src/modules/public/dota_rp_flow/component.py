@@ -702,7 +702,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         new_activity = await self.get_activity(friend)
         if friend.activity != new_activity:
             friend.activity = new_activity
-            self.bot.dispatch("activity_change", friend)
+            # self.bot.dispatch("activity_change", friend)
         else:
             # no activity changes = no need to do anything
             return
