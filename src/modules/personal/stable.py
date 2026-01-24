@@ -121,7 +121,7 @@ class StableCommands(IrePersonalComponent):
     @commands.command()
     async def discord(self, ctx: IreContext) -> None:
         """Link to my discord community server."""
-        await ctx.send(f"{const.STV.Discord} discord.gg/K8FuDeP")
+        await ctx.send(f"{const.STV.discord} discord.gg/K8FuDeP")
 
     @commands.command()
     async def donate(self, ctx: IreContext) -> None:

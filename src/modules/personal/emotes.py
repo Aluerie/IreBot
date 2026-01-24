@@ -35,21 +35,24 @@ class EmoteChecker(IrePersonalComponent):
         self.check_emotes.cancel()
         await super().component_teardown()
 
-    async def send_error_embed(self, emote: str, service: str, colour: int) -> None:
+    async def send_error_embed(self, emotes_to_send: list[str], service: str, colour: int) -> None:
         """Helper function to send a ping to Aluerie that something is wrong with emote services."""
         content = self.bot.error_ping
         embed = Embed(
             title=f"Problem with {service} emotes",
-            description=f"Looks like emote `{emote}` is no longer present in the channel.",
+            description=(
+                "Looks like the following emote(-s) are no longer present in the channel.\n"
+                f"```\n{', '.join(emotes_to_send)}```"
+            ),
             colour=colour,
-        ).set_footer(text="but it was previously used for @IreBot emotes")
+        ).set_footer(text="but it was previously used for @IrenesBot emotes")
         await self.bot.error_webhook.send(content=content, embed=embed)
 
     async def cross_check_emotes(self, api_emotes: list[str], bot_emotes: type[StrEnum], colour: int) -> None:
         """Cross check between emote list in `utils.const` and list from 3rd party emote service API."""
-        for emote in bot_emotes:
-            if emote not in api_emotes:
-                await self.send_error_embed(emote, bot_emotes.__name__, colour)
+        emotes_to_send: list[str] = [e for e in bot_emotes if e not in api_emotes]
+        if emotes_to_send:
+            await self.send_error_embed(emotes_to_send, bot_emotes.__name__, colour)
 
     @ireloop(time=[datetime.time(hour=5, minute=59)])
     async def check_emotes(self) -> None:
