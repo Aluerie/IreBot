@@ -112,11 +112,7 @@ class UnsupportedPartial(Activity):
 
 
 @dataclass(slots=True)
-class NotInDota(Activity): ...
-
-
-@dataclass(slots=True)
-class Transition(Activity):
+class Incomplete(Activity):
     msg: str
 
 
@@ -161,7 +157,7 @@ class Friend:
         self.steam_user: Dota2SteamUser = steam_user
         self.rich_presence: RichPresence = RichPresence(steam_user.rich_presence)
         self.active_match: PlayingMatch | SpectatingMatch | UnsupportedActivity | None = None
-        self.activity: Activity = Transition("Haven't received any RP updates yet.")
+        self.activity: Activity = Incomplete("Haven't received any RP updates yet.")
 
     @override
     def __repr__(self) -> str:
@@ -630,13 +626,13 @@ class Dota2RichPresenceFlow(IrePublicComponent):
                     LobbyParam0.DemoMode: UnsupportedPartial("Demo mode is not supported"),
                     LobbyParam0.BotMatch: UnsupportedPartial("Bot matches are not supported"),
                 }
-                return lobby_map.get(lobby_param0, Transition("RP is `playing` but watchable_game_id=None"))
+                return lobby_map.get(lobby_param0, Incomplete("RP is `playing` but watchable_game_id=None"))
 
             if watchable_game_id == "0":
                 # something is off again
                 # usually this happens when a player has just quit the match into the main menu
                 # the status flickers for a few seconds to be `watchable_game_id=0`
-                return Transition("RP is `playing` but watchable_game_id=0")
+                return Incomplete("RP is `playing` but watchable_game_id=0")
             return PlayingPartial(watchable_game_id)
 
         # Watching
@@ -648,7 +644,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
 
         if rp.status == Status.NoStatus:
             # usually this happens in exact moment when the player closes Dota
-            return Transition("Closed Dota")
+            return Incomplete("Closed Dota")
 
         other_statuses = {
             Status.BotPractice: "Demo mode is not supported",
@@ -695,7 +691,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             await self.bot.pool.execute(query, datetime.datetime.now(datetime.UTC), friend.steam_user.id)
         else:
             # not interested if not playing Dota 2
-            friend.activity = NotInDota()
+            friend.activity = Incomplete("Not in dota")
             await self.conclude_friend_match(friend)
             return
 
