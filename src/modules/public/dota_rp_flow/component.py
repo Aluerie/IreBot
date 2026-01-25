@@ -776,11 +776,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         This nulls `Friend.active_match` attribute as well as adds the match into the database
         if it's a play match.
         """
-        if (
-            (match := friend.active_match)
-            and isinstance(match, PlayingMatch)
-            and match.match_id
-        ):
+        if (match := friend.active_match) and isinstance(match, PlayingMatch) and match.match_id:
             if match.live == LiveIndicator.Live:
                 match.live = LiveIndicator.Pending
                 query = """
@@ -1237,19 +1233,21 @@ class Dota2RichPresenceFlow(IrePublicComponent):
 
     async def score_response_helper(self, broadcaster_id: str, stream_started_at: datetime.datetime | None = None) -> str:
         """Helper function to get !wl commands response."""
-        clause = "AND m.start_time > $2" if stream_started_at else ""
+        clause = "AND m.start_time > $3" if stream_started_at else ""
         query = f"""
             SELECT d.friend_id, m.start_time, m.lobby_type, m.game_mode, m.outcome, p.player_slot, p.abandon
             FROM ttv_dota_matches m
             JOIN ttv_dota_match_players p ON m.match_id = p.match_id
             JOIN ttv_dota_accounts d ON d.friend_id = p.friend_id
-            WHERE d.twitch_id = $1 {clause}
+            WHERE d.twitch_id = $1 AND m.live > $2 {clause}
             ORDER BY m.start_time DESC;
         """
         if stream_started_at:
-            rows: list[ScoreQueryRow] = await self.bot.pool.fetch(query, broadcaster_id, stream_started_at)
+            rows: list[ScoreQueryRow] = await self.bot.pool.fetch(
+                query, broadcaster_id, LiveIndicator.Live, stream_started_at
+            )
         else:
-            rows: list[ScoreQueryRow] = await self.bot.pool.fetch(query, broadcaster_id)
+            rows: list[ScoreQueryRow] = await self.bot.pool.fetch(query, broadcaster_id, LiveIndicator.Live)
 
         if not rows:
             return "0 W - 0 L" if stream_started_at else "0 W - 0 L (No games played in the last 2 days)"
