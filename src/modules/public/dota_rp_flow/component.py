@@ -780,17 +780,20 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             (match := friend.active_match)
             and isinstance(match, PlayingMatch)
             and match.match_id
-            and match.live == LiveIndicator.Live
         ):
-            match.live = LiveIndicator.Pending
-            query = """
-                UPDATE ttv_dota_matches
-                SET live = $1
-                WHERE match_id = $2;
-            """
-            await self.bot.pool.execute(query, LiveIndicator.Pending, match.match_id)
-            if not self.process_pending_matches.is_running():
-                self.process_pending_matches.start()
+            if match.live == LiveIndicator.Live:
+                match.live = LiveIndicator.Pending
+                query = """
+                    UPDATE ttv_dota_matches
+                    SET live = $1
+                    WHERE match_id = $2;
+                """
+                await self.bot.pool.execute(query, LiveIndicator.Pending, match.match_id)
+                if not self.process_pending_matches.is_running():
+                    self.process_pending_matches.start()
+            elif match.live == LiveIndicator.Starting:
+                # It means that the lobby terminated before heroes were picked;
+                match.update_data.cancel()
 
         friend.active_match = None
 
