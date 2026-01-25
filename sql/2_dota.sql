@@ -20,7 +20,8 @@ CREATE TABLE
         start_time TIMESTAMPTZ DEFAULT (NOW () AT TIME zone 'utc'),
         lobby_type INT NOT NULL,
         game_mode INT NOT NULL,
-        outcome INT DEFAULT (NULL) -- NULL means match is still live;
+        outcome INT DEFAULT (NULL),
+        live INT DEFAULT (1);
     );
 
 CREATE TABLE

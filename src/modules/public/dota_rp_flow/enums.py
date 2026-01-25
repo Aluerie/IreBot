@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from enum import Enum, StrEnum
+from enum import Enum, IntEnum, StrEnum
 from typing import TYPE_CHECKING, Self, override
 
 from steam.enums import Enum as SteampyEnum, classproperty
@@ -118,3 +118,12 @@ class LobbyParam0(StrEnum):
 
     DemoMode = "#demo_hero_mode_name"
     BotMatch = "#DOTA_lobby_type_name_bot_match"
+
+
+class LiveIndicator(IntEnum):
+    """Indicates current state for matches."""
+
+    Starting = 1
+    Live = 2
+    Pending = 3
+    Completed = 4

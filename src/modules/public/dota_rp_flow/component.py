@@ -8,7 +8,7 @@ import logging
 import pprint
 from dataclasses import dataclass
 from operator import attrgetter
-from typing import TYPE_CHECKING, Annotated, Any, TypedDict, override
+from typing import TYPE_CHECKING, Annotated, Any, TypedDict, TypeVar, override
 from urllib import parse as url_parse
 
 import steam
@@ -19,7 +19,7 @@ from config import config
 from core import IrePublicComponent, ireloop
 from utils import errors, fmt, guards
 
-from .enums import LobbyParam0, ScoreCategory, Status
+from .enums import LiveIndicator, LobbyParam0, ScoreCategory, Status
 from .tools import (
     PARTY_MEMBERS_PATTERN,
     SteamUserConverter,
@@ -59,6 +59,8 @@ if TYPE_CHECKING:
         lobby_type: int
         player_slot: int
 
+
+LM = TypeVar("LM", bound="LiveMatch")
 
 __all__ = ("Dota2RichPresenceFlow",)
 
@@ -253,6 +255,8 @@ class LiveMatch:
         # friends
         self.friends: set[Friend] = set()
 
+        self.started_at: datetime.datetime = datetime.datetime.now(datetime.UTC)
+
     def _is_players_data_ready(self) -> bool:
         """A condition to check whether match player data is filled properly."""
         return bool(self.game_mode) and all(bool(player) for player in self.players)
@@ -399,6 +403,7 @@ class PlayingMatch(LiveMatch):
         self.lobby_id: int = int(watchable_game_id)
 
         self.average_mmr: int | None = None
+        self.live: LiveIndicator = LiveIndicator.Starting
 
         self.update_data.start()
 
@@ -421,6 +426,7 @@ class PlayingMatch(LiveMatch):
             self.average_mmr = match.average_mmr
             self.lobby_type = match.lobby_type
             self.game_mode = match.game_mode
+            self.started_at = match.start_time
 
             # players
             self.players = [
@@ -446,6 +452,9 @@ class PlayingMatch(LiveMatch):
                 # I.e. after playing in a practice lobby - there is
                 # no match to inspect in match history, opendota, etc;
                 # And `match.minimal()` errors out with `ValueError`
+
+                self.live = LiveIndicator.Live
+
                 query = """
                     INSERT INTO ttv_dota_matches
                     (match_id, start_time, lobby_type, game_mode)
@@ -453,6 +462,21 @@ class PlayingMatch(LiveMatch):
                     ON CONFLICT (match_id) DO NOTHING;
                 """
                 await self.bot.pool.execute(query, self.match_id, match.start_time, self.lobby_type, self.game_mode)
+
+                for friend in self.friends:
+                    player_slot = next(iter(s for (s, p) in enumerate(match.players) if p.id == friend.steam_user.id), None)
+                    if player_slot is None:
+                        msg = "Somehow `player_slot` is `None` in `conclude_friend_match`"
+                        raise errors.PlaceholderError(msg)
+                    hero = match.heroes[player_slot]
+                    query = """
+                        INSERT INTO ttv_dota_match_players
+                        (friend_id, match_id, hero_id, player_slot)
+                        VALUES ($1, $2, $3, $4)
+                        ON CONFLICT (friend_id, match_id) DO NOTHING;
+                    """
+                    await self.bot.pool.execute(query, friend.steam_user.id, self.match_id, hero.id, player_slot)
+
             self.update_data.stop()
 
     @override
@@ -502,6 +526,7 @@ class SpectatingMatch(LiveMatch):
             self.match_id = int(match["match"]["match_id"])
             self.lobby_type = LobbyType.try_value(match["match"]["lobby_type"])
             self.game_mode = GameMode.try_value(match["match"]["game_mode"])
+            self.started_at = datetime.datetime.fromtimestamp(match["match"]["start_timestamp"], tz=datetime.UTC)
 
             # players
             self.players = [
@@ -650,7 +675,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             Status.BotPractice: "Demo mode is not supported",
             Status.PrivateLobby: "Bot matches are not supported",
             Status.CustomGameLobby: "Private lobbies (this includes draft in public lobbies) are not supported",
-            Status.CrownfallNestOfThorns: "Nest of Thorns is not supported."
+            Status.CrownfallNestOfThorns: "Nest of Thorns is not supported.",
         }
         if msg := other_statuses.get(rp.status):
             return UnsupportedPartial(msg)
@@ -751,20 +776,19 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         This nulls `Friend.active_match` attribute as well as adds the match into the database
         if it's a play match.
         """
-        if (match := friend.active_match) and isinstance(match, PlayingMatch) and match.match_id:
-            player_slot = next(iter(s for (s, p) in enumerate(match.players) if p.friend_id == friend.steam_user.id), None)
-            if player_slot is None:
-                msg = "Somehow `player_slot` is `None` in `conclude_friend_match`"
-                raise errors.PlaceholderError(msg)
-            hero = match.heroes[player_slot]
+        if (
+            (match := friend.active_match)
+            and isinstance(match, PlayingMatch)
+            and match.match_id
+            and match.live == LiveIndicator.Live
+        ):
+            match.live = LiveIndicator.Pending
             query = """
-                INSERT INTO ttv_dota_match_players
-                (friend_id, match_id, hero_id, player_slot)
-                VALUES ($1, $2, $3, $4)
-                ON CONFLICT (friend_id, match_id) DO NOTHING;
+                UPDATE ttv_dota_matches
+                SET live = $1
+                WHERE match_id = $2;
             """
-            await self.bot.pool.execute(query, friend.steam_user.id, match.match_id, hero.id, player_slot)
-
+            await self.bot.pool.execute(query, LiveIndicator.Pending, match.match_id)
             if not self.process_pending_matches.is_running():
                 self.process_pending_matches.start()
 
@@ -1082,6 +1106,17 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         """
         await self.bot.pool.execute(query, datetime.datetime.now(datetime.UTC) - datetime.timedelta(hours=48))
 
+        cut_off_dt = datetime.datetime.now(datetime.UTC) - datetime.timedelta(hours=8)
+
+        def remove_from_index(index: dict[str, LM]) -> None:
+            for match_id in list(index.keys()):
+                match = index[match_id]
+                if match.started_at < cut_off_dt:
+                    index.pop(match_id)
+
+        remove_from_index(self.play_matches_index)
+        remove_from_index(self.watch_matches_index)
+
     @ireloop(seconds=20)
     async def process_pending_matches(self) -> None:
         """Process pending matches.
@@ -1099,9 +1134,9 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             SELECT m.match_id
             FROM ttv_dota_matches m
             JOIN ttv_dota_match_players p ON m.match_id = p.match_id
-            WHERE m.outcome IS NULL;
+            WHERE m.outcome IS NULL AND m.live = $1;
         """
-        rows = await self.bot.pool.fetch(query)
+        rows = await self.bot.pool.fetch(query, LiveIndicator.Pending)
         if not rows:
             # I guess no pending matches left
             self.process_pending_matches.cancel()
@@ -1111,10 +1146,10 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             minimal = await self.bot.dota.create_partial_match(row["match_id"]).minimal()
             query = """
                 UPDATE ttv_dota_matches
-                SET outcome = $1
+                SET outcome = $1, live = $3
                 WHERE match_id = $2;
             """
-            await self.bot.pool.execute(query, minimal.outcome, row["match_id"])
+            await self.bot.pool.execute(query, minimal.outcome, row["match_id"], LiveIndicator.Completed)
 
     @ireloop(seconds=20)
     async def process_pending_abandons(self) -> None:

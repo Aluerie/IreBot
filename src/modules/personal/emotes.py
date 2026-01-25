@@ -82,9 +82,10 @@ class EmoteChecker(IrePersonalComponent):
 
     @commands.command(aliases=["potatbotat"])
     async def potat(self, ctx: IreContext) -> None:
-        """Get reminder on what command to use to merge 7tv sets using @PotatBotat tool.
+        """Get a note on what command to use when merging 7tv sets using @PotatBotat tool.
 
         Link to the tool: https://potat.app/help/mergeset.
+        Using this command will trigger @PotatBotat automatically as it listens to other bots messages too.
         """
         await ctx.send('#mergeset 01FAQVCS500002EV4FV330P46A 01JS1XW1PAAKP34984FDYZVDR7 as:"Default but Dota 2"')
 
