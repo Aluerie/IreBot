@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import logging
 from typing import TYPE_CHECKING, NamedTuple, override
 
@@ -69,9 +70,14 @@ class Dota2Client(Client):
 
     @override
     async def on_ready(self) -> None:
-        log.info("Dota 2 Client: Ready - Successfully %s", self.user.name)
-        await self.wait_until_gc_ready()
-        log.info("Dota 2 Game Coordinator: Ready")
+        log.info("Dota 2 Client: Ready %s, now waiting till Game Coordinator is ready;", self.user.name)
+        try:
+            async with asyncio.timeout(11 * 60):  # 11 minutes
+                await self.wait_until_gc_ready()
+                log.info("Dota 2 Game Coordinator: Ready")
+        except TimeoutError:
+            log.warning("🔴 Failed to wait for Dota 2 Game Coordinator to get ready - restarting the bot. 🔴")
+            await asyncio.create_subprocess_shell("sudo systemctl restart irebot")
 
     @override
     async def on_user_update(self, before: User, after: User) -> None:

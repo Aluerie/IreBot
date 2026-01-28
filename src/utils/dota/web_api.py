@@ -40,7 +40,7 @@ class WebAPIClient:
         for _ in range(max_failures):
             async with self.session.get(url) as resp:
                 # encoding='utf-8' errored out one day
-                result = await resp.json(loads=orjson.loads, encoding="ISO-8859-1")
+                result = await resp.json(loads=orjson.loads, content_type=None)
                 if result:
                     break
                 # Valve, why does it return an empty dict `{}` on the very first request for every match...

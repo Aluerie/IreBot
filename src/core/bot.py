@@ -5,14 +5,12 @@ import datetime
 import logging
 import platform
 import pprint
-
-# import sys
+import sys
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, TypedDict, override
 
 import discord
-
-# import steam
+import steam
 import twitchio
 from twitchio import eventsub
 from twitchio.ext import commands
@@ -366,17 +364,20 @@ class IreBot(commands.AutoBot):
     async def start(self) -> None:
         if "modules.public.dota_rp_flow" in self.modules_to_load:
             self.dota = Dota2Client(self)
-            # try:
-            await asyncio.gather(
-                super().start(),
-                self.dota.login(),
-            )
+            try:
+                await asyncio.gather(
+                    super().start(),
+                    self.dota.login(),
+                )
             # A potential workaround for steam login issues
             # https://github.com/Gobot1234/steam.py/issues/446
-            # except steam.errors.NoCMsFound:
-            #     sys.exit(1)
-            # except steam.errors.LoginError:
-            #     sys.exit(1)
+            # Not sure if it works :D
+            except steam.errors.NoCMsFound:
+                log.warning("🔴 Encountered `steam.errors.NoCMsFound` - restarting. 🔴")
+                sys.exit(1)
+            except steam.errors.LoginError:
+                log.warning("🔴 Encountered `steam.errors.LoginError` - restarting. 🔴")
+                sys.exit(1)
         else:
             await super().start()
 

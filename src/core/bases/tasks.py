@@ -61,6 +61,9 @@ class IreLoop(tasks.Loop[LF]):
         super().__init__(coro, seconds, hours, minutes, time, count, reconnect, name)
         if wait_for_ready:
             self._before_loop = self._wait_for_ready
+        # Not sure how I feel about it, but it's annoying that it silences `aiohttp.ClientError, asyncio.TimeoutError`
+        # because valid aiohttp requests raise them as well !
+        self.clear_exception_types()
 
     async def _wait_for_ready(self, cog: HasBotAttribute) -> None:  # *args: Any
         await cog.bot.wait_until_ready()

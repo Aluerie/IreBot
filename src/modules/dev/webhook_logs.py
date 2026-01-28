@@ -86,7 +86,7 @@ class LogsViaWebhook(IreDevComponent):
     @override
     async def component_teardown(self) -> None:
         self.logging_worker.stop()
-        log.warning("Tearing down logger via webhook.")
+        # log.warning("Tearing down logger via webhook.")
         logging.getLogger().removeHandler(self.logs_handler)
         del self.logs_handler
         await super().component_teardown()
