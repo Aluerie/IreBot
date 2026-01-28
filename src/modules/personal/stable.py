@@ -93,7 +93,7 @@ class StableCommands(IrePersonalComponent):
     """Stable commands.
 
     Stable in a sense that unlike commands in `temporary.py`
-    these commands are unlikely to be axed  for a long time.
+    these commands are unlikely to be deleted from my channel for a long time.
 
     Notes
     -----

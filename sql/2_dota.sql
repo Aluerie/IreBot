@@ -21,7 +21,8 @@ CREATE TABLE
         lobby_type INT NOT NULL,
         game_mode INT NOT NULL,
         outcome INT DEFAULT (NULL),
-        live INT DEFAULT (1);
+        live INT DEFAULT (1),
+        failed INT DEFAULT (0)
     );
 
 CREATE TABLE

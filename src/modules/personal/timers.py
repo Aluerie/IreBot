@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any
 
 from twitchio.ext import commands
 
-from core import IrePersonalComponent
+from core import IrePersonalComponent, ireloop
 from utils import const
 
 if TYPE_CHECKING:
@@ -65,6 +65,7 @@ class Timers(IrePersonalComponent):
         self.index = 0
         self.lines_count = 0
         self.bot.add_listener(self.count_messages, event="event_message")
+        self.boink_announcement.start()
 
     @commands.Component.listener(name="stream_offline")
     async def stream_offline_cancel_the_task(self, offline: twitchio.StreamOffline) -> None:
@@ -73,6 +74,7 @@ class Timers(IrePersonalComponent):
             return
 
         self.bot.remove_listener(self.count_messages)
+        self.boink_announcement.cancel()
 
     # @commands.Component.listener(name="message")
     async def count_messages(self, message: twitchio.ChatMessage) -> None:
@@ -105,6 +107,15 @@ class Timers(IrePersonalComponent):
                 self.index += 1
                 self.lines_count = 0
                 self._most_recent = datetime.datetime.now(datetime.UTC)
+
+    @ireloop(hours=5)
+    async def boink_announcement(self) -> None:
+        """It's time to boink."""
+        if self.boink_announcement.current_loop == 0:
+            return
+
+        owner = self.bot.get_partial_owner()
+        await owner.send_announcement(message="It's time to Boink", moderator=self.bot.bot_id, color="primary")
 
 
 async def setup(bot: IreBot) -> None:

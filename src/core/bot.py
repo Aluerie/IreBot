@@ -162,6 +162,7 @@ class IreBot(commands.AutoBot):
         * etc.
 
     Maybe I will change this in future to be less confusing, but I think current situation is fine.
+
     """
 
     if TYPE_CHECKING:
@@ -550,7 +551,7 @@ class IreBot(commands.AutoBot):
         """Error Role ping used to notify the developer(-s) about some errors."""
         return "<@&1337106675433340990>" if self.test else "<@&1116171071528374394>"
 
-    # UTILITIES
+    # UTILITIES AND SHORTCUTS
 
     def is_online(self, user_id: str) -> bool:
         """Whether the user is online.
@@ -559,3 +560,7 @@ class IreBot(commands.AutoBot):
         For proper request - we need to use twitchio's `.fetch_streams` method.
         """
         return s.online if (s := self.streamers.get(user_id, None)) else False
+
+    def get_partial_owner(self) -> twitchio.PartialUser:
+        """A shortcut to get a partial user object for the bot's owner."""
+        return self.create_partialuser(self.owner_id)

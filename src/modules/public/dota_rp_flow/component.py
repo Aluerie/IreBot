@@ -100,16 +100,31 @@ class Dashboard(Activity): ...
 
 @dataclass(slots=True)
 class PlayingPartial(Activity):
+    """Partial Playing Match.
+
+    Partial in a sense that full `PlayingMatch` objects get built from objects of `PlayingPartial` class.
+    """
+
     watchable_game_id: str
 
 
 @dataclass(slots=True)
 class SpectatingPartial(Activity):
+    """Partial Spectating Match.
+
+    Partial in a sense that full `SpectatingMatch` objects get built from objects of `SpectatingPartial` class.
+    """
+
     watching_server: str
 
 
 @dataclass(slots=True)
 class UnsupportedPartial(Activity):
+    """Partial Unsupported Match.
+
+    Partial in a sense that full `UnsupportedMatch` objects get built from objects of `UnsupportedPartial` class.
+    """
+
     msg: str
 
 
@@ -1130,10 +1145,9 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         log.debug("Processing pending matches.")
 
         query = """
-            SELECT m.match_id
-            FROM ttv_dota_matches m
-            JOIN ttv_dota_match_players p ON m.match_id = p.match_id
-            WHERE m.outcome IS NULL AND m.live = $1;
+            SELECT match_id, failed
+            FROM ttv_dota_matches
+            WHERE outcome IS NULL AND live = $1 AND failed < 12;
         """
         rows = await self.bot.pool.fetch(query, LiveIndicator.Pending)
         if not rows:
@@ -1142,7 +1156,23 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             return
 
         for row in rows:
-            minimal = await self.bot.dota.create_partial_match(row["match_id"]).minimal()
+            try:
+                # If streamer disconnects before ancient falls (i.e., preemptive disconnects or when game is "Safe to leave")
+                # Then `.minimal` won't give any results as the game is still live but streamer's RP is different
+                # So we need to deal with errors of not getting response from it.
+                # This also happens if streamer disconnects-reconnects in the middle of the match.
+                minimal = await self.bot.dota.create_partial_match(row["match_id"]).minimal()
+            except ValueError:
+                # this way any matches that errored out more 12 times gonna be ignored
+                # not sure how I feel about such solution;
+                query = """
+                    UPDATE ttv_dota_matches
+                    SET failed = failed + 1
+                    WHERE match_id = $1;
+                """
+                await self.bot.pool.execute(query, row["match_id"])
+                continue
+
             query = """
                 UPDATE ttv_dota_matches
                 SET outcome = $1, live = $3
