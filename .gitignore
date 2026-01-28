@@ -30,6 +30,6 @@ config.toml
 .temp/
 
 # Testing Only
-modules/beta.py
+src/modules/beta.py
 _test.py
 scripts/

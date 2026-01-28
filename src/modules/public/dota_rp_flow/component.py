@@ -1567,10 +1567,10 @@ class Dota2RichPresenceFlow(IrePublicComponent):
 
     @ireloop(count=1)
     async def tuesday_problems(self) -> None:
-        """A crutch to try to solve infamous Tuesday problems.
+        """A crutch to try to solve infamous Tuesday Steam maintenance problems.
 
         When steam crashes - it always is a big problem for the bot;
-        It doesn't ever properly reconnect on its own.
+        It doesn't ever properly reconnect or restart on its own.
 
         Let's put a crutch to simply restart the bot if that happens.
         """
@@ -1579,4 +1579,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
                 await self.bot.dota.wait_until_gc_ready()
         except TimeoutError:
             log.warning("🔴 Failed to wait for Dota 2 Game Coordinator to get ready - restarting the bot. 🔴")
-            await asyncio.create_subprocess_shell("sudo systemctl restart irebot")
+            try:
+                await asyncio.create_subprocess_shell("sudo systemctl restart irebot")
+            except Exception:
+                log.exception("Failed to Restart the bot's process", stack_info=True)

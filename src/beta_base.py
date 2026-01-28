@@ -1,3 +1,13 @@
+"""
+Base class for BetaCog for `modules.beta.py`.
+
+It's a silly way to quickly beta-test some things, but this way
+`modules.beta.py` can be done in the least amount of lines as all the imports and chores
+are handled in this base file instead.
+
+For an example of how `modules.beta.py` looks - you can look in `examples` folder.
+"""
+
 #  pyright: basic
 
 from __future__ import annotations
@@ -12,8 +22,8 @@ import aiohttp
 import twitchio
 from twitchio.ext import commands
 
-from core import IreDevComponent, ireloop
 from config import config
+from core import IreDevComponent, ireloop
 from utils import const, errors
 
 if TYPE_CHECKING:

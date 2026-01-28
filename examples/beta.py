@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from examples.beta.base import *
+from beta_base import *
 
 
 class BetaTest(BetaCog):
