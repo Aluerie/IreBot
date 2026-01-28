@@ -610,6 +610,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         self.fill_completed_matches_from_gc_match_history.start()
         self.remove_way_too_old_matches.start()
         self.debug_announce_gc_ready.start()
+        self.tuesday_problems.start()
 
     @override
     async def component_teardown(self) -> None:
@@ -618,6 +619,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         self.fill_completed_matches_from_gc_match_history.cancel()
         self.remove_way_too_old_matches.cancel()
         self.debug_announce_gc_ready.cancel()
+        self.tuesday_problems.cancel()
 
     #################################
     #           EVENTS              #
@@ -1562,3 +1564,19 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         """Announce in Irene's twitch chat that their activity data has changed."""
         if friend.steam_user.id == config["STEAM"]["IRENE_ID32"]:
             await self.debug_deliver(f"Activity changed to: {friend.activity}")
+
+    @ireloop(count=1)
+    async def tuesday_problems(self) -> None:
+        """A crutch to try to solve infamous Tuesday problems.
+
+        When steam crashes - it always is a big problem for the bot;
+        It doesn't ever properly reconnect on its own.
+
+        Let's put a crutch to simply restart the bot if that happens.
+        """
+        try:
+            async with asyncio.timeout(11 * 60):  # 11 minutes
+                await self.bot.dota.wait_until_gc_ready()
+        except TimeoutError:
+            log.warning("🔴 Failed to wait for Dota 2 Game Coordinator to get ready - restarting the bot. 🔴")
+            await asyncio.create_subprocess_shell("sudo systemctl restart irebot")
