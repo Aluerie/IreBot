@@ -1247,28 +1247,29 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             # Apparently if a party is too big, valve just slice the string into party2
             party += party2
 
-        steam32_ids = [m.id for m in map(steam.ID, PARTY_MEMBERS_PATTERN.findall(party))]
+        # Mapping steam32_id to notable player name from the database
+        members: dict[int, str] = {m.id: "" for m in map(steam.ID, PARTY_MEMBERS_PATTERN.findall(party))}
 
         query = """
             SELECT nickname, friend_id
             FROM ttv_dota_notable_players
             WHERE friend_id = ANY($1);
         """
-        rows = await self.bot.pool.fetch(query, steam32_ids)
-        nickname_mapping = {row["friend_id"]: row["nickname"] for row in rows}
+        rows = await self.bot.pool.fetch(query, members)
+        for row in rows:
+            members[row["friend_id"]] = row["nickname"]
 
         response = ""
-        if nickname_mapping:
-            known_party_members = " \N{BULLET} ".join(nickname_mapping.values())
+        if rows:
+            known_party_members = " \N{BULLET} ".join(v for v in members.values() if v)
             response += known_party_members
 
-        unknown_party_members = " \N{BULLET} ".join(str(id_) for id_ in steam32_ids if id_ not in nickname_mapping)
-        if unknown_party_members:
-            if response:
-                response += f" | Unknown party members IDs: {unknown_party_members}"
-            else:
-                response += f"Party Members IDs: {unknown_party_members}"
-
+        unknown_party_members = " \N{BULLET} ".join(v for v in members.values() if not v)
+        if response:
+            response += f" | Yet unknown party members IDs: {unknown_party_members}"
+        else:
+            # zero known members
+            response = f"Party members IDs: {unknown_party_members}"
         await ctx.send(response)
 
     async def score_response_helper(self, broadcaster_id: str, stream_started_at: datetime.datetime | None = None) -> str:
