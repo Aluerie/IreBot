@@ -1257,10 +1257,18 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         rows = await self.bot.pool.fetch(query, steam32_ids)
         nickname_mapping = {row["friend_id"]: row["nickname"] for row in rows}
 
-        known_party_members = " \N{BULLET} ".join(nickname_mapping.values())
-        unknown_party_members = " \N{BULLET} ".join(str(id_) for id_ in steam32_ids if id_ not in nickname_mapping)
+        response = ""
+        if nickname_mapping:
+            known_party_members = " \N{BULLET} ".join(nickname_mapping.values())
+            response += known_party_members
 
-        response = f"{known_party_members} | Unknown party members: {unknown_party_members}"
+        unknown_party_members = " \N{BULLET} ".join(str(id_) for id_ in steam32_ids if id_ not in nickname_mapping)
+        if unknown_party_members:
+            if response:
+                response += f" | Unknown party members IDs: {unknown_party_members}"
+            else:
+                response += f"Party Members IDs: {unknown_party_members}"
+
         await ctx.send(response)
 
     async def score_response_helper(self, broadcaster_id: str, stream_started_at: datetime.datetime | None = None) -> str:
