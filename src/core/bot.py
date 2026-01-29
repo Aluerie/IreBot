@@ -531,7 +531,7 @@ class IreBot(commands.AutoBot):
             embed = self.add_args_field(embed, f"Extra {payload.error.__class__.__name__} Debug Data", payload.error.data)
         await self.exc_manager.register_error(payload.error, embed=embed)
 
-    # SHORTCUTS
+    # SHORTCUTS AND UTILITIES
 
     def webhook_from_url(self, url: str) -> discord.Webhook:
         """A shortcut function with filled in discord.Webhook.from_url args."""
@@ -551,8 +551,6 @@ class IreBot(commands.AutoBot):
     def error_ping(self) -> str:
         """Error Role ping used to notify the developer(-s) about some errors."""
         return "<@&1337106675433340990>" if self.test else "<@&1116171071528374394>"
-
-    # UTILITIES AND SHORTCUTS
 
     def is_online(self, user_id: str) -> bool:
         """Whether the user is online.

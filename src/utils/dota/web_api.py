@@ -35,11 +35,12 @@ class WebAPIClient:
     ) -> Any:
         """Invoke a request to Steam Web API."""
         queries = "&".join(f"{k}={v}" for k, v in kwargs.items())
-        url = f"https://api.steampowered.com/{endpoint}/?key={self.api_key}{queries}"
+        url = f"https://api.steampowered.com/{endpoint}/?key={self.api_key}&{queries}"
         max_failures = 5
         for _ in range(max_failures):
             async with self.session.get(url) as resp:
-                # encoding='utf-8' errored out one day
+                # encoding='utf-8' errored out one day, it seems Valve have misconfigured some servers' content types
+                # Or maybe they have to because all the unique characters in player names?
                 result = await resp.json(loads=orjson.loads, content_type=None)
                 if result:
                     break

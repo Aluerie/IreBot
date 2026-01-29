@@ -1,9 +1,11 @@
 """
 Base class for BetaCog for `modules.beta.py`.
 
-It's a silly way to quickly beta-test some things, but this way
-`modules.beta.py` can be done in the least amount of lines as all the imports and chores
-are handled in this base file instead.
+In `modules.beta.py` I quickly beta-test some things. It's a bit silly but very efficient.
+
+The purpose of the current file is to minimize amount of imports and lines of code
+for anything we're going to do while beta-testing. The performance cost of extra imports is probably
+negligible compared to annoyance to type them manually out every time we need them.
 
 For an example of how `modules.beta.py` looks - you can look in `examples` folder.
 """
