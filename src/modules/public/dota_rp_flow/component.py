@@ -1241,21 +1241,23 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         party = friend.rich_presence.raw.get("party")
         if party is None:
             msg = "Streamer is not in a party."
-            await ctx.send(msg)
-            return
+            raise errors.RespondWithError(msg)
         if party2 := friend.rich_presence.raw.get("party2"):
             # Apparently if a party is too big, valve just slice the string into party2
             party += party2
 
         # Mapping steam32_id to notable player name from the database
         members: dict[int, str] = {m.id: "" for m in map(steam.ID, PARTY_MEMBERS_PATTERN.findall(party))}
+        if not members:
+            msg = "Streamer is not in a party."
+            raise errors.RespondWithError(msg)
 
         query = """
             SELECT nickname, friend_id
             FROM ttv_dota_notable_players
             WHERE friend_id = ANY($1);
         """
-        rows = await self.bot.pool.fetch(query, members)
+        rows = await self.bot.pool.fetch(query, members.keys())
         for row in rows:
             members[row["friend_id"]] = row["nickname"]
 
@@ -1511,8 +1513,8 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             LIMIT 3;
         """
         rows = await self.bot.pool.fetch(query, name)
-        response = f'3 most likely matches to your query "{name}":' + " \N{BULLET}".join(
-            f"<{row['nickname']} id={row['friend_id']}>" for row in rows
+        response = f'3 most similar entries "{name}": ' + " \N{BULLET}".join(
+            f"{row['nickname']} id={row['friend_id']}" for row in rows
         )
         await ctx.send(response)
 
@@ -1615,3 +1617,12 @@ class Dota2RichPresenceFlow(IrePublicComponent):
                 await asyncio.create_subprocess_shell("sudo systemctl restart irebot")
             except Exception:
                 log.exception("Failed to Restart the bot's process", stack_info=True)
+
+    @commands.is_owner()
+    @commands.command(name="raw_rp")
+    async def send_raw_rich_presence(self, ctx: IreContext) -> None:
+        """Send current rich presence state to @irene for debugging reasons."""
+        friend = await self.find_friend_account(ctx.broadcaster.id)
+        to_send = f"```json\n{pprint.pformat(friend.rich_presence.raw)}```"
+        await self.bot.error_webhook.send(content=to_send)
+        await ctx.send(content="Done")
