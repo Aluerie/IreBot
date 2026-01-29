@@ -1448,7 +1448,11 @@ class Dota2RichPresenceFlow(IrePublicComponent):
     @commands.group(name="npm", aliases=["np-dev"], invoke_fallback=True)
     async def npm_dev(self, ctx: IreContext) -> None:
         """A group command for the bot developer to manage list of notable players in the database."""
-        await ctx.send('"!npm" is a group command: use it together with its subcommands, i.e. "!npm add 123 Arteezy"')
+        message = (
+            '"!npm" is a group command: use it together with its subcommands (add, help, remove, find), "'
+            '"i.e. "!npm add 123 Arteezy"'
+        )
+        await ctx.send(message)
 
     @npm_dev.command(name="add", aliases=["edit", "rename"])
     async def npm_dev_add(self, ctx: IreContext, steam_user: Annotated[Dota2User, SteamUserConverter], *, name: str) -> None:
@@ -1475,7 +1479,8 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             "!npm add 123 Arteezy \N{BULLET} "
             "!npm remove 123 \N{BULLET} "
             "!npm rename 123 \N{BULLET} "
-            "where 123 is their friend_id."
+            "where 123 is their friend_id; "
+            "!npm find Arteezy - to get their friend_id."
         )
         await ctx.send(response)
 
@@ -1492,6 +1497,24 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         """
         name: str = await self.bot.pool.fetchval(query, friend_id)
         await ctx.send(f"Removed player <friend_id={friend_id}, name={name}> from notable players.")
+
+    @npm_dev.command(name="find")
+    async def npm_dev_find(self, ctx: IreContext, name: str) -> None:
+        """Find a notable player from the database.
+
+        This command is only available for certain group of people.
+        """
+        query = """
+            SELECT friend_id, nickname
+            FROM ttv_dota_notable_players
+            ORDER BY similarity(nickname, $1) DESC
+            LIMIT 3;
+        """
+        rows = await self.bot.pool.fetch(query, name)
+        response = f'3 most likely matches to your query "{name}":' + " \N{BULLET}".join(
+            f"<{row['nickname']} id={row['friend_id']}>" for row in rows
+        )
+        await ctx.send(response)
 
     #################################
     #          TASK CARE            #
