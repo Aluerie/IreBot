@@ -1247,7 +1247,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             party += party2
 
         # Mapping steam32_id to notable player name from the database
-        members: dict[int, str] = {m.id: "" for m in map(steam.ID, PARTY_MEMBERS_PATTERN.findall(party))}
+        members: dict[steam.ID, str] = dict.fromkeys(map(steam.ID, PARTY_MEMBERS_PATTERN.findall(party)), "")
         if not members:
             msg = "Streamer is not in a party."
             raise errors.RespondWithError(msg)
@@ -1266,9 +1266,11 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             known_party_members = " \N{BULLET} ".join(v for v in members.values() if v)
             response += known_party_members
 
-        unknown_party_members = " \N{BULLET} ".join(str(k) for k, v in members.items() if not v)
+        unknown_party_members = " \N{BULLET} ".join(
+            [f"{(await self.bot.dota.fetch_user(k.id64)).name} ({k.id})" for k, v in members.items() if not v]
+        )
         if response:
-            response += f" | Unknown party members IDs: {unknown_party_members}"
+            response += f" | Not notable to the bot party members: {unknown_party_members}"
         else:
             # zero known members
             response = f"Party members IDs: {unknown_party_members}"
