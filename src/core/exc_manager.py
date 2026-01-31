@@ -49,8 +49,12 @@ class ExceptionManager:
 
         traceback_string = (
             "".join(traceback.format_exception(error))
-            # Just making code blocks shorter without losing information;
+            # Just making code blocks shorter without losing much information;
+            # maybe such amount of replaces warrant regex;
             .replace(f"{Path.cwd()}/src", "<src>")
+            .replace("<src>/modules", "<modules>")
+            .replace("<src>/core", "<core>")
+            .replace("<src>/utils", "<utils>")
             .replace(f"{Path.cwd()}/.venv/lib/python3.12/site-packages", "<venv>")
         )
 

@@ -7,7 +7,7 @@ The purpose of the current file is to minimize amount of imports and lines of co
 for anything we're going to do while beta-testing. The performance cost of extra imports is probably
 negligible compared to annoyance to type them manually out every time we need them.
 
-For an example of how `modules.beta.py` looks - you can look in `examples` folder.
+For an example of how starting template for `modules.beta.py` looks - you can look in `examples` folder.
 """
 
 #  pyright: basic

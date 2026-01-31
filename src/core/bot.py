@@ -355,8 +355,11 @@ class IreBot(commands.AutoBot):
     @override
     async def load_tokens(self, _: str | None = None) -> None:  # _ is `path`
         # We don't need to call this manually, it is called in .login() from .start() internally...
-
-        rows: list[LoadTokensQueryRow] = await self.pool.fetch("""SELECT * from ttv_tokens""")
+        query = """
+            SELECT *
+            FROM ttv_tokens
+        """
+        rows: list[LoadTokensQueryRow] = await self.pool.fetch(query)
         for row in rows:
             await self.add_token(row["token"], row["refresh"])
 

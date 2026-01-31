@@ -1266,9 +1266,9 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             known_party_members = " \N{BULLET} ".join(v for v in members.values() if v)
             response += known_party_members
 
-        unknown_party_members = " \N{BULLET} ".join(v for v in members.values() if not v)
+        unknown_party_members = " \N{BULLET} ".join(str(k) for k, v in members.items() if not v)
         if response:
-            response += f" | Yet unknown party members IDs: {unknown_party_members}"
+            response += f" | Unknown party members IDs: {unknown_party_members}"
         else:
             # zero known members
             response = f"Party members IDs: {unknown_party_members}"
