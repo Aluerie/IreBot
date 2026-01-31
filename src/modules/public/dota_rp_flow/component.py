@@ -1246,8 +1246,12 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             # Apparently if a party is too big, valve just slice the string into party2
             party += party2
 
-        # Mapping steam32_id to notable player name from the database
-        members: dict[steam.ID, str] = dict.fromkeys(map(steam.ID, PARTY_MEMBERS_PATTERN.findall(party)), "")
+        # Mapping steam32_id -> [steam64_id, their supposed account name]
+        # v[0] - steam64
+        # v[1] - notable name
+        members: dict[int, tuple[int, str]] = {
+            m.id: (m.id64, "") for m in map(steam.ID, PARTY_MEMBERS_PATTERN.findall(party))
+        }
         if not members:
             msg = "Streamer is not in a party."
             raise errors.RespondWithError(msg)
@@ -1263,11 +1267,11 @@ class Dota2RichPresenceFlow(IrePublicComponent):
 
         response = ""
         if rows:
-            known_party_members = " \N{BULLET} ".join(v for v in members.values() if v)
+            known_party_members = " \N{BULLET} ".join(v[1] for v in members.values() if v[1])
             response += known_party_members
 
         unknown_party_members = " \N{BULLET} ".join(
-            [f"{(await self.bot.dota.fetch_user(k.id64)).name} ({k.id})" for k, v in members.items() if not v]
+            [f"{(await self.bot.dota.fetch_user(v[0])).name} ({k})" for k, v in members.items() if not v[1]]
         )
         if response:
             response += f" | Not notable to the bot party members: {unknown_party_members}"
