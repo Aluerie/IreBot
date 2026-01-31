@@ -1247,10 +1247,10 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             party += party2
 
         # Mapping steam32_id -> [steam64_id, their supposed account name]
-        # v[0] - steam64
-        # v[1] - notable name
-        members: dict[int, tuple[int, str]] = {
-            m.id: (m.id64, "") for m in map(steam.ID, PARTY_MEMBERS_PATTERN.findall(party))
+        # v[0]: int - steam64
+        # v[1]: str - notable name
+        members: dict[int, list[Any]] = {
+            m.id: [m.id64, ""] for m in map(steam.ID, PARTY_MEMBERS_PATTERN.findall(party))
         }
         if not members:
             msg = "Streamer is not in a party."
@@ -1263,7 +1263,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         """
         rows = await self.bot.pool.fetch(query, members.keys())
         for row in rows:
-            members[row["friend_id"]] = row["nickname"]
+            members[row["friend_id"]][1] = row["nickname"]
 
         response = ""
         if rows:
