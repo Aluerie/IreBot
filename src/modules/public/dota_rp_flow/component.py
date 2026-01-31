@@ -1274,7 +1274,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             [f"{(await self.bot.dota.fetch_user(v[0])).name} ({k})" for k, v in members.items() if not v[1]]
         )
         if response:
-            response += f" | Not notable to the bot party members: {unknown_party_members}"
+            response += f" | Not notable to the bot: {unknown_party_members}"
         else:
             # zero known members
             response = f"Party members IDs: {unknown_party_members}"
