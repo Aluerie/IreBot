@@ -476,31 +476,21 @@ class IreBot(commands.AutoBot):
                 command_name = f"{ctx.prefix}{command.name}" if command else "this command"
                 await ctx.send(f"Command {command_name} is on cooldown! Try again in {error.remaining:.0f} sec.")
             case commands.GuardFailure():
-                guard_mapping = {
-                    # Default guards from `twitchio`, my custom guards should `raise RespondWithError`
-                    "is_moderator.<locals>.predicate": (
-                        f"Only moderators are allowed to use this command {const.FFZ.peepoPolice}"
-                    ),
-                    "is_owner.<locals>.predicate": (
-                        f"Only Irene Adler is allowed to use this command {const.FFZ.peepoPolice}"
-                    ),
-                    "is_broadcaster.<locals>.predicate": (
-                        f"Only broadcaster is allowed to use this command {const.FFZ.peepoPolice}"
-                    ),
-                    # My own guards
-                    "is_vps.<locals>.predicate": (
-                        "Sorry, this command is currently disabled "
-                        f"while Irene is testing some stuff {const.FFZ.peepoPolice}"
-                    ),
-                    "is_online.<locals>.predicate": (
-                        f"This commands is only allowed when stream is online {const.FFZ.peepoPolice}"
-                    ),
-                    "is_allowed_to_add_notable.<locals>.predicate": (
-                        f"You are not allowed to add notable players into the bot's database {const.FFZ.peepoPolice}"
-                    ),
-                }
-                unknown_guard_message = f"For some reason you are not allowed to use this command {const.FFZ.peepoPolice}"
-                await ctx.send(guard_mapping.get(error.guard.__qualname__, unknown_guard_message))
+                if (cause := error.__cause__) and isinstance(cause, errors.RespondWithError):
+                    # my custom guards should `raise errors.RespondWithError`
+                    await ctx.send(str(cause))
+                else:
+                    # For default `twitchio` guards - we need to cook a bit
+                    guard_response = {
+                        "is_moderator": f"Only moderators are allowed to use this command {const.FFZ.peepoPolice}",
+                        "is_owner": f"Only Irene Adler is allowed to use this command {const.FFZ.peepoPolice}",
+                        "is_broadcaster": f"Only broadcaster is allowed to use this command {const.FFZ.peepoPolice}",
+                    }.get(
+                        # an example of qualname: "is_moderator,<locals>.predicate"
+                        error.guard.__qualname__.removesuffix(".<locals>.predicate"),
+                        f"For some reason you are not allowed to use this command {const.FFZ.peepoPolice}",
+                    )
+                    await ctx.send(guard_response)
             case twitchio.HTTPException():
                 await ctx.send(
                     f"{error.__class__.__name__} - "

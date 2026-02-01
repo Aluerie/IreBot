@@ -41,6 +41,8 @@ class WebAPIClient:
             async with self.session.get(url) as resp:
                 # encoding='utf-8' errored out one day, it seems Valve have misconfigured some servers' content types
                 # Or maybe they have to because all the unique characters in player names?
+                # I'm not sure if this "ISO-8859-1" encoding solves all problems;
+                # meta shows utf-8 though so idk.
                 result = await resp.json(loads=orjson.loads, content_type=None, encoding="ISO-8859-1")
                 if result:
                     break

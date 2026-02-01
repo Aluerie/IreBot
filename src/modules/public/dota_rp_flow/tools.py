@@ -236,7 +236,10 @@ def is_allowed_to_add_notable() -> Any:
     def predicate(ctx: IreContext) -> bool:
         # Maybe we will edit this to be some proper dynamic database thing;
         allowed_ids = (const.UserID.Irene, const.UserID.Aluerie, const.UserID.Xas)
-        return ctx.chatter.id in allowed_ids
+        if ctx.chatter.id in allowed_ids:
+            return True
+        msg = f"You are not allowed to add notable players into the bot's database {const.FFZ.peepoPolice}"
+        raise errors.RespondWithError(msg)
 
     return commands.guard(predicate)
 

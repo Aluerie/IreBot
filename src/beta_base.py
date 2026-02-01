@@ -18,7 +18,7 @@ import asyncio
 import itertools
 import logging
 import platform
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, override
 
 import aiohttp
 import twitchio

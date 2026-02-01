@@ -13,6 +13,8 @@ from typing import TYPE_CHECKING, Any
 
 from twitchio.ext import commands
 
+from . import const, errors
+
 if TYPE_CHECKING:
     from core import IreContext
 
@@ -31,7 +33,10 @@ def is_vps() -> Any:
 
     def predicate(ctx: IreContext) -> bool:
         # Still allow Irene to use the command during the testing;
-        return ctx.bot.test or ctx.chatter.id == ctx.bot.owner_id
+        if not ctx.bot.test or ctx.chatter.id == ctx.bot.owner_id:
+            return True
+        msg = f"Sorry, this command is currently disabled while Irene is testing some stuff {const.FFZ.peepoPolice}"
+        raise errors.RespondWithError(msg)
 
     return commands.guard(predicate)
 
@@ -40,6 +45,9 @@ def is_online() -> Any:
     """Allow the command to be completed only when Irene's stream is online."""
 
     def predicate(ctx: IreContext) -> bool:
-        return ctx.bot.is_online(ctx.broadcaster.id)
+        if ctx.bot.is_online(ctx.broadcaster.id):
+            return True
+        msg = f"This commands is only allowed when stream is online {const.FFZ.peepoPolice}"
+        raise errors.RespondWithError(msg)
 
     return commands.guard(predicate)

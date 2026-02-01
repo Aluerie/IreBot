@@ -39,11 +39,10 @@ class IrePersonalComponent(IreComponent):
         return user_id == self.bot.owner_id
 
     @override
-    async def component_before_invoke(self, ctx: IreContext) -> bool:
+    async def component_before_invoke(self, ctx: IreContext) -> None:
         if not self.is_owner(ctx.broadcaster.id):
             msg = "Command is not allowed anywhere except Irene's channel"
             raise errors.SilentError(msg)
-        return True
 
 
 class IreDevComponent(IreComponent):
@@ -53,5 +52,7 @@ class IreDevComponent(IreComponent):
     """
 
     @override
-    async def component_before_invoke(self, ctx: IreContext) -> bool:
-        return ctx.chatter.id == ctx.bot.owner_id
+    async def component_before_invoke(self, ctx: IreContext) -> None:
+        if ctx.chatter.id == ctx.bot.owner_id:
+            msg = "Command is not allowed by anybody else except Irene"
+            raise errors.SilentError(msg)
