@@ -10,9 +10,9 @@ class BetaTest(BetaCog):
     async def beta_test(self) -> None:
         pass
 
-    @commands.command()
-    async def beta(self, ctx: IreContext) -> None:
-        pass
+    @commands.command(name="test", aliases=["beta"])
+    async def test(self, ctx: IreContext) -> None:
+        await ctx.send("test")
 
 
 async def setup(bot: IreBot) -> None:

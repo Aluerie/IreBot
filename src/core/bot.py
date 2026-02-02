@@ -480,13 +480,13 @@ class IreBot(commands.AutoBot):
                     # my custom guards should `raise errors.RespondWithError`
                     await ctx.send(str(cause))
                 else:
-                    # For default `twitchio` guards - we need to cook a bit
+                    # To make custom responses for default `twitchio` guards - need to cook a bit.
                     guard_response = {
                         "is_moderator": f"Only moderators are allowed to use this command {const.FFZ.peepoPolice}",
                         "is_owner": f"Only Irene Adler is allowed to use this command {const.FFZ.peepoPolice}",
                         "is_broadcaster": f"Only broadcaster is allowed to use this command {const.FFZ.peepoPolice}",
                     }.get(
-                        # an example of qualname: "is_moderator,<locals>.predicate"
+                        # an example of `.__qualname__`: "is_moderator.<locals>.predicate"
                         error.guard.__qualname__.removesuffix(".<locals>.predicate"),
                         f"For some reason you are not allowed to use this command {const.FFZ.peepoPolice}",
                     )

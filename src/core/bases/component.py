@@ -53,6 +53,6 @@ class IreDevComponent(IreComponent):
 
     @override
     async def component_before_invoke(self, ctx: IreContext) -> None:
-        if ctx.chatter.id == ctx.bot.owner_id:
+        if ctx.chatter.id != ctx.bot.owner_id:
             msg = "Command is not allowed by anybody else except Irene"
             raise errors.SilentError(msg)

@@ -1274,7 +1274,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             [f"{(await self.bot.dota.fetch_user(v[0])).name} ({k})" for k, v in members.items() if not v[1]]
         )
         if response:
-            response += f" | Not notable to the bot: {unknown_party_members}"
+            response += f". And not notable to the bot: {unknown_party_members}"
         else:
             # zero known members
             response = f"Party members IDs: {unknown_party_members}"
@@ -1478,7 +1478,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
                 UPDATE SET nickname = $2;
         """
         await self.bot.pool.execute(query, steam_user.id, name)
-        await ctx.send(f"Added a new notable player <friend_id={steam_user.id}, name={name}>")
+        await ctx.send(f"Added/edited a notable player <friend_id={steam_user.id}, name={name}>")
 
     @npm_dev.command(name="help")
     async def npm_dev_help(self, ctx: IreContext) -> None:
@@ -1507,7 +1507,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         await ctx.send(f"Removed player <friend_id={friend_id}, name={name}> from notable players.")
 
     @npm_dev.command(name="find")
-    async def npm_dev_find(self, ctx: IreContext, name: str) -> None:
+    async def npm_dev_find(self, ctx: IreContext, *, name: str) -> None:
         """Find a notable player from the database.
 
         This command is only available for certain group of people.
