@@ -657,8 +657,6 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             Status.PreGame,
             Status.WaitingForMapToLoad,
             Status.Playing,
-            Status.CustomGameProgress,
-            Status.CustomGameProgress,
             Status.Coaching,
         }:
             if (watchable_game_id := rp.raw.get("WatchableGameID")) is None:
@@ -691,6 +689,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         other_statuses = {
             Status.BotPractice: "Demo mode is not supported",
             Status.PrivateLobby: "Bot matches are not supported",
+            Status.CustomGameProgress: "Custom games are not supported",
             Status.CustomGameLobby: "Private lobbies (this includes draft in public lobbies) are not supported",
             Status.CrownfallNestOfThorns: "Nest of Thorns is not supported.",
         }
@@ -1249,9 +1248,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         # Mapping steam32_id -> [steam64_id, their supposed account name]
         # v[0]: int - steam64
         # v[1]: str - notable name
-        members: dict[int, list[Any]] = {
-            m.id: [m.id64, ""] for m in map(steam.ID, PARTY_MEMBERS_PATTERN.findall(party))
-        }
+        members: dict[int, list[Any]] = {m.id: [m.id64, ""] for m in map(steam.ID, PARTY_MEMBERS_PATTERN.findall(party))}
         if not members:
             msg = "Streamer is not in a party."
             raise errors.RespondWithError(msg)

@@ -271,7 +271,9 @@ def extract_hero_index(argument: str, heroes: list[Hero]) -> tuple[Hero, int]:
         try:
             return heroes[index], index
         except IndexError:
-            msg = f"Detected numeric input for player slot #{argument} but there are {len(heroes)} players in this match."
+            msg = (
+                f"Detected numeric input for player slot #{argument} but there are only {len(heroes)} players in this match."
+            )
             raise errors.RespondWithError(msg) from None
 
     # Otherwise - we have to use the fuzzy search
