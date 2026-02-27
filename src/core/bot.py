@@ -481,6 +481,7 @@ class IreBot(commands.AutoBot):
                     await ctx.send(str(cause))
                 else:
                     # To make custom responses for default `twitchio` guards - need to cook a bit.
+                    # (or make our own guards with the same predicates, not like it's anything complex)
                     guard_response = {
                         "is_moderator": f"Only moderators are allowed to use this command {const.FFZ.peepoPolice}",
                         "is_owner": f"Only Irene Adler is allowed to use this command {const.FFZ.peepoPolice}",
