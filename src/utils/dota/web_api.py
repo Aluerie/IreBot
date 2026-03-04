@@ -15,6 +15,10 @@ if TYPE_CHECKING:
 __all__ = ("WebAPIClient",)
 
 
+class SteamWebAPIError(errors.IreBotError):
+    """Errors related to Steam Web API."""
+
+
 class WebAPIClient:
     """A class for interacting with Steam Web API.
 
@@ -36,7 +40,7 @@ class WebAPIClient:
         """Invoke a request to Steam Web API."""
         queries = "&".join(f"{k}={v}" for k, v in kwargs.items())
         url = f"https://api.steampowered.com/{endpoint}/?key={self.api_key}&{queries}"
-        max_failures = 5
+        max_failures = 10
         for _ in range(max_failures):
             async with self.session.get(url) as resp:
                 # encoding='utf-8' errored out one day, it seems Valve have misconfigured some servers' content types
@@ -52,8 +56,8 @@ class WebAPIClient:
                 await asyncio.sleep(0.49)
                 continue
         else:
-            msg = f"A request to {endpoint} got an empty dict {max_failures} times in a row"
-            raise errors.PlaceholderError(msg)
+            msg = f"A request {url} got an empty dict {max_failures} times in a row"
+            raise SteamWebAPIError(msg)
 
         return result
 
@@ -61,7 +65,7 @@ class WebAPIClient:
         """Get Real Time Stats from Steam Web API.
 
         Links
-        ----------
-        https://steamapi.xpaw.me/#IDOTA2MatchStats_570/GetRealtimeStats.
+        -----
+        * https://steamapi.xpaw.me/#IDOTA2MatchStats_570/GetRealtimeStats.
         """
         return await self.invoke("IDOTA2MatchStats_570/GetRealtimeStats/v1", server_steam_id=server_steam_id)
