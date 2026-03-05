@@ -54,7 +54,9 @@ class Alerts(IrePersonalComponent):
     # SECTION 2
     # Actual events
 
-    @commands.Component.listener(name="follow")
+    # Disabling this for time being
+    # Idk, it's a bit invasive to announce/log what other people do
+    # @commands.Component.listener(name="follow")
     async def follows(self, follow: twitchio.ChannelFollow) -> None:
         """Somebody followed the channel."""
         if not self.is_owner(follow.broadcaster.id):
