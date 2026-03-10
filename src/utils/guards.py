@@ -45,16 +45,24 @@ def is_online() -> Any:
     """Allow the command to be completed only when Irene's stream is online."""
 
     def predicate(ctx: IreContext) -> bool:
-        if ctx.chatter.id != ctx.bot.owner_id:
-            # decorators order in twitchio performs
-            # `.component_before_invoke` after local decorators
-            # so this workaround fixes that order
-            msg = f"Command is only allowed in Irene's channel {const.FFZ.peepoPolice}"
-            raise errors.SilentError(msg)
-
         if ctx.bot.is_online(ctx.broadcaster.id):
             return True
         msg = f"This commands is only allowed when stream is online {const.FFZ.peepoPolice}"
         raise errors.RespondWithError(msg)
 
     return commands.guard(predicate)
+
+
+def is_owner_channel() -> Any:
+    def predicate(ctx: IreContext) -> bool:
+        if ctx.channel.id == ctx.bot.owner_id:
+            return True
+        # decorators order in twitchio performs
+        # `.component_before_invoke` after local decorators
+        # so this workaround fixes that order
+        msg = f"Command is only allowed in Irene's channel {const.FFZ.peepoPolice}"
+        raise errors.SilentError(msg)
+
+    return commands.guard(predicate)
+    # TODO: Write to twichio and ask them to move before_component_invoke to be performed before the guards
+    # because it would make more logical sense.

@@ -101,12 +101,14 @@ class StableCommands(IrePersonalComponent):
     """
 
     @commands.cooldown(rate=1, per=60, key=commands.BucketType.channel)
+    @guards.is_owner_channel()
     @commands.command()
     async def boink(self, ctx: IreContext) -> None:
         """Send an announcement for an obligatory boink."""
         await ctx.send_announcement(content=f"it's time to boink {const.STV.Boink}", color="purple")
 
     @guards.is_online()
+    @guards.is_owner_channel()
     @commands.command()
     async def clip(self, ctx: IreContext) -> None:
         """Create a clip for last 30 seconds of the stream."""
@@ -272,6 +274,7 @@ class StableCommands(IrePersonalComponent):
         await ctx.send("open.spotify.com/playlist/7fVAcuDPLVAUL8555vy8Kz?si=b26cecab2cf24608")  # cSpell: ignore DPLVAUL
 
     @commands.cooldown(rate=1, per=60, key=commands.BucketType.channel)
+    @guards.is_owner_channel()
     @commands.command(aliases=["rr", "russianroulette"])
     async def roulette(self, ctx: IreContext) -> None:
         """Play russian roulette."""
@@ -303,12 +306,14 @@ class StableCommands(IrePersonalComponent):
 
     @guards.is_online()
     @commands.is_moderator()
+    @guards.is_owner_channel()
     @commands.command(aliases=["so"])
     async def shoutout(self, ctx: IreContext, user: twitchio.User) -> None:
         """Do /shoutout to a user."""
         await ctx.broadcaster.send_shoutout(to_broadcaster=user.id, moderator=const.UserID.Bot)
 
     @commands.cooldown(rate=1, per=10, key=commands.BucketType.channel)
+    @guards.is_owner_channel()
     @commands.command()
     async def song(self, ctx: IreContext) -> None:
         """Get currently played song on Spotify."""
