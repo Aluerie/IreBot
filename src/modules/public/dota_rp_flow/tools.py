@@ -7,17 +7,11 @@ import steam
 from steam.ext.dota2 import Hero, User as Dota2User
 from twitchio.ext import commands
 
-try:
-    from utils import const, errors, fuzzy
-except ModuleNotFoundError:
-    import sys
-
-    # Just for lazy testing (in the end of this file);
-    sys.path.append("D:/CODE/IreBot/src")
-
-    from utils import const, errors, fuzzy
+from utils import const, errors, fuzzy
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
     from steam.ext.dota2 import ProfileCard
 
     from core import IreContext
@@ -244,7 +238,7 @@ def is_allowed_to_add_notable() -> Any:
     return commands.guard(predicate)
 
 
-def extract_hero_index(argument: str, heroes: list[Hero]) -> tuple[Hero, int]:
+def extract_hero_index(argument: str, heroes: Sequence[Hero]) -> tuple[Hero, int]:
     """Convert command argument provided by user (twitch chatter) into a player_slot in the match.
 
     Uses fuzzy match to extract the likely match.
@@ -303,12 +297,3 @@ def extract_hero_index(argument: str, heroes: list[Hero]) -> tuple[Hero, int]:
         raise errors.RespondWithError(msg)
 
     return result
-
-
-if __name__ == "__main__":
-    # A little test.
-    argument = "PA"
-    self_heroes = [Hero.PhantomAssassin, Hero.Kez, Hero.KeeperOfTheLight, Hero.Io]
-
-    res = extract_hero_index(argument, self_heroes)
-    print(res)  # noqa: T201

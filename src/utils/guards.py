@@ -45,6 +45,13 @@ def is_online() -> Any:
     """Allow the command to be completed only when Irene's stream is online."""
 
     def predicate(ctx: IreContext) -> bool:
+        if ctx.chatter.id != ctx.bot.owner_id:
+            # decorators order in twitchio performs
+            # `.component_before_invoke` after local decorators
+            # so this workaround fixes that order
+            msg = f"Command is only allowed in Irene's channel {const.FFZ.peepoPolice}"
+            raise errors.SilentError(msg)
+
         if ctx.bot.is_online(ctx.broadcaster.id):
             return True
         msg = f"This commands is only allowed when stream is online {const.FFZ.peepoPolice}"

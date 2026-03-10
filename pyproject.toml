@@ -23,6 +23,7 @@ dev = [
     "asyncpg-stubs",
     "ipykernel",
     "pyright",
+    "pytest>=9.0.2",
 ]
 
 [[tool.uv.index]]
@@ -238,3 +239,10 @@ allow-star-arg-any = true
 
 [tool.ruff.lint.flake8-quotes]
 inline-quotes = "double"
+
+[tool.pytest]
+addopts = ["-vv", "-p", "no:cacheprovider", "--disable-warnings"]
+norecursedirs = ["env/*", "venv/*", ".venv/*"]
+filterwarnings = ["ignore::DeprecationWarning"]
+# testpaths = ["tests/"]
+# python_files = ["test_*.py"]

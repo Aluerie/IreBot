@@ -56,7 +56,7 @@ class Control(IreDevComponent):
         try:
             await asyncio.create_subprocess_shell("sudo systemctl restart irebot")
         except Exception:
-            log.exception("Failed to Restart the bot's process", stack_info=True)
+            log.exception("Failed to Restart the bot's process")
             # it might not go off
             await ctx.send("Something went wrong.")
 
