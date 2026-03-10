@@ -476,9 +476,12 @@ class IreBot(commands.AutoBot):
                 command_name = f"{ctx.prefix}{command.name}" if command else "this command"
                 await ctx.send(f"Command {command_name} is on cooldown! Try again in {error.remaining:.0f} sec.")
             case commands.GuardFailure():
-                if (cause := error.__cause__) and isinstance(cause, errors.RespondWithError):
-                    # my custom guards should `raise errors.RespondWithError`
-                    await ctx.send(str(cause))
+                if (cause := error.__cause__):
+                    if isinstance(cause, errors.RespondWithError):
+                        # my custom guards should `raise errors.RespondWithError`
+                        await ctx.send(str(cause))
+                    elif isinstance(cause, errors.SilentError):
+                        return
                 else:
                     # To make custom responses for default `twitchio` guards - need to cook a bit.
                     # (or make our own guards with the same predicates, not like it's anything complex)
