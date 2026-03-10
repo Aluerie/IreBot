@@ -488,8 +488,8 @@ class IreBot(commands.AutoBot):
                         "is_broadcaster": f"Only broadcaster is allowed to use this command {const.FFZ.peepoPolice}",
                     }.get(
                         # an example of `.__qualname__`: "is_moderator.<locals>.predicate"
-                        error.guard.__qualname__.removesuffix(".<locals>.predicate"),
-                        f"For some reason you are not allowed to use this command {const.FFZ.peepoPolice}",
+                        guard_name := error.guard.__qualname__.removesuffix(".<locals>.predicate"),
+                        f'For some reason ("{guard_name}") you are not allowed to use this command {const.FFZ.peepoPolice}',
                     )
                     await ctx.send(guard_response)
             case twitchio.HTTPException():
