@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
     from .schemas import web_api as schemas
 
-__all__ = ("WebAPIClient",)
+__all__ = ("SteamWebAPIError", "WebAPIClient")
 
 
 class SteamWebAPIError(errors.IreBotError):
@@ -41,7 +41,7 @@ class WebAPIClient:
         queries = "&".join(f"{k}={v}" for k, v in kwargs.items())
         url = f"https://api.steampowered.com/{endpoint}/?key={self.api_key}&{queries}"
         max_failures = 10
-        for _ in range(max_failures):
+        for attempt in range(max_failures):
             async with self.session.get(url) as resp:
                 # encoding='utf-8' errored out one day, it seems Valve have misconfigured some servers' content types
                 # Or maybe they have to because all the unique characters in player names?
@@ -53,10 +53,11 @@ class WebAPIClient:
                 # Valve, why does it return an empty dict `{}` on the very first request for every match...
                 # It's a problem even in the actual game client.
                 # So we have to ask again hence this silly for loop.
-                await asyncio.sleep(0.49)
+                # some lazy exp backoff:
+                await asyncio.sleep(0.49 * 1.7**attempt)
                 continue
         else:
-            msg = f"A request {url} got an empty dict {max_failures} times in a row"
+            msg = f'Response "{url}" was empty {max_failures} times in a row.'
             raise SteamWebAPIError(msg)
 
         return result

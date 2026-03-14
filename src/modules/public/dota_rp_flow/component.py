@@ -18,6 +18,7 @@ from twitchio.ext import commands
 from config import config
 from core import IrePublicComponent, ireloop
 from utils import errors, fmt, guards
+from utils.dota import SteamWebAPIError
 
 from .enums import LiveIndicator, LobbyParam0, ScoreCategory, Status
 from .tools import (
@@ -238,7 +239,10 @@ def format_match_response(func: Callable[..., Coroutine[Any, Any, str]]) -> Call
             return self.message
 
         prefix = f"[{self.activity_tag}] " if self.activity_tag else ""
-        response = await func(self, *args, **kwargs)
+        if isinstance(self, SpectatingMatch) and self.unavailable:
+            response = "I'm not able to fetch data for this match, sorry."
+        else:
+            response = await func(self, *args, **kwargs)
         return prefix + response
 
     return wrapper
@@ -527,13 +531,21 @@ class SpectatingMatch(LiveMatch):
             msg = "Failed to get steam ID from id3."
             raise errors.PlaceholderError(msg)
         self.server_steam_id: int = steam_id.id64
+        self.unavailable: bool = False
 
         self.update_data.start()
 
     @ireloop(seconds=10.1, count=30)
     async def update_data(self) -> None:
         log.debug('Updating %s data for watching_server "%s"', self.__class__.__name__, self.watching_server)
-        match = await self.bot.dota.web_api.get_real_time_stats(self.server_steam_id)
+        try:
+            match = await self.bot.dota.web_api.get_real_time_stats(self.server_steam_id)
+        except SteamWebAPIError:
+            # If SteamWebAPI didn't respond with any data then we have no way to get the data
+            self.unavailable = True
+            self.update_data.stop()
+            return
+
         api_players = list(itertools.chain(match["teams"][0]["players"], match["teams"][1]["players"]))
 
         if not self.players_data_ready.is_set():
@@ -1629,3 +1641,12 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         to_send = f"```json\n{pprint.pformat(friend.rich_presence.raw)}```"
         await self.bot.error_webhook.send(content=to_send)
         await ctx.send(content="Done")
+
+    @override
+    async def component_command_error(self, payload: commands.CommandErrorPayload) -> bool | None:
+        """Event called when an error occurs in a command in this Component."""
+        if isinstance(payload.exception, SteamWebAPIError):
+            msg = "I'm not able to fetch data for this match, sorry!"
+            await payload.context.send(msg)
+            return False
+        return None

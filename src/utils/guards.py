@@ -54,6 +54,8 @@ def is_online() -> Any:
 
 
 def is_owner_channel() -> Any:
+    """Allow the command to be completed only in Irene's stream channel."""
+
     def predicate(ctx: IreContext) -> bool:
         if ctx.channel.id == ctx.bot.owner_id:
             return True
@@ -64,5 +66,3 @@ def is_owner_channel() -> Any:
         raise errors.SilentError(msg)
 
     return commands.guard(predicate)
-    # TODO: Write to twichio and ask them to move before_component_invoke to be performed before the guards
-    # because it would make more logical sense.
