@@ -18,7 +18,7 @@ from twitchio.ext import commands
 from config import config
 from core import IrePublicComponent, ireloop
 from utils import errors, fmt, guards
-from utils.dota import SteamWebAPIError
+from utils.dota import APIClientError
 
 from .enums import LiveIndicator, LobbyParam0, ScoreCategory, Status
 from .tools import (
@@ -35,8 +35,8 @@ if TYPE_CHECKING:
     from steam.ext.dota2 import MatchHistoryMatch, User as Dota2SteamUser
 
     from core import IreBot, IreContext
+    from types_.dota_api_schemas import OpendotaMatchesPlayer
     from utils.dota import SteamUserUpdate
-    from utils.dota.schemas import opendota
 
     type ActiveMatch = PlayingMatch | SpectatingMatch | UnsupportedActivity
 
@@ -540,7 +540,7 @@ class SpectatingMatch(LiveMatch):
         log.debug('Updating %s data for watching_server "%s"', self.__class__.__name__, self.watching_server)
         try:
             match = await self.bot.dota.web_api.get_real_time_stats(self.server_steam_id)
-        except SteamWebAPIError:
+        except APIClientError:
             # If SteamWebAPI didn't respond with any data then we have no way to get the data
             self.unavailable = True
             self.update_data.stop()
@@ -1211,7 +1211,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             self.process_pending_abandons.cancel()
             return
 
-        players_cache: dict[int, list[opendota.MatchesPlayer]] = {}
+        players_cache: dict[int, list[OpendotaMatchesPlayer]] = {}
 
         for row in rows:
             players = players_cache.get(row["match_id"])
@@ -1645,7 +1645,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
     @override
     async def component_command_error(self, payload: commands.CommandErrorPayload) -> bool | None:
         """Event called when an error occurs in a command in this Component."""
-        if isinstance(payload.exception, SteamWebAPIError):
+        if isinstance(payload.exception, APIClientError):
             msg = "I'm not able to fetch data for this match, sorry!"
             await payload.context.send(msg)
             return False

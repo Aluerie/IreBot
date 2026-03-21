@@ -1,6 +1,6 @@
 # Chat Commands
 
-## 1. Dota 2
+## 1. 🍋Dota 2
 
 <table>
   <tr>
@@ -162,7 +162,7 @@
   </tr>
 </table>
 
-### Tip for merging 7tv emote sets
+### 7️⃣ Tip for merging 7tv emote sets
 
 To make bot responses look like in the "Showcase" column you can add those emotes quickly to your channel by merging your main 7tv emote set with the <a href="https://7tv.app/emote-sets/01JS1XW1PAAKP34984FDYZVDR7">Dota 2 emote set</a> using a tool like [potat.app/help/mergeset](<https://potat.app/help/mergeset>). Some short instructions for @PotatBotat specifically:
 
@@ -173,16 +173,16 @@ To make bot responses look like in the "Showcase" column you can add those emote
 * @PotatBotat will create a new emote set trying to merge the provided ones; if there is more then 1000 emotes in total - some emotes from the 2nd set won't make it;
 * Now you can switch between your main set and a merged version;
 
-### Dota 2 functionality restrictions
+### 🤷‍♀️ Dota 2 functionality restrictions
 
 Unfortunately, due to implementation specifics currently for the Dota 2 features to work:
 
-  1. You need to add the bot's steam accounts to friends.
-  2. You also need to be green-online 🟢 in Dota 2 (and have rich presence visible to friends) for the bot to be able to see your status live.
+1. You need to add the bot's steam accounts to friends.
+2. You also need to be green-online 🟢 in Dota 2 (and have rich presence visible to friends) for the bot to be able to see your status live.
 
 PS. Another implementation for these features (using Dota 2 Game State Integration) is coming soon™️. It won't have mentioned restrictions but you will have to put a `.cfg` file into the Dota 2 directory.
 
-## 2. Meta
+## 2. 🌠 Meta Commands
 
 <table>
   <tr>
@@ -206,3 +206,13 @@ PS. Another implementation for these features (using Dota 2 Game State Integrati
     <td><img src="./images/FeelsDankMan.png" alt="FeelsDankMan" width="64"/></td>
   </tr>
 </table>
+
+## 3. 🤔 How to add the bot to your channel?
+
+I'm not planning to go big with this bot, so I didn't make an easy one-click way to add the bot. However, steps are as follows:
+
+1. Add the bot's steam account into your friends: <https://steamcommunity.com/id/irenesbot>
+2. Tell me that you want to add the bot - find me (`@Irene_Adler__`) in a twitch chat
+3. After you tell me that - I'm going to make the following link work: <https://parrot-thankful-trivially.ngrok-free.app/oauth?scopes=channel:bot&force_verify=true>. Yes, the link looks sketchy because I don't care enough to spend money for a real web-site domain. When I activate the said link - it will become an Authorization link where you allow the bot to be a bot in your channel.
+4. Click the link and authorize, it's same "allow permissions" thing like any other twitch bot.
+5. ⚠️ Remember that for the bot features to work - you need to be green-online in Dota 2 as well.

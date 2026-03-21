@@ -64,7 +64,7 @@ class StreamInformation(IrePersonalComponent):
         self.game = channel_info.game_name
         self.title = channel_info.title
 
-    @commands.command(name="game")
+    @commands.command(name="game", aliases=["category"])
     async def game_command(self, ctx: IreContext, *, game_name: str | None = None) -> None:
         """Either get current channel game or update it."""
         if not game_name:

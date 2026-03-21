@@ -142,7 +142,7 @@ def main(
             Ignore ngrok dashboard saying port 80, it's just an example.
     Step 3.
         Simply run the bot, i.e. `uv run main.py`.
-        Now  users should be able to visit a link like this
+        Now users should be able to visit a link like this
             local: http://localhost:4343/oauth?scopes=channel:bot&force_verify=true
             ngrok: https://parrot-thankful-trivially.ngrok-free.app/oauth?scopes=channel:bot&force_verify=true
         to authorize the bot. Note, to get a proper link with ALL proper scopes - launch the bot in `scopes-only` mode.
