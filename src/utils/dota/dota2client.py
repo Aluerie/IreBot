@@ -8,10 +8,8 @@ from steam.ext.dota2 import Client
 
 from config import config
 
-from .opendota import OpenDotaClient
+from .api_clients import OpenDotaClient, SteamWebAPIClient, StratzClient
 from .storage import Items
-from .stratz import StratzClient
-from .web_api import WebAPIClient
 
 if TYPE_CHECKING:
     from steam.ext.dota2 import User
@@ -47,7 +45,7 @@ class Dota2Client(Client):
 
         self.opendota = OpenDotaClient(session=self.bot.session)
         self.stratz = StratzClient(bearer_token=config["TOKENS"]["STRATZ_BEARER"], session=self.bot.session)
-        self.web_api = WebAPIClient(api_key=config["TOKENS"]["STEAM"], session=self.bot.session)
+        self.web_api = SteamWebAPIClient(api_key=config["TOKENS"]["STEAM"], session=self.bot.session)
 
         self.items = Items(twitch_bot)
 
