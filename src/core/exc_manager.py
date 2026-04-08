@@ -3,6 +3,8 @@ from __future__ import annotations
 import asyncio
 import datetime
 import logging
+import platform
+import re
 import traceback
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -47,16 +49,27 @@ class ExceptionManager:
         """Register, analyse error and put it into queue to send to developers."""
         log.error("%s: `%s`.", error.__class__.__name__, embed.footer.text, exc_info=error)
 
-        traceback_string = (
-            "".join(traceback.format_exception(error))
+        if platform.system() == "Linux":
+            slash = "/"
+            venv_path = f"{Path.cwd()}{slash}.venv{slash}lib{slash}python3.12{slash}site-packages"
+        else:
+            # windows
+            slash = "\\"
+            # For some reason Python loves referencing venvs with a lowercase disk name
+            venv_path = f"{Path.cwd()}{slash}.venv{slash}Lib{slash}site-packages".replace("D:\\", "d:\\")
+
+        src_path = f"{Path.cwd()}{slash}src"
+
+        replacements = {
             # Just making code blocks shorter without losing much information;
-            # maybe such amount of replaces warrant regex;
-            .replace(f"{Path.cwd()}/src", "<src>")
-            .replace("<src>/modules", "<modules>")
-            .replace("<src>/core", "<core>")
-            .replace("<src>/utils", "<utils>")
-            .replace(f"{Path.cwd()}/.venv/lib/python3.12/site-packages", "<venv>")
-        )
+            f"{src_path}{slash}modules": "<modules>",
+            f"{src_path}{slash}core": "<core>",
+            f"{src_path}{slash}utils": "<utils>",
+            venv_path: "<venv>",
+            src_path: "<src>",
+        }
+        regex = re.compile("|".join(map(re.escape, replacements.keys())))
+        traceback_string = regex.sub(lambda mo: replacements[mo.group()], "".join(traceback.format_exception(error)))
 
         async with self._lock:
             if self._most_recent and (delta := datetime.datetime.now(datetime.UTC) - self._most_recent) < self.cooldown:

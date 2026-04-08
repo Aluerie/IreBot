@@ -483,10 +483,16 @@ class PlayingMatch(LiveMatch):
                 await self.bot.pool.execute(query, self.match_id, match.start_time, self.lobby_type, self.game_mode)
 
                 for friend in self.friends:
+                    if friend.rich_presence.status == Status.Coaching:
+                        # If the person is coaching then the match will not be in their match history -
+                        # we don't need to track WinLoss or etc ; no need to add it into the database ;
+                        continue
+
                     player_slot = next(iter(s for (s, p) in enumerate(match.players) if p.id == friend.steam_user.id), None)
                     if player_slot is None:
-                        msg = "Somehow `player_slot` is `None` in `conclude_friend_match`"
+                        msg = "Somehow 'player_slot' is 'None' in 'conclude_friend_match'"
                         raise errors.PlaceholderError(msg)
+
                     hero = match.heroes[player_slot]
                     query = """
                         INSERT INTO ttv_dota_match_players
@@ -617,6 +623,10 @@ class Dota2RichPresenceFlow(IrePublicComponent):
 
     @override
     async def component_load(self) -> None:
+        if "modules.dev.required" not in self.bot.modules:
+            msg = "Module 'modules.public.dota_rp_flow' requires 'modules.dev.required' to be loaded."
+            raise errors.IreBotError(msg)
+
         self.starting_fill_friends.start()
         self.add_steam_user_update_listener.start()
         self.fill_completed_matches_from_gc_match_history.start()

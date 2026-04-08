@@ -9,11 +9,11 @@ __all__ = ("get_modules",)
 try:
     import _test
 
-    TEST_MODULES = _test.TEST_MODULES
-    USE_ALL_MODULES = _test.USE_ALL_MODULES
+    TEST_MODULES = _test.MODULES_TO_LOAD
+    LOAD_ALL_MODULES = _test.LOAD_ALL_MODULES
 except ModuleNotFoundError:
     TEST_MODULES: tuple[str, ...] = ()  # type: ignore[ConstantRedefinition]
-    USE_ALL_MODULES: bool = True  # type: ignore[reportConstantRedefinition]
+    LOAD_ALL_MODULES: bool = True  # type: ignore[reportConstantRedefinition]
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.INFO)
@@ -36,7 +36,7 @@ def get_modules(*, test: bool) -> tuple[str, ...]:
         The modules are given in a full dot form.
         Example: `('modules.personal.alerts', 'modules.dev.control', 'modules.public.dota_rp_flow', )`
     """
-    if test and not USE_ALL_MODULES:
+    if test and not LOAD_ALL_MODULES:
         # assume testing specific modules from `_test.py`
         return TEST_MODULES
 

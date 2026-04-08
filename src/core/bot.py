@@ -295,10 +295,15 @@ class IreBot(commands.AutoBot):
                 f"{self.show_public_oauth()}\n"
             )
             log.warning(msg)
-        else:
-            for module in self.modules_to_load:
-                log.debug("Loading module: %s", module)
+            return
+
+        for module in self.modules_to_load:
+            log.debug("Loading module: %s", module)
+            try:
                 await self.load_module(module)
+            except commands.ModuleLoadFailure as error:
+                embed = discord.Embed(title="Module Load Error", colour=0x12A28A)
+                await self.exc_manager.register_error(error, embed=embed)
 
     @override
     async def event_oauth_authorized(self, payload: twitchio.authentication.UserTokenPayload) -> None:
