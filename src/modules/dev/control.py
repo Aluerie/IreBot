@@ -96,8 +96,9 @@ class Control(IreDevComponent):
             else:
                 index["other"].append(name.removeprefix("modules."))
 
-        response = f" {const.STV.DankDolmes} ".join(f"{c}: {', '.join(m)}" for c, m in index.items() if m)
-        await ctx.send(response)
+        for c, m in index.items():
+            if m:
+                await ctx.send(f"{const.STV.DankDolmes} {c}: {', '.join(m)}")
 
 
 async def setup(bot: IreBot) -> None:
