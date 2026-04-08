@@ -624,7 +624,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
     @override
     async def component_load(self) -> None:
         if "modules.dev.required" not in self.bot.modules:
-            msg = "Module 'modules.public.dota_rp_flow' requires 'modules.dev.required' to be loaded."
+            msg = f"Module 'modules.public.dota_rp_flow' requires 'modules.dev.required' to be loaded. {self.bot.modules}"
             raise errors.IreBotError(msg)
 
         self.starting_fill_friends.start()
