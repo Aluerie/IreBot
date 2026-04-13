@@ -19,7 +19,7 @@ class Tags(IrePersonalComponent):
     """Commands to fetch something by a tag name."""
 
     @commands.is_moderator()
-    @commands.group(invoke_fallback=True, aliases=["tags"])
+    @commands.group(invoke_fallback=True, aliases=["tags", "t"])
     async def tag(self, ctx: IreContext, *, tag_name: str) -> None:
         """Group command for `!tag`.
 
@@ -35,10 +35,10 @@ class Tags(IrePersonalComponent):
         else:
             await ctx.send(f"There is no tag under '{tag_name}' name {const.STV.uuhAcktshucally}")
 
-    @tag.command()
+    @tag.command(aliases="a")
     async def add(self, ctx: IreContext, tag_name: str, *, tag_content: str) -> None:
         """Add tag."""
-        if tag_name in ("delete", "remove", "del", "add", "list", "edit"):
+        if tag_name in ("delete", "remove", "del", "add", "list", "edit", "a", "d", "r", "e", "l"):
             msg = f"This tag_name is reserved {const.STV.uuhAcktshucally}"
             raise errors.RespondWithError(msg) from None
         try:
@@ -48,12 +48,12 @@ class Tags(IrePersonalComponent):
                 VALUES ($1, $2);
             """
             await self.bot.pool.execute(query, tag_name, tag_content)
-            await ctx.send(f"Created tag {tag_name} {const.STV.uuhAcktshucally}")
+            await ctx.send(f"Created tag '{tag_name}' {const.STV.uuhAcktshucally}")
         except asyncpg.UniqueViolationError:
-            msg = f"There already exists a tag with such name {const.STV.uuhAcktshucally}"
+            msg = f"There already exists a tag with name '{tag_name}' {const.STV.uuhAcktshucally}"
             raise errors.RespondWithError(msg) from None
 
-    @tag.command(aliases=["del", "remove"])
+    @tag.command(aliases=["del", "remove", "d", "r"])
     async def delete(self, ctx: IreContext, tag_name: str) -> None:
         """Delete tag by name."""
         query = """
@@ -68,8 +68,8 @@ class Tags(IrePersonalComponent):
 
         await ctx.send(f"Deleted tag '{tag_name}' {const.STV.uuhAcktshucally}")
 
-    @tag.command()
-    async def edit(self, ctx: IreContext, command_name: str, *, text: str) -> None:
+    @tag.command(aliases=["e"])
+    async def edit(self, ctx: IreContext, tag_name: str, *, text: str) -> None:
         """Edit tag."""
         query = """
             UPDATE ttv_tags
@@ -77,14 +77,14 @@ class Tags(IrePersonalComponent):
             WHERE tag_name
             RETURNING tag_name;
         """
-        val: str | None = await self.bot.pool.fetchval(query, command_name, text)
+        val: str | None = await self.bot.pool.fetchval(query, tag_name, text)
         if val is None:
-            msg = f"There is no tag with such name {const.STV.uuhAcktshucally}"
+            msg = f"There is no tag with name '{tag_name}' {const.STV.uuhAcktshucally}"
             raise errors.RespondWithError(msg)
 
-        await ctx.send(f"Edited tag '{command_name}' {const.STV.uuhAcktshucally}")
+        await ctx.send(f"Edited tag '{tag_name}' {const.STV.uuhAcktshucally}")
 
-    @tag.command()
+    @tag.command(aliases=["l"])
     async def list(self, ctx: IreContext) -> None:
         """Tag list."""
         query = """
@@ -92,7 +92,7 @@ class Tags(IrePersonalComponent):
         """
         tag_names: list[str] = [r for (r,) in await self.bot.pool.fetch(query)]
         if tag_names:
-            await ctx.send(", ".join(tag_names))
+            await ctx.send(f"{const.STV.uuhAcktshucally} {', '.join(tag_names)}")
         else:
             await ctx.send(f"No tags were created yet {const.STV.uuhAcktshucally}")
 
