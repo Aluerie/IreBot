@@ -34,7 +34,7 @@ explicit = true
 [tool.pyright]
 pythonVersion = "3.12"
 typeCheckingMode = "strict"  # let's enable the default max setting and go down from here.
-exclude = [".venv", "**/__pycache__"]
+exclude = [".venv", "**/__pycache__", "**/node_modules", "**/.*"]
 # https://github.com/microsoft/pyright/blob/main/docs/configuration.md
 
 deprecateTypingAliases = true
