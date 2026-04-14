@@ -739,7 +739,7 @@ wheels = [
 
 [[package]]
 name = "irebot"
-version = "0.1.0"
+version = "0.7.7"
 source = { virtual = "." }
 dependencies = [
     { name = "asyncpg" },
@@ -773,7 +773,7 @@ dev = [
     { name = "asyncpg-stubs" },
     { name = "ipykernel" },
     { name = "pyright" },
-    { name = "pytest", specifier = ">=9.0.2" },
+    { name = "pytest" },
 ]
 
 [[package]]

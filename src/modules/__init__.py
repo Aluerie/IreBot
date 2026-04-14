@@ -7,10 +7,10 @@ from pkgutil import iter_modules
 __all__ = ("get_modules",)
 
 try:
-    import _test
+    import mtl
 
-    TEST_MODULES = _test.MODULES_TO_LOAD
-    LOAD_ALL_MODULES = _test.LOAD_ALL_MODULES
+    TEST_MODULES = mtl.MODULES_TO_LOAD
+    LOAD_ALL_MODULES = mtl.LOAD_ALL_MODULES
 except ModuleNotFoundError:
     TEST_MODULES: tuple[str, ...] = ()  # type: ignore[ConstantRedefinition]
     LOAD_ALL_MODULES: bool = True  # type: ignore[reportConstantRedefinition]

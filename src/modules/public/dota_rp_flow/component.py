@@ -619,7 +619,8 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         self.play_matches_index: dict[str, PlayingMatch] = {}
         self.watch_matches_index: dict[str, SpectatingMatch] = {}
 
-        self.debug: bool = True
+        self.debug: bool = False
+        """Set to `True` if you want to see some [debug] messages with extra information in Irene's chat."""
 
     @override
     async def component_load(self) -> None:
