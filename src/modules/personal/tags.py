@@ -104,7 +104,7 @@ class Tags(IrePersonalComponent):
         """
         val: str | None = await self.bot.pool.fetchval(query, tag_name, new_tag_name)
         assert val is not None, self.tag_does_not_exist_message(tag_name)
-        await ctx.send(f"Renamed tag '{tag_name}' into 'new_tag_name' {const.STV.uuhAcktshucally}")
+        await ctx.send(f"Renamed tag '{tag_name}' into '{new_tag_name}' {const.STV.uuhAcktshucally}")
 
     @tag.command(aliases=["l"])
     async def list(self, ctx: IreContext) -> None:
