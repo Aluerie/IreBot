@@ -249,11 +249,7 @@ def format_match_response(func: Callable[..., Coroutine[Any, Any, str]]) -> Call
 
 
 class LiveMatch:
-    def __init__(
-        self,
-        bot: IreBot,
-        tag: str = "",
-    ) -> None:
+    def __init__(self, bot: IreBot, tag: str = "") -> None:
         self.bot: IreBot = bot
         self.activity_tag: str = tag
 
@@ -314,8 +310,7 @@ class LiveMatch:
         response_parts = [
             f"{hero if hero else player.color} {player.lifetime_games}"
             for player, hero in sorted(
-                zip(self.players, self.heroes, strict=True),
-                key=lambda x: attrgetter("lifetime_games")(x[0]),
+                zip(self.players, self.heroes, strict=True), key=lambda x: attrgetter("lifetime_games")(x[0])
             )
         ]
         return "Lifetime Games: " + " \N{BULLET} ".join(response_parts)
@@ -656,13 +651,13 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         """
         log.debug("Indexing bot's friend list.")
         for friend in await self.bot.dota.user.friends():
-            self.friends[friend.id] = Friend(self.bot, friend._user)  # pyright: ignore[reportArgumentType]
+            self.friends[friend.id] = Friend(self.bot, friend._user)  # pyright: ignore[reportArgumentType, reportPrivateUsage]
 
         for friend in self.friends.values():
             await self.analyze_rich_presence(friend)
 
         log.debug('Friends index ready. Setting "_friends_index_ready".')
-        self.bot._friends_index_ready.set()
+        self.bot.friends_index_ready.set()
 
     async def get_activity(self, friend: Friend) -> Activity:
         """Get Activity."""
@@ -862,7 +857,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
                 raise errors.RespondWithError(msg)
             return friend
 
-        if not self.bot._friends_index_ready.is_set():
+        if not self.bot.friends_index_ready.is_set():
             msg = "Bot is restarting. Dota 2 features are not ready yet. Please, wait a bit."
             raise errors.RespondWithError(msg)
 
@@ -930,7 +925,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         if isinstance(payload.exception, commands.MissingRequiredArgument):
             await payload.context.send(
                 "You need to provide a hero name (i.e. VengefulSpirit , PA, Mireska, etc) or "
-                "player slot (i.e. 9, DarkGreen )",
+                "player slot (i.e. 9, DarkGreen )"
             )
         else:
             raise payload.exception
@@ -1077,12 +1072,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             RETURNING match_id;
         """
         match_id: int | None = await self.bot.pool.fetchval(
-            query,
-            match.id,
-            match.start_time,
-            match.lobby_type,
-            match.game_mode,
-            minimal.outcome,
+            query, match.id, match.start_time, match.lobby_type, match.game_mode, minimal.outcome
         )
         player_slot = next((slot for slot, player in enumerate(minimal.players) if player.hero == match.hero), None)
         if player_slot is None:
@@ -1108,14 +1098,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             ON CONFLICT (friend_id, match_id) DO
                 UPDATE SET abandon = $5;
         """
-        await self.bot.pool.execute(
-            query,
-            friend_id,
-            match.id,
-            match.hero.id,
-            player_slot,
-            match.abandon,
-        )
+        await self.bot.pool.execute(query, friend_id, match.id, match.hero.id, player_slot, match.abandon)
 
     @ireloop(hours=1)
     async def fill_completed_matches_from_gc_match_history(self) -> None:
@@ -1564,7 +1547,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         await self.bot.wait_until_ready()
         await self.bot.dota.wait_until_ready()
         await self.bot.dota.wait_until_gc_ready()
-        await self.bot._streamers_index_ready.wait()
+        await self.bot.streamers_index_ready.wait()
 
     @fill_completed_matches_from_gc_match_history.before_loop
     @remove_way_too_old_matches.before_loop
@@ -1574,7 +1557,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         This calls `.wait_for_clients` which also waits for all the required clients to be ready.
         """
         await self.wait_for_clients()
-        await self.bot._friends_index_ready.wait()
+        await self.bot.friends_index_ready.wait()
 
     #################################
     #  MORE OR LESS DEBUG COMMANDS  #

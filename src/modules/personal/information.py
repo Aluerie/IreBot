@@ -24,12 +24,7 @@ __all__ = ("StreamInformation",)
 
 
 # specific exception so I can type "!game dota" without 2;
-GAME_KEYWORDS = {
-    "dota": "Dota 2",
-    "er": "Elden Ring",
-    "sk": "Sekiro",
-    "code": "Software and Game Development",
-}
+GAME_KEYWORDS = {"dota": "Dota 2", "er": "Elden Ring", "sk": "Sekiro", "code": "Software and Game Development"}
 
 
 class StreamInformation(IrePersonalComponent):
@@ -159,8 +154,7 @@ class StreamInformation(IrePersonalComponent):
             if self.bot.is_online(update.broadcaster.id):
                 with contextlib.suppress(twitchio.HTTPException):
                     await update.broadcaster.create_stream_marker(
-                        token_for=const.UserID.Irene,
-                        description=f"Game: {new_category}",
+                        token_for=const.UserID.Irene, description=f"Game: {new_category}"
                     )
 
         if self.title != update.title and (now - self.title_dt).seconds > 15:

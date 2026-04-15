@@ -63,23 +63,10 @@ class Alerts(IrePersonalComponent):
             return
 
         random_phrase = random.choice(
-            [
-                "welcome in",
-                "I appreciate it",
-                "enjoy your stay",
-                "nice to see you",
-                "enjoy the show",
-            ],
+            ["welcome in", "I appreciate it", "enjoy your stay", "nice to see you", "enjoy the show"]
         )
         random_emote = random.choice(
-            [
-                const.STV.donkHappy,
-                const.BTTV.PogU,
-                const.STV.dankHey,
-                const.STV.donkHey,
-                const.BTTV.peepoHey,
-                const.STV.Hey,
-            ],
+            [const.STV.donkHappy, const.BTTV.PogU, const.STV.dankHey, const.STV.donkHey, const.BTTV.peepoHey, const.STV.Hey]
         )
         await follow.respond(f"@{follow.user.display_name} just followed! Thanks, {random_phrase} {random_emote}")
 

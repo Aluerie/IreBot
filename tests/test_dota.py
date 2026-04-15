@@ -19,12 +19,12 @@ MATCH_1_HEROES = [
 
 @pytest.mark.parametrize(
     ("argument", "expected_hero", "heroes_in_match"),
-    (
+    [
         ("pa", Hero.PhantomAssassin, ALL_HEROES),
         ("kEZ", Hero.Kez, ALL_HEROES),
         ("cm", Hero.CrystalMaiden, ALL_HEROES),
         ("naga", Hero.NagaSiren, MATCH_1_HEROES),
-    ),
+    ],
 )
 def test_fuzzy_extract_hero_index(argument: str, expected_hero: Hero, heroes_in_match: list[Hero]) -> None:
     """Test whether `extract_hero_index` function returns expected values."""

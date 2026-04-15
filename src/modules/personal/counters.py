@@ -139,13 +139,9 @@ class Counters(IrePersonalComponent):
         rows: list[FirstRedeemsRow] = await self.bot.pool.fetch(query)
         content = f'Top3 "First!" redeemers {const.BTTV.DankG} '
 
-        rank_medals = [
-            "\N{FIRST PLACE MEDAL}",
-            "\N{SECOND PLACE MEDAL}",
-            "\N{THIRD PLACE MEDAL}",
-        ]  # + const.DIGITS[4:10]
+        rank_medals = ["\N{FIRST PLACE MEDAL}", "\N{SECOND PLACE MEDAL}", "\N{THIRD PLACE MEDAL}"]  # + const.DIGITS[4:10]
         content += " ".join(
-            [f"{rank_medals[i]} {row['user_name']}: {fmt.plural(row['first_times']):time};" for i, row in enumerate(rows)],
+            [f"{rank_medals[i]} {row['user_name']}: {fmt.plural(row['first_times']):time};" for i, row in enumerate(rows)]
         )
         await ctx.send(content)
 
@@ -182,8 +178,7 @@ class Counters(IrePersonalComponent):
             # we bad
             content = self.bot.error_ping
             embed = Embed(
-                description='Looks like you deleted "First!" channel points reward from the channel.',
-                colour=0x345245,
+                description='Looks like you deleted "First!" channel points reward from the channel.', colour=0x345245
             ).set_footer(text="WTF, bring it back!")
             await self.bot.error_webhook.send(content=content, embed=embed)
 

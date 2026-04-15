@@ -48,11 +48,7 @@ class TranslateError(errors.IreBotError):
 
 
 async def translate(
-    text: str,
-    *,
-    source_lang: str = "auto",
-    target_lang: str = "en",
-    session: ClientSession,
+    text: str, *, source_lang: str = "auto", target_lang: str = "en", session: ClientSession
 ) -> TranslateResult:
     """Google Translate."""
     query = {
@@ -67,7 +63,7 @@ async def translate(
     headers = {
         "User-Agent": (
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36"
-        ),
+        )
     }
 
     async with session.get("https://clients5.google.com/translate_a/single", params=query, headers=headers) as resp:
@@ -150,7 +146,7 @@ class StableCommands(IrePersonalComponent):
             "Duis sagittis ipsum. Praesent mauris. Fusce nec tellus sed augue semper porta. Mauris massa. "
             "Vestibulum lacinia arcu eget nulla. Class aptent taciti sociosqu ad litora torquent per conubia nostra, "
             "per inceptos himenaeos. Curabitur sodales ligula in libero. Sed dignissim lacinia nunc. Curabitur tortor. "
-            "Pellentesque nibh.",
+            "Pellentesque nibh."
         )  # cSpell:enable
 
     @commands.command()
@@ -260,7 +256,7 @@ class StableCommands(IrePersonalComponent):
             "I can't go on a hour🕐of my day🌞without thinking💭💦about plowing👉👌🚜that tight😳wooden🌳ass💦🍑. "
             "I'd kill🔫😱a man👨 in cold❄️blood😈just to spend💷a minute⏱️with her crotch🍑😫grinding against "
             "my throbbing💦🍆💦manhood💦🍆💦as she whispers🙊😫terribly dirty💩💩things to me in her "
-            "geographically🌍🌎ambiguous🌏🗺️accent 🇮🇪",
+            "geographically🌍🌎ambiguous🌏🗺️accent 🇮🇪"
         )
 
     @commands.command(aliases=["pcparts", "specs"])
@@ -298,10 +294,7 @@ class StableCommands(IrePersonalComponent):
             await ctx.send(f"Revolver fires! {mention} lies dead in chat {const.STV.Deadge}")
 
             await ctx.broadcaster.timeout_user(
-                moderator=const.UserID.Bot,
-                user=ctx.chatter.id,
-                duration=30,
-                reason="Lost in !russianroulette",
+                moderator=const.UserID.Bot, user=ctx.chatter.id, duration=30, reason="Lost in !russianroulette"
             )
 
     @guards.is_online()
@@ -377,10 +370,7 @@ class StableCommands(IrePersonalComponent):
             await ctx.send(msg)
         else:
             await ctx.broadcaster.timeout_user(
-                moderator=const.UserID.Bot,
-                user=ctx.chatter.id,
-                duration=1,
-                reason="Used !vanish",
+                moderator=const.UserID.Bot, user=ctx.chatter.id, duration=1, reason="Used !vanish"
             )
 
     @commands.command()

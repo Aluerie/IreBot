@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, override
 
 import asyncpg
 from twitchio.ext import commands
@@ -16,11 +16,28 @@ __all__ = ("Tags",)
 
 
 class Tags(IrePersonalComponent):
-    """Commands to fetch something by a tag name."""
+    """Commands to fetch something by a tag name.
+
+    Dev notes
+    ---------
+    * In this component I use `assert val is not None, tag_name` purely for type-checking memes
+    over some `tag_exists_check` function.
+    """
+
+    @override
+    async def component_command_error(self, payload: commands.CommandErrorPayload) -> bool | None:
+        """Event called when an error occurs in a command in this Component."""
+        if isinstance(exc := payload.exception, AssertionError):
+            msg = str(exc)
+            raise errors.RespondWithError(msg)
+        return None
+
+    def tag_does_not_exist_message(self, tag_name: str) -> str:
+        return f"There is no tag with name '{tag_name}' {const.STV.uuhAcktshucally}"
 
     @commands.is_moderator()
     @commands.group(invoke_fallback=True, aliases=["tags", "t"])
-    async def tag(self, ctx: IreContext, *, tag_name: str) -> None:
+    async def tag(self, ctx: IreContext, tag_name: str) -> None:
         """Group command for `!tag`.
 
         Without a subcommand this fetches a tag.
@@ -30,10 +47,8 @@ class Tags(IrePersonalComponent):
             WHERE tag_name = $1;
         """
         tag_content: str | None = await self.bot.pool.fetchval(query, tag_name)
-        if tag_content:
-            await ctx.send(tag_content)
-        else:
-            await ctx.send(f"There is no tag under '{tag_name}' name {const.STV.uuhAcktshucally}")
+        assert tag_content is not None, self.tag_does_not_exist_message(tag_name)
+        await ctx.send(tag_content)
 
     @tag.command(aliases="a")
     async def add(self, ctx: IreContext, tag_name: str, *, tag_content: str) -> None:
@@ -53,7 +68,7 @@ class Tags(IrePersonalComponent):
             msg = f"There already exists a tag with name '{tag_name}' {const.STV.uuhAcktshucally}"
             raise errors.RespondWithError(msg) from None
 
-    @tag.command(aliases=["del", "remove", "d", "r"])
+    @tag.command(aliases=["del", "remove", "d"])
     async def delete(self, ctx: IreContext, tag_name: str) -> None:
         """Delete tag by name."""
         query = """
@@ -62,27 +77,34 @@ class Tags(IrePersonalComponent):
             RETURNING tag_name;
         """
         val: str | None = await self.bot.pool.fetchval(query, tag_name)
-        if val is None:
-            msg = f"There is no tag with such name {const.STV.uuhAcktshucally}"
-            raise errors.RespondWithError(msg)
-
+        assert val is not None, self.tag_does_not_exist_message(tag_name)
         await ctx.send(f"Deleted tag '{tag_name}' {const.STV.uuhAcktshucally}")
 
     @tag.command(aliases=["e"])
-    async def edit(self, ctx: IreContext, tag_name: str, *, text: str) -> None:
+    async def edit(self, ctx: IreContext, tag_name: str, *, tag_content: str) -> None:
         """Edit tag."""
         query = """
             UPDATE ttv_tags
-            SET tag_content=$3
-            WHERE tag_name
+            SET tag_content=$2
+            WHERE tag_name=$1
             RETURNING tag_name;
         """
-        val: str | None = await self.bot.pool.fetchval(query, tag_name, text)
-        if val is None:
-            msg = f"There is no tag with name '{tag_name}' {const.STV.uuhAcktshucally}"
-            raise errors.RespondWithError(msg)
-
+        val: str | None = await self.bot.pool.fetchval(query, tag_name, tag_content)
+        assert val is not None, self.tag_does_not_exist_message(tag_name)
         await ctx.send(f"Edited tag '{tag_name}' {const.STV.uuhAcktshucally}")
+
+    @tag.command(aliases=["r"])
+    async def rename(self, ctx: IreContext, tag_name: str, new_tag_name: str) -> None:
+        """Rename tag."""
+        query = """
+            UPDATE ttv_tags
+            SET tag_name=$2
+            WHERE tag_name=$1
+            RETURNING tag_name;
+        """
+        val: str | None = await self.bot.pool.fetchval(query, tag_name, new_tag_name)
+        assert val is not None, self.tag_does_not_exist_message(tag_name)
+        await ctx.send(f"Renamed tag '{tag_name}' into 'new_tag_name' {const.STV.uuhAcktshucally}")
 
     @tag.command(aliases=["l"])
     async def list(self, ctx: IreContext) -> None:

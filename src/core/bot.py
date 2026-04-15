@@ -38,11 +38,7 @@ if TYPE_CHECKING:
         user_id: str
 
 
-__all__ = (
-    "IreBot",
-    "Streamer",
-    "get_eventsub_subscriptions",
-)
+__all__ = ("IreBot", "Streamer", "get_eventsub_subscriptions")
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
@@ -213,8 +209,8 @@ class IreBot(commands.AutoBot):
         self.exc_manager = ExceptionManager(self)
 
         self.streamers: dict[str, Streamer] = {}
-        self._streamers_index_ready: asyncio.Event = asyncio.Event()
-        self._friends_index_ready: asyncio.Event = asyncio.Event()
+        self.streamers_index_ready: asyncio.Event = asyncio.Event()
+        self.friends_index_ready: asyncio.Event = asyncio.Event()
 
     def show_oauth_helper(self, scopes: list[str], prefix: str) -> str:
         """Helper function for `show_bot_oauth`, `show_personal_oauth`, `show_public_oauth`.
@@ -263,9 +259,7 @@ class IreBot(commands.AutoBot):
 
     def show_public_oauth(self) -> str:
         """Print a link for public streamers to click and authorize the scopes for the bot."""
-        scopes = [
-            "channel:bot",
-        ]
+        scopes = ["channel:bot"]
         return self.show_oauth_helper(scopes, "🌈🌈🌈 PUBLIC OAUTH LINK: 🌈🌈🌈")
 
     @override
@@ -373,10 +367,7 @@ class IreBot(commands.AutoBot):
         if "modules.public.dota_rp_flow" in self.modules_to_load:
             self.dota = Dota2Client(self)
             try:
-                await asyncio.gather(
-                    super().start(),
-                    self.dota.login(),
-                )
+                await asyncio.gather(super().start(), self.dota.login())
             # A potential workaround for steam login issues
             # https://github.com/Gobot1234/steam.py/issues/446
             # Not sure if it works :D
@@ -505,12 +496,10 @@ class IreBot(commands.AutoBot):
                     f"{error.__class__.__name__} - "
                     f"{error.extra.get('error', 'Error')} "
                     f"{error.extra.get('status', 'XXX')}: "
-                    f"{error.extra.get('message', 'Unknown')} {const.STV.dankFix}",
+                    f"{error.extra.get('message', 'Unknown')} {const.STV.dankFix}"
                 )
             case commands.MissingRequiredArgument():
-                await ctx.send(
-                    f'You need to provide "{error.param.name}" argument for this command {const.FFZ.peepoPolice}',
-                )
+                await ctx.send(f'You need to provide "{error.param.name}" argument for this command {const.FFZ.peepoPolice}')
 
             # case commands.BadArgument():
             #     log.warning("%s %s", error.name, error)

@@ -50,9 +50,9 @@ typeCheckingMode = "strict"
 
 reportCallInDefaultInitializer = "warning"
 reportImplicitOverride = "warning"
-reportImplicitStringConcatenation = "warning"
+reportImplicitStringConcatenation = "none"
 reportImportCycles = "none"
-reportMissingSuperCall = "warning"
+reportMissingSuperCall = "none"
 reportPropertyTypeMismatch = "warning"
 reportUninitializedInstanceVariable = "warning"
 reportUnnecessaryTypeIgnoreComment = "warning"
@@ -61,6 +61,7 @@ reportUnusedCallResult = "none"
 
 reportDuplicateImport = "none"
 reportIncompatibleMethodOverride = "none"
+reportIncompatibleVariableOverride = "none"
 reportMissingTypeStubs = "none"
 
 [tool.ruff]

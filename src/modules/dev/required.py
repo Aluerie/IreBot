@@ -68,7 +68,7 @@ class StreamerIndexManagement(IreDevComponent):
                 streamer.started_dt = stream.started_at
 
         log.debug("Finished initial filling of `self.bot.streamers` index")
-        self.bot._streamers_index_ready.set()
+        self.bot.streamers_index_ready.set()
 
     @commands.Component.listener(name="stream_online")
     async def add_stream_to_online_cache(self, online: twitchio.StreamOnline) -> None:
