@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import random
 from typing import TYPE_CHECKING, Any, override
 
 from twitchio.ext import commands
@@ -57,18 +56,19 @@ class Alerts(IrePersonalComponent):
     # Disabling this for time being
     # Idk, it's a bit invasive to announce/log what other people do
     # @commands.Component.listener(name="follow")
-    async def follows(self, follow: twitchio.ChannelFollow) -> None:
-        """Somebody followed the channel."""
-        if not self.is_owner(follow.broadcaster.id):
-            return
+    # async def follows(self, follow: twitchio.ChannelFollow) -> None:
+    #     """Somebody followed the channel."""
+    #     if not self.is_owner(follow.broadcaster.id):
+    #         return
 
-        random_phrase = random.choice(
-            ["welcome in", "I appreciate it", "enjoy your stay", "nice to see you", "enjoy the show"]
-        )
-        random_emote = random.choice(
-            [const.STV.donkHappy, const.BTTV.PogU, const.STV.dankHey, const.STV.donkHey, const.BTTV.peepoHey, const.STV.Hey]
-        )
-        await follow.respond(f"@{follow.user.display_name} just followed! Thanks, {random_phrase} {random_emote}")
+    #     random_phrase = random.choice(
+    #         ["welcome in", "I appreciate it", "enjoy your stay", "nice to see you", "enjoy the show"]
+    #     )
+    #     random_emote = random.choice(
+    #         [const.STV.donkHappy, const.BTTV.PogU, const.STV.dankHey, const.STV.donkHey, const.BTTV.peepoHey,
+    # const.STV.Hey]
+    #     )
+    #     await follow.respond(f"@{follow.user.display_name} just followed! Thanks, {random_phrase} {random_emote}")
 
     @commands.Component.listener(name="raid")
     async def raids(self, raid: twitchio.ChannelRaid) -> None:

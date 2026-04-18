@@ -122,7 +122,7 @@ class STV(StrEnum):
     Speedge = "Speedge"
     yo = "yo"
     uuh = "uuh"
-    uuhAcktshucally = "uuhAcktshucally "
+    uuhAcktshucally = "uuhAcktshucally"
     wickedchad = "wickedchad"
     widepeepoHappyRightHeart = "widepeepoHappyRightHeart"
     wow = "wow"

@@ -72,6 +72,9 @@ src = ["src"]
 [tool.ruff.lint]
 select = ["ALL"]
 ignore = [
+    "ERA", # eradicate
+    # "RUF100", # unused-noqa
+
     "D",
     "D417",
     "DOC",

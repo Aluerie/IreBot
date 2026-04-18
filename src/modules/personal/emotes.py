@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime
+import logging
 from typing import TYPE_CHECKING, Any, override
 
 from discord import Embed
@@ -13,6 +14,8 @@ if TYPE_CHECKING:
     from enum import StrEnum
 
     from core import IreBot, IreContext
+
+log = logging.getLogger(__name__)
 
 
 class EmoteChecker(IrePersonalComponent):
@@ -51,8 +54,13 @@ class EmoteChecker(IrePersonalComponent):
     async def cross_check_emotes(self, api_emotes: list[str], bot_emotes: type[StrEnum], colour: int) -> None:
         """Cross check between emote list in `utils.const` and list from 3rd party emote service API."""
         emotes_to_send: list[str] = [e for e in bot_emotes if e not in api_emotes]
+
+        log_prefix = "Checked 7TV, FFZ & BTTV emotes from 'const.py'"
         if emotes_to_send:
             await self.send_error_embed(emotes_to_send, bot_emotes.__name__, colour)
+            log.debug("%s - %s emotes are not in order: %s", log_prefix, len(emotes_to_send), ", ".join(emotes_to_send))
+        else:
+            log.debug("Checked 7TV, FFZ & BTTV emotes from 'const.py' - all seems good.")
 
     @ireloop(time=[datetime.time(hour=5, minute=59)])
     async def check_emotes(self) -> None:

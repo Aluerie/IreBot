@@ -10,7 +10,7 @@ import twitchio  # noqa: TC002
 from twitchio.ext import commands
 
 from core import IreDevComponent
-from utils import fmt
+from utils import fmt, const
 
 if TYPE_CHECKING:
     from core import IreBot, IreContext
@@ -71,7 +71,7 @@ class OtherDevCommands(IreDevComponent):
     @commands.command(aliases=["id", "twitchid"])
     async def twitch_id(self, ctx: IreContext, *, user: twitchio.User) -> None:
         """Get mentioned @user numeric twitch_id."""
-        await ctx.send(f"Twitch ID for {user.mention}: {user.id}")
+        await ctx.send(f"Twitch ID for {user.mention}: {user.id} {const.STV.donkDetective}")
 
     @commands.command(aliases=["version", "packages", "libraries"])
     async def versions(self, ctx: IreContext) -> None:
