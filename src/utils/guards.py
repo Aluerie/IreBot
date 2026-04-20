@@ -18,10 +18,7 @@ from . import const, errors
 if TYPE_CHECKING:
     from core import IreContext
 
-__all__ = (
-    "is_online",
-    "is_vps",
-)
+__all__ = ("is_online", "is_vps")
 
 
 def is_vps() -> Any:
@@ -33,7 +30,7 @@ def is_vps() -> Any:
 
     def predicate(ctx: IreContext) -> bool:
         # Still allow Irene to use the command during the testing;
-        if not ctx.bot.test or ctx.chatter.id == ctx.bot.owner_id:
+        if not ctx.bot.test_subset_mode or ctx.chatter.id == ctx.bot.owner_id:
             return True
         msg = f"Sorry, this command is currently disabled while Irene is testing some stuff {const.FFZ.peepoPolice}"
         raise errors.RespondWithError(msg)

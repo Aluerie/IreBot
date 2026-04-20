@@ -180,7 +180,7 @@ class IreBot(commands.AutoBot):
         self.prefixes: tuple[str, ...] = ("!", "?", "$", "%")
         if local:
             self.domain = "http://localhost:4343"
-            adapter = None
+            adapter: StarletteAdapter[Any] | None = None
         else:
             self.domain = "https://parrot-thankful-trivially.ngrok-free.app"
             adapter = StarletteAdapter(
@@ -202,10 +202,13 @@ class IreBot(commands.AutoBot):
         self.pool: PoolTypedWithAny = pool
         self.scopes_only: bool = scopes_only
 
-        # we use different credentials for some things depending on home/vps
-        self.test: bool = platform.system() == "Windows"
+        self.test_subset_mode: bool = platform.system() == "Windows"
+        """A boolean flag indicating whether we launch the whole bot (on VPS machine)
+        or just a subset of features (on my home Windows machine). We also use
+        different credentials for certain things depending on home/vps choice.
+        """
 
-        self.modules_to_load: tuple[str, ...] = get_modules(test=self.test)
+        self.modules_to_load: tuple[str, ...] = get_modules(test=self.test_subset_mode)
         self.exc_manager = ExceptionManager(self)
 
         self.streamers: dict[str, Streamer] = {}
@@ -541,7 +544,7 @@ class IreBot(commands.AutoBot):
     @discord.utils.cached_property
     def error_ping(self) -> str:
         """Error Role ping used to notify the developer(-s) about some errors."""
-        return "<@&1337106675433340990>" if self.test else "<@&1116171071528374394>"
+        return "<@&1337106675433340990>" if self.test_subset_mode else "<@&1116171071528374394>"
 
     def is_online(self, user_id: str) -> bool:
         """Whether the user is online.

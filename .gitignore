@@ -31,5 +31,6 @@ config.toml
 
 # Testing Only
 src/modules/beta.py
-_test.py
+m.py
 scripts/
+ipynb/

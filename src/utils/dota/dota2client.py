@@ -18,10 +18,7 @@ if TYPE_CHECKING:
 
 log = logging.getLogger(__name__)
 
-__all__ = (
-    "Dota2Client",
-    "SteamUserUpdate",
-)
+__all__ = ("Dota2Client", "SteamUserUpdate")
 
 
 class SteamUserUpdate(NamedTuple):
@@ -57,7 +54,7 @@ class Dota2Client(Client):
     @override
     async def login(self) -> None:
         await self.start_helpers()
-        account_credentials = config["STEAM"]["IRENESTEST"] if self.bot.test else config["STEAM"]["IRENESBOT"]
+        account_credentials = config["STEAM"]["IRENESTEST"] if self.bot.test_subset_mode else config["STEAM"]["IRENESBOT"]
         username, password = account_credentials["USERNAME"], account_credentials["PASSWORD"]
         await super().login(username, password)
 

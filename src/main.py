@@ -24,19 +24,13 @@ except ImportError:
     RUNTIME = asyncio.run  # pyright: ignore[reportConstantRedefinition]
 else:
     # LINUX
-    RUNTIME = uvloop.run
+    RUNTIME = uvloop.run  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
 
 
 async def create_pool() -> asyncpg.Pool[asyncpg.Record]:
     """Create AsyncPG Pool."""
     postgres_url = config["POSTGRES"]["VPS"] if platform.system() == "Linux" else config["POSTGRES"]["HOME"]
-    return await asyncpg.create_pool(
-        postgres_url,
-        command_timeout=60,
-        min_size=10,
-        max_size=10,
-        statement_cache_size=0,
-    )
+    return await asyncpg.create_pool(postgres_url, command_timeout=60, min_size=10, max_size=10, statement_cache_size=0)
 
 
 async def start_the_bot(*, scopes_only: bool, owner_id: str, force_subscribe: bool, local: bool) -> None:
@@ -100,12 +94,7 @@ async def start_the_bot(*, scopes_only: bool, owner_id: str, force_subscribe: bo
     help="Whether to use adapter with localhost (default) or remote host (currently ngrok-free for testing purposes).",
 )
 def main(
-    click_ctx: click.Context,
-    *,
-    scopes_only: bool,
-    owner: Literal["irene", "aluerie"],
-    force_subscribe: bool,
-    local: bool,
+    click_ctx: click.Context, *, scopes_only: bool, owner: Literal["irene", "aluerie"], force_subscribe: bool, local: bool
 ) -> None:
     """Launches the bot.
 
@@ -154,12 +143,7 @@ def main(
             owner_id: str = {"irene": const.UserID.Irene, "aluerie": const.UserID.Aluerie}[owner]
             try:
                 RUNTIME(
-                    start_the_bot(
-                        scopes_only=scopes_only,
-                        owner_id=owner_id,
-                        force_subscribe=force_subscribe,
-                        local=local,
-                    )
+                    start_the_bot(scopes_only=scopes_only, owner_id=owner_id, force_subscribe=force_subscribe, local=local)
                 )
             except KeyboardInterrupt:
                 print("Aborted! The bot was interrupted with `KeyboardInterrupt`!")  # noqa: T201
