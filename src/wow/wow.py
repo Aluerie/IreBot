@@ -145,3 +145,8 @@ def ordinal(n: int | str) -> str:
 
 def foo(x):
     return x
+
+
+def foo(x):
+    return x
+
