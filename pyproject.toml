@@ -156,6 +156,7 @@ skip-magic-trailing-comma = true
 line-ending = "lf"
 
 [tool.ruff.lint.isort]
+split-on-trailing-comma = false
 combine-as-imports = true
 
 [tool.ruff.lint.pydocstyle]
