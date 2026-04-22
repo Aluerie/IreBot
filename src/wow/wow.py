@@ -150,3 +150,10 @@ def foo(x):
 def foo(x):
     return x
 
+def foo(x):
+    return x
+
+
+def foo(x):
+    return x
+
