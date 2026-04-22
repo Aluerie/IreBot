@@ -23,13 +23,7 @@ log = logging.getLogger("exc_manager")
 class ExceptionManager:
     """Exception Manager that."""
 
-    __slots__: tuple[str, ...] = (
-        "_lock",
-        "_most_recent",
-        "bot",
-        "cooldown",
-        "errors_cache",
-    )
+    __slots__: tuple[str, ...] = ("_lock", "_most_recent", "bot", "cooldown", "errors_cache")
 
     def __init__(self, bot: IreBot, *, cooldown: datetime.timedelta = datetime.timedelta(seconds=5)) -> None:
         self.bot: IreBot = bot
