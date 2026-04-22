@@ -35,7 +35,7 @@ CATEGORY_MODULES_MAPPING = {
     "public": [
         # "dota_rp_flow",
         # "meta"
-    ]                         
+    ],
 }
 
 

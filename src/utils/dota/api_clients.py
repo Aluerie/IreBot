@@ -32,11 +32,7 @@ class OpenDotaClient(APIClient):
     """A class for interacting with OpenDota API."""
 
     @override
-    async def invoke(
-        self,
-        endpoint: str,
-        argument: int,
-    ) -> Any:
+    async def invoke(self, endpoint: str, argument: int) -> Any:
         """Invoke a request to OpenDota API."""
         url = f"https://api.opendota.com/api/{endpoint}/{argument}"
         async with self.session.get(url=url) as resp:
@@ -97,11 +93,7 @@ class SteamWebAPIClient(APIClient):
         self.api_key: str = api_key
 
     @override
-    async def invoke(
-        self,
-        endpoint: str,
-        **kwargs: Any,
-    ) -> Any:
+    async def invoke(self, endpoint: str, **kwargs: Any) -> Any:
         """Invoke a request to Steam Web API."""
         queries = "&".join(f"{k}={v}" for k, v in kwargs.items())
         url = f"https://api.steampowered.com/{endpoint}/?key={self.api_key}&{queries}"

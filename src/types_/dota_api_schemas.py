@@ -4,11 +4,7 @@ from __future__ import annotations
 
 from typing import Literal, NotRequired, TypedDict
 
-__all__ = (
-    "OpendotaMatches",
-    "SteamWebRealTimeStats",
-    "StratzItems",
-)
+__all__ = ("OpendotaMatches", "SteamWebRealTimeStats", "StratzItems")
 
 ####################
 #   1. OPENDOTA    #

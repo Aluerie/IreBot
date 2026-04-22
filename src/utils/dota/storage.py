@@ -22,10 +22,7 @@ if TYPE_CHECKING:
         item_by_id: dict[int, str]  # id -> item name
 
 
-__all__ = (
-    "GameDataStorage",
-    "Items",
-)
+__all__ = ("GameDataStorage", "Items")
 
 
 log = logging.getLogger(__name__)

@@ -31,7 +31,13 @@ twitchio = { git = "https://github.com/PythonistaGuild/TwitchIO.git", rev = "mai
 steamio = { git = "https://github.com/Aluerie/steam.py", rev = "introduce-ext.dota2" }
 
 [dependency-groups]
-dev = ["asyncpg-stubs", "ipykernel", "pyright", "pytest"]
+dev = [
+    "asyncpg-stubs",
+    "ipykernel",
+    "pre-commit>=4.6.0",
+    "pyright",
+    "pytest",
+]
 
 [[tool.uv.index]]
 name = "umbra"
@@ -69,6 +75,7 @@ line-length = 125
 target-version = "py312"
 exclude = [".venv", "docs"]
 src = ["src"]
+
 [tool.ruff.lint]
 select = ["ALL"]
 ignore = [

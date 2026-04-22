@@ -76,9 +76,7 @@ class OtherDevCommands(IreDevComponent):
     @commands.command(aliases=["version", "packages", "libraries"])
     async def versions(self, ctx: IreContext) -> None:
         """🔬 Get info bot's main Python Packages."""
-        curious_packages = [
-            "twitchio",
-        ]  # list of packages versions of which I'm interested the most
+        curious_packages = ["twitchio"]  # list of packages versions of which I'm interested the most
         pv = sys.version_info  # python version
 
         await ctx.send(
