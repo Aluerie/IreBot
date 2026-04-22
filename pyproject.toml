@@ -37,6 +37,7 @@ dev = [
     "pre-commit>=4.6.0",
     "pyright",
     "pytest",
+    "ruff>=0.15.11",
 ]
 
 [[tool.uv.index]]
