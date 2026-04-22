@@ -1,20 +1,7 @@
 from __future__ import annotations
 
 from enum import IntEnum
-
-
-
-
-
-
-
-
-
-
-
-
 from typing import TYPE_CHECKING, override
-
 
 if TYPE_CHECKING:
     import datetime
@@ -38,6 +25,7 @@ class plural:  # noqa: N801
     * Rapptz/RoboDanny (licensed MPL v2)
         https://github.com/Rapptz/RoboDanny/blob/rewrite/cogs/utils/formats.py
     """
+
     def __init__(self, number: int) -> None:
         self.number: int = number
 
@@ -47,7 +35,7 @@ class plural:  # noqa: N801
         singular, _, plural = format_spec.partition("|")  # _ is `separator`
         plural = plural or f"{singular}s"
         if abs(number) != 1:
-            return f'{number} {plural}'
+            return f"{number} {plural}"
         return f"{number} {singular}"
 
 
@@ -63,11 +51,7 @@ class TimeDeltaFormat(IntEnum):
 
 
 def timedelta_to_words(
-    timedelta: datetime.timedelta ,
-    seconds: int,
-    *,
-    accuracy: int = 2,
-    fmt: TimeDeltaFormat = TimeDeltaFormat.Full,
+    timedelta: datetime.timedelta, seconds: int, *, accuracy: int = 2, fmt: TimeDeltaFormat = TimeDeltaFormat.Full
 ) -> str:
     """Convert `datetime.timedelta` to a string of humanly readable words.
 
@@ -106,11 +90,11 @@ def timedelta_to_words(
     elif seconds:
         total_seconds = seconds
     else:
-        msg = "You need to provide at least one of the following arguments: `delta` and `seconds`." "You need to provide at least one of the following arguments: `delta` and `seconds`."
+        msg = "You need to provide at least one of the following arguments: `delta` and `seconds`.You need to provide at least one of the following arguments: `delta` and `seconds`."
         raise TypeError(msg)
 
-    minutes,                          seconds = divmod(total_seconds, 60)
-    hours,                       minutes = divmod(minutes, 60)
+    minutes, seconds = divmod(total_seconds, 60)
+    hours, minutes = divmod(minutes, 60)
     days, hours = divmod(hours, 24)
 
     match fmt:
@@ -123,10 +107,7 @@ def timedelta_to_words(
             output = [f"{number} {short}" for short, number in time_units.items() if number]
             return " ".join(output[:accuracy])
         case TimeDeltaFormat.Letter:  # 1m30s
-            time_units = {"d": days, 
-                          "h": hours, 
-                          "m": minutes, 
-                          "s": seconds}
+            time_units = {"d": days, "h": hours, "m": minutes, "s": seconds}
             output = [f"{number:02d}{letter}" for letter, number in time_units.items() if number]
             return "".join(output[:accuracy]).removeprefix("0")  # remove leading zero if it managed to sneak in
 
@@ -143,12 +124,6 @@ def ordinal(n: int | str) -> str:
     suffix = "th" if 11 <= n % 100 <= 13 else ["th", "st", "nd", "rd", "th"][min(n % 10, 4)]
     return str(n) + suffix
 
-def foo(x):
-    return x
-
-
-def foo(x):
-    return x
 
 def foo(x):
     return x
@@ -157,3 +132,10 @@ def foo(x):
 def foo(x):
     return x
 
+
+def foo(x):
+    return x
+
+
+def foo(x):
+    return x

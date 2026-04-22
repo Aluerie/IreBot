@@ -287,8 +287,7 @@ class LiveMatch:
             return "No players data yet."
 
         response_parts = [
-            f"{hero if hero else player.color} {player.medal or '?'}"
-            for player, hero in zip(self.players, self.heroes, strict=True)
+            f"{hero or player.color} {player.medal or '?'}" for player, hero in zip(self.players, self.heroes, strict=True)
         ]
         return " \N{BULLET} ".join(response_parts)  # [:5]) + " VS " + ", ".join(response_parts[5:])
 
@@ -308,7 +307,7 @@ class LiveMatch:
             return "No players data yet."
 
         response_parts = [
-            f"{hero if hero else player.color} {player.lifetime_games}"
+            f"{hero or player.color} {player.lifetime_games}"
             for player, hero in sorted(
                 zip(self.players, self.heroes, strict=True), key=lambda x: attrgetter("lifetime_games")(x[0])
             )
@@ -398,7 +397,7 @@ class LiveMatch:
         nickname_mapping = {row["friend_id"]: row["nickname"] for row in rows}
 
         response_parts = [
-            f"{nick} as {hero if hero else player.color}"
+            f"{nick} as {hero or player.color}"
             for player, hero in zip(self.players, self.heroes, strict=True)
             if (nick := nickname_mapping.get(player.friend_id))
         ]
@@ -512,7 +511,7 @@ class PlayingMatch(LiveMatch):
         last_game_hero_player_index.pop(friend_id, None)  # remove the streamer themselves
 
         response_parts = [
-            f"{hero if hero else player.color} played as {last_game_played_as}"
+            f"{hero or player.color} played as {last_game_played_as}"
             for player, hero in zip(self.players, self.heroes, strict=True)
             if (last_game_played_as := last_game_hero_player_index.get(player.friend_id))
         ]

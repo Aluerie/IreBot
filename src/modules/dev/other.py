@@ -10,7 +10,7 @@ import twitchio  # noqa: TC002
 from twitchio.ext import commands
 
 from core import IreDevComponent
-from utils import fmt, const
+from utils import const, fmt
 
 if TYPE_CHECKING:
     from core import IreBot, IreContext
@@ -76,9 +76,7 @@ class OtherDevCommands(IreDevComponent):
     @commands.command(aliases=["version", "packages", "libraries"])
     async def versions(self, ctx: IreContext) -> None:
         """🔬 Get info bot's main Python Packages."""
-        curious_packages = [
-            "twitchio",
-        ]  # list of packages versions of which I'm interested the most
+        curious_packages = ["twitchio"]  # list of packages versions of which I'm interested the most
         pv = sys.version_info  # python version
 
         await ctx.send(

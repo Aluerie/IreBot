@@ -52,7 +52,7 @@ class LogsViaWebhook(IreDevComponent):
         "exc_manager": "https://em-content.zobj.net/source/microsoft/378/sos-button_1f198.png",
     }
     INCLUSIVE_AVATAR_MAPPING: Mapping[str, str] = {
-        "twitchio.": "https://raw.githubusercontent.com/Aluerie/AluBot/main/assets/images/logo/twitchio.png",
+        "twitchio.": "https://raw.githubusercontent.com/Aluerie/AluBot/main/assets/images/logo/twitchio.png"
     }
     DOLPHIN_IMAGE: str = "https://em-content.zobj.net/source/microsoft/407/dolphin_1f42c.png"
 
@@ -61,11 +61,7 @@ class LogsViaWebhook(IreDevComponent):
         "WARNING": "\N{WARNING SIGN}\ufe0f",
         "ERROR": "\N{CROSS MARK}",
     }
-    COLORS: Mapping[str, discord.Color | int] = {
-        "INFO": 0x03A9F4,
-        "WARNING": 0xFBC02D,
-        "ERROR": 0x800000,
-    }
+    COLORS: Mapping[str, discord.Color | int] = {"INFO": 0x03A9F4, "WARNING": 0xFBC02D, "ERROR": 0x800000}
 
     def __init__(self, bot: IreBot, *args: Any, **kwargs: Any) -> None:
         super().__init__(bot, *args, **kwargs)

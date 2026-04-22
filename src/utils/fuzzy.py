@@ -107,27 +107,18 @@ def partial_token_sort_ratio(a: str, b: str) -> int:
 
 @overload
 def _extraction_generator(
-    query: str,
-    choices: Sequence[str],
-    scorer: Callable[[str, str], int] = ...,
-    score_cutoff: int = ...,
+    query: str, choices: Sequence[str], scorer: Callable[[str, str], int] = ..., score_cutoff: int = ...
 ) -> Generator[tuple[str, int], None, None]: ...
 
 
 @overload
 def _extraction_generator[T](
-    query: str,
-    choices: dict[str, T],
-    scorer: Callable[[str, str], int] = ...,
-    score_cutoff: int = ...,
+    query: str, choices: dict[str, T], scorer: Callable[[str, str], int] = ..., score_cutoff: int = ...
 ) -> Generator[tuple[str, int, T], None, None]: ...
 
 
 def _extraction_generator[T](
-    query: str,
-    choices: Sequence[str] | dict[str, T],
-    scorer: Callable[[str, str], int] = quick_ratio,
-    score_cutoff: int = 0,
+    query: str, choices: Sequence[str] | dict[str, T], scorer: Callable[[str, str], int] = quick_ratio, score_cutoff: int = 0
 ) -> Generator[tuple[str, int, T] | tuple[str, int], None, None]:
     if isinstance(choices, dict):
         for key, value in choices.items():
@@ -185,21 +176,13 @@ def extract[T](
 
 @overload
 def extract_one(
-    query: str,
-    choices: Sequence[str],
-    *,
-    scorer: Callable[[str, str], int] = ...,
-    score_cutoff: int = ...,
+    query: str, choices: Sequence[str], *, scorer: Callable[[str, str], int] = ..., score_cutoff: int = ...
 ) -> tuple[str, int] | None: ...
 
 
 @overload
 def extract_one[T](
-    query: str,
-    choices: dict[str, T],
-    *,
-    scorer: Callable[[str, str], int] = ...,
-    score_cutoff: int = ...,
+    query: str, choices: dict[str, T], *, scorer: Callable[[str, str], int] = ..., score_cutoff: int = ...
 ) -> tuple[str, int, T] | None: ...
 
 
@@ -281,21 +264,13 @@ def extract_or_exact[T](
 
 @overload
 def extract_top_matches(
-    query: str,
-    choices: Sequence[str],
-    *,
-    scorer: Callable[[str, str], int] = ...,
-    score_cutoff: int = ...,
+    query: str, choices: Sequence[str], *, scorer: Callable[[str, str], int] = ..., score_cutoff: int = ...
 ) -> list[tuple[str, int]]: ...
 
 
 @overload
 def extract_top_matches[T](
-    query: str,
-    choices: dict[str, T],
-    *,
-    scorer: Callable[[str, str], int] = ...,
-    score_cutoff: int = ...,
+    query: str, choices: dict[str, T], *, scorer: Callable[[str, str], int] = ..., score_cutoff: int = ...
 ) -> list[tuple[str, int, T]]: ...
 
 
@@ -335,40 +310,20 @@ def extract_top_matches[T](
 
 @overload
 def finder(
-    text: str,
-    collection: Iterable[T],
-    *,
-    key: Callable[[T], str] | None = ...,
-    raw: Literal[True],
+    text: str, collection: Iterable[T], *, key: Callable[[T], str] | None = ..., raw: Literal[True]
 ) -> list[tuple[int, int, T]]: ...
 
 
 @overload
-def finder(
-    text: str,
-    collection: Iterable[T],
-    *,
-    key: Callable[[T], str] | None = ...,
-    raw: Literal[False],
-) -> list[T]: ...
+def finder(text: str, collection: Iterable[T], *, key: Callable[[T], str] | None = ..., raw: Literal[False]) -> list[T]: ...
 
 
 @overload
-def finder(
-    text: str,
-    collection: Iterable[T],
-    *,
-    key: Callable[[T], str] | None = ...,
-    raw: bool = ...,
-) -> list[T]: ...
+def finder(text: str, collection: Iterable[T], *, key: Callable[[T], str] | None = ..., raw: bool = ...) -> list[T]: ...
 
 
 def finder(
-    text: str,
-    collection: Iterable[T],
-    *,
-    key: Callable[[T], str] | None = None,
-    raw: bool = False,
+    text: str, collection: Iterable[T], *, key: Callable[[T], str] | None = None, raw: bool = False
 ) -> list[tuple[int, int, T]] | list[T]:
     """Find best matches using regex."""
     suggestions: list[tuple[int, int, T]] = []

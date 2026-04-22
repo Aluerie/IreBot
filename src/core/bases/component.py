@@ -10,11 +10,7 @@ if TYPE_CHECKING:
     from core import IreBot, IreContext
 
 
-__all__ = (
-    "IreDevComponent",
-    "IrePersonalComponent",
-    "IrePublicComponent",
-)
+__all__ = ("IreDevComponent", "IrePersonalComponent", "IrePublicComponent")
 
 
 class IreComponent(commands.Component):
