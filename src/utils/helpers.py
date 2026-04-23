@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import logging
 from time import perf_counter
-from typing import TYPE_CHECKING, Self
+from typing import Self
 
 __all__ = ("measure_time",)
 
@@ -31,13 +31,11 @@ class measure_time:  # noqa: N801 # it's fine to call classes lowercase if they 
 
     """
 
-    if TYPE_CHECKING:
-        start: float
-        end: float
-
     def __init__(self, name: str = "Unnamed", *, logger: logging.Logger = log) -> None:
         self.name: str = name
         self.log: logging.Logger = logger
+        self.start: float = 0.0
+        self.end: float = 0.0
 
     def __enter__(self) -> Self:
         self.start = perf_counter()

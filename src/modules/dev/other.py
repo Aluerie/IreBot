@@ -10,7 +10,7 @@ import twitchio  # noqa: TC002
 from twitchio.ext import commands
 
 from core import IreDevComponent
-from utils import fmt, const
+from utils import const, fmt
 
 if TYPE_CHECKING:
     from core import IreBot, IreContext

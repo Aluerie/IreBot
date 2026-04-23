@@ -20,12 +20,11 @@ import heapq
 import operator
 import re
 from difflib import SequenceMatcher
-from typing import TYPE_CHECKING, Literal, TypeVar, overload
+from typing import TYPE_CHECKING, Literal, overload
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Generator, Iterable, Sequence
 
-T = TypeVar("T")
 
 __all__ = (
     "extract",  # exact matches
@@ -291,7 +290,7 @@ def extract_top_matches[T](
         return []
 
     top_score = matches[0][1]
-    to_return = []
+    to_return: list[tuple[str, int]] | list[tuple[str, int, T]] = []
     index = 0
     while True:
         try:
@@ -304,25 +303,29 @@ def extract_top_matches[T](
         if match[1] != top_score:
             break
 
-        to_return.append(match)
+        # a = list[str] | list[int] ; a.append(b) esque-problem
+        # type-hinter can't understand that `b` is always going to be of the same type
+        to_return.append(match)  # pyright: ignore[reportArgumentType]
     return to_return
 
 
 @overload
-def finder(
+def finder[T](
     text: str, collection: Iterable[T], *, key: Callable[[T], str] | None = ..., raw: Literal[True]
 ) -> list[tuple[int, int, T]]: ...
 
 
 @overload
-def finder(text: str, collection: Iterable[T], *, key: Callable[[T], str] | None = ..., raw: Literal[False]) -> list[T]: ...
+def finder[T](
+    text: str, collection: Iterable[T], *, key: Callable[[T], str] | None = ..., raw: Literal[False]
+) -> list[T]: ...
 
 
 @overload
-def finder(text: str, collection: Iterable[T], *, key: Callable[[T], str] | None = ..., raw: bool = ...) -> list[T]: ...
+def finder[T](text: str, collection: Iterable[T], *, key: Callable[[T], str] | None = ..., raw: bool = ...) -> list[T]: ...
 
 
-def finder(
+def finder[T](
     text: str, collection: Iterable[T], *, key: Callable[[T], str] | None = None, raw: bool = False
 ) -> list[tuple[int, int, T]] | list[T]:
     """Find best matches using regex."""

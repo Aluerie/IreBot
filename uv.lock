@@ -778,6 +778,7 @@ name = "irebot"
 version = "0.7.7"
 source = { virtual = "." }
 dependencies = [
+    { name = "anyio" },
     { name = "asyncpg" },
     { name = "click" },
     { name = "discord-py", extra = ["speed"] },
@@ -798,6 +799,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "anyio", specifier = ">=4.13.0" },
     { name = "asyncpg" },
     { name = "click" },
     { name = "discord-py", extras = ["speed"] },

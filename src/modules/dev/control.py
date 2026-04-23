@@ -86,7 +86,7 @@ class Control(IreDevComponent):
         --------
         * "modules.personal.dev modules.public.states"
         """
-        index = {"personal": [], "public": [], "dev": [], "other": []}
+        index: dict[str, list[str]] = {"personal": [], "public": [], "dev": [], "other": []}
         for module in ctx.bot.modules.values():
             name = module.__name__
             for category in ("public", "personal", "dev"):
