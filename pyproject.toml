@@ -18,7 +18,6 @@ classifiers = [
     "Typing :: Typed",
 ]
 dependencies = [
-    "anyio>=4.13.0",
     "asyncpg",
     "click",
     "discord-py[speed]",
@@ -161,7 +160,7 @@ flake8-quotes.inline-quotes = "double"
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
-skip-magic-trailing-comma = true
+skip-magic-trailing-comma = false
 line-ending = "lf"
 
 [tool.ruff.lint.isort]

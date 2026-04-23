@@ -35,6 +35,9 @@ class Status(SteampyStrEnum):
     RichPresenceNone = "#MY_RP_NONE"  # Rich Presence is None
     NoStatus = "#MY_NO_STATUS"  # Somehow "status" field is missing from Rich Presence
 
+    # SPECIAL CASES
+    Crownfall = "#SPECIAL_CROWNFALL"
+
     # DOTA_RP
     Idle = "#DOTA_RP_IDLE"
     MainMenu = "#DOTA_RP_INIT"
@@ -52,7 +55,6 @@ class Status(SteampyStrEnum):
     WatchingTournament = "#DOTA_RP_WATCHING_TOURNAMENT"
     CustomGameProgress = "#DOTA_RP_GAME_IN_PROGRESS_CUSTOM"
     CustomGameLobby = "#DOTA_RP_LOBBY_CUSTOM"
-    CrownfallNestOfThorns = "#DOTA_Crownfall_EncounterStatus_NestOfThorns_WithDifficulty"
 
     @classproperty
     def KNOWN_DISPLAY_NAMES(cls: type[Self]) -> Mapping[Status, str]:  # type: ignore[GeneralTypeIssue] # noqa: N802, N805
@@ -74,6 +76,7 @@ class Status(SteampyStrEnum):
             cls.Coaching: "Coaching",
             cls.WatchingTournament: "Watching Tournament",
             cls.CustomGameProgress: "Custom Game",
+            cls.Crownfall: "Crownfall activity",
         }
 
     @property
@@ -84,6 +87,15 @@ class Status(SteampyStrEnum):
         except KeyError:
             # will still return "#DEADLOCK_RP_SOMETHING"
             return self.value
+
+    @override
+    @classmethod
+    def try_value(cls, value: str) -> Status:
+        # Special cases
+        if value.startswith("#DOTA_Crownfall"):
+            return cls.Crownfall
+        # Normal
+        return super().try_value(value)
 
 
 class ScoreCategory(Enum):

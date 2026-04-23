@@ -4,6 +4,7 @@ import abc
 import asyncio
 import json
 import logging
+import pathlib
 import random
 import time
 from dataclasses import dataclass
@@ -91,7 +92,7 @@ class GameDataStorage[VT, PseudoVT](abc.ABC):
             )
             # Make a back up for fun
             await asyncio.sleep(60 * 60)
-            async with await anyio.open_file(f".temp/{self.__class__.__name__}.json", mode="w", encoding="utf-8") as f:
+            with pathlib.Path(f".temp/{self.__class__.__name__}.json").open("w", encoding="utf-8") as f:  # noqa: ASYNC230
                 json.dump(self.cached_data, f, ensure_ascii=False, indent=4, default=str)
 
     async def get_cached_data(self) -> dict[int, VT]:
@@ -167,8 +168,8 @@ class Items(GameDataStorage[Item, Item]):
         except aiohttp.ClientResponseError as err:
             log.exception("%s", err.__class__.__name__, exc_info=err)
             try:
-                async with await anyio.open_file(f".temp/{self.__class__.__name__}.json", encoding="utf-8") as f:
-                    return json.loads(await f.read())
+                with pathlib.Path(f".temp/{self.__class__.__name__}.json").open(encoding="utf-8") as f:  # noqa: ASYNC230
+                    return json.load(f)
             except FileNotFoundError:
                 raise err from None
 

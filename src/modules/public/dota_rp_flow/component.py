@@ -708,7 +708,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             Status.PrivateLobby: "Bot matches are not supported",
             Status.CustomGameProgress: "Custom games are not supported",
             Status.CustomGameLobby: "Private lobbies (this includes draft in public lobbies) are not supported",
-            Status.CrownfallNestOfThorns: "Nest of Thorns is not supported.",
+            Status.Crownfall: "Crownfall activities are not supported.",
         }
         if msg := other_statuses.get(rp.status):
             return UnsupportedPartial(msg)
