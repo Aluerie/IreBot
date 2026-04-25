@@ -35,7 +35,7 @@ class Tags(IrePersonalComponent):
         tag_content: str | None = await self.bot.pool.fetchval(query, tag_name)
         await ctx.send(self.tag_does_not_exist_message(tag_name) if tag_content is None else tag_content)
 
-    @tag.command(aliases="a")
+    @tag.command(aliases=["a", "create"])
     async def add(self, ctx: IreContext, tag_name: str, *, tag_content: str) -> None:
         """Add tag."""
         if tag_name in ("delete", "remove", "del", "add", "list", "edit", "a", "d", "r", "e", "l"):
