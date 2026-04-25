@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, override
+from typing import TYPE_CHECKING
 
 import asyncpg
 from twitchio.ext import commands
@@ -16,21 +16,7 @@ __all__ = ("Tags",)
 
 
 class Tags(IrePersonalComponent):
-    """Commands to fetch something by a tag name.
-
-    Dev notes
-    ---------
-    * In this component I use `assert val is not None, tag_name` purely for type-checking memes
-    over some `tag_exists_check` function.
-    """
-
-    @override
-    async def component_command_error(self, payload: commands.CommandErrorPayload) -> bool | None:
-        """Event called when an error occurs in a command in this Component."""
-        if isinstance(exc := payload.exception, AssertionError):
-            msg = str(exc)
-            raise errors.RespondWithError(msg)
-        return None
+    """Commands to fetch something by a tag name."""
 
     def tag_does_not_exist_message(self, tag_name: str) -> str:
         return f"There is no tag with name '{tag_name}' {const.STV.uuhAcktshucally}"
@@ -47,8 +33,7 @@ class Tags(IrePersonalComponent):
             WHERE tag_name = $1;
         """
         tag_content: str | None = await self.bot.pool.fetchval(query, tag_name)
-        assert tag_content is not None, self.tag_does_not_exist_message(tag_name)
-        await ctx.send(tag_content)
+        await ctx.send(self.tag_does_not_exist_message(tag_name) if tag_content is None else tag_content)
 
     @tag.command(aliases="a")
     async def add(self, ctx: IreContext, tag_name: str, *, tag_content: str) -> None:
@@ -77,8 +62,11 @@ class Tags(IrePersonalComponent):
             RETURNING tag_name;
         """
         val: str | None = await self.bot.pool.fetchval(query, tag_name)
-        assert val is not None, self.tag_does_not_exist_message(tag_name)
-        await ctx.send(f"Deleted tag '{tag_name}' {const.STV.uuhAcktshucally}")
+        await ctx.send(
+            self.tag_does_not_exist_message(tag_name)
+            if val is None
+            else f"Deleted tag '{tag_name}' {const.STV.uuhAcktshucally}"
+        )
 
     @tag.command(aliases=["e"])
     async def edit(self, ctx: IreContext, tag_name: str, *, tag_content: str) -> None:
@@ -90,8 +78,11 @@ class Tags(IrePersonalComponent):
             RETURNING tag_name;
         """
         val: str | None = await self.bot.pool.fetchval(query, tag_name, tag_content)
-        assert val is not None, self.tag_does_not_exist_message(tag_name)
-        await ctx.send(f"Edited tag '{tag_name}' {const.STV.uuhAcktshucally}")
+        await ctx.send(
+            self.tag_does_not_exist_message(tag_name)
+            if val is None
+            else f"Edited tag '{tag_name}' {const.STV.uuhAcktshucally}"
+        )
 
     @tag.command(aliases=["r"])
     async def rename(self, ctx: IreContext, tag_name: str, new_tag_name: str) -> None:
@@ -103,8 +94,11 @@ class Tags(IrePersonalComponent):
             RETURNING tag_name;
         """
         val: str | None = await self.bot.pool.fetchval(query, tag_name, new_tag_name)
-        assert val is not None, self.tag_does_not_exist_message(tag_name)
-        await ctx.send(f"Renamed tag '{tag_name}' into '{new_tag_name}' {const.STV.uuhAcktshucally}")
+        await ctx.send(
+            self.tag_does_not_exist_message(tag_name)
+            if val is None
+            else f"Renamed tag '{tag_name}' into '{new_tag_name}' {const.STV.uuhAcktshucally}"
+        )
 
     @tag.command(aliases=["l"])
     async def list(self, ctx: IreContext) -> None:
@@ -113,10 +107,11 @@ class Tags(IrePersonalComponent):
             SELECT tag_name FROM ttv_tags;
         """
         tag_names: list[str] = [r for (r,) in await self.bot.pool.fetch(query)]
-        if tag_names:
-            await ctx.send(f"{const.STV.uuhAcktshucally} {', '.join(tag_names)}")
-        else:
-            await ctx.send(f"No tags were created yet {const.STV.uuhAcktshucally}")
+        await ctx.send(
+            f"{const.STV.uuhAcktshucally} {', '.join(tag_names)}"
+            if tag_names
+            else f"No tags were created yet {const.STV.uuhAcktshucally}"
+        )
 
 
 async def setup(bot: IreBot) -> None:

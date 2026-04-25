@@ -1,12 +1,21 @@
 ci:
   autofix_prs: true
 
+files: .*\.py$
+
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.15.11
     hooks:
       # Run the linter.
-      # - id: ruff-check
-      #   args: [ --fix ]
+      - id: ruff-check
+        args: [ --fix ]
       # Run the formatter.
       - id: ruff-format
+
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.9.18
+    hooks:
+      - id: uv-lock
+        files: ""
+        language: system
