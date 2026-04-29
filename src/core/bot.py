@@ -554,6 +554,10 @@ class IreBot(commands.AutoBot):
         """
         return s.online if (s := self.streamers.get(user_id, None)) else False
 
+    def is_irene_live(self) -> bool:
+        """Whether @irene, the bot's owner is live on twitch"""
+        return self.is_online(const.UserID.Irene)
+
     def get_partial_owner(self) -> twitchio.PartialUser:
         """A shortcut to get a partial user object for the bot's owner."""
         return self.create_partialuser(self.owner_id)

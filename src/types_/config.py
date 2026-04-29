@@ -35,6 +35,7 @@ class Tokens(TypedDict):
 class Webhooks(TypedDict):
     ERROR: str
     LOGGER: str
+    STREAM_NOTIFS: str
 
 
 class Config(TypedDict):
