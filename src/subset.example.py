@@ -33,7 +33,7 @@ CATEGORY_MODULES_MAPPING = {
         # "timers",
     ],
     "public": [
-        # "dota_rp_flow",
+        # "9kmmrbot",
         # "meta"
     ],
 }

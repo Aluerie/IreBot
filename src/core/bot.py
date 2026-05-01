@@ -18,8 +18,7 @@ from twitchio.web import StarletteAdapter
 
 from config import config
 from modules import get_modules
-from utils import const, errors
-from utils.dota import Dota2Client
+from utils import const, dota2 as dota2utils, errors
 
 from .bases import IreContext
 from .exc_manager import ExceptionManager
@@ -160,10 +159,8 @@ class IreBot(commands.AutoBot):
     """
 
     if TYPE_CHECKING:
-        dota: Dota2Client
-        launch_time: datetime.datetime
-        logs_via_webhook_handler: logging.Handler
-        owner_id: str  # it's "str | None" in twitchio, but we do supply it directly.
+        # it's "str | None" in twitchio, but we do supply it directly
+        owner_id: str  # pyright: ignore[reportIncompatibleMethodOverride]
 
     def __init__(
         self,
@@ -215,6 +212,11 @@ class IreBot(commands.AutoBot):
         self.streamers_index_ready: asyncio.Event = asyncio.Event()
         self.friends_index_ready: asyncio.Event = asyncio.Event()
 
+        # initialized later
+        self.dota2: dota2utils.Dota2Client = const.MISSING
+        self.launch_time: datetime.datetime
+        self.logs_via_webhook_handler: logging.Handler
+
     def show_oauth_helper(self, scopes: list[str], prefix: str) -> str:
         """Helper function for `show_bot_oauth`, `show_personal_oauth`, `show_public_oauth`.
 
@@ -251,7 +253,7 @@ class IreBot(commands.AutoBot):
         """Print a link for me (personal bot user with all the features) to click and authorize the scopes for the bot."""
         scopes = [
             "channel:bot",
-            "channel:edit:commercial", #"channel:read:ads",
+            "channel:edit:commercial",  # "channel:read:ads",
             "channel:moderate",
             "channel:read:redemptions",
             "channel:manage:redemptions",
@@ -367,10 +369,10 @@ class IreBot(commands.AutoBot):
 
     @override
     async def start(self) -> None:
-        if "modules.public.dota_rp_flow" in self.modules_to_load:
-            self.dota = Dota2Client(self)
+        if "modules.public.9kmmrbot" in self.modules_to_load:
+            self.dota2 = dota2utils.Dota2Client(self)
             try:
-                await asyncio.gather(super().start(), self.dota.login())
+                await asyncio.gather(super().start(), self.dota2.login())
             # A potential workaround for steam login issues
             # https://github.com/Gobot1234/steam.py/issues/446
             # Not sure if it works :D
@@ -385,8 +387,8 @@ class IreBot(commands.AutoBot):
 
     @override
     async def close(self) -> None:
-        if hasattr(self, "dota"):
-            await self.dota.close()
+        if hasattr(self, "dota2"):
+            await self.dota2.close()
         await super().close()
 
     @override
@@ -402,8 +404,8 @@ class IreBot(commands.AutoBot):
         if not hasattr(self, "launch_time"):
             # who knows maybe it triggers many times like `discord.py`
             self.launch_time = datetime.datetime.now(datetime.UTC)
-        if hasattr(self, "dota"):
-            await self.dota.wait_until_ready()
+        if hasattr(self, "dota2"):
+            await self.dota2.wait_until_ready()
 
     @staticmethod
     def add_args_field(embed: discord.Embed, field_name: str, data: dict[str, Any]) -> discord.Embed:

@@ -35,7 +35,7 @@ dev = [
     "asyncpg-stubs",
     "ipykernel",
     "pre-commit>=4.6.0",
-    "pyright",
+    "pyright>=1.1.408",
     "pytest",
     "ruff>=0.15.11",
 ]
@@ -67,9 +67,9 @@ reportUnreachable = "warning"
 reportUnusedCallResult = "none"
 
 reportDuplicateImport = "none"
-reportIncompatibleMethodOverride = "none"
-reportIncompatibleVariableOverride = "none"
-reportMissingTypeStubs = "none"
+# reportIncompatibleMethodOverride = "none"
+# reportIncompatibleVariableOverride = "none"
+# reportMissingTypeStubs = "none"
 
 [tool.ruff]
 line-length = 125
@@ -165,7 +165,7 @@ skip-magic-trailing-comma = false
 line-ending = "lf"
 
 [tool.ruff.lint.isort]
-split-on-trailing-comma = false
+split-on-trailing-comma = true
 combine-as-imports = true
 
 [tool.ruff.lint.pydocstyle]

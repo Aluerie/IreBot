@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from .component import Dota2RichPresenceFlow
+from .rp_flow import Dota2RichPresenceFlow
 
 if TYPE_CHECKING:
     from core import IreBot

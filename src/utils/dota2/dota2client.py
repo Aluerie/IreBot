@@ -4,7 +4,7 @@ import logging
 from typing import TYPE_CHECKING, NamedTuple, override
 
 from steam import PersonaState
-from steam.ext.dota2 import Client
+from steam.ext import dota2
 
 from config import config
 
@@ -12,8 +12,6 @@ from .api_clients import OpenDotaClient, SteamWebAPIClient, StratzClient
 from .storage import Items
 
 if TYPE_CHECKING:
-    from steam.ext.dota2 import User
-
     from core import IreBot
 
 log = logging.getLogger(__name__)
@@ -24,11 +22,11 @@ __all__ = ("Dota2Client", "SteamUserUpdate")
 class SteamUserUpdate(NamedTuple):
     """Payload for my custom `steam_user_update` event to mirror `Dota2Client.on_user_update`."""
 
-    before: User
-    after: User
+    before: dota2.User
+    after: dota2.User
 
 
-class Dota2Client(Client):
+class Dota2Client(dota2.Client):
     """Subclass for SteamIO's Client.
 
     Used to communicate with Dota 2 Game Coordinator in order to track information about my profile real-time.
@@ -69,7 +67,7 @@ class Dota2Client(Client):
         log.info("Dota 2 Game Coordinator: Ready")
 
     @override
-    async def on_user_update(self, before: User, after: User) -> None:
+    async def on_user_update(self, before: dota2.User, after: dota2.User) -> None:
         """Called when a steam user is updated, due to one or more of their attributes changing.
 
         The information from this event is redirected to `self.bot` events

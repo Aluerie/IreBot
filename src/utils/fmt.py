@@ -3,7 +3,7 @@ from __future__ import annotations
 from enum import IntEnum
 from typing import TYPE_CHECKING, override
 
-from . import MISSING
+from .const import MISSING
 
 if TYPE_CHECKING:
     import datetime

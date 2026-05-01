@@ -811,7 +811,7 @@ dev = [
     { name = "asyncpg-stubs" },
     { name = "ipykernel" },
     { name = "pre-commit", specifier = ">=4.6.0" },
-    { name = "pyright" },
+    { name = "pyright", specifier = ">=1.1.408" },
     { name = "pytest" },
     { name = "ruff", specifier = ">=0.15.11" },
 ]

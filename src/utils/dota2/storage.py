@@ -11,7 +11,6 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, TypedDict, override
 
 import aiohttp
-import anyio
 import discord
 
 from core import ireloop
@@ -163,7 +162,7 @@ class Items(GameDataStorage[Item, Item]):
     @override
     async def fill_data(self) -> dict[int, Item]:
         try:
-            items = await self.bot.dota.stratz.get_items()
+            items = await self.bot.dota2.stratz.get_items()
             return {item["id"]: Item(item["id"], item["displayName"]) for item in items["data"]["constants"]["items"]}
         except aiohttp.ClientResponseError as err:
             log.exception("%s", err.__class__.__name__, exc_info=err)
@@ -175,13 +174,13 @@ class Items(GameDataStorage[Item, Item]):
 
     @override
     @staticmethod
-    def generate_unknown_object(item_id: int) -> Item:
-        return Item(id=item_id, display_name="Unknown Item")
+    def generate_unknown_object(object_id: int) -> Item:
+        return Item(id=object_id, display_name="Unknown Item")
 
     @override
-    async def by_id(self, item_id: int) -> Item:
+    async def by_id(self, object_id: int) -> Item:
         """Get Item by its ID."""
         # special case
-        if item_id == 0:
+        if object_id == 0:
             return Item(0, "Empty Slot")
-        return await super().by_id(item_id)
+        return await super().by_id(object_id)

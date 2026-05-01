@@ -4,15 +4,13 @@ import re
 from typing import TYPE_CHECKING, Any, override
 
 import steam
-from steam.ext.dota2 import Hero, User as Dota2User
+from steam.ext import dota2
 from twitchio.ext import commands
 
 from utils import const, errors, fuzzy
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
-
-    from steam.ext.dota2 import ProfileCard
 
     from core import IreContext
 
@@ -26,6 +24,9 @@ __all__ = (
 )
 
 PARTY_MEMBERS_PATTERN = re.compile(r"members\s{\ssteam_id:\s([0-9]+)")
+
+# Alias
+Hero = dota2.Hero
 
 # /* cSpell:disable */
 HERO_ALIASES = {
@@ -198,23 +199,23 @@ class SteamUserNotFound(commands.BadArgument):
         super().__init__(f"User {argument!r} not found.", value=argument)
 
 
-class SteamUserConverter(commands.Converter[Dota2User]):
+class SteamUserConverter(commands.Converter[dota2.User]):
     """Simple Steam User converter."""
 
     @override
-    async def convert(self, ctx: IreContext, argument: str) -> Dota2User:
+    async def convert(self, ctx: IreContext, argument: str) -> dota2.User:
         try:
-            return await ctx.bot.dota.fetch_user(steam.utils.parse_id64(argument))
+            return await ctx.bot.dota2.fetch_user(steam.utils.parse_id64(argument))
         except steam.InvalidID:
             id64 = await steam.utils.id64_from_url(argument)
             if id64 is None:
                 raise SteamUserNotFound(argument) from None
-            return await ctx.bot.dota.fetch_user(id64)
+            return await ctx.bot.dota2.fetch_user(id64)
         except TimeoutError:
             raise SteamUserNotFound(argument) from None
 
 
-def rank_medal_display_name(profile_card: ProfileCard) -> str:
+def rank_medal_display_name(profile_card: dota2.ProfileCard) -> str:
     """Get human-readable rank medal string out of player's Dota 2 Profile Card."""
     display_name = profile_card.rank_tier.division
     if stars := profile_card.rank_tier.stars:

@@ -12,13 +12,12 @@ from typing import TYPE_CHECKING, Annotated, Any, TypedDict, TypeVar, override
 from urllib import parse as url_parse
 
 import steam
-from steam.ext.dota2 import GameMode, Hero, LobbyType, MatchOutcome, MinimalMatch, User as Dota2User
+from steam.ext import dota2
 from twitchio.ext import commands
 
 from config import config
 from core import IrePublicComponent, ireloop
-from utils import errors, fmt, guards
-from utils.dota import APIClientError
+from utils import const, dota2 as dota2utils, errors, fmt, guards
 
 from .enums import LiveIndicator, LobbyParam0, ScoreCategory, Status
 from .tools import (
@@ -32,11 +31,9 @@ from .tools import (
 if TYPE_CHECKING:
     from collections.abc import Callable, Coroutine
 
-    from steam.ext.dota2 import MatchHistoryMatch, User as Dota2SteamUser
-
     from core import IreBot, IreContext
     from types_.dota_api_schemas import OpendotaMatchesPlayer
-    from utils.dota import SteamUserUpdate
+    from utils.dota2 import SteamUserUpdate
 
     type ActiveMatch = PlayingMatch | SpectatingMatch | UnsupportedActivity
 
@@ -170,9 +167,9 @@ class RichPresence:
 
 
 class Friend:
-    def __init__(self, bot: IreBot, steam_user: Dota2SteamUser) -> None:
+    def __init__(self, bot: IreBot, steam_user: dota2.User) -> None:
         self._bot: IreBot = bot
-        self.steam_user: Dota2SteamUser = steam_user
+        self.steam_user: dota2.User = steam_user
         self.rich_presence: RichPresence = RichPresence(steam_user.rich_presence)
         self.active_match: PlayingMatch | SpectatingMatch | UnsupportedActivity | None = None
         self.activity: Activity = Incomplete("Haven't received any RP updates yet.")
@@ -213,7 +210,7 @@ class Player:
 
     @classmethod
     async def create(cls, bot: IreBot, account_id: int, player_slot: int) -> Player:
-        partial_user = bot.dota.create_partial_user(account_id)
+        partial_user = bot.dota2.create_partial_user(account_id)
         profile_card = await partial_user.dota2_profile_card()
 
         return Player(
@@ -255,13 +252,13 @@ class LiveMatch:
 
         # match data
         self.match_id: int | None = None
-        self.lobby_type: LobbyType | None = None
-        self.game_mode: GameMode | None = None
-        self.server_steam_id: int | None = None
+        self.lobby_type: dota2.LobbyType | None = None
+        self.game_mode: dota2.GameMode | None = None
+        self.server_steam_id: int = const.MISSING
 
         # players
         self.players: list[Player] = []
-        self.heroes: list[Hero] = []
+        self.heroes: list[dota2.Hero] = []
 
         # ready events
         self.players_data_ready: asyncio.Event = asyncio.Event()
@@ -297,7 +294,7 @@ class LiveMatch:
         if not self.lobby_type or not self.game_mode:
             return "No lobby data yet."
 
-        yes_no = "Yes" if self.lobby_type == LobbyType.Ranked else "No"
+        yes_no = "Yes" if self.lobby_type == dota2.LobbyType.Ranked else "No"
         return f"{yes_no}, it's {self.lobby_type.display_name} ({self.game_mode.display_name})"
 
     @format_match_response
@@ -328,14 +325,14 @@ class LiveMatch:
         """Response for !stats command."""
         if not self.players:
             return "No player data yet."
-        if self.server_steam_id is None:
+        if not self.server_steam_id:
             return "This match doesn't support real time stats"
-        if self.lobby_type == LobbyType.NewPlayerMode:
+        if self.lobby_type == dota2.LobbyType.NewPlayerMode:
             return "New Player Mode matches do not support real time stats."
 
         hero, player_slot = extract_hero_index(argument, self.heroes)
 
-        match = await self.bot.dota.web_api.get_real_time_stats(self.server_steam_id)
+        match = await self.bot.dota2.web_api.get_real_time_stats(self.server_steam_id)
 
         # We have to loop through teams in order to support Custom and Event Games
         # Since the amount of players in the team can be variable.
@@ -351,21 +348,21 @@ class LiveMatch:
             msg = f"Somehow couldn't find the player {player_slot=} with {hero=} in the game."
             raise errors.PlaceholderError(msg)
 
-        prefix = f"[2m delay] {api_player['name']} {Hero.try_value(api_player['heroid'])} lvl {api_player['level']}"
+        prefix = f"[2m delay] {api_player['name']} {dota2.Hero.try_value(api_player['heroid'])} lvl {api_player['level']}"
         net_worth = f"NW: {api_player['net_worth']}"
         kda = f"{api_player['kill_count']}/{api_player['death_count']}/{api_player['assists_count']}"
         cs = f"CS: {api_player['lh_count']}"
 
-        items = ", ".join([str(await self.bot.dota.items.by_id(item)) for item in api_player["items"] if item != -1])
+        items = ", ".join([str(await self.bot.dota2.items.by_id(item)) for item in api_player["items"] if item != -1])
         response_parts = (prefix, net_worth, kda, cs, items)
         return " \N{BULLET} ".join(response_parts)
 
     @format_match_response
     async def lead(self) -> str:
         """Response for !lead command."""
-        if self.server_steam_id is None:
+        if not self.server_steam_id:
             return "This match doesn't support real time stats"
-        match = await self.bot.dota.web_api.get_real_time_stats(self.server_steam_id)
+        match = await self.bot.dota2.web_api.get_real_time_stats(self.server_steam_id)
         radiant = match["teams"][0]
         dire = match["teams"][1]
 
@@ -427,7 +424,7 @@ class PlayingMatch(LiveMatch):
     @ireloop(seconds=10.1, count=30)
     async def update_data(self) -> None:
         log.debug('Updating %s data for watchable_game_id "%s"', self.__class__.__name__, self.watchable_game_id)
-        match = next(iter(await self.bot.dota.live_matches(lobby_ids=[self.lobby_id])), None)
+        match = next(iter(await self.bot.dota2.live_matches(lobby_ids=[self.lobby_id])), None)
         if not match:
             msg = f'FindTopSourceTVGames did not find watchable_game_id "{self.watchable_game_id}".'
             raise errors.PlaceholderError(msg)
@@ -460,7 +457,7 @@ class PlayingMatch(LiveMatch):
 
         if self.players_data_ready.is_set() and self.heroes_data_ready.is_set():
             # add to the database
-            if self.lobby_type == LobbyType.Practice:
+            if self.lobby_type == dota2.LobbyType.Practice:
                 # These lobby types do not leave any trace for match history purposes
                 # I.e. after playing in a practice lobby - there is
                 # no match to inspect in match history, opendota, etc;
@@ -503,11 +500,11 @@ class PlayingMatch(LiveMatch):
         mmr_notice = f"[{self.average_mmr} avg] " if self.average_mmr else ""
         return mmr_notice + await super().game_medals()
 
-    async def played_with(self, friend_id: int, last_game: MinimalMatch) -> str:
+    async def played_with(self, friend_id: int, last_game: dota2.MinimalMatch) -> str:
         if not self.players:
             return "No player data yet."
 
-        last_game_hero_player_index: dict[int, Hero] = {p.id: p.hero for p in last_game.players}
+        last_game_hero_player_index: dict[int, dota2.Hero] = {p.id: p.hero for p in last_game.players}
         last_game_hero_player_index.pop(friend_id, None)  # remove the streamer themselves
 
         response_parts = [
@@ -539,8 +536,8 @@ class SpectatingMatch(LiveMatch):
     async def update_data(self) -> None:
         log.debug('Updating %s data for watching_server "%s"', self.__class__.__name__, self.watching_server)
         try:
-            match = await self.bot.dota.web_api.get_real_time_stats(self.server_steam_id)
-        except APIClientError:
+            match = await self.bot.dota2.web_api.get_real_time_stats(self.server_steam_id)
+        except dota2utils.APIClientError:
             # If SteamWebAPI didn't respond with any data then we have no way to get the data
             self.unavailable = True
             self.update_data.stop()
@@ -551,8 +548,8 @@ class SpectatingMatch(LiveMatch):
         if not self.players_data_ready.is_set():
             # match data
             self.match_id = int(match["match"]["match_id"])
-            self.lobby_type = LobbyType.try_value(match["match"]["lobby_type"])
-            self.game_mode = GameMode.try_value(match["match"]["game_mode"])
+            self.lobby_type = dota2.LobbyType.try_value(match["match"]["lobby_type"])
+            self.game_mode = dota2.GameMode.try_value(match["match"]["game_mode"])
             self.started_at = datetime.datetime.fromtimestamp(match["match"]["start_timestamp"], tz=datetime.UTC)
 
             # players
@@ -566,7 +563,7 @@ class SpectatingMatch(LiveMatch):
                 self.bot.dispatch("players_data_ready", self)
 
         if not self.heroes_data_ready.is_set():
-            self.heroes = [Hero.try_value(api_player["heroid"]) for api_player in api_players]
+            self.heroes = [dota2.Hero.try_value(api_player["heroid"]) for api_player in api_players]
             if self._is_heroes_data_ready():
                 self.heroes_data_ready.set()
                 log.debug('%s heroes data ready for: "%s"', self.__class__.__name__, self.watching_server)
@@ -649,7 +646,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         Also makes initial analyse of their rich presences.
         """
         log.debug("Indexing bot's friend list.")
-        for friend in await self.bot.dota.user.friends():
+        for friend in await self.bot.dota2.user.friends():
             self.friends[friend.id] = Friend(self.bot, friend._user)  # pyright: ignore[reportArgumentType, reportPrivateUsage]
 
         for friend in self.friends.values():
@@ -954,7 +951,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
     #           LAST GAME           #
     #################################
 
-    async def get_last_game(self, broadcaster_id: str) -> tuple[int, int, MinimalMatch]:
+    async def get_last_game(self, broadcaster_id: str) -> tuple[int, int, dota2.MinimalMatch]:
         """A helper function to get broadcaster's last played game from the database.
 
         Returns
@@ -977,7 +974,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         if not row:
             msg = "No last game found: streamer hasn't played Dota 2 in the last 2 days"
             raise errors.RespondWithError(msg)
-        last_game = await self.bot.dota.create_partial_match(row["match_id"]).minimal()
+        last_game = await self.bot.dota2.create_partial_match(row["match_id"]).minimal()
         return row["friend_id"], row["hero_id"], last_game
 
     @commands.command(name="played", aliases=["last_game", "lg", "lm"])
@@ -1004,11 +1001,11 @@ class Dota2RichPresenceFlow(IrePublicComponent):
 
         is_radiant = slot < 5
         score_category = ScoreCategory.create(match.lobby_type, match.game_mode)
-        if match.outcome >= MatchOutcome.NotScoredPoorNetworkConditions:
+        if match.outcome >= dota2.MatchOutcome.NotScoredPoorNetworkConditions:
             outcome = "Not Scored"
-        elif match.outcome == MatchOutcome.RadiantVictory:
+        elif match.outcome == dota2.MatchOutcome.RadiantVictory:
             outcome = "Win" if is_radiant else "Loss"
-        elif match.outcome == MatchOutcome.DireVictory:
+        elif match.outcome == dota2.MatchOutcome.DireVictory:
             outcome = "Loss" if is_radiant else "Win"
         else:
             outcome = "Unknown outcome"
@@ -1027,16 +1024,16 @@ class Dota2RichPresenceFlow(IrePublicComponent):
 
     async def update_mmr(self, *, friend_id: int, lobby_type: int, player_slot: int, outcome: int, is_abandon: bool) -> None:
         """Update MMR for friend under friend_id."""
-        if lobby_type != LobbyType.Ranked:
+        if lobby_type != dota2.LobbyType.Ranked:
             return
-        if outcome >= MatchOutcome.NotScoredPoorNetworkConditions:
+        if outcome >= dota2.MatchOutcome.NotScoredPoorNetworkConditions:
             return
 
         if is_abandon:
             mmr_delta = -25
-        elif outcome == MatchOutcome.RadiantVictory:
+        elif outcome == dota2.MatchOutcome.RadiantVictory:
             mmr_delta = 25 if player_slot < 5 else -25
-        elif outcome == MatchOutcome.DireVictory:
+        elif outcome == dota2.MatchOutcome.DireVictory:
             mmr_delta = 25 if player_slot > 4 else -25
         else:
             mmr_delta = 0
@@ -1049,7 +1046,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             """
             await self.bot.pool.execute(query, mmr_delta, friend_id)
 
-    async def add_completed_match_to_database(self, match: MatchHistoryMatch, friend_id: int) -> None:
+    async def add_completed_match_to_database(self, match: dota2.MatchHistoryMatch, friend_id: int) -> None:
         """Add matches from match history check loop into the database.
 
         Development Notes
@@ -1061,7 +1058,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             return
 
         # match history entities on their own do not give proper outcome (Radiant/Dire)
-        minimal = await self.bot.dota.create_partial_match(match.id).minimal()
+        minimal = await self.bot.dota2.create_partial_match(match.id).minimal()
 
         query = """
             INSERT INTO ttv_dota_matches
@@ -1167,7 +1164,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
                 # Then `.minimal` won't give any results as the game is still live but streamer's RP is different
                 # So we need to deal with errors of not getting response from it.
                 # This also happens if streamer disconnects-reconnects in the middle of the match.
-                minimal = await self.bot.dota.create_partial_match(row["match_id"]).minimal()
+                minimal = await self.bot.dota2.create_partial_match(row["match_id"]).minimal()
             except ValueError:
                 # this way any matches that errored out more 12 times gonna be ignored
                 # not sure how I feel about such solution;
@@ -1209,7 +1206,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         for row in rows:
             players = players_cache.get(row["match_id"])
             if not players:
-                match = await self.bot.dota.opendota.matches(row["match_id"])
+                match = await self.bot.dota2.opendota.matches(row["match_id"])
                 try:
                     match["players"]
                 except KeyError:
@@ -1273,7 +1270,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             response += known_party_members
 
         unknown_party_members = " \N{BULLET} ".join(
-            [f"{(await self.bot.dota.fetch_user(v[0])).name} ({k})" for k, v in members.items() if not v[1]]
+            [f"{(await self.bot.dota2.fetch_user(v[0])).name} ({k})" for k, v in members.items() if not v[1]]
         )
         if response:
             response += f". And not notable to the bot: {unknown_party_members}"
@@ -1320,12 +1317,12 @@ class Dota2RichPresenceFlow(IrePublicComponent):
                 score.abandons += 1
             elif row["outcome"] is None:
                 score.pending += 1
-            elif row["outcome"] == MatchOutcome.RadiantVictory:
+            elif row["outcome"] == dota2.MatchOutcome.RadiantVictory:
                 if row["player_slot"] < 5:
                     score.wins += 1
                 else:
                     score.losses += 1
-            elif row["outcome"] == MatchOutcome.DireVictory:
+            elif row["outcome"] == dota2.MatchOutcome.DireVictory:
                 if row["player_slot"] > 4:
                     score.wins += 1
                 else:
@@ -1350,7 +1347,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
 
         response = " \N{LARGE PURPLE CIRCLE} ".join(
             # Let's make extra query to know name accounts
-            f"{u.name if (u := self.bot.dota.get_user(friend_id)) else friend_id}: {part}"
+            f"{u.name if (u := self.bot.dota2.get_user(friend_id)) else friend_id}: {part}"
             for friend_id, part in response_parts.items()
         )
         if not stream_started_at:
@@ -1442,7 +1439,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         friend = await self.find_friend_account(ctx.broadcaster.id)
         npc_hero_name = friend.rich_presence.raw.get("param2")
         if npc_hero_name:
-            hero = Hero.create_from_npc_dota_hero_name(npc_hero_name.removeprefix("#"))
+            hero = dota2.Hero.create_from_npc_dota_hero_name(npc_hero_name.removeprefix("#"))
             response = url_parse.quote(f"dota2protracker.com/hero/{hero.display_name}")
         else:
             response = "The streamer has not picked a hero yet."
@@ -1465,7 +1462,9 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         await ctx.send(message)
 
     @npm_dev.command(name="add", aliases=["edit", "rename"])
-    async def npm_dev_add(self, ctx: IreContext, steam_user: Annotated[Dota2User, SteamUserConverter], *, name: str) -> None:
+    async def npm_dev_add(
+        self, ctx: IreContext, steam_user: Annotated[dota2.User, SteamUserConverter], *, name: str
+    ) -> None:
         """Add a notable player to the database.
 
         This command is only available for certain group of people.
@@ -1544,8 +1543,8 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         Unfortunately, specifically, Dota 2 Coordinator usually takes ~30 seconds to get ready.
         """
         await self.bot.wait_until_ready()
-        await self.bot.dota.wait_until_ready()
-        await self.bot.dota.wait_until_gc_ready()
+        await self.bot.dota2.wait_until_ready()
+        await self.bot.dota2.wait_until_gc_ready()
         await self.bot.streamers_index_ready.wait()
 
     @fill_completed_matches_from_gc_match_history.before_loop
@@ -1586,7 +1585,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
     @ireloop(count=1)
     async def debug_announce_gc_ready(self) -> None:
         """Announce in Irene's twitch chat that Dota 2 GC is ready."""
-        await self.bot.dota.wait_until_gc_ready()
+        await self.bot.dota2.wait_until_gc_ready()
         await self.debug_deliver("Connection to Dota 2 Game Coordinator is ready")
 
     @commands.Component.listener("heroes_data_ready")
@@ -1618,7 +1617,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         """
         try:
             async with asyncio.timeout(11 * 60):  # 11 minutes
-                await self.bot.dota.wait_until_gc_ready()
+                await self.bot.dota2.wait_until_gc_ready()
         except TimeoutError:
             log.warning("🔴 Failed to wait for Dota 2 Game Coordinator to get ready - restarting the bot. 🔴")
             try:
@@ -1638,7 +1637,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
     @override
     async def component_command_error(self, payload: commands.CommandErrorPayload) -> bool | None:
         """Event called when an error occurs in a command in this Component."""
-        if isinstance(payload.exception, APIClientError):
+        if isinstance(payload.exception, dota2utils.APIClientError):
             msg = "I'm not able to fetch data for this match, sorry!"
             await payload.context.send(msg)
             return False
