@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, override
 
 from twitchio.ext import commands
 
-from utils import errors
+from utils import const, errors
 
 if TYPE_CHECKING:
     from core import IreBot, IreContext
@@ -50,5 +50,7 @@ class IreDevComponent(IreComponent):
     @override
     async def component_before_invoke(self, ctx: IreContext) -> None:
         if ctx.chatter.id != ctx.bot.owner_id:
-            msg = "Command is not allowed by anybody else except Irene"
+            msg = f"Command is not allowed by anybody else except Irene {const.FFZ.peepoPolice}"
+            if ctx.broadcaster.id == ctx.bot.owner_id:
+                raise errors.RespondWithError(msg)
             raise errors.SilentError(msg)

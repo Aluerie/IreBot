@@ -150,7 +150,6 @@ def main(
         with setup_logging():
             owner_id: str = {"irene": const.UserID.Irene, "aluerie": const.UserID.Aluerie}[owner]
             try:
-                print(local)
                 RUNTIME(
                     start_the_bot(scopes_only=scopes_only, owner_id=owner_id, force_subscribe=force_subscribe, local=local)
                 )

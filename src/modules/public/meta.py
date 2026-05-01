@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, TypedDict
 
+import twitchio  # noqa: TC002
 from twitchio.ext import commands
 
 from core import IrePublicComponent
@@ -49,6 +50,12 @@ class MetaCommands(IrePublicComponent):
     async def source(self, ctx: IreContext) -> None:
         """Get the link to the bot's GitHub repository."""
         await ctx.send("github.com/Aluerie/IreBot")
+
+    @commands.command(aliases=["id", "twitchid"])
+    async def twitch_id(self, ctx: IreContext, *, user: twitchio.User | None = None) -> None:
+        """Get mentioned @user numeric twitch_id."""
+        who = user or ctx.author
+        await ctx.send(f"Twitch ID for {who.mention}: {who.id} {const.STV.donkDetective}")
 
 
 async def setup(bot: IreBot) -> None:

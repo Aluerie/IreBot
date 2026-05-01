@@ -6,11 +6,10 @@ import sys
 import unicodedata
 from typing import TYPE_CHECKING, TypedDict
 
-import twitchio  # noqa: TC002
 from twitchio.ext import commands
 
 from core import IreDevComponent
-from utils import const, fmt
+from utils import fmt
 
 if TYPE_CHECKING:
     from core import IreBot, IreContext
@@ -67,12 +66,6 @@ class OtherDevCommands(IreDevComponent):
             f"Last reboot {self.bot.launch_time.strftime('%H:%M %d/%b/%y')}; "
             f"It's been {fmt.timedelta_to_words(datetime.datetime.now(datetime.UTC) - self.bot.launch_time)}."
         )
-
-    @commands.command(aliases=["id", "twitchid"])
-    async def twitch_id(self, ctx: IreContext, *, user: twitchio.User | None = None) -> None:
-        """Get mentioned @user numeric twitch_id."""
-        who = user or ctx.author
-        await ctx.send(f"Twitch ID for {who.mention}: {who.id} {const.STV.donkDetective}")
 
     @commands.command(aliases=["version", "packages", "libraries"])
     async def versions(self, ctx: IreContext) -> None:
