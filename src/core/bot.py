@@ -251,7 +251,7 @@ class IreBot(commands.AutoBot):
         """Print a link for me (personal bot user with all the features) to click and authorize the scopes for the bot."""
         scopes = [
             "channel:bot",
-            "channel:read:ads",
+            "channel:edit:commercial", #"channel:read:ads",
             "channel:moderate",
             "channel:read:redemptions",
             "channel:manage:redemptions",

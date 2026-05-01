@@ -1,3 +1,11 @@
+"""
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. If a copy of the MPL was not distributed with this
+file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+Copyright (C) 2020 Aluerie <https://github.com/Aluerie>
+"""
+
 from __future__ import annotations
 
 import asyncio
@@ -142,6 +150,7 @@ def main(
         with setup_logging():
             owner_id: str = {"irene": const.UserID.Irene, "aluerie": const.UserID.Aluerie}[owner]
             try:
+                print(local)
                 RUNTIME(
                     start_the_bot(scopes_only=scopes_only, owner_id=owner_id, force_subscribe=force_subscribe, local=local)
                 )

@@ -27,7 +27,7 @@ class DiscordNotifications(IrePersonalComponent):
     def __init__(self, bot: IreBot, *args: Any, **kwargs: Any) -> None:
         super().__init__(bot, *args, **kwargs)
         # it's a list just in case my internet goes crazy and we trigger multiple notifications in a row;
-        self.active_notification_messages: list[discord.Message] = []
+        self.active_notification_messages: list[discord.WebhookMessage] = []
 
     @discord.utils.cached_property
     def notification_webhook(self) -> discord.Webhook:
@@ -51,6 +51,7 @@ class DiscordNotifications(IrePersonalComponent):
         self.active_notification_messages.append(
             await self.notification_webhook.send(
                 content=f"<@&760082003495223298> and chat, **`@{irene.display_name}`** just went live!",
+                wait=True,
                 embed=discord.Embed(
                     color=0x9146FF,
                     title=f"{channel_info.title}",

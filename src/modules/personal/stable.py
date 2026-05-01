@@ -96,6 +96,11 @@ class StableCommands(IrePersonalComponent):
     * Commands in this file are sorted alphabetically.
     """
 
+    @commands.command()
+    async def ads(self, ctx: IreContext, length: int = 180) -> None:
+        """Start Ads"""
+        await ctx.broadcaster.start_commercial(length=length)
+
     @commands.cooldown(rate=1, per=60, key=commands.BucketType.channel)
     @guards.is_owner_channel()
     @commands.command()

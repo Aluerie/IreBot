@@ -69,9 +69,10 @@ class OtherDevCommands(IreDevComponent):
         )
 
     @commands.command(aliases=["id", "twitchid"])
-    async def twitch_id(self, ctx: IreContext, *, user: twitchio.User) -> None:
+    async def twitch_id(self, ctx: IreContext, *, user: twitchio.User | None = None) -> None:
         """Get mentioned @user numeric twitch_id."""
-        await ctx.send(f"Twitch ID for {user.mention}: {user.id} {const.STV.donkDetective}")
+        who = user or ctx.author
+        await ctx.send(f"Twitch ID for {who.mention}: {who.id} {const.STV.donkDetective}")
 
     @commands.command(aliases=["version", "packages", "libraries"])
     async def versions(self, ctx: IreContext) -> None:

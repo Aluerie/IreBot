@@ -7,7 +7,7 @@ from pkgutil import iter_modules
 __all__ = ("get_modules",)
 
 try:
-    import m as select_modules_to_load
+    import subset as select_modules_to_load
 
     TEST_CATEGORY_MODULES_MAPPING: dict[str, list[str]] = select_modules_to_load.CATEGORY_MODULES_MAPPING
     LOAD_ALL_MODULES = select_modules_to_load.LOAD_ALL_MODULES
@@ -26,7 +26,7 @@ DISABLED_MODULES: tuple[str, ...] = (
 )
 
 
-def get_modules_from_categories(categories: dict[str, list[str]]) -> tuple[str, ...]:
+def get_test_subset_modules(categories: dict[str, list[str]]) -> tuple[str, ...]:
     """Get a tuple of modules to load from a friendly formatted categories dictionary.
 
     Returns
@@ -63,7 +63,7 @@ def get_modules(*, test: bool) -> tuple[str, ...]:
     """
     if test and not LOAD_ALL_MODULES:
         # assume testing specific modules from `m.py`
-        return get_modules_from_categories(TEST_CATEGORY_MODULES_MAPPING)
+        return get_test_subset_modules(TEST_CATEGORY_MODULES_MAPPING)
 
     # assume running full bot functionality (besides `DISABLED_MODULES`)
     current_folder = "src/" + str(__package__)
