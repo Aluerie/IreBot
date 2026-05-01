@@ -25,6 +25,10 @@ DISABLED_MODULES: tuple[str, ...] = (
     # "modules.public.dota",
 )
 
+# named modules const
+PUBLIC_D9MMRBOT = "modules.public.d9kmmrbot"
+DEV_REQUIRED = "modules.dev.required"
+
 
 def get_test_subset_modules(categories: dict[str, list[str]]) -> tuple[str, ...]:
     """Get a tuple of modules to load from a friendly formatted categories dictionary.
@@ -46,8 +50,8 @@ def get_test_subset_modules(categories: dict[str, list[str]]) -> tuple[str, ...]
         "modules.beta",
     )
     # Component-based dependencies
-    if "modules.public.dota_rp_flow" in modules_to_load:
-        modules_to_load += ("modules.dev.required",)
+    if PUBLIC_D9MMRBOT in modules_to_load:
+        modules_to_load += (DEV_REQUIRED,)
     return modules_to_load
 
 

@@ -17,7 +17,7 @@ from twitchio.ext import commands
 from twitchio.web import StarletteAdapter
 
 from config import config
-from modules import get_modules
+from modules import PUBLIC_D9MMRBOT, get_modules
 from utils import const, dota2 as dota2utils, errors
 
 from .bases import IreContext
@@ -369,7 +369,7 @@ class IreBot(commands.AutoBot):
 
     @override
     async def start(self) -> None:
-        if "modules.public.9kmmrbot" in self.modules_to_load:
+        if PUBLIC_D9MMRBOT in self.modules_to_load:
             self.dota2 = dota2utils.Dota2Client(self)
             try:
                 await asyncio.gather(super().start(), self.dota2.login())

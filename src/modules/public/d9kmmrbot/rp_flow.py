@@ -17,6 +17,7 @@ from twitchio.ext import commands
 
 from config import config
 from core import IrePublicComponent, ireloop
+from modules import DEV_REQUIRED, PUBLIC_D9MMRBOT
 from utils import const, dota2 as dota2utils, errors, fmt, guards
 
 from .enums import LiveIndicator, LobbyParam0, ScoreCategory, Status
@@ -616,7 +617,10 @@ class Dota2RichPresenceFlow(IrePublicComponent):
     @override
     async def component_load(self) -> None:
         if "modules.dev.required" not in self.bot.modules_to_load:
-            msg = "Module 'modules.public.dota_rp_flow' requires 'modules.dev.required' to be loaded"
+            msg = f"Module '{PUBLIC_D9MMRBOT}' requires '{DEV_REQUIRED}' to be loaded."
+            raise errors.IreBotError(msg)
+        if not hasattr(self.bot, "dota2"):
+            msg = f"Module '{PUBLIC_D9MMRBOT}' requires Dota2Client to be attached to bot's instance as 'self.bot.dota2'."
             raise errors.IreBotError(msg)
 
         self.starting_fill_friends.start()

@@ -60,7 +60,8 @@
         "winloss",
         "Wize",
         "wizebot",
-        "WTFF"
+        "WTFF",
+        "MMRBOT",
     ],
     "python.REPL.enableREPLSmartSend": false,
     "yaml.schemas": {
