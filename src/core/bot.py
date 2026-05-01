@@ -499,7 +499,8 @@ class IreBot(commands.AutoBot):
                     f"{error.__class__.__name__} - "
                     f"{error.extra.get('error', 'Error')} "
                     f"{error.extra.get('status', 'XXX')}: "
-                    f"{error.extra.get('message', 'Unknown')} {const.STV.dankFix}"
+                    f"{error.extra.get('message') or 'Unknown'} {const.STV.dankFix} "
+                    f"(Irene will surely fix it)"
                 )
             case commands.MissingRequiredArgument():
                 await ctx.send(f'You need to provide "{error.param.name}" argument for this command {const.FFZ.peepoPolice}')
