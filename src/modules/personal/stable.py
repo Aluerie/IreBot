@@ -96,10 +96,21 @@ class StableCommands(IrePersonalComponent):
     * Commands in this file are sorted alphabetically.
     """
 
-    @commands.command()
-    async def ads(self, ctx: IreContext, length: int = 180) -> None:
-        """Start Ads"""
+    @commands.group(name="ads", aliases=["ad", "commercial"])
+    async def ads_group(self, ctx: IreContext) -> None:
+        """A group command !ads"""
+
+    @ads_group.command(name="start", aliases=["run"])
+    async def ads_start(self, ctx: IreContext, length: int = 180) -> None:
+        """Run ads."""
         await ctx.broadcaster.start_commercial(length=length)
+        await ctx.send("Running ads in 3 2 1 (if possible)")
+
+    @ads_group.command(name="snooze")
+    async def ads_snooze(self, ctx: IreContext) -> None:
+        """Snooze next ad."""
+        await ctx.broadcaster.snooze_next_ad()
+        await ctx.send(f"Snoozing next ad for 5 min {const.STV.DankApprove}")
 
     @commands.cooldown(rate=1, per=60, key=commands.BucketType.channel)
     @guards.is_owner_channel()
