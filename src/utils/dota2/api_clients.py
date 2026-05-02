@@ -25,7 +25,7 @@ class APIClient(abc.ABC):
         self.session: aiohttp.ClientSession = session
 
     @abc.abstractmethod
-    async def invoke(self) -> Any: ...
+    async def invoke(self, *args: Any, **kwargs: Any) -> Any: ...
 
 
 class OpenDotaClient(APIClient):

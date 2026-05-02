@@ -71,11 +71,11 @@ class LogsViaWebhook(IreDevComponent):
         self._lock: asyncio.Lock = asyncio.Lock()
         self.cooldown: datetime.timedelta = datetime.timedelta(seconds=5)
         self._most_recent: datetime.datetime | None = None
+        self.logs_handler = LoggingHandler(self)
 
     @override
     async def component_load(self) -> None:
         self.logging_worker.start()
-        self.logs_handler = LoggingHandler(self)
         logging.getLogger().addHandler(self.logs_handler)
         await super().component_load()
 

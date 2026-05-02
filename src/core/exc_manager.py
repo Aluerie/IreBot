@@ -9,6 +9,8 @@ import traceback
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from utils import const
+
 if TYPE_CHECKING:
     from collections.abc import Generator
 
@@ -23,11 +25,11 @@ log = logging.getLogger("exc_manager")
 class ExceptionManager:
     """Exception Manager that."""
 
-    __slots__: tuple[str, ...] = ("_lock", "_most_recent", "bot", "cooldown", "errors_cache")
+    __slots__: tuple[str, ...] = ("_lock", "_most_recent", "bot", "cooldown")
 
-    def __init__(self, bot: IreBot, *, cooldown: datetime.timedelta = datetime.timedelta(seconds=5)) -> None:
+    def __init__(self, bot: IreBot, *, cooldown: datetime.timedelta = const.MISSING) -> None:
         self.bot: IreBot = bot
-        self.cooldown: datetime.timedelta = cooldown
+        self.cooldown: datetime.timedelta = cooldown or datetime.timedelta(seconds=5)
 
         self._lock: asyncio.Lock = asyncio.Lock()
         self._most_recent: datetime.datetime | None = None
