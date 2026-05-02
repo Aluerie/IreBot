@@ -20,6 +20,7 @@ __all__ = (
     "SteamUserConverter",
     "SteamUserNotFound",
     "extract_hero_index",
+    "is_allowed_to_add_notable",
     "rank_medal_display_name",
 )
 

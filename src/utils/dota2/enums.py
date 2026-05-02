@@ -4,7 +4,7 @@ from enum import Enum, IntEnum, StrEnum
 from typing import TYPE_CHECKING, Self, override
 
 from steam.enums import Enum as SteampyEnum, classproperty
-from steam.ext.dota2 import GameMode, LobbyType
+from steam.ext import dota2
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -117,10 +117,10 @@ class ScoreCategory(Enum):
         This allows categorizing dota matches for !wl command.
         """
         match lobby_type:
-            case LobbyType.Ranked:
+            case dota2.LobbyType.Ranked:
                 return ScoreCategory.Ranked
-            case LobbyType.Unranked:
-                return ScoreCategory.Turbo if game_mode == GameMode.Turbo else ScoreCategory.Unranked
+            case dota2.LobbyType.Unranked:
+                return ScoreCategory.Turbo if game_mode == dota2.GameMode.Turbo else ScoreCategory.Unranked
             case _:
                 return ScoreCategory.Other
 

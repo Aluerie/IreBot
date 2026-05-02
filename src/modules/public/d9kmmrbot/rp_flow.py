@@ -20,15 +20,6 @@ from core import IrePublicComponent, ireloop
 from modules import DEV_REQUIRED, PUBLIC_D9MMRBOT
 from utils import const, dota2 as dota2utils, errors, fmt, guards
 
-from .enums import LiveIndicator, LobbyParam0, ScoreCategory, Status
-from .tools import (
-    PARTY_MEMBERS_PATTERN,
-    SteamUserConverter,
-    extract_hero_index,
-    is_allowed_to_add_notable,
-    rank_medal_display_name,
-)
-
 if TYPE_CHECKING:
     from collections.abc import Callable, Coroutine
 
@@ -145,7 +136,9 @@ class RichPresence:
 
     def __init__(self, raw: dict[str, str] | None) -> None:
         self.raw: dict[str, str] = raw or {}
-        self.status = Status.try_value(raw.get("status", "#MY_NO_STATUS")) if raw else Status.RichPresenceNone
+        self.status = (
+            dota2utils.Status.try_value(raw.get("status", "#MY_NO_STATUS")) if raw else dota2utils.Status.RichPresenceNone
+        )
 
     @override
     def __repr__(self) -> str:
@@ -218,7 +211,7 @@ class Player:
             friend_id=account_id,
             player_slot=player_slot,
             lifetime_games=profile_card.lifetime_games,
-            medal=rank_medal_display_name(profile_card),
+            medal=dota2utils.rank_medal_display_name(profile_card),
         )
 
     @property
@@ -318,7 +311,7 @@ class LiveMatch:
         if not self.players:
             return "No player data yet."
 
-        hero, player_slot = extract_hero_index(argument, self.heroes)
+        hero, player_slot = dota2utils.extract_hero_index(argument, self.heroes)
         return f"{hero} stratz.com/players/{self.players[player_slot].friend_id}"
 
     @format_match_response
@@ -331,7 +324,7 @@ class LiveMatch:
         if self.lobby_type == dota2.LobbyType.NewPlayerMode:
             return "New Player Mode matches do not support real time stats."
 
-        hero, player_slot = extract_hero_index(argument, self.heroes)
+        hero, player_slot = dota2utils.extract_hero_index(argument, self.heroes)
 
         match = await self.bot.dota2.web_api.get_real_time_stats(self.server_steam_id)
 
@@ -414,7 +407,7 @@ class PlayingMatch(LiveMatch):
         self.lobby_id: int = int(watchable_game_id)
 
         self.average_mmr: int | None = None
-        self.live: LiveIndicator = LiveIndicator.Starting
+        self.live: dota2utils.LiveIndicator = dota2utils.LiveIndicator.Starting
 
         self.update_data.start()
 
@@ -464,7 +457,7 @@ class PlayingMatch(LiveMatch):
                 # no match to inspect in match history, opendota, etc;
                 # And `match.minimal()` errors out with `ValueError`
 
-                self.live = LiveIndicator.Live
+                self.live = dota2utils.LiveIndicator.Live
 
                 query = """
                     INSERT INTO ttv_dota_matches
@@ -475,7 +468,7 @@ class PlayingMatch(LiveMatch):
                 await self.bot.pool.execute(query, self.match_id, match.start_time, self.lobby_type, self.game_mode)
 
                 for friend in self.friends:
-                    if friend.rich_presence.status == Status.Coaching:
+                    if friend.rich_presence.status == dota2utils.Status.Coaching:
                         # If the person is coaching then the match will not be in their match history -
                         # we don't need to track WinLoss or etc ; no need to add it into the database ;
                         continue
@@ -664,25 +657,25 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         rp = friend.rich_presence
 
         # Dashboard
-        if rp.status in {Status.Idle, Status.MainMenu, Status.Finding}:
+        if rp.status in {dota2utils.Status.Idle, dota2utils.Status.MainMenu, dota2utils.Status.Finding}:
             return Dashboard()
 
         # Playing somewhere
         if rp.status in {
-            Status.WaitingToLoad,
-            Status.HeroSelection,
-            Status.Strategy,
-            Status.PreGame,
-            Status.WaitingForMapToLoad,
-            Status.Playing,
-            Status.Coaching,
+            dota2utils.Status.WaitingToLoad,
+            dota2utils.Status.HeroSelection,
+            dota2utils.Status.Strategy,
+            dota2utils.Status.PreGame,
+            dota2utils.Status.WaitingForMapToLoad,
+            dota2utils.Status.Playing,
+            dota2utils.Status.Coaching,
         }:
             if (watchable_game_id := rp.raw.get("WatchableGameID")) is None:
                 # something is off
                 lobby_param0 = rp.raw.get("param0") or "_missing"
                 lobby_map: dict[str, Activity] = {
-                    LobbyParam0.DemoMode: UnsupportedPartial("Demo mode is not supported"),
-                    LobbyParam0.BotMatch: UnsupportedPartial("Bot matches are not supported"),
+                    dota2utils.LobbyParam0.DemoMode: UnsupportedPartial("Demo mode is not supported"),
+                    dota2utils.LobbyParam0.BotMatch: UnsupportedPartial("Bot matches are not supported"),
                 }
                 return lobby_map.get(lobby_param0, Incomplete("RP is `playing` but watchable_game_id=None"))
 
@@ -694,22 +687,22 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             return PlayingPartial(watchable_game_id)
 
         # Watching
-        if rp.status in {Status.Spectating, Status.WatchingTournament}:
+        if rp.status in {dota2utils.Status.Spectating, dota2utils.Status.WatchingTournament}:
             watching_server = rp.raw.get("watching_server")
             if watching_server is None:
                 return UnsupportedPartial("Data in watching replays is not supported")
             return SpectatingPartial(watching_server)
 
-        if rp.status == Status.NoStatus:
+        if rp.status == dota2utils.Status.NoStatus:
             # usually this happens in exact moment when the player closes Dota
             return Incomplete("Closed Dota")
 
         other_statuses = {
-            Status.BotPractice: "Demo mode is not supported",
-            Status.PrivateLobby: "Bot matches are not supported",
-            Status.CustomGameProgress: "Custom games are not supported",
-            Status.CustomGameLobby: "Private lobbies (this includes draft in public lobbies) are not supported",
-            Status.Crownfall: "Crownfall activities are not supported.",
+            dota2utils.Status.BotPractice: "Demo mode is not supported",
+            dota2utils.Status.PrivateLobby: "Bot matches are not supported",
+            dota2utils.Status.CustomGameProgress: "Custom games are not supported",
+            dota2utils.Status.CustomGameLobby: "Private lobbies (this includes draft in public lobbies) are not supported",
+            dota2utils.Status.Crownfall: "Crownfall activities are not supported.",
         }
         if msg := other_statuses.get(rp.status):
             return UnsupportedPartial(msg)
@@ -811,17 +804,17 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         if it's a play match.
         """
         if (match := friend.active_match) and isinstance(match, PlayingMatch) and match.match_id:
-            if match.live == LiveIndicator.Live:
-                match.live = LiveIndicator.Pending
+            if match.live == dota2utils.LiveIndicator.Live:
+                match.live = dota2utils.LiveIndicator.Pending
                 query = """
                     UPDATE ttv_dota_matches
                     SET live = $1
                     WHERE match_id = $2;
                 """
-                await self.bot.pool.execute(query, LiveIndicator.Pending, match.match_id)
+                await self.bot.pool.execute(query, dota2utils.LiveIndicator.Pending, match.match_id)
                 if not self.process_pending_matches.is_running():
                     self.process_pending_matches.start()
-            elif match.live == LiveIndicator.Starting:
+            elif match.live == dota2utils.LiveIndicator.Starting:
                 # It means that the lobby terminated before heroes were picked;
                 match.update_data.cancel()
 
@@ -1004,7 +997,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             raise errors.PlaceholderError(msg)
 
         is_radiant = slot < 5
-        score_category = ScoreCategory.create(match.lobby_type, match.game_mode)
+        score_category = dota2utils.ScoreCategory.create(match.lobby_type, match.game_mode)
         if match.outcome >= dota2.MatchOutcome.NotScoredPoorNetworkConditions:
             outcome = "Not Scored"
         elif match.outcome == dota2.MatchOutcome.RadiantVictory:
@@ -1156,7 +1149,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             FROM ttv_dota_matches
             WHERE outcome IS NULL AND live = $1 AND failed < 12;
         """
-        rows = await self.bot.pool.fetch(query, LiveIndicator.Pending)
+        rows = await self.bot.pool.fetch(query, dota2utils.LiveIndicator.Pending)
         if not rows:
             # I guess no pending matches left
             self.process_pending_matches.cancel()
@@ -1185,7 +1178,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
                 SET outcome = $1, live = $3
                 WHERE match_id = $2;
             """
-            await self.bot.pool.execute(query, minimal.outcome, row["match_id"], LiveIndicator.Completed)
+            await self.bot.pool.execute(query, minimal.outcome, row["match_id"], dota2utils.LiveIndicator.Completed)
 
     @ireloop(seconds=20)
     async def process_pending_abandons(self) -> None:
@@ -1254,7 +1247,9 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         # Mapping steam32_id -> [steam64_id, their supposed account name]
         # v[0]: int - steam64
         # v[1]: str - notable name
-        members: dict[int, list[Any]] = {m.id: [m.id64, ""] for m in map(steam.ID, PARTY_MEMBERS_PATTERN.findall(party))}
+        members: dict[int, list[Any]] = {
+            m.id: [m.id64, ""] for m in map(steam.ID, dota2utils.PARTY_MEMBERS_PATTERN.findall(party))
+        }
         if not members:
             msg = "Streamer is not in a party."
             raise errors.RespondWithError(msg)
@@ -1296,15 +1291,15 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         """
         if stream_started_at:
             rows: list[ScoreQueryRow] = await self.bot.pool.fetch(
-                query, broadcaster_id, LiveIndicator.Live, stream_started_at
+                query, broadcaster_id, dota2utils.LiveIndicator.Live, stream_started_at
             )
         else:
-            rows: list[ScoreQueryRow] = await self.bot.pool.fetch(query, broadcaster_id, LiveIndicator.Live)
+            rows: list[ScoreQueryRow] = await self.bot.pool.fetch(query, broadcaster_id, dota2utils.LiveIndicator.Live)
 
         if not rows:
             return "0 W - 0 L" if stream_started_at else "0 W - 0 L (No games played in the last 2 days)"
 
-        index: dict[int, dict[ScoreCategory, Score]] = {}
+        index: dict[int, dict[dota2utils.ScoreCategory, Score]] = {}
 
         cutoff_dt = rows[0]["start_time"]
         for row in rows:
@@ -1314,7 +1309,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
                 break
             cutoff_dt = row["start_time"]
 
-            score_category = ScoreCategory.create(row["lobby_type"], row["game_mode"])
+            score_category = dota2utils.ScoreCategory.create(row["lobby_type"], row["game_mode"])
             score = index.setdefault(row["friend_id"], {}).setdefault(score_category, Score(0, 0, 0, 0))
 
             if row["abandon"]:
@@ -1395,7 +1390,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
         mmr: int = await self.bot.pool.fetchval(query, friend.steam_user.id)
 
         profile_card = await friend.steam_user.dota2_profile_card()
-        response = f"Medal: {rank_medal_display_name(profile_card)} \N{BULLET} Database tracked MMR: {mmr}"
+        response = f"Medal: {dota2utils.rank_medal_display_name(profile_card)} \N{BULLET} Database tracked MMR: {mmr}"
         await ctx.send(response)
 
     @commands.is_broadcaster()
@@ -1454,7 +1449,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
     #################################
 
     # Remember, group guards apply to children.
-    @is_allowed_to_add_notable()
+    @dota2utils.is_allowed_to_add_notable()
     @guards.is_vps()
     @commands.group(name="npm", aliases=["np-dev"], invoke_fallback=True)
     async def npm_dev(self, ctx: IreContext) -> None:
@@ -1467,7 +1462,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
 
     @npm_dev.command(name="add", aliases=["edit", "rename"])
     async def npm_dev_add(
-        self, ctx: IreContext, steam_user: Annotated[dota2.User, SteamUserConverter], *, name: str
+        self, ctx: IreContext, steam_user: Annotated[dota2.User, dota2utils.SteamUserConverter], *, name: str
     ) -> None:
         """Add a notable player to the database.
 
