@@ -54,6 +54,8 @@ exclude = [".venv", "docs", "**/__pycache__", "**/node_modules", "**/.*"]
 pythonVersion = "3.12"
 deprecateTypingAliases = true
 typeCheckingMode = "strict"
+venvPath = "."
+venv = ".venv"
 
 reportCallInDefaultInitializer = "warning"
 reportImplicitOverride = "warning"
