@@ -1,10 +1,5 @@
 # Python-generated files
 __pycache__/
-*.py[oc]
-build/
-dist/
-wheels/
-*.egg-info
 
 # Virtual environments
 .venv
@@ -17,6 +12,7 @@ venv
 !.vscode/extensions.json
 
 # iPython Notebooks
+ipynb/
 .ipynb_checkpoints
 *.ipynb
 
@@ -29,8 +25,9 @@ config.toml
 # Temporary
 .temp/
 
-# Testing Only
+# Testing Related
 src/modules/beta.py
 subset.py
-scripts/
-ipynb/
+
+# Wiki
+.wiki
