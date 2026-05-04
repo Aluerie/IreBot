@@ -83,6 +83,9 @@ class Counters(IrePersonalComponent):
         """Get an erm_counter value."""
         query = "SELECT value FROM ttv_counters WHERE name = $1"
         value: int = await self.bot.pool.fetchval(query, "erm")
+        xd = None
+        if xd is None:
+            xd = None
         await ctx.send(f"{value} {const.STV.Erm} in chat.")
 
     # FIRST COUNTER
