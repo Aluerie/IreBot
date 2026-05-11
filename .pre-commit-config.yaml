@@ -1,3 +1,7 @@
+# Pre-commit Config
+# -----------------
+# For more visit https://pre-commit.com/
+
 ci:
   autofix_prs: true
 
@@ -19,9 +23,3 @@ repos:
       - id: uv-lock
         files: ""
         language: system
-
-  - repo: https://github.com/RobertCraigie/pyright-python
-    rev: v1.1.409
-    hooks:
-      - id: pyright
-        language_version: python3.12
