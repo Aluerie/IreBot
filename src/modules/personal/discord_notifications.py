@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any
 import discord
 from twitchio.ext import commands
 
-from config import config
+from config import env
 from core import IrePersonalComponent
 
 if TYPE_CHECKING:
@@ -32,7 +32,7 @@ class DiscordNotifications(IrePersonalComponent):
     @discord.utils.cached_property
     def notification_webhook(self) -> discord.Webhook:
         """A shortcut to error webhook."""
-        webhook_url = config["WEBHOOKS"]["STREAM_NOTIFS"] if not self.bot.test_subset_mode else config["WEBHOOKS"]["LOGGER"]
+        webhook_url = env.WEBHOOK_STREAM_NOTIFS if not self.bot.test_subset_mode else env.WEBHOOK_LOGGER
         return discord.Webhook.from_url(url=webhook_url, session=self.bot.session)
 
     @commands.Component.listener(name="stream_online")
