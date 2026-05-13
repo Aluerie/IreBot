@@ -1,6 +1,7 @@
 import pytest
 from steam.ext import dota2
 
+from config import env
 from utils.dota2.tools import extract_hero_index
 
 # pyright bug: if I do `from steam.ext.dota2 import Hero` it will fail to find stubs:
@@ -34,3 +35,6 @@ MATCH_1_HEROES = [
 def test_fuzzy_extract_hero_index(argument: str, expected_hero: Hero, heroes_in_match: list[Hero]) -> None:
     """Test whether `extract_hero_index` function returns expected values."""
     assert extract_hero_index(argument, heroes_in_match)[0] == expected_hero
+
+
+print(env.model_dump())
