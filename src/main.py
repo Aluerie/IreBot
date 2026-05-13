@@ -1,9 +1,11 @@
 """
-This Source Code Form is subject to the terms of the Mozilla Public
-License, v. 2.0. If a copy of the MPL was not distributed with this
-file, You can obtain one at http://mozilla.org/MPL/2.0/.
+Python Launcher file for the bot.
+Use `uv run src/main.py`, `python src/main.py`, IDE UI or any other ways to launch a python script.
 
-Copyright (C) 2020 Aluerie <https://github.com/Aluerie>
+License
+-------
+* This Source Code Form is subject to the terms of the [Mozilla Public License v2.0](<http://mozilla.org/MPL/2.0/>).
+* Copyright (C) 2020-present [Aluerie](<https://github.com/Aluerie>).
 """
 
 from __future__ import annotations
@@ -78,14 +80,23 @@ async def start_the_bot(*, scopes_only: bool, owner_id: str, force_subscribe: bo
     "-s",
     is_flag=True,
     default=False,  # usual default: False ✅
-    help="Show oath urls with scopes for broadcaster and bot accounts to authorize with (bot features won't be activated)",
+    help=(
+        "Launches the bot without any functionality except for Auth Token management."
+        "This also show OATH urls with scopes for a bot account, the bot owner and broadcasters to authorize with."
+        "The bot will add their tokens to the database upon authorization thanks to Auth Token management being on."
+    ),
 )
 @click.option(
     "--owner",
     "-o",
     type=click.Choice(["irene", "aluerie"]),
     default="irene",  # usual default: "irene" ✅
-    help="Which account to assume as the bot owner's account.",
+    help=(
+        "Which account to consider as bot's owner. Two options: `irene` or `aluerie`."
+        "Sometimes I switch between those accounts."
+        "The bot makes personal EventSubs subscriptions for the chosen account."
+        "Also changes the logic of `is_owner` condition."
+    ),
 )
 @click.option(
     "--force-subscribe",
@@ -102,50 +113,14 @@ async def start_the_bot(*, scopes_only: bool, owner_id: str, force_subscribe: bo
     help="Whether to use adapter with localhost (default) or remote host (currently ngrok-free for testing purposes).",
 )
 def main(
-    click_ctx: click.Context, *, scopes_only: bool, owner: Literal["irene", "aluerie"], force_subscribe: bool, local: bool
+    click_ctx: click.Context,
+    *,
+    scopes_only: bool,
+    owner: Literal["irene", "aluerie"],
+    force_subscribe: bool,
+    local: bool,
 ) -> None:
-    """Launches the bot.
-
-    Parameters
-    ----------
-    owner: str
-        Which account to consider as bot's owner. Two options: `irene` or `aluerie`.
-        Sometimes I switch between those accounts.
-        The bot makes personal EventSubs subscriptions for the chosen account.
-        Also changes the logic of "is_owner" condition.
-
-    local: bool
-        Whether to use adapter with localhost (default behavior) or with remote host.
-        Currently I'm using ngrok-free as a free domain app is being used for testing purposes.
-
-    DISCLAIMERS FOR FUTURE !!!
-    --------------------------
-    1.  If we switch `owner` parameter or default value - we have to run the bot with `force_subscribe=True` once.
-        The conduits stay alive only for 72 hours.
-        So it's almost certain the subscriptions will be dead for the other account when we decide to switch.
-
-    A small guide for adapter-host setup (I will forget).
-    -----------------------------------------------------
-    Step 0. Decide whether we use local adapter (localhost) or remote (currently - ngrok);
-        Remote allows other people to authorize the bot permissions, but requires a web app running.
-    Step 1. Twitch Developer Console at Irene_Adler__ account -> OAuths Redirect URLs:
-        local: http://localhost:4343/oauth/callback
-        ngrok: https://parrot-thankful-trivially.ngrok-free.app/oauth/callback
-    Step 2.
-        local: no actions needed;
-        ngrok:
-            Run `ngrok http --url=parrot-thankful-trivially.ngrok-free.app 4343` in PC/VPS's terminal.
-            Note that the port should be 4343, as twitchio adapter works on it as well.
-            Ignore ngrok dashboard saying port 80, it's just an example.
-    Step 3.
-        Simply run the bot, i.e. `uv run main.py`.
-        Now users should be able to visit a link like this
-            local: http://localhost:4343/oauth?scopes=channel:bot&force_verify=true
-            ngrok: https://parrot-thankful-trivially.ngrok-free.app/oauth?scopes=channel:bot&force_verify=true
-        to authorize the bot. Note, to get a proper link with ALL proper scopes - launch the bot in `scopes-only` mode.
-
-
-    """
+    """Launches the bot."""
     if click_ctx.invoked_subcommand is None:
         with setup_logging():
             owner_id: str = {"irene": const.UserID.Irene, "aluerie": const.UserID.Aluerie}[owner]
