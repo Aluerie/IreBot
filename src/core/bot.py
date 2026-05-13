@@ -16,7 +16,7 @@ from twitchio import eventsub
 from twitchio.ext import commands
 from twitchio.web import StarletteAdapter
 
-from config import config
+from config import env
 from modules import PUBLIC_D9MMRBOT, get_modules
 from utils import const, dota2 as dota2utils, errors
 
@@ -183,15 +183,15 @@ class IreBot(commands.AutoBot):
             adapter = StarletteAdapter(
                 host="0.0.0.0",  # noqa: S104
                 domain=self.domain,
-                eventsub_secret=config["TOKENS"]["EVENTSUB"],
+                eventsub_secret=env.EVENTSUB,
             )
         super().__init__(
-            client_id=config["TWITCH"]["CLIENT_ID"],
-            client_secret=config["TWITCH"]["CLIENT_SECRET"],
+            client_id=env.TWITCH_CLIENT_ID,
+            client_secret=env.TWITCH_CLIENT_SECRET,
             bot_id=const.UserID.Bot,
             owner_id=owner_id,
             prefix=self.prefixes,
-            adapter=adapter,  # pyright: ignore[reportArgumentType], it's hinted as `NotRequired` while I need to use `None`.
+            adapter=adapter,  # type: ignore[reportArgumentType], it's hinted as `NotRequired` while I need to use `None`.
             subscriptions=subscriptions,
             force_subscribe=force_subscribe,  # Set to `True` if we need urgent manual refreshing eventsub subs.
         )
@@ -537,12 +537,12 @@ class IreBot(commands.AutoBot):
     @discord.utils.cached_property
     def logger_webhook(self) -> discord.Webhook:
         """A webhook in hideout's #logger channel."""
-        return self.webhook_from_url(config["WEBHOOKS"]["LOGGER"])
+        return self.webhook_from_url(env.WEBHOOK_LOGGER)
 
     @discord.utils.cached_property
     def error_webhook(self) -> discord.Webhook:
         """A webhook in hideout server to send errors/notifications to the developer(-s)."""
-        return self.webhook_from_url(config["WEBHOOKS"]["ERROR"])
+        return self.webhook_from_url(env.WEBHOOK_ERROR)
 
     @discord.utils.cached_property
     def error_ping(self) -> str:

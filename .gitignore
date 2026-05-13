@@ -21,6 +21,7 @@ ipynb/
 
 # Config
 config.toml
+.env
 
 # Temporary
 .temp/

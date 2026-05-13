@@ -1,6 +1,9 @@
 """
 Python Launcher file for the bot.
-Use `uv run src/main.py`, `python src/main.py`, IDE UI or any other ways to launch a python script.
+
+Generally, it's preferred to use `make run` to run this bot, however you can use
+`uv run src/main.py`, `python src/main.py`, etc. directly, if you like.
+CLI supported flags can be viewed with `--help` flag.
 
 License
 -------
@@ -20,7 +23,7 @@ import aiohttp
 import asyncpg
 import click
 
-from config import config
+from config import env
 from core import IreBot, get_eventsub_subscriptions, setup_logging
 from utils import const
 
@@ -39,7 +42,7 @@ else:
 
 async def create_pool() -> asyncpg.Pool[asyncpg.Record]:
     """Create AsyncPG Pool."""
-    postgres_url = config["POSTGRES"]["VPS"] if platform.system() == "Linux" else config["POSTGRES"]["HOME"]
+    postgres_url = env.POSTGRES_VPS if platform.system() == "Linux" else env.POSTGRES_HOME
     return await asyncpg.create_pool(postgres_url, command_timeout=60, min_size=10, max_size=10, statement_cache_size=0)
 
 

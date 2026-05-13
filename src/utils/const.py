@@ -128,6 +128,7 @@ class STV(StrEnum):
     FirstTimeChadder = "FirstTimeChadder"
     FirstTimeDentge = "FirstTimeDentge"
     forsenCD = "forsenCD"
+    fridayNight = "fridayNight"
     gg = "gg"
     GroupScoots = "GroupScoots"
     hello = "hello"

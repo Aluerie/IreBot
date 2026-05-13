@@ -10,24 +10,51 @@ License
 from __future__ import annotations
 
 import re
-import tomllib
-from pathlib import Path
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from types_.config import Config
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
-__all__ = ("config", "replace_secrets")
+__all__ = ("env", "replace_secrets")
 
 
-with Path("config.toml").open("rb") as fp:
-    config: Config = tomllib.load(fp)  # pyright: ignore[reportAssignmentType]
+class EnvConfig(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_ignore_empty=True,
+        extra="ignore",
+    )
 
 
-DO_NOT_SPOIL_LIST: list[str] = [config["TWITCH"]["CLIENT_ID"], config["TWITCH"]["CLIENT_SECRET"], config["TOKENS"]["STEAM"]]
-DO_NOT_SPOIL_PATTERN = re.compile("|".join(map(re.escape, DO_NOT_SPOIL_LIST)))
+class Env(EnvConfig):
+    PROJECT_NAME: str
+    TWITCH_CLIENT_ID: str
+    TWITCH_CLIENT_SECRET: str
+    POSTGRES_VPS: str
+    POSTGRES_HOME: str
+    STEAM_FRIEND_IRENE_ID64: int
+    STEAM_FRIEND_IRENE_ID32: int
+    STEAM_IRENESTEST_USERNAME: str
+    STEAM_IRENESTEST_PASSWORD: str
+    STEAM_IRENESBOT_USERNAME: str
+    STEAM_IRENESBOT_PASSWORD: str
+    STRATZ_BEARER: str
+    STEAM_API_KEY: str
+    SPOTIFY_AIDENWALLIS: str
+    EVENTSUB: str
+    WEBHOOK_LOGGER: str
+    WEBHOOK_ERROR: str
+    WEBHOOK_STREAM_NOTIFS: str
+
+
+env = Env()  # type: ignore[reportCallIssue]
+
+secrets_list = list(map(str, env.model_dump().values()))
+DO_NOT_SPOIL_PATTERN = re.compile("|".join(map(re.escape, secrets_list)))
 
 
 def replace_secrets(text: str) -> str:
-    """Hide Secrets from my config files from a string."""
+    """Hide my `.env` secrets from a string.
+
+    A precaution measure.
+    For example, it's possible for error handler to spoil my secrets when reporting some `HTTPException`.
+    """
     return DO_NOT_SPOIL_PATTERN.sub("SECRET", text)

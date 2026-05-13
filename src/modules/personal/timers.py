@@ -65,7 +65,7 @@ class Timers(IrePersonalComponent):
         self.index = 0
         self.lines_count = 0
         self.bot.add_listener(self.count_messages, event="event_message")
-        self.boink_announcement.start()
+        self.random_daily_announcement.start()
 
     @commands.Component.listener(name="stream_offline")
     async def stream_offline_cancel_the_task(self, offline: twitchio.StreamOffline) -> None:
@@ -74,7 +74,7 @@ class Timers(IrePersonalComponent):
             return
 
         self.bot.remove_listener(self.count_messages)
-        self.boink_announcement.cancel()
+        self.random_daily_announcement.cancel()
 
     # @commands.Component.listener(name="message")
     async def count_messages(self, message: twitchio.ChatMessage) -> None:
@@ -109,13 +109,20 @@ class Timers(IrePersonalComponent):
                 self._most_recent = datetime.datetime.now(datetime.UTC)
 
     @ireloop(hours=5)
-    async def boink_announcement(self) -> None:
+    async def random_daily_announcement(self) -> None:
         """It's time to boink."""
-        if self.boink_announcement.current_loop == 0:
+        if self.random_daily_announcement.current_loop == 0:
             return
 
         owner = self.bot.get_partial_owner()
-        await owner.send_announcement(message="It's time to Boink", moderator=self.bot.bot_id, color="primary")
+
+        now = datetime.datetime.now(datetime.UTC)
+        if (now.day == 4 and now.hour > 18) or (now.day == 5 and now.hour < 6):
+            message = f"it's friday night gents {const.STV.fridayNight} time to dance"
+        else:
+            message = f"It's time to {const.STV.Boink}"
+
+        await owner.send_announcement(message=message, moderator=self.bot.bot_id, color="primary")
 
 
 async def setup(bot: IreBot) -> None:

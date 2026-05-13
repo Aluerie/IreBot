@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, NamedTuple, override
 from steam import PersonaState
 from steam.ext import dota2
 
-from config import config
+from config import env
 
 from .api_clients import OpenDotaClient, SteamWebAPIClient, StratzClient
 from .storage import Items
@@ -39,8 +39,8 @@ class Dota2Client(dota2.Client):
         self.started: bool = False
 
         self.opendota = OpenDotaClient(session=self.bot.session)
-        self.stratz = StratzClient(bearer_token=config["TOKENS"]["STRATZ_BEARER"], session=self.bot.session)
-        self.web_api = SteamWebAPIClient(api_key=config["TOKENS"]["STEAM"], session=self.bot.session)
+        self.stratz = StratzClient(bearer_token=env.STRATZ_BEARER, session=self.bot.session)
+        self.web_api = SteamWebAPIClient(api_key=env.STEAM_API_KEY, session=self.bot.session)
 
         self.items = Items(twitch_bot)
 
@@ -52,8 +52,10 @@ class Dota2Client(dota2.Client):
     @override
     async def login(self) -> None:
         await self.start_helpers()
-        account_credentials = config["STEAM"]["IRENESTEST"] if self.bot.test_subset_mode else config["STEAM"]["IRENESBOT"]
-        username, password = account_credentials["USERNAME"], account_credentials["PASSWORD"]
+        if self.bot.test_subset_mode:
+            username, password = env.STEAM_IRENESTEST_USERNAME, env.STEAM_IRENESTEST_PASSWORD
+        else:
+            username, password = env.STEAM_IRENESBOT_USERNAME, env.STEAM_IRENESBOT_PASSWORD
         await super().login(username, password)
 
     @override

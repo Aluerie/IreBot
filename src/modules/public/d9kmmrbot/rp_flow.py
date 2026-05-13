@@ -15,7 +15,7 @@ import steam
 from steam.ext import dota2
 from twitchio.ext import commands
 
-from config import config
+from config import env
 from core import IrePublicComponent, ireloop
 from modules import DEV_REQUIRED, PUBLIC_D9MMRBOT
 from utils import const, dota2 as dota2utils, errors, fmt, guards
@@ -1590,19 +1590,19 @@ class Dota2RichPresenceFlow(IrePublicComponent):
     @commands.Component.listener("heroes_data_ready")
     async def debug_announce_hero_data_ready(self, match: LiveMatch) -> None:
         """Announce in Irene's twitch chat that match heroes data is ready."""
-        if config["STEAM"]["IRENE_ID32"] in [f.steam_user.id for f in match.friends]:
+        if env.STEAM_FRIEND_IRENE_ID32 in [f.steam_user.id for f in match.friends]:
             await self.debug_deliver(f"Heroes Data for {match.match_id} is ready")
 
     @commands.Component.listener("players_data_ready")
     async def debug_announce_players_data_ready(self, match: LiveMatch) -> None:
         """Announce in Irene's twitch chat that match players data is ready."""
-        if config["STEAM"]["IRENE_ID32"] in [f.steam_user.id for f in match.friends]:
+        if env.STEAM_FRIEND_IRENE_ID32 in [f.steam_user.id for f in match.friends]:
             await self.debug_deliver(f"Players Data for {match.match_id} is ready")
 
     @commands.Component.listener("activity_change")
     async def debug_announce_activity_change(self, friend: Friend) -> None:
         """Announce in Irene's twitch chat that their activity data has changed."""
-        if friend.steam_user.id == config["STEAM"]["IRENE_ID32"]:
+        if friend.steam_user.id == env.STEAM_FRIEND_IRENE_ID32:
             await self.debug_deliver(f"Activity changed to: {friend.activity}")
 
     @ireloop(count=1)
