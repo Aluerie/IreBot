@@ -33,5 +33,4 @@ MATCH_1_HEROES = [
 )
 def test_fuzzy_extract_hero_index(argument: str, expected_hero: Hero, heroes_in_match: list[Hero]) -> None:
     """Test whether `extract_hero_index` function returns expected values."""
-    assert 0 == 1
     assert extract_hero_index(argument, heroes_in_match)[0] == expected_hero
