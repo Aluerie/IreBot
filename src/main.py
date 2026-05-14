@@ -11,6 +11,10 @@ License
 * Copyright (C) 2020-present [Aluerie](<https://github.com/Aluerie>).
 """
 
+# uvloop existing only for Linux makes that reportMissingImports to be invalid for Linux, but valid for Windows
+# TODO: is there any better way to approach this dilemma?
+# pyright: reportUnnecessaryTypeIgnoreComment=false
+
 from __future__ import annotations
 
 import asyncio
@@ -32,8 +36,8 @@ if TYPE_CHECKING:
 
 try:
     import uvloop  # pyright: ignore[reportMissingImports]
-except ImportError:
-    # WINDOWS
+except ModuleNotFoundError:
+    # WINDOWS - uvloop does not support Windows
     RUNTIME = asyncio.run  # pyright: ignore[reportConstantRedefinition]
 else:
     # LINUX

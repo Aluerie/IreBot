@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, NamedTuple, override
+from typing import TYPE_CHECKING, Any, NamedTuple, override
 
 from steam import PersonaState
 from steam.ext import dota2
@@ -50,13 +50,13 @@ class Dota2Client(dota2.Client):
             self.items.start()
 
     @override
-    async def login(self) -> None:
+    async def login(self, *args: Any, **kwargs: Any) -> None:
         await self.start_helpers()
         if self.bot.test_subset_mode:
             username, password = env.STEAM_IRENESTEST_USERNAME, env.STEAM_IRENESTEST_PASSWORD
         else:
             username, password = env.STEAM_IRENESBOT_USERNAME, env.STEAM_IRENESBOT_PASSWORD
-        await super().login(username, password)
+        await super().login(username, password, *args, **kwargs)
 
     @override
     async def close(self) -> None:

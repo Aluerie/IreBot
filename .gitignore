@@ -20,7 +20,6 @@ ipynb/
 *.ini
 
 # Config
-config.toml
 .env
 
 # Temporary

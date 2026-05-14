@@ -368,14 +368,24 @@ class IreBot(commands.AutoBot):
             await self.add_token(row["token"], row["refresh"])
 
     @override
-    async def start(self) -> None:
+    async def start(
+        self,
+        token: str | None = None,
+        *,
+        with_adapter: bool = True,
+        load_tokens: bool = True,
+        save_tokens: bool = True,
+    ) -> None:
         if PUBLIC_D9MMRBOT in self.modules_to_load:
             self.dota2 = dota2utils.Dota2Client(self)
             try:
-                await asyncio.gather(super().start(), self.dota2.login())
+                await asyncio.gather(
+                    super().start(token, with_adapter=with_adapter, load_tokens=load_tokens, save_tokens=save_tokens),
+                    self.dota2.login(),
+                )
             # A potential workaround for steam login issues
             # https://github.com/Gobot1234/steam.py/issues/446
-            # Not sure if it works :D
+            # # TODO: Check if it works as desired.
             except steam.errors.NoCMsFound:
                 log.warning("🔴 Encountered `steam.errors.NoCMsFound` - restarting. 🔴")
                 sys.exit(1)
@@ -386,13 +396,18 @@ class IreBot(commands.AutoBot):
             await super().start()
 
     @override
-    async def close(self) -> None:
+    async def close(self, **options: Any) -> None:
         if hasattr(self, "dota2"):
             await self.dota2.close()
-        await super().close()
+        await super().close(**options)
 
     @override
-    def get_context(self, payload: twitchio.ChatMessage, *, cls: Any = IreContext) -> IreContext:
+    def get_context(
+        self,
+        payload: twitchio.ChatMessage | twitchio.ChannelPointsRedemptionAdd | twitchio.ChannelPointsRedemptionUpdate,
+        *,
+        cls: Any = IreContext,
+    ) -> IreContext:
         # they have channel points commands but I'm not using it (yet)
         return super().get_context(payload, cls=cls)
 

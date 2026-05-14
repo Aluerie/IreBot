@@ -34,4 +34,5 @@ jobs:
       - name: Pytest Tests
         run: uv run make tests
         env:
+          # it doesn't need any other .env vars yet
           PROJECT_NAME: "irebot"
