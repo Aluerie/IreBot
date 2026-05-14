@@ -45,7 +45,7 @@ class Env(EnvConfig):
     WEBHOOK_STREAM_NOTIFS: str
 
 
-env = Env()  # type: ignore[reportCallIssue]
+env = Env()  # pyright: ignore[reportCallIssue]
 
 secrets_list = list(map(str, env.model_dump().values()))
 DO_NOT_SPOIL_PATTERN = re.compile("|".join(map(re.escape, secrets_list)))

@@ -69,7 +69,7 @@ class Dota2Client(dota2.Client):
         log.info("Dota 2 Game Coordinator: Ready")
 
     @override
-    async def on_user_update(self, before: dota2.User, after: dota2.User) -> None:
+    async def on_user_update(self, before: dota2.User, after: dota2.User) -> None:  # pyright: ignore[reportIncompatibleMethodOverride]
         """Called when a steam user is updated, due to one or more of their attributes changing.
 
         The information from this event is redirected to `self.bot` events

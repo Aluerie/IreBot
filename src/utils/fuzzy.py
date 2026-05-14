@@ -169,8 +169,8 @@ def extract[T](
     """
     it = _extraction_generator(query, choices, scorer, score_cutoff)
     if limit is not None:
-        return heapq.nlargest(limit, it, key=operator.itemgetter(1))  # type: ignore[reportReturnType]
-    return sorted(it, key=operator.itemgetter(1), reverse=True)  # type: ignore[reportReturnType]
+        return heapq.nlargest(limit, it, key=operator.itemgetter(1))  # pyright: ignore[reportReturnType]
+    return sorted(it, key=operator.itemgetter(1), reverse=True)  # pyright: ignore[reportReturnType]
 
 
 @overload

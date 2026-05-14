@@ -7,6 +7,9 @@ License
 * Copyright (C) 2020-present [Aluerie](<https://github.com/Aluerie>).
 """
 
+# VPS / HOME import difference
+# pyright: reportUnnecessaryTypeIgnoreComment=false
+
 from __future__ import annotations
 
 import logging
@@ -16,13 +19,13 @@ from pkgutil import iter_modules
 __all__ = ("get_modules",)
 
 try:
-    import subset as select_modules_to_load
-
-    TEST_CATEGORY_MODULES_MAPPING: dict[str, list[str]] = select_modules_to_load.CATEGORY_MODULES_MAPPING
-    LOAD_ALL_MODULES = select_modules_to_load.LOAD_ALL_MODULES
+    import subset as select_modules_to_load  # pyright: ignore[reportMissingImports]
 except ModuleNotFoundError:
-    TEST_CATEGORY_MODULES_MAPPING: dict[str, list[str]] = {}  # type: ignore[ConstantRedefinition]
-    LOAD_ALL_MODULES: bool = True  # type: ignore[reportConstantRedefinition]
+    SUBSET_CATEGORY_MODULES: dict[str, list[str]] = {}  # pyright: ignore[reportConstantRedefinition]
+    LOAD_ALL_MODULES: bool = True  # pyright: ignore[reportConstantRedefinition]
+else:
+    SUBSET_CATEGORY_MODULES: dict[str, list[str]] = select_modules_to_load.CATEGORY_MODULES_MAPPING
+    LOAD_ALL_MODULES: bool = select_modules_to_load.LOAD_ALL_MODULES
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.INFO)
@@ -76,7 +79,7 @@ def get_modules(*, test: bool) -> tuple[str, ...]:
     """
     if test and not LOAD_ALL_MODULES:
         # assume testing specific modules from `m.py`
-        return get_test_subset_modules(TEST_CATEGORY_MODULES_MAPPING)
+        return get_test_subset_modules(SUBSET_CATEGORY_MODULES)
 
     # assume running full bot functionality (besides `DISABLED_MODULES`)
     current_folder = "src/" + str(__package__)

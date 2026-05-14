@@ -57,7 +57,7 @@ class Status(SteampyStrEnum):
     CustomGameLobby = "#DOTA_RP_LOBBY_CUSTOM"
 
     @classproperty
-    def KNOWN_DISPLAY_NAMES(cls: type[Self]) -> Mapping[Status, str]:  # type: ignore[GeneralTypeIssue] # noqa: N802, N805
+    def KNOWN_DISPLAY_NAMES(cls: type[Self]) -> Mapping[Status, str]:  # pyright: ignore[reportGeneralTypeIssues] # noqa: N802, N805
         """Mapping between RPStatus enum and human-readable display names for them."""
         return {
             cls.RichPresenceNone: "Offline/Invisible",

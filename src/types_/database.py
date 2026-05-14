@@ -8,7 +8,7 @@ class PoolTypedWithAny(asyncpg.Pool[asyncpg.Record]):
 
     For typing purposes, our `bot.pool` will be "type-ignore"'d-as `PoolTypedWithAny`
     that allows us to properly type the return values via narrowing like mentioned in instructions above
-    without hundreds of "type: ignore" notices for each TypedDict.
+    without hundreds of "pyright: ignore" notices for each TypedDict.
 
     I could use Protocol to type it all, but `async-stubs` provide a good job in typing most of the stuff
     and we also don't lose doc-string this way.
@@ -20,7 +20,7 @@ class PoolTypedWithAny(asyncpg.Pool[asyncpg.Record]):
     # all methods below were changed from "asyncpg.Record" to "Any"
 
     @override
-    async def fetch(self, query: str, *args: Any, timeout: float | None = None) -> list[Any]: ...
+    async def fetch(self, query: str, *args: Any, timeout: float | None = None) -> list[Any]: ...  # pyright: ignore[reportIncompatibleMethodOverride]
 
     @override
-    async def fetchrow(self, query: str, *args: Any, timeout: float | None = None) -> Any: ...
+    async def fetchrow(self, query: str, *args: Any, timeout: float | None = None) -> Any: ...  # pyright: ignore[reportIncompatibleMethodOverride]

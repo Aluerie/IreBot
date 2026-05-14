@@ -17,5 +17,5 @@ class IreContext(commands.Context["IreBot"]):
         # I will only use IreContext with message commands
         # (twitchio also provides Channel Points commands).
         # therefore some type-hints can be reduced for convenience.
-        chatter: twitchio.Chatter
-        message: twitchio.ChatMessage
+        chatter: twitchio.Chatter  # pyright: ignore[reportIncompatibleMethodOverride]
+        message: twitchio.ChatMessage  # pyright: ignore[reportIncompatibleMethodOverride]

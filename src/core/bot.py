@@ -191,7 +191,7 @@ class IreBot(commands.AutoBot):
             bot_id=const.UserID.Bot,
             owner_id=owner_id,
             prefix=self.prefixes,
-            adapter=adapter,  # type: ignore[reportArgumentType], it's hinted as `NotRequired` while I need to use `None`.
+            adapter=adapter,  # pyright: ignore[reportArgumentType], it's hinted as `NotRequired` while I need to use `None`.
             subscriptions=subscriptions,
             force_subscribe=force_subscribe,  # Set to `True` if we need urgent manual refreshing eventsub subs.
         )
@@ -442,7 +442,7 @@ class IreBot(commands.AutoBot):
     async def event_command_error(self, payload: commands.CommandErrorPayload) -> None:
         """Called when error happens during command invoking."""
         command = payload.context.command
-        ctx: IreContext = payload.context  # type: ignore[reportAssignmentType] Channel Point commands lead to these things.
+        ctx: IreContext = payload.context  # pyright: ignore[reportAssignmentType] we do not use Channel Point commands.
         error = payload.exception
 
         if command and command.has_error and ctx.error_dispatched:

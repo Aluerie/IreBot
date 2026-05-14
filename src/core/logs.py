@@ -120,7 +120,7 @@ class MyColourFormatter(logging.Formatter):
 def get_log_fmt(handler: logging.Handler) -> logging.Formatter:
     if (
         isinstance(handler, logging.StreamHandler)
-        and discord.utils.stream_supports_colour(handler.stream)
+        and discord.utils.stream_supports_colour(handler.stream)  # pyright: ignore[reportUnknownMemberType]
         and not isinstance(handler, RotatingFileHandler)
     ):  # force file handler fmt into `else`
         formatter = MyColourFormatter()

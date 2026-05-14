@@ -12,7 +12,6 @@ License
 """
 
 # uvloop existing only for Linux makes that reportMissingImports to be invalid for Linux, but valid for Windows
-# TODO: is there any better way to approach this dilemma?
 # pyright: reportUnnecessaryTypeIgnoreComment=false
 
 from __future__ import annotations
