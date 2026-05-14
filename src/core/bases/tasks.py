@@ -69,7 +69,7 @@ class IreLoop(tasks.Loop[LF]):
         await cog.bot.wait_until_ready()
 
     @override
-    async def _error(self, cog: HasBotAttribute, exception: Exception) -> None:
+    async def _error(self, cog: HasBotAttribute, exception: Exception) -> None:  # pyright: ignore[reportIncompatibleMethodOverride]
         """Same `_error` as in parent class but with `exc_manager` integrated."""
         embed = discord.Embed(title=f"Task Error `{self.coro.__qualname__}`", colour=0x1A7A8A)
         if isinstance(exception, errors.PlaceholderError) and exception.data:
