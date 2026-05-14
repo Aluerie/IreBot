@@ -3,8 +3,8 @@ sources = src tests
 default: help
 
 .PHONY: help
-# ToDo: Look into ways to automatically gather output for this command.
-# The struggle is that Windows Terminal doesn't have `grep` and vice-versa, windows grep-like tools won't work for linux
+# TODO: Look into ways to automatically gather output for this command.
+# The struggle is that Windows Terminal doesn't have `grep`; and vice-versa windows grep-like tools won't work for linux
 help:  # Help
 	@echo IreBot Makefile
 	@echo ---------------

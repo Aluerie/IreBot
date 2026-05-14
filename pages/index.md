@@ -168,6 +168,7 @@ To make bot responses look like in the "Showcase" column you can add those emote
 
 * Add @PotatBotat to your channel;
 * Give it 7tv editor role, allow it to `Create Emote Sets` in addition to default permissions;
+<!-- cSpell: ignore PAAKP, FDYZVDR -->
 * Use `#mergeset <Primary set ID> 01JS1XW1PAAKP34984FDYZVDR7` where the second argument is an ID for the mentioned Dota 2 emote set;
 * You can find your `<Primary set ID>` by copying the last part of the URL to your own main emote set;
 * @PotatBotat will create a new emote set trying to merge the provided ones; if there is more then 1000 emotes in total - some emotes from the 2nd set won't make it;
@@ -211,8 +212,8 @@ PS. Another implementation for these features (using Dota 2 Game State Integrati
 
 I'm not planning to go big with this bot, so I didn't make an easy one-click way to add the bot. However, steps are as follows:
 
-1. Add the bot's steam account into your friends: <https://steamcommunity.com/id/irenesbot>
-2. Tell me that you want to add the bot - find me (`@Irene_Adler__`) in a twitch chat
-3. After you tell me that - I'm going to make the following link work: <https://parrot-thankful-trivially.ngrok-free.app/oauth?scopes=channel:bot&force_verify=true>. Yes, the link looks sketchy af because I don't care enough to spend money for a real web-site domain. When I activate the said link - it will become an Authorization link where you allow the bot to be a bot in your channel.
-4. Click the link and authorize, it's same "allow permissions" thing like any other twitch bot.
+1. Add the bot's steam account into your friends: <https://steamcommunity.com/id/irenesbot>.
+2. Tell me that you want to add the bot - find me (`@Irene_Adler__`) in a twitch chat or catch my stream.
+3. After that I'm going to make the following link work: <https://parrot-thankful-trivially.ngrok-free.app/oauth?scopes=channel:bot&force_verify=true>. Yes, the link looks sketchy af because I don't care enough to spend money for a real web-site domain. When I activate the said link - it will become an Authorization link where you allow the bot to be a bot in your channel.
+4. Click the link and authorize, it's the same "allow permissions" thing like any other twitch bot.
 5. ⚠️ Remember that for the bot features to work - you need to be green-online in Dota 2 as well.

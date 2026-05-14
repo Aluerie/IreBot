@@ -61,7 +61,7 @@ async def translate(
     }
 
     headers = {
-        "User-Agent": (
+        "User-Agent": (  # cSpell: ignore KHTML
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36"
         )
     }
@@ -140,10 +140,10 @@ class StableCommands(IrePersonalComponent):
     @commands.command()
     async def donate(self, ctx: IreContext) -> None:
         """Link to my Donation page."""
-        await ctx.send("donationalerts.com/r/irene_adler__")
+        await ctx.send("donationalerts.com/r/irene_adler__")  # cSpell: ignore donationalerts
 
     @commands.command()
-    async def followage(self, ctx: IreContext) -> None:
+    async def followage(self, ctx: IreContext) -> None:  # cSpell: ignore followage
         """Get your follow age."""
         # just a small joke to teach people
         await ctx.send("Just click your name 4Head")
@@ -203,7 +203,6 @@ class StableCommands(IrePersonalComponent):
     async def lurk(self, ctx: IreContext) -> None:
         """Make it clear to the chat that you are lurking."""
         await ctx.send(f"{ctx.chatter.mention} is now lurking {const.STV.DankLurk} Have fun {const.STV.donkHappy}")
-        # TODO: maybe make something like returning message for them with a time that they lurked
 
     @commands.command(name="decide", aliases=["ball", "8ball", "answer", "question", "yesno"])
     async def magic_ball(self, ctx: IreContext, *, text: str | None = None) -> None:
@@ -275,10 +274,10 @@ class StableCommands(IrePersonalComponent):
             "geographically🌍🌎ambiguous🌏🗺️accent 🇮🇪"
         )
 
-    @commands.command(aliases=["pcparts", "specs"])
+    @commands.command(aliases=["pcparts", "specs"])  # cSpell: ignore pcparts
     async def pc(self, ctx: IreContext) -> None:
         """Get Irene's current PC setup."""
-        await ctx.send("pcpartpicker.com/user/aluerie/saved/dY497P")
+        await ctx.send("pcpartpicker.com/user/aluerie/saved/dY497P")  # cSpell: ignore pcpartpicker
 
     @commands.command()
     async def playlist(self, ctx: IreContext) -> None:
@@ -287,7 +286,7 @@ class StableCommands(IrePersonalComponent):
 
     @commands.cooldown(rate=1, per=60, key=commands.BucketType.channel)
     @guards.is_owner_channel()
-    @commands.command(aliases=["rr", "russianroulette"])
+    @commands.command(aliases=["rr", "russianroulette"])  # cSpell: ignore russianroulette
     async def roulette(self, ctx: IreContext) -> None:
         """Play russian roulette."""
         mention = ctx.chatter.mention

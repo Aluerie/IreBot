@@ -50,7 +50,7 @@ class Status(SteampyStrEnum):
     Playing = "#DOTA_RP_PLAYING_AS"
     Spectating = "#DOTA_RP_SPECTATING"
     PrivateLobby = "#DOTA_RP_PRIVATE_LOBBY"
-    BotPractice = "#DOTA_RP_BOTPRACTICE"
+    BotPractice = "#DOTA_RP_BOTPRACTICE"  # cSpell: ignore BOTPRACTICE
     Coaching = "#DOTA_RP_COACHING"
     WatchingTournament = "#DOTA_RP_WATCHING_TOURNAMENT"
     CustomGameProgress = "#DOTA_RP_GAME_IN_PROGRESS_CUSTOM"

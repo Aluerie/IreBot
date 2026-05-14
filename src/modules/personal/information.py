@@ -23,8 +23,17 @@ if TYPE_CHECKING:
 __all__ = ("StreamInformation",)
 
 
-# specific exception so I can type "!game dota" without 2;
-GAME_KEYWORDS = {"dota": "Dota 2", "er": "Elden Ring", "sk": "Sekiro", "code": "Software and Game Development"}
+# specific exception so I can use shortcuts over typing full names
+GAME_KEYWORDS = {
+    "dota": "Dota 2",
+    "er": "Elden Ring",
+    "sk": "Sekiro",
+    "hk": "Hollow Knight",
+    "ss": "Hollow Knight: Silksong",
+    "mom": "With Your Mom's Tits",
+    "dev": "Software and Game Development",
+    "code": "Software and Game Development",
+}
 
 
 class StreamInformation(IrePersonalComponent):
