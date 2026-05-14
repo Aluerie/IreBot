@@ -26,6 +26,7 @@ sync:  # Install dependencies
 update:  # Update dependencies
 	uv lock --upgrade
 	uv sync --all-extras --all-packages --group dev
+	pre-commit autoupdate
 
 .PHONY: run
 .SILENT: run
