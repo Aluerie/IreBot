@@ -34,5 +34,22 @@ jobs:
       - name: Pytest Tests
         run: uv run make tests
         env:
-          # it doesn't need any other .env vars yet
-          PROJECT_NAME: "irebot"
+          # it doesn't need any real .env values, just so pydantic doesn't crash out
+          PROJECT_NAME: irebot
+          TWITCH_CLIENT_ID: str
+          TWITCH_CLIENT_SECRET: str
+          POSTGRES_VPS: str
+          POSTGRES_HOME: str
+          STEAM_FRIEND_IRENE_ID64: int
+          STEAM_FRIEND_IRENE_ID32: int
+          STEAM_IRENESTEST_USERNAME: str
+          STEAM_IRENESTEST_PASSWORD: str
+          STEAM_IRENESBOT_USERNAME: str
+          STEAM_IRENESBOT_PASSWORD: str
+          STRATZ_BEARER: str
+          STEAM_API_KEY: str
+          SPOTIFY_AIDENWALLIS: str
+          EVENTSUB: str
+          WEBHOOK_LOGGER: str
+          WEBHOOK_ERROR: str
+          WEBHOOK_STREAM_NOTIFS: str

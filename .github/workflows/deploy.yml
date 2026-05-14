@@ -1,5 +1,5 @@
 name: Deploy and Restart 
-run-name: Deploy {{ github.event_name }}
+run-name: Deploy ${{ github.event_name }}
 
 on:
   push:
