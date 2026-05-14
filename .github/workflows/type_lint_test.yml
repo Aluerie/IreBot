@@ -40,8 +40,8 @@ jobs:
           TWITCH_CLIENT_SECRET: str
           POSTGRES_VPS: str
           POSTGRES_HOME: str
-          STEAM_FRIEND_IRENE_ID64: int
-          STEAM_FRIEND_IRENE_ID32: int
+          STEAM_FRIEND_IRENE_ID64: 0
+          STEAM_FRIEND_IRENE_ID32: 0
           STEAM_IRENESTEST_USERNAME: str
           STEAM_IRENESTEST_PASSWORD: str
           STEAM_IRENESBOT_USERNAME: str
