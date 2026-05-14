@@ -204,7 +204,7 @@ class SteamUserConverter(commands.Converter[dota2.User]):
     """Simple Steam User converter."""
 
     @override
-    async def convert(self, ctx: IreContext, argument: str) -> dota2.User:
+    async def convert(self, ctx: IreContext, argument: str) -> dota2.User:  # pyright: ignore[reportIncompatibleMethodOverride]
         try:
             return await ctx.bot.dota2.fetch_user(steam.utils.parse_id64(argument))
         except steam.InvalidID:

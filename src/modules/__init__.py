@@ -24,8 +24,8 @@ except ModuleNotFoundError:
     SUBSET_CATEGORY_MODULES: dict[str, list[str]] = {}  # pyright: ignore[reportConstantRedefinition]
     LOAD_ALL_MODULES: bool = True  # pyright: ignore[reportConstantRedefinition]
 else:
-    SUBSET_CATEGORY_MODULES: dict[str, list[str]] = select_modules_to_load.CATEGORY_MODULES_MAPPING
-    LOAD_ALL_MODULES: bool = select_modules_to_load.LOAD_ALL_MODULES
+    SUBSET_CATEGORY_MODULES: dict[str, list[str]] = select_modules_to_load.CATEGORY_MODULES_MAPPING  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
+    LOAD_ALL_MODULES: bool = select_modules_to_load.LOAD_ALL_MODULES  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.INFO)

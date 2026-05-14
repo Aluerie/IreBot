@@ -47,3 +47,8 @@ class BetaCog(IreDevComponent):
     @ireloop(count=1)
     async def beta_test(self) -> None:
         """Task that is supposed to run just once to test stuff out."""
+        await self.beta_test_task_count_1()
+
+    async def beta_test_task_count_1(self) -> None:
+        """Worker function for `self.beta_test` ireloop task"""
+        raise NotImplementedError

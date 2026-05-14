@@ -4,8 +4,8 @@ from beta_base import *
 
 
 class BetaTest(BetaCog):
-    @ireloop(count=1)
-    async def beta_test(self) -> None:
+    @override
+    async def beta_test_task_count_1(self) -> None:
         pass
 
     @commands.command(name="test", aliases=["beta"])
