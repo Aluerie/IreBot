@@ -61,7 +61,7 @@ async def start_the_bot(*, scopes_only: bool, owner_id: str, force_subscribe: bo
         log.exception(msg)
         return
 
-    subscriptions = await get_eventsub_subscriptions(pool, owner_id)
+    subscriptions = await get_eventsub_subscriptions(pool, owner_id                                                         )
 
     async with (
         aiohttp.ClientSession() as session,
