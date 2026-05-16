@@ -6,9 +6,6 @@
 #   It supports file `.pre-commit-config.yaml` format too.
 # * `ci: autofix_prs` is exclusively https://pre-commit.ci (".ci" ending, not ".com") feature though AFAIK.
 
-ci:
-  autofix_prs: true
-
 files: .*\.py$
 
 repos:
