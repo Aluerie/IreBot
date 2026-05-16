@@ -30,4 +30,6 @@ src/modules/beta.py
 subset.py
 
 # Wiki
+# I like cloning wiki https://github.com/Aluerie/IreBot.wiki.git 
+# into the same folder so I can edit it in the same IDE window
 .wiki
