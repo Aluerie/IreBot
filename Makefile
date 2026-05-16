@@ -8,6 +8,7 @@ default: help
 help:  # Help
 	@echo IreBot Makefile
 	@echo ---------------
+	@echo * make setup: Setup the repository - recommended to use right after cloning
 	@echo * make sync: Install dependencies
 	@echo * make update: Update dependencies
 	@echo * make run: Run the bot
@@ -15,6 +16,12 @@ help:  # Help
 	@echo * make format: Format the code
 	@echo * make format-check: Check code formatting
 	@echo * make tests: Run the tests
+
+.PHONY: setup
+.SILENT: setup
+sync:  # Setup the repository - recommended to use right after cloning
+	uv sync --all-extras --all-packages --group dev
+	prek install
 
 .PHONY: sync
 .SILENT: sync

@@ -1,7 +1,8 @@
 files= ".*\\.py$"
 
-[[ci]]
-autofix_prs = true
+# prek doesn't have such feature in the config, we don't need it tbh
+# [[ci]]
+# autofix_prs = true
 
 [auto_update]
 cooldown_days = 90
@@ -14,15 +15,13 @@ hooks = [
     # When we need linting - it's handled by `.github/workflows/type_lint_test.yml`
     { id = "ruff-check", args = [
         "--fix",
-        "--exit-zero",
+        "--exit-non-zero-on-fix",
     ] },
     # Run the formatter.
     { id = "ruff-format" },
 ]
 
-[[repos]]
-repo = "https://github.com/astral-sh/uv-pre-commit"
-rev = "0.11.14"
-# Run the linter (solely for --fix part).
-# When we need linting - it's handled by `.github/workflows/type_lint_test.yml`
-hooks = [{ id = "uv-lock", args = ["--fix", "--exit-zero"] }]
+# [[repos]]
+# repo = "https://github.com/astral-sh/uv-pre-commit"
+# rev = "0.11.14"
+# hooks = [{ id = "uv-lock" }]
