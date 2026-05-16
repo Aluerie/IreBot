@@ -16,23 +16,24 @@ help:  # Help
 	@echo * make format: Format the code
 	@echo * make format-check: Check code formatting
 	@echo * make tests: Run the tests
+	@echo * make pages: Locally run the github pages website
 
 .PHONY: setup
 .SILENT: setup
-sync:  # Setup the repository - recommended to use right after cloning
-	uv sync --all-extras --all-packages --group dev
+setup:  # Setup the repository - recommended to use right after cloning
+	uv sync
 	prek install
 
 .PHONY: sync
 .SILENT: sync
 sync:  # Install dependencies
-	uv sync --all-extras --all-packages --group dev
+	uv sync
 
 .PHONY: update
 .SILENT: update
 update:  # Update dependencies
 	uv lock --upgrade
-	uv sync --all-extras --all-packages --group dev
+	uv sync
 	prek autoupdate
 
 .PHONY: run
@@ -61,3 +62,9 @@ format-check:  # Check code formatting
 .SILENT: tests
 tests:  # Run the tests
 	uv run pytest
+
+.PHONY: pages
+.SILENT: pages
+pages:  # Run the pages
+	cd docs && \
+	bundle exec jekyll serve
