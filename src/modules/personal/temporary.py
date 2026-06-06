@@ -96,6 +96,17 @@ class TemporaryCommands(IrePersonalComponent):
         text = " ".join(f"{letter}uh" for letter in alphabet)
         await ctx.send(text)
 
+    @commands.command(aliases=["sf", "run"])
+    async def focused(self, ctx: IreContext) -> None:
+        """My def."""
+        msg = (
+            "Sword ✨Focused✨ is my vision of what restriction 'Sword Damage Only' "
+            "should have been. Which is simply allowing QoL consumables/actives (Gachiin, Bloodsmoke, Ceramic Shards, etc) "
+            "while keeping the core spirit of the run the same: direct combat is Sword Only. "
+            "I don't define strict rules though - I just want to get through running/clearing-mobs sections a bit faster. "
+        )
+        await ctx.send(msg)
+
 
 async def setup(bot: IreBot) -> None:
     """Load IreBot module. Framework of twitchio."""
