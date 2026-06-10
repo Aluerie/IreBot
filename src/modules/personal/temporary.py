@@ -100,10 +100,10 @@ class TemporaryCommands(IrePersonalComponent):
     async def focused(self, ctx: IreContext) -> None:
         """My def."""
         msg = (
-            "Sword ✨Focused✨ is my vision of what restriction 'Sword Damage Only' "
-            "should have been. Which is simply allowing QoL consumables/actives (Gachiin, Bloodsmoke, Ceramic Shards, etc) "
-            "while keeping the core spirit of the run the same: direct combat is Sword Only. "
-            "I don't define strict rules though - I just want to get through running/clearing-mobs sections a bit faster. "
+            "Sword ✨Focused✨ is my vision of how 'Sword Damage Only' restriction "
+            "should be defined. Boss-combat is sword-only, while everything is okay for running sections (including cleaning ads or SDB setups). "
+            "This way we have some fun with Gachiin, Bloodsmoke, Ceramic Shards, etc (also a bit faster); "
+            "while keeping the core spirit of the run the same. "
         )
         await ctx.send(msg)
 
