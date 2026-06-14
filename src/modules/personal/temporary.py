@@ -101,9 +101,9 @@ class TemporaryCommands(IrePersonalComponent):
         """My def."""
         msg = (
             "Sword ✨Focused✨ is my vision of how 'Sword Damage Only' restriction "
-            "should be defined. Boss-combat is sword-only, while everything is okay for running sections (including cleaning ads or SDB setups). "
-            "This way we have some fun with Gachiin, Bloodsmoke, Ceramic Shards, etc (also a bit faster); "
-            "while keeping the core spirit of the run the same. "
+            "should have been defined. Boss-combat is sword-only, while Stealth/QoL actives "
+            "are okay (i.e. gachiin , Bloodsmoke, Ceramics). "
+            "This way the core spirit of the run is the same but running sections/SDB setups are a bit better." 
         )
         await ctx.send(msg)
 
