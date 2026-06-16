@@ -103,7 +103,7 @@ class TemporaryCommands(IrePersonalComponent):
             "Sword ✨Focused✨ is my vision of how 'Sword Damage Only' restriction "
             "should have been defined. Boss-combat is sword-only, while Stealth/QoL actives "
             "are okay (i.e. gachiin , Bloodsmoke, Ceramics). "
-            "This way the core spirit of the run is the same but running sections/SDB setups are a bit better."
+            "This way the core spirit of the run is the same but running sections/SDB setups are a bit better. "
             "I don't use yash / ako but they would be allowed I guess thinking."
         )
         await ctx.send(msg)
