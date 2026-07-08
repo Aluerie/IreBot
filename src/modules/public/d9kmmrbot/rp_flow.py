@@ -12,13 +12,14 @@ from typing import TYPE_CHECKING, Annotated, Any, TypedDict, TypeVar, override
 from urllib import parse as url_parse
 
 import steam
+from discord.utils import MISSING
 from steam.ext import dota2
 from twitchio.ext import commands
 
 from config import env
 from core import IrePublicComponent, ireloop
 from modules import DEV_REQUIRED, PUBLIC_D9MMRBOT
-from utils import const, dota2 as dota2utils, errors, fmt, guards
+from utils import dota2 as dota2utils, errors, fmt, guards
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Coroutine
@@ -248,7 +249,7 @@ class LiveMatch:
         self.match_id: int | None = None
         self.lobby_type: dota2.LobbyType | None = None
         self.game_mode: dota2.GameMode | None = None
-        self.server_steam_id: int = const.MISSING
+        self.server_steam_id: int = MISSING
 
         # players
         self.players: list[Player] = []
@@ -703,6 +704,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             dota2utils.Status.CustomGameProgress: "Custom games are not supported",
             dota2utils.Status.CustomGameLobby: "Private lobbies (this includes draft in public lobbies) are not supported",
             dota2utils.Status.Crownfall: "Crownfall activities are not supported.",
+            dota2utils.Status.CoopBot: "Coop vs Bots matches are not supported",
         }
         if msg := other_statuses.get(rp.status):
             return UnsupportedPartial(msg)

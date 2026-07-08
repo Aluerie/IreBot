@@ -9,7 +9,7 @@ import traceback
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from utils import const
+from discord.utils import MISSING
 
 if TYPE_CHECKING:
     from collections.abc import Generator
@@ -22,26 +22,26 @@ if TYPE_CHECKING:
 log = logging.getLogger("exc_manager")
 
 
-class ExceptionManager:
-    """Exception Manager that."""
+class ErrorManager:
+    """Error Manager."""
 
     __slots__: tuple[str, ...] = ("_lock", "_most_recent", "bot", "cooldown")
 
-    def __init__(self, bot: IreBot, *, cooldown: datetime.timedelta = const.MISSING) -> None:
+    def __init__(self, bot: IreBot, *, cooldown: datetime.timedelta = MISSING) -> None:
         self.bot: IreBot = bot
         self.cooldown: datetime.timedelta = cooldown or datetime.timedelta(seconds=5)
 
         self._lock: asyncio.Lock = asyncio.Lock()
         self._most_recent: datetime.datetime | None = None
 
-    def _yield_code_chunks(self, iterable: str, *, chunks_size: int = 2000) -> Generator[str, None, None]:
+    def _yield_code_chunks(self, iterable: str, *, chunks_size: int = 2000) -> Generator[str]:
         codeblocks: str = "```py\n{}```"
         max_chars_in_code = chunks_size - (len(codeblocks) - 2)  # chunks_size minus code blocker size
 
         for i in range(0, len(iterable), max_chars_in_code):
             yield codeblocks.format(iterable[i : i + max_chars_in_code])
 
-    async def register_error(self, error: BaseException, embed: discord.Embed, *, mention: bool = True) -> None:
+    async def register(self, error: BaseException, embed: discord.Embed, *, mention: bool = True) -> None:
         """Register, analyse error and put it into queue to send to developers."""
         log.error("%s: `%s`.", error.__class__.__name__, embed.footer.text, exc_info=error)
 
@@ -75,12 +75,12 @@ class ExceptionManager:
                 await asyncio.sleep(total_seconds)
 
             self._most_recent = datetime.datetime.now(datetime.UTC)
-            await self.send_error(traceback_string, embed, mention=mention)
+            await self.send_report(traceback_string, embed, mention=mention)
 
-    async def send_error(self, traceback: str, embed: discord.Embed, *, mention: bool) -> None:
+    async def send_report(self, traceback: str, embed: discord.Embed, *, mention: bool) -> None:
         """Send an error to the webhook.
 
-        It is not recommended to call this yourself, call `register_error` instead.
+        It is not recommended to call this yourself, call `register` instead.
         """
         code_chunks = list(self._yield_code_chunks(traceback))
 

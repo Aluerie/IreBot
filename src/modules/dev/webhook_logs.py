@@ -7,6 +7,7 @@ import textwrap
 from typing import TYPE_CHECKING, Any, override
 
 import discord
+from discord.utils import MISSING
 from twitchio.ext import commands
 
 from core import IreDevComponent, ireloop
@@ -101,7 +102,7 @@ class LogsViaWebhook(IreDevComponent):
             if username.startswith(search_name):
                 return candidate
         # else
-        return discord.utils.MISSING
+        return MISSING
 
     async def send_log_record(self, record: logging.LogRecord) -> None:
         """Send Log record to discord webhook."""

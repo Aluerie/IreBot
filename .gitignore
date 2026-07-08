@@ -1,6 +1,9 @@
 # Python-generated files
 __pycache__/
 
+# Pytest cache
+.pytest_cache 
+
 # Virtual environments
 .venv
 venv
@@ -22,7 +25,7 @@ ipynb/
 # Config
 .env
 
-# Temporary
+# Temporary files
 .temp/
 
 # Testing Related

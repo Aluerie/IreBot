@@ -1,0 +1,16 @@
+# Ignore everything
+*
+
+# Allow files and directories
+!/.env
+!/Makefile
+!/uv.lock
+!/pyproject.toml
+!/src
+
+
+# Ignore unnecessary files inside allowed directories
+**/*~
+**/*.log
+**/__pycache__
+**/*.py[cod]

@@ -2,31 +2,8 @@
 from __future__ import annotations
 
 from enum import StrEnum
-from typing import Any, override
 
-__all__ = ("BTTV", "DIGITS", "FFZ", "MISSING", "STV", "Bots", "Global", "Logo", "LowerName", "UserID")
-
-
-class _MissingSentinel:
-    __slots__ = ()
-
-    @override
-    def __eq__(self, other: object) -> bool:
-        return False
-
-    def __bool__(self) -> bool:
-        return False
-
-    @override
-    def __hash__(self) -> int:
-        return 0
-
-    @override
-    def __repr__(self) -> str:
-        return "..."
-
-
-MISSING: Any = _MissingSentinel()
+__all__ = ("BTTV", "DIGITS", "FFZ", "STV", "Bots", "Global", "Logo", "LowerName", "UserID")
 
 
 class UserID(StrEnum):

@@ -19,7 +19,7 @@ from __future__ import annotations
 import heapq
 import operator
 import re
-from difflib import SequenceMatcher
+from difflib import Match, SequenceMatcher
 from typing import TYPE_CHECKING, Literal, overload
 
 if TYPE_CHECKING:
@@ -51,9 +51,9 @@ def quick_ratio(a: str, b: str) -> int:
 def partial_ratio(a: str, b: str) -> int:
     """Return the ratio of the most similar substring as a number between 0 and 100."""
     short, long = (a, b) if len(a) <= len(b) else (b, a)
-    m = SequenceMatcher(None, short, long)
+    m: SequenceMatcher[str] = SequenceMatcher(None, short, long)
 
-    blocks = m.get_matching_blocks()
+    blocks: list[Match] = m.get_matching_blocks()
 
     scores: list[float] = []
     for i, j, _ in blocks:
@@ -107,18 +107,18 @@ def partial_token_sort_ratio(a: str, b: str) -> int:
 @overload
 def _extraction_generator(
     query: str, choices: Sequence[str], scorer: Callable[[str, str], int] = ..., score_cutoff: int = ...
-) -> Generator[tuple[str, int], None, None]: ...
+) -> Generator[tuple[str, int]]: ...
 
 
 @overload
 def _extraction_generator[T](
     query: str, choices: dict[str, T], scorer: Callable[[str, str], int] = ..., score_cutoff: int = ...
-) -> Generator[tuple[str, int, T], None, None]: ...
+) -> Generator[tuple[str, int, T]]: ...
 
 
 def _extraction_generator[T](
     query: str, choices: Sequence[str] | dict[str, T], scorer: Callable[[str, str], int] = quick_ratio, score_cutoff: int = 0
-) -> Generator[tuple[str, int, T] | tuple[str, int], None, None]:
+) -> Generator[tuple[str, int, T] | tuple[str, int]]:
     if isinstance(choices, dict):
         for key, value in choices.items():
             score = scorer(query, key)
@@ -251,8 +251,8 @@ def extract_or_exact[T](
     if len(matches) == 1:
         return matches
 
-    top = matches[0][1]
-    second = matches[1][1]
+    top: int = matches[0][1]
+    second: int = matches[1][1]
 
     # check if the top one is exact or more than 30% more correct than the top
     if top == 100 or top > (second + 30):

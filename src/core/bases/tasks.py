@@ -74,7 +74,7 @@ class IreLoop(tasks.Loop[LF]):
         embed = discord.Embed(title=f"Task Error `{self.coro.__qualname__}`", colour=0x1A7A8A)
         if isinstance(exception, errors.PlaceholderError) and exception.data:
             embed = cog.bot.add_args_field(embed, f"Extra {exception.__class__.__name__} Debug Data", exception.data)
-        await cog.bot.exc_manager.register_error(exception, embed)
+        await cog.bot.error_manager.register(exception, embed)
 
 
 @discord.utils.copy_doc(tasks.loop)

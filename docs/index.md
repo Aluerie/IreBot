@@ -169,8 +169,8 @@ To make bot responses look like in the "Showcase" column you can add those emote
 * Add @PotatBotat to your channel;
 * Give it 7tv editor role, allow it to `Create Emote Sets` in addition to default permissions;
 <!-- cSpell: ignore PAAKP, FDYZVDR -->
-* Use `#mergeset <Primary set ID> 01JS1XW1PAAKP34984FDYZVDR7` where the second argument is an ID for the mentioned Dota 2 emote set;
-* You can find your `<Primary set ID>` by copying the last part of the URL to your own main emote set;
+* Use `#mergeset <Primary set ID> 01JS1XW1PAAKP34984FDYZVDR7` where the second argument is the ID for the Dota 2 emote set from the showcase column;
+* You can find your `<Primary set ID>` (the first argument) by copying the last part of the URL to your own main emote set;
 * @PotatBotat will create a new emote set trying to merge the provided ones; if there is more then 1000 emotes in total - some emotes from the 2nd set won't make it;
 * Now you can switch between your main set and a merged version;
 

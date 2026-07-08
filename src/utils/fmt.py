@@ -3,7 +3,7 @@ from __future__ import annotations
 from enum import IntEnum
 from typing import TYPE_CHECKING, override
 
-from .const import MISSING
+from discord.utils import MISSING
 
 if TYPE_CHECKING:
     import datetime

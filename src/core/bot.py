@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING, Any, TypedDict, override
 import discord
 import steam
 import twitchio
+from discord.utils import MISSING
 from twitchio import eventsub
 from twitchio.ext import commands
 from twitchio.web import StarletteAdapter
@@ -21,7 +22,7 @@ from modules import PUBLIC_D9MMRBOT, get_modules
 from utils import const, dota2 as dota2utils, errors
 
 from .bases import IreContext
-from .exc_manager import ExceptionManager
+from .error_manager import ErrorManager
 
 if TYPE_CHECKING:
     from aiohttp import ClientSession
@@ -206,14 +207,14 @@ class IreBot(commands.AutoBot):
         """
 
         self.modules_to_load: tuple[str, ...] = get_modules(test=self.test_subset_mode)
-        self.exc_manager = ExceptionManager(self)
+        self.error_manager = ErrorManager(self)
 
         self.streamers: dict[str, Streamer] = {}
         self.streamers_index_ready: asyncio.Event = asyncio.Event()
         self.friends_index_ready: asyncio.Event = asyncio.Event()
 
         # initialized later
-        self.dota2: dota2utils.Dota2Client = const.MISSING
+        self.dota2: dota2utils.Dota2Client = MISSING
         self.launch_time: datetime.datetime
         self.logs_via_webhook_handler: logging.Handler
 
@@ -302,7 +303,7 @@ class IreBot(commands.AutoBot):
                 await self.load_module(module)
             except commands.ModuleLoadFailure as error:
                 embed = discord.Embed(title="Module Load Error", colour=0x12A28A)
-                await self.exc_manager.register_error(error, embed=embed)
+                await self.error_manager.register(error, embed=embed)
 
     @override
     async def event_oauth_authorized(self, payload: twitchio.authentication.UserTokenPayload) -> None:
@@ -482,7 +483,7 @@ class IreBot(commands.AutoBot):
                 embed = await get_error_report_embed(ctx)
                 if error.data:
                     embed = self.add_args_field(embed, f"Extra {error.__class__.__name__} Debug Data", error.data)
-                await self.exc_manager.register_error(error, embed=embed)
+                await self.error_manager.register(error, embed=embed)
 
             # TWITCHIO ERRORS
             case commands.CommandNotFound():
@@ -532,7 +533,7 @@ class IreBot(commands.AutoBot):
                 await ctx.send(something_went_wrong_message)
                 # await ctx.send(f"{error.__class__.__name__}: {replace_secrets(str(error))}")
                 embed = await get_error_report_embed(ctx)
-                await self.exc_manager.register_error(error, embed=embed)
+                await self.error_manager.register(error, embed=embed)
 
     @override
     async def event_error(self, payload: twitchio.EventErrorPayload) -> None:
@@ -541,7 +542,7 @@ class IreBot(commands.AutoBot):
         )
         if isinstance(payload.error, errors.PlaceholderError) and payload.error.data:
             embed = self.add_args_field(embed, f"Extra {payload.error.__class__.__name__} Debug Data", payload.error.data)
-        await self.exc_manager.register_error(payload.error, embed=embed)
+        await self.error_manager.register(payload.error, embed=embed)
 
     # SHORTCUTS AND UTILITIES
 

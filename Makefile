@@ -17,6 +17,7 @@ help:  # Help
 	@echo * make format-check: Check code formatting
 	@echo * make tests: Run the tests
 	@echo * make pages: Locally run the github pages website
+	@echo * make ty: Run ty (beta testing ty typechecker)
 
 .PHONY: setup
 .SILENT: setup
@@ -68,3 +69,8 @@ tests:  # Run the tests
 pages:  # Run the pages
 	cd docs && \
 	bundle exec jekyll serve
+
+.PHONY: ty
+.SILENT: ty
+ty:  # Run ty (beta testing ty typechecker)
+	uv run ty check .

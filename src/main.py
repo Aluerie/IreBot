@@ -34,7 +34,7 @@ if TYPE_CHECKING:
     from types_.database import PoolTypedWithAny
 
 try:
-    import uvloop  # pyright: ignore[reportMissingImports]
+    import uvloop  # pyright: ignore[reportMissingImports]  # ty: ignore[unresolved-import]
 except ModuleNotFoundError:
     # WINDOWS - uvloop does not support Windows
     RUNTIME = asyncio.run  # pyright: ignore[reportConstantRedefinition]
@@ -54,7 +54,7 @@ async def start_the_bot(*, scopes_only: bool, owner_id: str, force_subscribe: bo
     log = logging.getLogger()
     try:
         # Unfortunate `asyncpg` typing crutch. Read `types_.database` for more
-        pool: PoolTypedWithAny = await create_pool()  # pyright: ignore[reportAssignmentType]
+        pool: PoolTypedWithAny = await create_pool()  # pyright: ignore[reportAssignmentType]  # ty:ignore[invalid-assignment]
     except Exception:
         msg = "Could not set up PostgreSQL. Exiting."
         click.echo(msg, file=sys.stderr)
