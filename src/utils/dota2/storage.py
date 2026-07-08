@@ -106,7 +106,7 @@ class GameDataStorage[VT, PseudoVT](abc.ABC):
         """Get value by the `key` from `self.cached_data`."""
         try:
             return self.cached_data[object_id]
-        except (KeyError, AttributeError):
+        except KeyError, AttributeError:
             # let's try to update the cache in case it's a KeyError due to
             # * new patch or something
             # * the data is not initialized then we will get stuck in self.lock waiting for the data.
