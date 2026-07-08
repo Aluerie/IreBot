@@ -19,7 +19,7 @@ from pkgutil import iter_modules
 __all__ = ("get_modules",)
 
 try:
-    import subset as select_modules_to_load  # pyright: ignore[reportMissingImports]
+    import modules_subset as select_modules_to_load  # pyright: ignore[reportMissingImports]
 except ModuleNotFoundError:
     SUBSET_CATEGORY_MODULES: dict[str, list[str]] = {}  # pyright: ignore[reportConstantRedefinition]
     LOAD_ALL_MODULES: bool = True  # pyright: ignore[reportConstantRedefinition]

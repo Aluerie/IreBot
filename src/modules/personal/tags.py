@@ -26,7 +26,7 @@ class Tags(IrePersonalComponent):
         return f"There is no tag with name '{tag_name}' {const.STV.uuhAcktshucally}"
 
     @commands.is_moderator()
-    @commands.group(invoke_fallback=True, aliases=["tags", "t"])
+    @commands.group(invoke_fallback=True, name="tag", aliases=["tags", "t"])
     async def tag_group(self, ctx: IreContext, tag_name: str) -> None:
         """Group command for `!tag`.
 
@@ -123,12 +123,11 @@ class Tags(IrePersonalComponent):
         query = """
             SELECT tag_name, tag_content FROM ttv_tags;
         """
-        tag_rows: list[TagQueryRow] = [r for (r,) in await self.bot.pool.fetch(query)]
-        if tag_rows:
-            for tag_row in tag_rows:
-                await ctx.send(f"{const.STV.uuhAcktshucally} {tag_row['tag_name']}: {tag_row['tag_content']}")
-        else:
+        tag_rows: list[TagQueryRow] = await self.bot.pool.fetch(query)
+        if not tag_rows:
             await ctx.send(f"No tags were created yet {const.STV.uuhAcktshucally}")
+        for tag_row in tag_rows:
+            await ctx.send(f"{const.STV.uuhAcktshucally} {tag_row['tag_name']}: {tag_row['tag_content']}")
 
 
 async def setup(bot: IreBot) -> None:

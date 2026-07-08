@@ -2,6 +2,7 @@
 ; sudo systemctl daemon-reload
 ; sudo systemctl enable irebot
 ; sudo systemctl start irebot
+; sudo systemctl restart irebot
 ; sudo journalctl -u irebot -e
 
 [Unit]
@@ -11,7 +12,8 @@ After=network-online.target
 [Service]
 Type=simple
 WorkingDirectory=/home/ubuntu/IreBot/
-ExecStart=uv run src/main.py
+ExecStart=/home/ubuntu/.local/bin/uv run src/main.py
+; ExecStart=/home/ubuntu/IreBot/.venv/bin/python3.14 src/main.py
 User=ubuntu
 Restart=always
 RestartSec=10
