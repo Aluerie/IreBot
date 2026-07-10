@@ -37,6 +37,7 @@ class Status(SteampyStrEnum):
 
     # SPECIAL CASES
     Crownfall = "#SPECIAL_CROWNFALL"
+    DarkCarnival = "#SPECIAL_DARKCARNIVAL"
 
     # DOTA_RP
     Idle = "#DOTA_RP_IDLE"
@@ -78,6 +79,7 @@ class Status(SteampyStrEnum):
             cls.WatchingTournament: "Watching Tournament",
             cls.CustomGameProgress: "Custom Game",
             cls.Crownfall: "Crownfall activity",
+            cls.DarkCarnival: "DarkCarnival activity",
         }
 
     @property
@@ -95,6 +97,8 @@ class Status(SteampyStrEnum):
         # Special cases
         if value.startswith("#DOTA_Crownfall"):
             return cls.Crownfall
+        if value.startswith("#DOTA_DarkCarnival"):
+            return cls.DarkCarnival
         # Normal
         return super().try_value(value)
 

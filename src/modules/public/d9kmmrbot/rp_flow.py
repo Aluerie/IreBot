@@ -704,6 +704,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             dota2utils.Status.CustomGameProgress: "Custom games are not supported",
             dota2utils.Status.CustomGameLobby: "Private lobbies (this includes draft in public lobbies) are not supported",
             dota2utils.Status.Crownfall: "Crownfall activities are not supported.",
+            dota2utils.Status.DarkCarnival: "Dark Carnival activities are not supported.",
             dota2utils.Status.CoopBot: "Coop vs Bots matches are not supported",
         }
         if msg := other_statuses.get(rp.status):
