@@ -26,10 +26,8 @@ MESSAGES: list[str] = [
         "hi chat many features of this bot are WIP so, please, if you notice bugs or incorrect responses - "
         f"inform me {const.STV.DANKHACKERMANS}"
     ),
-    (
-        "Audio too loud? Music too low? Bad image quality? "
-        f"Please, let me know of any problems with the stream if any {const.STV.dankFix}"
-    ),
+    (f"Audio too loud? Music too low? Bad image quality? Please, let me know about any problems {const.STV.dankFix}"),
+    ("!showemote ass"),
     # (
     #     "hey chat I'm making a small web-page to describe the bot's features (WIP)."
     #     "You can see it here: (not implemented xdd)"

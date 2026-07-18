@@ -104,6 +104,7 @@ class Alerts(IrePersonalComponent):
             f"pin some info {const.STV.ALERT} "
             f"start recording {const.STV.ALERT} "
             f"Turn music on {const.STV.ALERT}"
+            f"Check if chat overlay shows emotes properly {const.STV.ALERT}"
         )
         # 10 minutes reminder about some things
         if self.reminder_to_turn_recording_on.is_running():
