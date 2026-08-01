@@ -103,7 +103,7 @@ class Alerts(IrePersonalComponent):
             f"{online.broadcaster.mention} a few reminders {const.STV.ALERT} "
             f"pin some info {const.STV.ALERT} "
             f"start recording {const.STV.ALERT} "
-            f"Turn music on {const.STV.ALERT}"
+            f"Turn music on {const.STV.ALERT} "
             f"Check if chat overlay shows emotes properly {const.STV.ALERT}"
         )
         # 10 minutes reminder about some things
