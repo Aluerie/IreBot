@@ -28,6 +28,7 @@ class Global(StrEnum):
 
     # Twitch Native ones
     D4Head = "4Head"  # idk let's think better name?
+    CaitThinking = "CaitThinking"
 
     # BTTV
     monkaS = "monkaS"

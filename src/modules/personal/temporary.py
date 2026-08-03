@@ -96,15 +96,26 @@ class TemporaryCommands(IrePersonalComponent):
         text = " ".join(f"{letter}uh" for letter in alphabet)
         await ctx.send(text)
 
-    @commands.command(aliases=["sf", "run"])
-    async def focused(self, ctx: IreContext) -> None:
-        """My def."""
+    @commands.command()
+    async def based(self, ctx: IreContext) -> None:
+        """Sword based."""
         msg = (
-            "Sword ✨Focused✨ is my vision of how 'Sword Damage Only' restriction "
+            "Sword ✨ BASED ✨ is my vision of how 'Sword Damage Only' restriction "
             "should have been defined. Boss-combat is sword-only, while Stealth/QoL actives "
             "are okay (i.e. gachiin , Bloodsmoke, Ceramics). "
             "This way the core spirit of the run is the same but running sections/SDB setups are a bit better. "
-            "I don't use yash / ako but they would be allowed I guess thinking"
+            f"I don't use yash / ako but they would be allowed I guess {const.Global.CaitThinking} "
+        )
+        await ctx.send(msg)
+
+    @commands.command()
+    async def run(self, ctx: IreContext) -> None:
+        """My run."""
+        msg = (
+            "All Unique Bosses, which means I need to kill at least one boss from the same 'type', "
+            "e.g. I have to choose 1 Headless (but skip other 2), 1 Lone Shadow, etc. "
+            "On paper, it becomes All Memories + some extra minibosses. "
+            "I also load a save-state for Emma + Isshin + Inner Father to cover them too."
         )
         await ctx.send(msg)
 
