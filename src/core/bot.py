@@ -420,7 +420,7 @@ class IreBot(commands.AutoBot):
         if not hasattr(self, "launch_time"):
             # who knows maybe it triggers many times like `discord.py`
             self.launch_time = datetime.datetime.now(datetime.UTC)
-        if hasattr(self, "dota2"):
+        if self.dota2:
             await self.dota2.wait_until_ready()
 
     @staticmethod

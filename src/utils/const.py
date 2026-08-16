@@ -87,6 +87,7 @@ class STV(StrEnum):
     DankMods = "DankMods"
     DankDolmes = "DankDolmes"
     DANKHACKERMANS = "DANKHACKERMANS"
+    dankJAM = "dankJAM"
     DankLurk = "DankLurk"
     DankReading = "DankReading"
     DankThink = "DankThink"
@@ -125,6 +126,7 @@ class STV(StrEnum):
     POLICE = "POLICE"
     science = "science"
     Speedge = "Speedge"
+    Spotify = "Spotify"
     yo = "yo"
     uuh = "uuh"
     uuhAcktshucally = "uuhAcktshucally"
@@ -132,6 +134,7 @@ class STV(StrEnum):
     widepeepoHappyRightHeart = "widepeepoHappyRightHeart"
     wow = "wow"
     UltraMad = "UltraMad"
+    YouTube = "YouTube"
 
 
 class Bots(StrEnum):

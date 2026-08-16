@@ -5,7 +5,7 @@ CATEGORY_MODULES_MAPPING: dict[str, list[str]] = {
         # "required",
         # ---
         # "control",
-        "other",
+        # "other",
         # "webhook_logs",
     ],
     "personal": [
@@ -15,7 +15,7 @@ CATEGORY_MODULES_MAPPING: dict[str, list[str]] = {
         # "information",
         # "emotes"
         # "keywords",
-        # "stable",
+        "stable",
         # "tags",
         # "temporary",
         # "timers",

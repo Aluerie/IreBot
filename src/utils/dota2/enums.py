@@ -57,6 +57,7 @@ class Status(SteampyStrEnum):
     CustomGameProgress = "#DOTA_RP_GAME_IN_PROGRESS_CUSTOM"
     CustomGameLobby = "#DOTA_RP_LOBBY_CUSTOM"
     CoopBot = "#DOTA_RP_COOPBOT"  # cSpell: ignore COOPBOT
+    WatchingTI = "#DOTA_RP_WATCHING_TI"
 
     @classproperty
     def KNOWN_DISPLAY_NAMES(cls: type[Self]) -> Mapping[Status, str]:  # pyright: ignore[reportGeneralTypeIssues] # noqa: N802, N805
@@ -80,6 +81,7 @@ class Status(SteampyStrEnum):
             cls.CustomGameProgress: "Custom Game",
             cls.Crownfall: "Crownfall activity",
             cls.DarkCarnival: "DarkCarnival activity",
+            cls.WatchingTI: "Watching TI",
         }
 
     @property
