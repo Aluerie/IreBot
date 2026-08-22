@@ -93,7 +93,7 @@ class TemporaryCommands(IrePersonalComponent):
             "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"
         ]
         # fmt: on
-        text = " ".join(f"{letter}uh" for letter in alphabet)
+        text: str = " ".join(f"{letter}uh" for letter in alphabet)
         await ctx.send(text)
 
     @commands.command()
