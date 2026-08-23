@@ -688,7 +688,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             return PlayingPartial(watchable_game_id)
 
         # Watching
-        if rp.status in {dota2utils.Status.Spectating, dota2utils.Status.WatchingTournament}:
+        if rp.status in {dota2utils.Status.Spectating, dota2utils.Status.WatchingTournament, dota2utils.Status.WatchingTI}:
             watching_server = rp.raw.get("watching_server")
             if watching_server is None:
                 return UnsupportedPartial("Data in watching replays is not supported")

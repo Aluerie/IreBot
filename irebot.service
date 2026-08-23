@@ -3,6 +3,7 @@
 ; sudo systemctl enable irebot
 ; sudo systemctl start irebot
 ; sudo systemctl restart irebot
+; sudo systemctl stop irebot
 ; sudo journalctl -u irebot -e
 
 [Unit]
