@@ -113,6 +113,7 @@ class Dota2Client(dota2.Client):
             log.warning("🍋 Stratz API error: `get_items`", exc_info=err)
             # Then we should try with OpenDota
         else:
+            log.info(items)
             await self.upsert_constants_items(
                 # Sometimes Stratz return `None` for item display names.
                 to_insert=[(item["id"], item["displayName"] or "") for item in items],
