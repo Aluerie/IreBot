@@ -113,10 +113,10 @@ class Dota2Client(dota2.Client):
             log.warning("🍋 Stratz API error: `get_items`", exc_info=err)
             # Then we should try with OpenDota
         else:
-            log.info(items)
             await self.upsert_constants_items(
                 # Sometimes Stratz return `None` for item display names.
-                to_insert=[(item["id"], item["displayName"] or "") for item in items],
+                # Also they put '\x00' into their responses which is not supported by PostgresQL
+                to_insert=[(item["id"], item["displayName"].replace('\x00','') or "") for item in items],
                 service_name="Stratz",
             )
             return
