@@ -11,17 +11,18 @@ CATEGORY_MODULES_MAPPING: dict[str, list[str]] = {
     "personal": [
         # "alerts",
         # "counters",
+        # "cycling_emotes",
         # "discord_notifications",
         # "information",
         # "emotes"
         # "keywords",
-        "stable",
+        # "stable",
         # "tags",
         # "temporary",
         # "timers",
     ],
     "public": [
-        # "d9kmmrbot",
+        "d9kmmrbot",
         # "meta"
     ],
 }

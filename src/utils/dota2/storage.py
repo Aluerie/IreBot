@@ -26,9 +26,9 @@ __all__ = ("GameDataStorage", "Items")
 
 
 log = logging.getLogger(__name__)
-log.setLevel(logging.INFO)
+log.setLevel(logging.DEBUG)
 
-
+# TODO: I M NOT USING THIS FILE AT ALL ANYMORE REMOVE IT
 CDN_REACT = "https://cdn.akamai.steamstatic.com/apps/dota2/images/dota_react/"
 
 
@@ -82,7 +82,9 @@ class GameDataStorage[VT, PseudoVT](abc.ABC):
         log.debug("Updating Storage %s.", self.__class__.__name__)
         async with self.lock:
             start_time = time.perf_counter()
+            print("cachec_data = await")
             self.cached_data = await self.fill_data()
+            print("done caching")
             log.debug(
                 "Storage %s %s is updated in %.3fs",
                 __package__.split(".")[-1].capitalize() if __package__ else "",
@@ -90,9 +92,9 @@ class GameDataStorage[VT, PseudoVT](abc.ABC):
                 time.perf_counter() - start_time,
             )
             # Make a back up for fun
-            await asyncio.sleep(60 * 60)
-            with pathlib.Path(f".temp/{self.__class__.__name__}.json").open("w", encoding="utf-8") as f:  # noqa: ASYNC230
-                json.dump(self.cached_data, f, ensure_ascii=False, indent=4, default=str)
+            # await asyncio.sleep(60 * 60)
+            # with pathlib.Path(f".temp/{self.__class__.__name__}.json").open("w", encoding="utf-8") as f:  # noqa: ASYNC230
+            #     json.dump(self.cached_data, f, ensure_ascii=False, indent=4, default=str)
 
     async def get_cached_data(self) -> dict[int, VT]:
         """Get the whole cached data."""
@@ -105,6 +107,7 @@ class GameDataStorage[VT, PseudoVT](abc.ABC):
     async def get_value(self, object_id: int) -> VT:
         """Get value by the `key` from `self.cached_data`."""
         try:
+            print(self.cached_data, object_id, type(object_id))
             return self.cached_data[object_id]
         except KeyError, AttributeError:
             # let's try to update the cache in case it's a KeyError due to
@@ -162,14 +165,17 @@ class Items(GameDataStorage[Item, Item]):
     @override
     async def fill_data(self) -> dict[int, Item]:
         try:
+            print("filling items")
             items = await self.bot.dota2.stratz.get_items()
-            return {item["id"]: Item(item["id"], item["displayName"]) for item in items["data"]["constants"]["items"]}
-        except aiohttp.ClientResponseError as err:
+            print("done filling items")
+            return 
+        except (aiohttp.ClientResponseError, KeyError) as err:
             log.exception("%s", err.__class__.__name__, exc_info=err)
             try:
                 with pathlib.Path(f".temp/{self.__class__.__name__}.json").open(encoding="utf-8") as f:  # noqa: ASYNC230
                     return json.load(f)
             except FileNotFoundError:
+                print('FileNotFoundError')
                 raise err from None
 
     @override
@@ -180,6 +186,7 @@ class Items(GameDataStorage[Item, Item]):
     @override
     async def by_id(self, object_id: int) -> Item:
         """Get Item by its ID."""
+        print("xd")
         # special case
         if object_id == 0:
             return Item(0, "Empty Slot")

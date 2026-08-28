@@ -19,7 +19,7 @@ from twitchio.web import StarletteAdapter
 
 from config import env
 from modules import PUBLIC_D9MMRBOT, get_modules
-from utils import const, dota2 as dota2utils, errors
+from utils import const, dota2 as dota2utils, errors, seven_tv
 
 from .bases import IreContext
 from .error_manager import ErrorManager
@@ -213,6 +213,8 @@ class IreBot(commands.AutoBot):
         self.streamers_index_ready: asyncio.Event = asyncio.Event()
         self.friends_index_ready: asyncio.Event = asyncio.Event()
 
+        self.stv: seven_tv.SevenTVClient = seven_tv.SevenTVClient(session=session)
+
         # initialized later
         self.dota2: dota2utils.Dota2Client = MISSING
         self.launch_time: datetime.datetime
@@ -265,7 +267,11 @@ class IreBot(commands.AutoBot):
 
     def show_public_oauth(self) -> str:
         """Print a link for public streamers to click and authorize the scopes for the bot."""
-        scopes = ["channel:bot"]
+        scopes = [
+            "channel:bot",
+            "channel:read:redemptions",
+            "channel:manage:redemptions",
+        ]
         return self.show_oauth_helper(scopes, "🌈🌈🌈 PUBLIC OAUTH LINK: 🌈🌈🌈")
 
     @override
@@ -540,9 +546,16 @@ class IreBot(commands.AutoBot):
         embed = discord.Embed(title=f"Event Error: `{payload.listener.__qualname__}`").add_field(
             name="Exception", value=f"`{payload.error.__class__.__name__}`"
         )
-        if isinstance(payload.error, errors.PlaceholderError) and payload.error.data:
-            embed = self.add_args_field(embed, f"Extra {payload.error.__class__.__name__} Debug Data", payload.error.data)
-        await self.error_manager.register(payload.error, embed=embed)
+
+        match payload.error:
+            case errors.PlaceholderError():
+                if payload.error.data:
+                    embed = self.add_args_field(
+                        embed, f"Extra {payload.error.__class__.__name__} Debug Data", payload.error.data
+                    )
+                    await self.error_manager.register(payload.error, embed=embed)
+            case _:
+                await self.error_manager.register(payload.error, embed=embed)
 
     # SHORTCUTS AND UTILITIES
 

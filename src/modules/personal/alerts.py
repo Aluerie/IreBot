@@ -54,7 +54,8 @@ class Alerts(IrePersonalComponent):
     # SECTION 2
     # Actual events
 
-    @commands.Component.listener(name="follow")
+    # Turn it off for a foreseeable future, anonymized follows are better.
+    # @commands.Component.listener(name="follow")
     async def follows(self, follow: twitchio.ChannelFollow) -> None:
         """Somebody followed the channel."""
         if not self.is_owner(follow.broadcaster.id):

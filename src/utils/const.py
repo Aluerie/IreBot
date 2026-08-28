@@ -93,6 +93,7 @@ class STV(StrEnum):
     DankThink = "DankThink"
     Deadge = "Deadge"
     discord = "discord"
+    DonkCrayon = "DonkCrayon"
     donkDetective = "donkDetective"
     donkHappy = "donkHappy"
     donkHey = "donkHey"

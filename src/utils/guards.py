@@ -18,7 +18,10 @@ from . import const, errors
 if TYPE_CHECKING:
     from core import IreContext
 
-__all__ = ("is_online", "is_vps")
+__all__ = (
+    "is_online",
+    "is_vps",
+)
 
 
 def is_vps() -> Any:

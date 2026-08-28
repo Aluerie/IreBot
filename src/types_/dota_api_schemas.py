@@ -1,10 +1,23 @@
-"""API Schemas for `utils.dota.api_clients`."""
+"""API Schemas for `utils.dota.api_clients`.
+
+I didn't include all fields that corresponding requests return; just those that I need at the moment.
+
+License
+-------
+* This Source Code Form is subject to the terms of the [Mozilla Public License v2.0](<http://mozilla.org/MPL/2.0/>).
+* Copyright (C) 2020-present [Aluerie](<https://github.com/Aluerie>).
+"""
 
 from __future__ import annotations
 
 from typing import Literal, NotRequired, TypedDict
 
-__all__ = ("OpendotaMatches", "SteamWebRealTimeStats", "StratzItems")
+__all__ = (
+    "OpendotaItemsQuery",
+    "OpendotaMatches",
+    "SteamWebRealTimeStats",
+    "StratzAllItemsQuery",
+)
 
 ####################
 #   1. OPENDOTA    #
@@ -12,10 +25,7 @@ __all__ = ("OpendotaMatches", "SteamWebRealTimeStats", "StratzItems")
 
 
 class OpendotaMatches(TypedDict):
-    """Typing Dict for response json for the OpenDota's `GET matches` endpoint.
-
-    I didn't include all fields; just those that I need at the moment.
-    """
+    """Typing Dict for response json for the OpenDota's `GET matches` endpoint."""
 
     players: list[OpendotaMatchesPlayer]
     match_id: int
@@ -28,12 +38,39 @@ class OpendotaMatchesPlayer(TypedDict):
     account_id: NotRequired[int]
 
 
+type OpendotaItemsQuery = dict[str, OpendotaItem]
+
+
+class OpendotaItem(TypedDict):
+    hint: list[str]
+    id: int
+    img: str
+    dname: str
+    qual: str
+    cost: int
+    notes: str
+    attrib: list[OpendotaItemAttrib]
+    mc: Literal[False] | int
+    cd: float
+    lore: str
+    components: list[str]
+    created: bool
+    charges: bool
+
+
+class OpendotaItemAttrib(TypedDict):
+    key: str
+    header: str
+    value: str
+    generated: NotRequired[bool]
+
+
 ####################
 #    2. STRATZ     #
 ####################
 
 
-class StratzItems(TypedDict):
+class StratzAllItemsQuery(TypedDict):
     """Schema for Stratz GraphQL `get_items` response."""
 
     data: StratzItemData

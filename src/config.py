@@ -43,6 +43,7 @@ class Env(EnvConfig):
     WEBHOOK_LOGGER: str
     WEBHOOK_ERROR: str
     WEBHOOK_STREAM_NOTIFS: str
+    SEVEN_TV_BEARER: str
 
 
 env = Env()  # pyright: ignore[reportCallIssue]

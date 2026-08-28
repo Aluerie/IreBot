@@ -2,18 +2,31 @@ from __future__ import annotations
 
 import abc
 import asyncio
-from typing import TYPE_CHECKING, Any, override
+import logging
+from typing import TYPE_CHECKING, Any, TypedDict, override
 
 import orjson
+
+from utils import errors
 
 from ..errors import IreBotError
 
 if TYPE_CHECKING:
     import aiohttp
 
-    from types_.dota_api_schemas import OpendotaMatches, SteamWebRealTimeStats, StratzItems
+    from types_ import dota_api_schemas
 
-__all__ = ("APIClientError", "OpenDotaClient", "SteamWebAPIClient", "StratzClient")
+    class GraphQLData(TypedDict):
+        data: Any
+
+
+__all__ = (
+    "APIClientError",
+    "OpenDotaClient",
+    "SteamWebAPIClient",
+    "StratzClient",
+)
+log = logging.getLogger(__name__)
 
 
 class APIClientError(IreBotError):
@@ -32,15 +45,26 @@ class OpenDotaClient(APIClient):
     """A class for interacting with OpenDota API."""
 
     @override
-    async def invoke(self, endpoint: str, argument: int) -> Any:
+    async def invoke(self, endpoint: str) -> Any:
         """Invoke a request to OpenDota API."""
-        url = f"https://api.opendota.com/api/{endpoint}/{argument}"
+        url = f"https://api.opendota.com/api/{endpoint}"
         async with self.session.get(url=url) as resp:
             return await resp.json(loads=orjson.loads)
 
-    async def matches(self, match_id: int) -> OpendotaMatches:
+    async def matches(self, match_id: int) -> dota_api_schemas.OpendotaMatches:
         """Get match from opendota API via GET matches endpoint."""
-        return await self.invoke("matches", match_id)
+        return await self.invoke(f"matches/{match_id}")
+
+    async def get_items(self) -> dota_api_schemas.OpendotaItemsQuery:
+        """Get Opendota constants items.
+
+        Links
+        -----
+        * https://api.opendota.com/api/constants/items
+        * https://raw.githubusercontent.com/odota/dotaconstants/master/build/items.json
+        """
+        log.debug("🍋 Opendota Constants API: getting items.")
+        return await self.invoke("constants/items")
 
 
 class StratzClient(APIClient):
@@ -62,21 +86,28 @@ class StratzClient(APIClient):
                 "Content-Type": "application/json",
             },
         ) as resp:
-            return await resp.json(loads=orjson.loads)
+            graphql_json: GraphQLData = await resp.json(loads=orjson.loads)
+            try:
+                return graphql_json["data"]
+            except KeyError:
+                msg = "Stratz GraphQL API Error:"
+                raise errors.APIDataError(msg, graphql_json) from None
 
-    async def get_items(self) -> StratzItems:
+    async def get_items(self) -> list[dota_api_schemas.StratzItem]:
         """Get Constants for Dota 2 Items."""
+        log.debug("🍋 Stratz GraphQL API: getting items.")
         query = """
-query Items {
-    constants {
-        items {
-            id
-            displayName
+        query AllItemsQuery {
+            constants {
+                items {
+                    id
+                    displayName
+                }
+            }
         }
-    }
-}
         """
-        return await self.invoke(query)
+        data: dota_api_schemas.StratzItemData = await self.invoke(query)
+        return data["constants"]["items"]
 
 
 class SteamWebAPIClient(APIClient):

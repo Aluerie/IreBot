@@ -5,4 +5,5 @@ from . import (
     fuzzy as fuzzy,
     guards as guards,
     helpers as helpers,
+    seven_tv as seven_tv,
 )

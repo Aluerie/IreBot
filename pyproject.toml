@@ -39,6 +39,7 @@ dev = [
     "prek>=0.4.0",
     "pyright>=1.1.408",
     "pytest",
+    "pytest-asyncio>=1.4.0",
     "ruff>=0.15.11",
     "ty>=0.0.37",
 ]
@@ -90,12 +91,9 @@ src = ["src"]
 select = ["ALL"]
 ignore = [
     "ERA", # eradicate
-    # "RUF100", # unused-noqa
-
     "D",
     "D417",
     "DOC",
-
     "W191",   # tab-indentation
     "E111",   # indentation-with-invalid-multiple
     "E114",   # indentation-with-invalid-multiple-comment 
@@ -109,7 +107,6 @@ ignore = [
     "COM812", # missing-trailing-comma
     "COM819", # prohibited-trailing-comma
     "ISC002", # multi-line-implicit-string-concatenation
-
     "ANN401",
     "ASYNC116",
     "ASYNC109",
@@ -143,12 +140,10 @@ ignore = [
     "TD",
     "TRY003",
     "TRY301",
-
     "FLY002",
     "PLW2901",
     "S608",
     "TID252",
-
     "D100",
     "D104",
     "D105",
@@ -186,3 +181,4 @@ norecursedirs = ["env/*", "venv/*", ".venv/*"]
 filterwarnings = ["ignore::DeprecationWarning"]
 testpaths = ["tests/"]
 python_files = ["test_*.py"]
+asyncio_mode="auto"

@@ -58,6 +58,7 @@
         "streamelements",
         "streamlabs",
         "supibot",
+        "tcer",
         "Weirdge",
         "wickedchad",
         "widepeepo",
@@ -69,5 +70,6 @@
     "python.REPL.enableREPLSmartSend": false,
     "yaml.schemas": {
         "https://json.schemastore.org/github-workflow.json": "file:///d%3A/LAPTOP/IreBot/.github/workflows/deploy.yml"
-    }
+    },
+    "python.analysis.typeCheckingMode": "off" // basedpyright addition
 }

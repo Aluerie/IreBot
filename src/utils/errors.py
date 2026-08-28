@@ -25,6 +25,10 @@ class RespondWithError(IreBotError):
     """
 
 
+class BadUserInputError(RespondWithError):
+    """Error indicating there was a problem with user input."""
+
+
 class PlaceholderError(IreBotError):
     """Placeholder Error for "Something went wrong" moments.
 
@@ -37,7 +41,24 @@ class PlaceholderError(IreBotError):
         super().__init__(message)
 
 
-# UN-REVIEWED
+class APIDataError(IreBotError):
+    """API Data Error.
+
+    This error is raised when 3rd party API returns a response indicating
+    that there was some error.
+
+    Useful for API like GraphQL which like to put an error message into its data responses, i.e.
+    `{data: {"error": "There was an error"}}`.
+
+    Attributes
+    ----------
+    data: Any
+        Any data that API attached to the response.
+    """
+
+    def __init__(self, message: str, data: Any) -> None:
+        self.data: Any = data
+        super().__init__(message)
 
 
 class ResponseNotOK(IreBotError):  # noqa: N818

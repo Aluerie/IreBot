@@ -348,7 +348,17 @@ class LiveMatch:
         kda = f"{api_player['kill_count']}/{api_player['death_count']}/{api_player['assists_count']}"
         cs = f"CS: {api_player['lh_count']}"
 
-        items = ", ".join([str(await self.bot.dota2.items.by_id(item)) for item in api_player["items"] if item != -1])
+        # https://stackoverflow.com/a/35456954/19217368
+        query = """
+            SELECT item_id, display_name
+            FROM dota_constants_items
+            JOIN unnest($1::int[]) WITH ORDINALITY t(item_id, ord) USING (item_id)
+            ORDER BY t.ord;
+        """
+        player_items_dict: dict[int, str] = {
+            r["item_id"]: r["display_name"] for r in await self.bot.pool.fetch(query, api_player["items"])
+        }
+        items: str = ", ".join([player_items_dict.get(item, "Unknown Item") for item in api_player["items"] if item != -1])
         response_parts = (prefix, net_worth, kda, cs, items)
         return " \N{BULLET} ".join(response_parts)
 
@@ -1644,3 +1654,8 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             await payload.context.send(msg)
             return False
         return None
+
+
+async def setup(bot: IreBot) -> None:
+    """Load IreBot module. Framework of twitchio."""
+    await bot.add_component(Dota2RichPresenceFlow(bot))

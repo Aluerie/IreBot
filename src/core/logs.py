@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import platform
+import time
 from contextlib import contextmanager
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
@@ -13,6 +14,8 @@ if TYPE_CHECKING:
     from collections.abc import Generator
 
 __all__ = ("setup_logging",)
+
+logging.Formatter.converter = time.gmtime
 
 # generated at https://patorjk.com/software/taag/ using "Standard" font
 ASCII_STARTING_UP_ART = r"""

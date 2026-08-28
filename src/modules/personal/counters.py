@@ -62,20 +62,22 @@ class Counters(IrePersonalComponent):
             where name = $1
             RETURNING value;
         """
-        value: int = await self.bot.pool.fetchval(query, "erm")
+        erm_amount_milestone: int = await self.bot.pool.fetchval(query, "erm")
 
         # milestone
-        if value % 1000 == 0:
-            await message.respond(f"{const.STV.wow} we reached a milestone of {value} {const.STV.Erm} in chat")
+        if erm_amount_milestone % 1000 == 0:
+            await message.respond(
+                f"{const.STV.wow} we reached a milestone of {erm_amount_milestone} {const.STV.Erm} in chat"
+            )
             return
 
         # random notification/reminder
-        now = datetime.datetime.now(datetime.UTC)
+        now: datetime.datetime = datetime.datetime.now(datetime.UTC)
         if random.randint(0, 150) < 2 and (now - self.last_erm_notification).seconds > 180:
             await asyncio.sleep(3)
             query = "SELECT value FROM ttv_counters WHERE name = $1"
-            value: int = await self.bot.pool.fetchval(query, "erm")
-            await message.respond(f"{value} {const.STV.Erm} in chat.")
+            erm_amount_random: int = await self.bot.pool.fetchval(query, "erm")
+            await message.respond(f"{erm_amount_random} {const.STV.Erm} in chat.")
             return
 
     @commands.command(aliases=["erm"])
