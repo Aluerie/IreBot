@@ -114,9 +114,9 @@ class Dota2Client(dota2.Client):
             # Then we should try with OpenDota
         else:
             await self.upsert_constants_items(
-                # Sometimes Stratz return `None` for item display names.
+                # Sometimes Stratz return `None` for item display names (hence `or ""`).
                 # Also they put '\x00' into their responses which is not supported by PostgresQL
-                to_insert=[(item["id"], item["displayName"].replace('\x00','') or "") for item in items],
+                to_insert=[(item["id"], (item["displayName"] or "").replace("\x00", "")) for item in items],
                 service_name="Stratz",
             )
             return
