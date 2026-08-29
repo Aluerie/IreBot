@@ -48,7 +48,7 @@ def to_emote_id(user_input: str) -> str:
 
 class SevenTVEmoteConverter(commands.Converter[str]):
     @override
-    async def convert(self, ctx: IreContext, user_input: str) -> str:
+    async def convert(self, ctx: IreContext, user_input: str) -> str:  # pyright: ignore[reportIncompatibleMethodOverride]
         """Convert `user_input` to 7TV emote_id."""
         # Step 1. Check if it's emote link / emote_id
         try:
@@ -81,7 +81,7 @@ class CyclingEmotes(IrePersonalComponent):
     async def fill_known_rewards(self) -> None:
         """The task that fills a set of rewards ids for convenience to cut on a few database queries."""
         query = "SELECT reward_id FROM ttv_cycling_emote_rewards"
-        self.reward_ids_cache: set[str] = {r for (r,) in await self.bot.pool.fetch(query)}
+        self.reward_ids_cache = {r for (r,) in await self.bot.pool.fetch(query)}
 
     @guards.is_owner_channel()
     @commands.is_owner()

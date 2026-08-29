@@ -189,7 +189,7 @@ class Alerts(IrePersonalComponent):
         Just a fool proof measure in case I randomly snap and delete it.
         """
         query = "SELECT user_id FROM ttv_chatters"
-        self.known_chatters: list[str] = [r for (r,) in await self.bot.pool.fetch(query)]
+        self.known_chatters = [r for (r,) in await self.bot.pool.fetch(query)]
 
     @commands.Component.listener(name="message")
     async def first_message(self, message: twitchio.ChatMessage) -> None:
