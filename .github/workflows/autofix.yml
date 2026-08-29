@@ -1,3 +1,5 @@
+# https://autofix.ci/setup
+
 name: autofix.ci
 on:
   workflow_call:

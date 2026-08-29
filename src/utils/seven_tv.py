@@ -121,6 +121,19 @@ class SevenTVClient:
         return graph_ql_json
 
     async def emote_get_name(self, emote_id: str) -> str:
+        """
+        Get defaultName for an emote.
+
+        Parameters
+        ----------
+        emote_id: str
+            7TV emote id.
+
+        Returns
+        -------
+        str
+            emote's `defaultName`.
+        """
         res = await self.invoke(
             query="""
             query EmoteFindName($emoteId: Id!) {
