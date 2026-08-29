@@ -18,6 +18,7 @@ from twitchio.ext import commands
 
 from core import IrePersonalComponent, ireloop
 from utils import const, errors, guards, seven_tv
+from utils.seven_tv import EmoteNotFoundInSetError
 
 if TYPE_CHECKING:
     import twitchio
@@ -56,7 +57,7 @@ class SevenTVEmoteConverter(commands.Converter[str]):
             pass
 
         # Step 2. Try to find the said emote with 7TV Graph QL
-        return await ctx.bot.stv.user_search_emote_name(broadcaster_id=ctx.broadcaster.id, emote_name=user_input)
+        return await ctx.bot.stv.user_search_emote(broadcaster_id=ctx.broadcaster.id, emote_name=user_input)
 
 
 class CyclingEmotes(IrePersonalComponent):
@@ -122,62 +123,96 @@ class CyclingEmotes(IrePersonalComponent):
         # Step 1. Parse User Input
         split = redemption.user_input.split()
 
-        if len(split) > 2:
-            await redemption.refund(token_for=redemption.broadcaster.id)
+        async def refund_and_respond(content: str) -> None:
+            """Refund the redemption and response.
 
-            msg = 'Bad User Input, it\'s supposed to be an "*emote_link/id* *emote_alias* - no extra words"'
-            raise errors.BadUserInputError(msg)
+            Just a little lazy shortcut."""
+            await redemption.refund(token_for=redemption.broadcaster.id)
+            await redemption.respond(content=content)
+
+        if len(split) > 2:
+            await refund_and_respond(
+                f"Bad Input, it's supposed to be an \"*emote_link/id* *emote_alias* - no extra words {const.FFZ.peepoPolice}"
+            )
+            return
 
         try:
             emote_id = to_emote_id(split[0])
         except errors.BadUserInputError:
-            await redemption.refund(token_for=redemption.broadcaster.id)
-            raise
+            await refund_and_respond(f"Bad input, I couldn't find emote_link/emote_id in that {const.FFZ.peepoPolice}")
+            return
 
-        emote_alias = ""
-        with contextlib.suppress(IndexError):
+        try:
             # If emote alias was given - assign it.
-            emote_alias = split[1]
+            emote_alias: str = split[1]
+        except IndexError:
+            # unfortunately, due to Seven TV weird implementation of Emote Set update call
+            # we won't actually get the name from it, so we need to fetch it beforehand.
+            emote_alias = await self.bot.stv.emote_get_name(emote_id)
 
         log.debug("🖍️ - emote_id = %s emote_alias = %s", emote_id, emote_alias)
 
         # Step 2. Get Emote Set
-        emote_set_id = await self.bot.stv.active_emote_set_by_broadcaster(broadcaster_id=redemption.broadcaster.id)
+        emote_set_id = await self.bot.stv.user_get_active_emote(broadcaster_id=redemption.broadcaster.id)
         log.debug("🖍️ - Operating on emote_set #%s", emote_set_id)
 
         # Step 3. Remove emote(-s) if above the limit
         query = """
-            DELETE FROM ttv_cycling_emotes tce
-            WHERE tce.emote_id IN (
-                SELECT tce2.emote_id
-                FROM ttv_cycling_emotes tce2
-                WHERE tce2.streamer_id = $1
-                    AND tce2.emote_set_id = $2
-                ORDER BY tce2.added_at DESC
-                OFFSET (
-                    SELECT tcer.emote_limit - 1
-                    FROM ttv_cycling_emote_rewards tcer
-                    WHERE tcer.streamer_id = $1
-                )
+            SELECT tce2.emote_id
+            FROM ttv_cycling_emotes tce2
+            WHERE tce2.streamer_id = $1
+                AND tce2.emote_set_id = $2
+            ORDER BY tce2.added_at DESC
+            OFFSET (
+                SELECT tcer.emote_limit - 1
+                FROM ttv_cycling_emote_rewards tcer
+                WHERE tcer.streamer_id = $1
             )
-            RETURNING tce.emote_id;
         """
         emote_ids_to_remove: list[str] = [
             r for (r,) in await self.bot.pool.fetch(query, redemption.broadcaster.id, emote_set_id)
         ]
         log.debug("🖍️ - Removing emotes #%s", emote_ids_to_remove)
 
-        for emote_id_to_delete in emote_ids_to_remove:
-            with contextlib.suppress(seven_tv.EmoteNotFoundInSetError):
+        def get_seven_tv_link(emote_id: str) -> str:
+            return f"7tv.app/emotes/{emote_id}"
+
+        for emote_id_to_remove in emote_ids_to_remove:
+            try:
+                emote_name_to_remove: str = await self.bot.stv.emote_emote_set_alias(
+                    emote_set_id=emote_set_id,
+                    emote_id=emote_id_to_remove,
+                )
                 await self.bot.stv.emote_set_remove_emote(
                     emote_set_id=emote_set_id,
-                    emote_id=emote_id_to_delete,
+                    emote_id=emote_id_to_remove,
                 )
-
-            log.debug("🖍️ - Removed emote #%s", emote_id_to_delete)
+            except seven_tv.EmoteNotFoundInSetError:
+                pass
+            else:
+                await redemption.respond(f"Removed {emote_name_to_remove} ({get_seven_tv_link(emote_id_to_remove)})")
+            log.debug("🖍️ - Removed emote #%s", emote_id_to_remove)
+        if emote_ids_to_remove:
+            query = """
+                DELETE FROM ttv_cycling_emotes
+                WHERE streamer_id = $1 AND emote_id = ANY($2);
+            """
+            await self.bot.pool.execute(query, redemption.broadcaster.id, emote_ids_to_remove)
 
         # Step 4. Add the requested emote
-        await self.bot.stv.emote_set_add_emote(emote_set_id=emote_set_id, emote_id=emote_id, emote_alias=emote_alias)
+        try:
+            await self.bot.stv.emote_set_add_emote(
+                emote_set_id=emote_set_id,
+                emote_id=emote_id,
+                emote_alias=emote_alias,
+            )
+        except seven_tv.ConflictingEmoteNameError:
+            await refund_and_respond(
+                "This emote has a conflicting name, consider using an alias for it "
+                f"(or maybe this emote was already added as non-cycling emote?) {const.FFZ.peepoPolice}"
+            )
+            return
+
         log.debug("🖍️ - Added emote #%s", emote_id)
 
         query = """
@@ -187,11 +222,7 @@ class CyclingEmotes(IrePersonalComponent):
         """
         await self.bot.pool.execute(query, emote_id, redemption.broadcaster.id, emote_set_id, redemption.user.id)
 
-        content = f"Added {emote_id}"
-        if emote_ids_to_remove:
-            content += f"; Removed {', '.join(emote_ids_to_remove)}"
-        content += f" {const.STV.DonkCrayon}"
-        await redemption.respond(content)
+        await redemption.respond(f"Added '{emote_alias}' ({get_seven_tv_link(emote_id)}) {const.STV.DonkCrayon}")
         await redemption.fulfill(token_for=redemption.broadcaster.id)
 
     @guards.is_owner_channel()
@@ -226,16 +257,25 @@ class CyclingEmotes(IrePersonalComponent):
         await self.bot.pool.execute(query, const.UserID.Irene)
 
         color_ball_ids = [
+            # cSpell: disable
             "01J8FC6EN0000DNWJ3ST67HH38",  # Blue
             "01J8FCA6RR0004HJ8DYSFE2PF2",  # Teal
-            "01J8FCAY6R0006NP3M7JY4GDAA",
-            "01J8FCBGRG000A5QBDAQ50YRYC",
+            "01J8FCAY6R0006NP3M7JY4GDAA",  # Purple
+            "01J8FCBGRG000A5QBDAQ50YRYC",  # Yellow
+            "01J8FCC2B00005G1FWF2H9XPCE",  # Orange
+            "01J8FCG750000D15QN0BDGKN3A",  # Pink
+            "01J8FCGXKR000E0691W9XKC6X0",  # Olive
+            "01J8FCHF68000E0691W9XKC6X5",  # LightBlue
+            "01J8FCHZSG000C93G7AYMMNCBC",  # DarkGreen
+            "01J8FCK00R0006NP3M7JY4GDB0",  # Brown
+            # cSpell: enable
         ]
         for emote_id in color_ball_ids:
-            try:
-                await ctx.bot.stv.emote_set_remove_emote(emote_set_id="01FAQVCS500002EV4FV330P46A", emote_id=emote_id)
-            except Exception as err:
-                print(err)
+            with contextlib.suppress(EmoteNotFoundInSetError):
+                await ctx.bot.stv.emote_set_remove_emote(
+                    emote_set_id=const.STV_IRENE_DEFAULT_EMOTE_SET_ID,
+                    emote_id=emote_id,
+                )
         await ctx.send(f"Done {const.STV.DonkCrayon}")
 
 

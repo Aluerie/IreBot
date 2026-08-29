@@ -3,7 +3,18 @@ from __future__ import annotations
 
 from enum import StrEnum
 
-__all__ = ("BTTV", "DIGITS", "FFZ", "STV", "Bots", "Global", "Logo", "LowerName", "UserID")
+__all__ = (
+    "BTTV",
+    "DIGITS",
+    "FFZ",
+    "STV",
+    "STV_IRENE_DEFAULT_EMOTE_SET_ID",
+    "Bots",
+    "Global",
+    "Logo",
+    "LowerName",
+    "UserID",
+)
 
 
 class UserID(StrEnum):
@@ -64,6 +75,9 @@ class FFZ(StrEnum):
     PepoG = "PepoG"
     sadKEK = "sadKEK"
     WTFF = "WTFF"
+
+
+STV_IRENE_DEFAULT_EMOTE_SET_ID = "01FAQVCS500002EV4FV330P46A"
 
 
 class STV(StrEnum):

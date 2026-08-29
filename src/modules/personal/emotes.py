@@ -95,7 +95,9 @@ class EmoteChecker(IrePersonalComponent):
         Link to the tool: https://potat.app/help/mergeset.
         Using this command will trigger @PotatBotat automatically as it listens to other bots messages too.
         """
-        await ctx.send('#mergeset 01FAQVCS500002EV4FV330P46A 01JS1XW1PAAKP34984FDYZVDR7 as:"Default but Dota 2"')
+        await ctx.send(
+            f'#mergeset {const.STV_IRENE_DEFAULT_EMOTE_SET_ID} 01JS1XW1PAAKP34984FDYZVDR7 as:"Default but Dota 2"'
+        )
 
 
 async def setup(bot: IreBot) -> None:

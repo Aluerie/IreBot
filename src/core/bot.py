@@ -543,19 +543,23 @@ class IreBot(commands.AutoBot):
 
     @override
     async def event_error(self, payload: twitchio.EventErrorPayload) -> None:
-        embed = discord.Embed(title=f"Event Error: `{payload.listener.__qualname__}`").add_field(
-            name="Exception", value=f"`{payload.error.__class__.__name__}`"
-        )
+
+        def get_report_embed() -> discord.Embed:
+            return discord.Embed(title=f"Event Error: `{payload.listener.__qualname__}`").add_field(
+                name="Exception", value=f"`{payload.error.__class__.__name__}`"
+            )
 
         match payload.error:
             case errors.PlaceholderError():
                 if payload.error.data:
                     embed = self.add_args_field(
-                        embed, f"Extra {payload.error.__class__.__name__} Debug Data", payload.error.data
+                        get_report_embed(),
+                        f"Extra {payload.error.__class__.__name__} Debug Data",
+                        payload.error.data,
                     )
                     await self.error_manager.register(payload.error, embed=embed)
             case _:
-                await self.error_manager.register(payload.error, embed=embed)
+                await self.error_manager.register(payload.error, embed=get_report_embed())
 
     # SHORTCUTS AND UTILITIES
 

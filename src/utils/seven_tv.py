@@ -30,13 +30,21 @@ if TYPE_CHECKING:
 
 
 __all__ = (
+    "ConflictingEmoteNameError",
     "EmoteNotFoundInSetError",
     "SevenTVClient",
 )
 
+BAD_REQUEST_CONFLICTING_NAME_MESSAGE = "BAD_REQUEST this emote has a conflicting name"
+BAD_REQUEST_EMOTE_NOT_FOUND_MESSAGE = "BAD_REQUEST emote not found in set"
+
 
 class EmoteNotFoundInSetError(errors.IreBotError):
     """Emote Not Found In Set Error."""
+
+
+class ConflictingEmoteNameError(errors.IreBotError):
+    """Conflicting Emote Name Error."""
 
 
 class SevenTVClient:
@@ -92,34 +100,42 @@ class SevenTVClient:
                 "Authorization": env.SEVEN_TV_BEARER,
             },
         ) as response:
-            gql_json = await response.json(loads=orjson.loads)
+            graph_ql_json = await response.json(loads=orjson.loads)
 
-        if "errors" in gql_json:
-            msg = str(gql_json["errors"])
-            raise errors.APIDataError(msg, gql_json["errors"])
-        return gql_json
+        # ERRORS
+        if "errors" in graph_ql_json:
+            graph_ql_errors: list[dict[str, Any]] = graph_ql_json["errors"]
+            for gql_error in graph_ql_errors:
+                message = gql_error.get("message", "")
+                status = gql_error.get("extensions", {}).get("status", "")
+                error_msg = f"{status} {message}"
 
-    async def active_emote_set_by_broadcaster(self, *, broadcaster_id: str) -> str:
-        """Get currently active 7TV emote set for a broadcaster.
+                if message == BAD_REQUEST_CONFLICTING_NAME_MESSAGE:
+                    raise ConflictingEmoteNameError(error_msg)
+                if message == BAD_REQUEST_EMOTE_NOT_FOUND_MESSAGE:
+                    raise EmoteNotFoundInSetError(error_msg)
 
-        Parameters
-        ----------
-        broadcaster_id: str
-            Twitch ID for the broadcaster.
-        """
-        query = """
-        query findActiveEmoteSetByPlatformId ($platformId: String!) {
-            users {
-                userByConnection(platform: TWITCH, platformId: $platformId ) {
-                    style {
-                        activeEmoteSetId
+            raise errors.APIDataError(str(graph_ql_json["errors"]), graph_ql_json["errors"])
+
+        # NO ERRORS
+        return graph_ql_json
+
+    async def emote_get_name(self, emote_id: str) -> str:
+        res = await self.invoke(
+            query="""
+            query EmoteFindName($emoteId: Id!) {
+                emotes {
+                    emote(id: $emoteId) {
+                        defaultName
                     }
                 }
             }
-        }
-        """
-        res = await self.invoke(query, variables={"platformId": broadcaster_id})
-        return res["data"]["users"]["userByConnection"]["style"]["activeEmoteSetId"]
+            """,
+            variables={
+                "emoteId": emote_id,
+            },
+        )
+        return res["data"]["emotes"]["emote"]["defaultName"]
 
     async def emote_set_add_emote(self, *, emote_set_id: str, emote_id: str, emote_alias: str | None = None) -> str:
         """
@@ -190,24 +206,66 @@ class SevenTVClient:
             }
         }
         """
-        try:
-            res = await self.invoke(
-                query,
-                variables={
-                    "emoteSetId": emote_set_id,
-                    "emoteIdWithAlias": {
-                        "emoteId": emote_id,
-                    },
+        res = await self.invoke(
+            query,
+            variables={
+                "emoteSetId": emote_set_id,
+                "emoteIdWithAlias": {
+                    "emoteId": emote_id,
                 },
-            )
-        except errors.APIDataError as err:
-            if any(err_entry.get("message", "") == "BAD_REQUEST emote not found in set" for err_entry in err.data):
-                msg = f"Emote {emote_id} not found in set {emote_set_id}"
-                raise EmoteNotFoundInSetError(msg) from None
-            raise
+            },
+        )
         return res["data"]["emoteSets"]["emoteSet"]["removeEmote"]["id"]
 
-    async def user_search_emote_name(self, *, broadcaster_id: str, emote_name: str) -> str:
+    async def emote_emote_set_alias(self, *, emote_set_id: str, emote_id: str) -> str:
+        """
+        Get emote's alias in the emote alias.
+        """
+        res = await self.invoke(
+            query="""
+                query EmoteSetSearchEmoteAlias($emoteSetId: Id!, $emoteId: Id!) {
+                    emotes {
+                        emote(id: $emoteId) {
+                            inEmoteSets (emoteSetIds: [$emoteSetId]) {
+                                emote {
+                                    alias
+                                }
+                            }
+                        }
+                    }
+                }
+                """,
+            variables={"emoteSetId": emote_set_id, "emoteId": emote_id},
+        )
+        emote = res["data"]["emotes"]["emote"]["inEmoteSets"][0]["emote"]
+        if emote is None:
+            msg = f"Could not find {emote_id} in emote set {emote_set_id}"
+            raise EmoteNotFoundInSetError(msg)
+        return emote["alias"]
+
+    async def user_get_active_emote(self, *, broadcaster_id: str) -> str:
+        """Get currently active 7TV emote set for a broadcaster.
+
+        Parameters
+        ----------
+        broadcaster_id: str
+            Twitch ID for the broadcaster.
+        """
+        query = """
+        query findActiveEmoteSetByPlatformId ($platformId: String!) {
+            users {
+                userByConnection(platform: TWITCH, platformId: $platformId ) {
+                    style {
+                        activeEmoteSetId
+                    }
+                }
+            }
+        }
+        """
+        res = await self.invoke(query, variables={"platformId": broadcaster_id})
+        return res["data"]["users"]["userByConnection"]["style"]["activeEmoteSetId"]
+
+    async def user_search_emote(self, *, broadcaster_id: str, emote_name: str) -> str:
         """Search a 7TV emote in a broadcaster's active emote set by emote_name.
 
         Parameters
@@ -223,7 +281,7 @@ class SevenTVClient:
             Emote ID that matches provided `emote_name` in the active emote set for the broadcaster.
         """
         query: str = """
-        query UserSearchEmoteName($platformId: String!, $emoteName: String) {
+        query UserSearchEmote($platformId: String!, $emoteName: String) {
             users {
                 userByConnection(platform: TWITCH, platformId: $platformId) {
                     style {

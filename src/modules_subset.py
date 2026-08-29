@@ -11,7 +11,7 @@ CATEGORY_MODULES_MAPPING: dict[str, list[str]] = {
     "personal": [
         # "alerts",
         # "counters",
-        # "cycling_emotes",
+        "cycling_emotes",
         # "discord_notifications",
         # "information",
         # "emotes"
@@ -22,7 +22,7 @@ CATEGORY_MODULES_MAPPING: dict[str, list[str]] = {
         # "timers",
     ],
     "public": [
-        "d9kmmrbot",
+        # "d9kmmrbot",
         # "meta"
     ],
 }
