@@ -37,11 +37,13 @@ class Counters(IrePersonalComponent):
     @override
     async def component_load(self) -> None:
         self.check_first_reward.start()
+        self.double_check_offline.start()
         await super().component_load()
 
     @override
     async def component_teardown(self) -> None:
         self.check_first_reward.cancel()
+        self.double_check_offline.cancel()
         await super().component_teardown()
 
     # ERM COUNTERS
@@ -128,6 +130,20 @@ class Counters(IrePersonalComponent):
 
         first_reward = next(reward for reward in await offline.broadcaster.fetch_custom_rewards() if reward.id == FIRST_ID)
         await first_reward.update(title="First !")
+
+    @ireloop(hours=8)
+    async def double_check_offline(self) -> None:
+        """Double Check if the stream is online.
+
+        Sometimes, the bot is offline during Irene's stream ends so it doesn't catch the `stream_offline` event."""
+        await self.bot.streamers_index_ready.wait()
+        if (irene_streamer := self.bot.streamers.get(const.UserID.Irene)) is not None and not irene_streamer.online:
+            first_reward = next(
+                reward
+                for reward in await self.bot.create_partialuser(self.bot.owner_id).fetch_custom_rewards()
+                if reward.id == FIRST_ID
+            )
+            await first_reward.update(title="First !")
 
     @commands.command(aliases=["first"])
     async def firsts(self, ctx: IreContext) -> None:
