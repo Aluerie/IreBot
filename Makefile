@@ -1,4 +1,4 @@
-sources = src tests
+sources = src tests examples
 
 default: help
 
@@ -18,6 +18,8 @@ help:  # Help
 	@echo * make tests: Run the tests
 	@echo * make pages: Locally run the github pages website
 	@echo * make ty: Run ty (beta testing ty typechecker)
+	@echo * make basedpyright: Run basedpyright
+
 
 .PHONY: setup
 .SILENT: setup
@@ -54,11 +56,6 @@ format:  # Format the code
 	uv run ruff check $(sources) --fix
 	uv run ruff format $(sources)
 
-.PHONY: format-check
-.SILENT: format-check
-format-check:  # Check code formatting
-	uv run ruff format --check $(sources)
-
 .PHONY: tests
 .SILENT: tests
 tests:  # Run the tests
@@ -74,3 +71,8 @@ pages:  # Run the pages
 .SILENT: ty
 ty:  # Run ty (beta testing ty typechecker)
 	uv run ty check .
+
+.PHONY: basedpyright
+.SILENT: basedpyright
+basedpyright:  # Run basedpyright
+	uv run basedpyright $(sources)
