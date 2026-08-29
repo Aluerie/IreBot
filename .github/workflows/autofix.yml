@@ -4,8 +4,9 @@ name: autofix.ci
 on:
   workflow_call:
   pull_request:
-  push:
-    branches: ["main"]
+  # Local prek is good enough for "main" branch 
+  # push:
+  #   branches: ["main"]
 permissions:
   contents: read
 
