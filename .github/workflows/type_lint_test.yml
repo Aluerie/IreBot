@@ -27,9 +27,9 @@ jobs:
 
       - name: Basedpyright Type Checking
         run: uv run basedpyright
-
-      - name: Ty Type Checking (why not both)
-        run: uv run ty check src tests
+      
+      # - name: Ty Type Checking (Choose one typechecker)
+      #   run: uv run ty check src tests
 
       - name: Ruff Lint Checking
         run: uv run ruff check src tests --output-format github
@@ -53,6 +53,7 @@ jobs:
           STEAM_API_KEY: str
           SPOTIFY_AIDENWALLIS: str
           EVENTSUB: str
+          SEVEN_TV_BEARER: str
           WEBHOOK_LOGGER: str
           WEBHOOK_ERROR: str
           WEBHOOK_STREAM_NOTIFS: str
