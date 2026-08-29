@@ -19,13 +19,11 @@ from pkgutil import iter_modules
 __all__ = ("get_modules",)
 
 try:
-    import modules_subset as select_modules_to_load  # pyright: ignore[reportMissingImports]
+    from modules_subset import CATEGORY_MODULES_MAPPING, LOAD_ALL_MODULES  # pyright: ignore[reportMissingImports]
 except ModuleNotFoundError:
-    SUBSET_CATEGORY_MODULES: dict[str, list[str]] = {}  # pyright: ignore[reportConstantRedefinition]
+    CATEGORY_MODULES_MAPPING: dict[str, list[str]] = {}  # pyright: ignore[reportConstantRedefinition]
     LOAD_ALL_MODULES: bool = True  # pyright: ignore[reportConstantRedefinition]
-else:
-    SUBSET_CATEGORY_MODULES: dict[str, list[str]] = select_modules_to_load.CATEGORY_MODULES_MAPPING  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
-    LOAD_ALL_MODULES: bool = select_modules_to_load.LOAD_ALL_MODULES  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
+
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.INFO)
@@ -79,7 +77,7 @@ def get_modules(*, test: bool) -> tuple[str, ...]:
     """
     if test and not LOAD_ALL_MODULES:
         # assume testing specific modules from `m.py`
-        return get_test_subset_modules(SUBSET_CATEGORY_MODULES)
+        return get_test_subset_modules(CATEGORY_MODULES_MAPPING)
 
     # assume running full bot functionality (besides `DISABLED_MODULES`)
     current_folder = "src/" + str(__package__)

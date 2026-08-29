@@ -150,7 +150,7 @@ class SteamWebAPIClient(APIClient):
 
         return result
 
-    async def get_real_time_stats(self, server_steam_id: int) -> SteamWebRealTimeStats:
+    async def get_real_time_stats(self, server_steam_id: int) -> dota_api_schemas.SteamWebRealTimeStats:
         """Get Real Time Stats from Steam Web API.
 
         Links

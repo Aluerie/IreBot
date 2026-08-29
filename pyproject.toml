@@ -61,6 +61,7 @@ deprecateTypingAliases = true
 typeCheckingMode = "strict"
 venvPath = "."
 venv = ".venv"
+allowedUntypedLibraries = []
 
 reportCallInDefaultInitializer = "warning"
 reportImplicitOverride = "warning"
@@ -81,6 +82,12 @@ reportDuplicateImport = "none"
 [tool.ty.environment]
 root = ["./src"]
 
+[tool.ty.rules]
+# Ctrl F "level: ignore" in https://docs.astral.sh/ty/reference/rules/ and mark some of them as "warn"
+blanket-ignore-comment = "warn"
+missing-override-decorator = "warn"
+missing-type-argument = "warn"
+
 [tool.ruff]
 line-length = 125
 target-version = "py314"
@@ -91,23 +98,23 @@ src = ["src"]
 [tool.ruff.lint]
 select = ["ALL"]
 ignore = [
-    "ERA", # eradicate
+    "ERA",      # eradicate
     "D",
     "D417",
     "DOC",
-    "W191",   # tab-indentation
-    "E111",   # indentation-with-invalid-multiple
-    "E114",   # indentation-with-invalid-multiple-comment 
-    "E117",   # over-indented
-    "D206",   # docstring-tab-indentation
-    "D300",   # triple-single-quotes 
-    "Q000",   # bad-quotes-inline-string
-    "Q001",   # bad-quotes-multiline-string
-    "Q002",   # bad-quotes-docstring
-    "Q003",   # avoidable-escaped-quote
-    "COM812", # missing-trailing-comma
-    "COM819", # prohibited-trailing-comma
-    "ISC002", # multi-line-implicit-string-concatenation
+    "W191",     # tab-indentation
+    "E111",     # indentation-with-invalid-multiple
+    "E114",     # indentation-with-invalid-multiple-comment 
+    "E117",     # over-indented
+    "D206",     # docstring-tab-indentation
+    "D300",     # triple-single-quotes 
+    "Q000",     # bad-quotes-inline-string
+    "Q001",     # bad-quotes-multiline-string
+    "Q002",     # bad-quotes-docstring
+    "Q003",     # avoidable-escaped-quote
+    "COM812",   # missing-trailing-comma
+    "COM819",   # prohibited-trailing-comma
+    "ISC002",   # multi-line-implicit-string-concatenation
     "ANN401",
     "ASYNC116",
     "ASYNC109",
@@ -182,4 +189,4 @@ norecursedirs = ["env/*", "venv/*", ".venv/*"]
 filterwarnings = ["ignore::DeprecationWarning"]
 testpaths = ["tests/"]
 python_files = ["test_*.py"]
-asyncio_mode="auto"
+asyncio_mode = "auto"

@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-import datetime
 import logging
-import re
 from typing import TYPE_CHECKING, Any, NamedTuple, override
 
 from steam import PersonaState
@@ -13,7 +11,6 @@ from core import ireloop
 from utils import errors
 
 from .api_clients import OpenDotaClient, SteamWebAPIClient, StratzClient
-from .storage import Items
 
 if TYPE_CHECKING:
     from core import IreBot

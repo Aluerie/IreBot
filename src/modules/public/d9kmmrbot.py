@@ -1302,12 +1302,11 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             WHERE d.twitch_id = $1 AND m.live > $2 {clause}
             ORDER BY m.start_time DESC;
         """
-        if stream_started_at:
-            rows: list[ScoreQueryRow] = await self.bot.pool.fetch(
-                query, broadcaster_id, dota2utils.LiveIndicator.Live, stream_started_at
-            )
-        else:
-            rows: list[ScoreQueryRow] = await self.bot.pool.fetch(query, broadcaster_id, dota2utils.LiveIndicator.Live)
+        rows: list[ScoreQueryRow] = (
+            await self.bot.pool.fetch(query, broadcaster_id, dota2utils.LiveIndicator.Live, stream_started_at)
+            if stream_started_at
+            else await self.bot.pool.fetch(query, broadcaster_id, dota2utils.LiveIndicator.Live)
+        )
 
         if not rows:
             return "0 W - 0 L" if stream_started_at else "0 W - 0 L (No games played in the last 2 days)"
