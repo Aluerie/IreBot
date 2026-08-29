@@ -24,9 +24,12 @@ jobs:
 
       - name: Install dependencies
         run: uv sync
-  
-      - name: Pyright Type Checking
-        run: uv run pyright
+
+      - name: Basedpyright Type Checking
+        run: basedpyright
+
+      - name: Ty Type Checking (why not both)
+        run: uv run ty check .
 
       - name: Ruff Lint Checking
         run: uv run make lint
