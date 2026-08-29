@@ -37,7 +37,7 @@ jobs:
       - name: Pytest Tests
         run: uv run make tests
         env:
-          # it doesn't need any real .env values, just so pydantic doesn't crash out
+          # it doesn't need any real .env values for most of it, just so pydantic doesn't crash out
           PROJECT_NAME: irebot
           TWITCH_CLIENT_ID: str
           TWITCH_CLIENT_SECRET: str
@@ -53,7 +53,7 @@ jobs:
           STEAM_API_KEY: str
           SPOTIFY_AIDENWALLIS: str
           EVENTSUB: str
-          SEVEN_TV_BEARER: str
+          SEVEN_TV_BEARER: ${{ secrets.SEVEN_TV_BEARER }}
           WEBHOOK_LOGGER: str
           WEBHOOK_ERROR: str
           WEBHOOK_STREAM_NOTIFS: str
