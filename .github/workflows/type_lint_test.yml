@@ -23,16 +23,16 @@ jobs:
           enable-cache: true
 
       - name: Install dependencies
-        run: uv sync
+        run: uv sync --dev
 
       - name: Basedpyright Type Checking
         run: basedpyright
 
       - name: Ty Type Checking (why not both)
-        run: uv run ty check .
+        run: uv run ty check src tests
 
       - name: Ruff Lint Checking
-        run: uv run make lint
+        run: uv run ruff check src tests --output-format github
 
       - name: Pytest Tests
         run: uv run make tests

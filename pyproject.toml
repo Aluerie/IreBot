@@ -35,6 +35,7 @@ steamio = { git = "https://github.com/Aluerie/steam.py", rev = "introduce-ext.do
 [dependency-groups]
 dev = [
     "asyncpg-stubs",
+    "basedpyright>=1.39.10",
     "ipykernel",
     "prek>=0.4.0",
     "pyright>=1.1.408",
