@@ -81,7 +81,7 @@ class CyclingEmotes(IrePersonalComponent):
     async def fill_known_rewards(self) -> None:
         """The task that fills a set of rewards ids for convenience to cut on a few database queries."""
         query = "SELECT reward_id FROM ttv_cycling_emote_rewards"
-        self.reward_ids_cache = {r for (r,) in await self.bot.pool.fetch(query)}
+        self.reward_ids_cache: set[str] = {r for (r,) in await self.bot.pool.fetch(query)}
 
     @guards.is_owner_channel()
     @commands.is_owner()
@@ -91,9 +91,9 @@ class CyclingEmotes(IrePersonalComponent):
             title="Add a 7TV emote (10 slots, oldest cycles out)",
             cost=10,
             prompt=(
-                "Give me a 7TV emote link or emote ID. "
-                "If you want an alias name for the emote then provide it after a space. "
-                'Example: "https://7tv.app/emotes/01FP8TR8G8000EJT2EVEY3JQTF smh"'
+                # This prompt can be 200 characters max
+                "Give me a 7TV emote link or emote ID. If you want an emote alias - type it after a space: "
+                '"*emote_link/id* *optional_emote_alias*". Example: "https://7tv.app/emotes/01FP8TR8G8000EJT2EVEY3JQTF smh"'
             ),
         )
 
@@ -132,14 +132,17 @@ class CyclingEmotes(IrePersonalComponent):
 
         if len(split) > 2:
             await refund_and_respond(
-                f"Bad Input, it's supposed to be an \"*emote_link/id* *emote_alias* - no extra words {const.FFZ.peepoPolice}"
+                f'Bad Input, it\'s supposed to be an "*emote_link/id* *optional_emote_alias*" - '
+                f"no extra words {const.FFZ.peepoPolice}"
             )
             return
 
         try:
             emote_id = to_emote_id(split[0])
         except errors.BadUserInputError:
-            await refund_and_respond(f"Bad input, I couldn't find emote_link/emote_id in that {const.FFZ.peepoPolice}")
+            await refund_and_respond(
+                f'Bad input (it\'s supposed to be "*emote_link/id* *optional_emote_alias*") {const.FFZ.peepoPolice}'
+            )
             return
 
         try:
@@ -207,11 +210,18 @@ class CyclingEmotes(IrePersonalComponent):
                 emote_alias=emote_alias,
             )
         except seven_tv.ConflictingEmoteNameError:
-            await refund_and_respond(
-                "This emote has a conflicting name, consider using an alias for it "
-                f"(or maybe this emote was already added as non-cycling emote?) {const.FFZ.peepoPolice}"
-            )
-            return
+            try:
+                await self.bot.stv.emote_emote_set_alias(emote_set_id=emote_set_id, emote_id=emote_id)
+            except EmoteNotFoundInSetError:
+                # This means the new emote has a conflicting name
+                await refund_and_respond(
+                    f"This emote has a conflicting name, consider adding it with an alias {const.FFZ.peepoPolice}"
+                )
+                return
+            else:
+                # This means the new emote was already added
+                await refund_and_respond(f"This his emote was already added to this emote set {const.FFZ.peepoPolice}")
+                return
 
         log.debug("🖍️ - Added emote #%s", emote_id)
 
