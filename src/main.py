@@ -79,7 +79,7 @@ async def start_the_bot(*, scopes_only: bool, owner_id: str, force_subscribe: bo
         await irebot.start()
 
 
-@click.group(invoke_without_command=                            True, options_metavar='[options]')
+@click.group(invoke_without_command=True, options_metavar="[options]")
 @click.pass_context
 @click.option(
     "--scopes-only",
