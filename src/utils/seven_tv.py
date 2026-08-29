@@ -233,6 +233,18 @@ class SevenTVClient:
     async def emote_emote_set_alias(self, *, emote_set_id: str, emote_id: str) -> str:
         """
         Get emote's alias in the emote alias.
+
+        Parameters
+        ----------
+        emote_set_id: str
+            7TV emote set where we will search for the emote.
+        emote_id: str
+            7TV emote id.
+
+        Returns
+        -------
+        str
+            Emote's `alias` in the mentioned emote set. If alias wasn't set, it still returns `defaultName` for the emote.
         """
         res = await self.invoke(
             query="""
