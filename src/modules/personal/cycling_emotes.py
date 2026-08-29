@@ -47,6 +47,10 @@ def to_emote_id(user_input: str) -> str:
 
 
 class SevenTVEmoteConverter(commands.Converter[str]):
+    """Seven TV Emote Converter.
+
+    Converts user_input from `str` type into 7TV emote_id."""
+
     @override
     async def convert(self, ctx: IreContext, user_input: str) -> str:  # pyright: ignore[reportIncompatibleMethodOverride]
         """Convert `user_input` to 7TV emote_id."""
