@@ -1,5 +1,4 @@
 import pytest
-from aiohttp import ClientSession
 
 from utils import const, seven_tv
 
@@ -8,8 +7,7 @@ pytest_plugins = ("pytest_asyncio",)
 
 @pytest.fixture
 async def stv() -> seven_tv.SevenTVClient:
-    async with ClientSession() as session:
-        return seven_tv.SevenTVClient(session)
+    return seven_tv.SevenTVClient()
 
 
 @pytest.mark.asyncio
