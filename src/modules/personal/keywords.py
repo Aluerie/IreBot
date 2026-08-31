@@ -58,7 +58,7 @@ class Keywords(IrePersonalComponent):
         if (now - self.cooldown_dt).seconds < 7 * 60:
             # the keyword was recently triggered
             return
-        if message.chatter.name in const.Bots or not message.text or random.randint(1, 100) > 10:
+        if message.chatter.name in const.BotsLowerName or not message.text or random.randint(1, 100) > 10:
             # restrict `keywords` functionality from
             # 1. invited bots
             # 2. weird empty messages

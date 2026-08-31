@@ -1,5 +1,5 @@
-# Currently manually disabled as https://github.com/Aluerie/IreBot/actions
-# as I'm using `deploy_service.yml` as my deploy workflow
+# Currently manually disabled at https://github.com/Aluerie/IreBot/actions/workflows/deploy_docker.yml
+# as I'm using `deploy_service.yml` instead as my deploy workflow
 
 name: Deploy Docker
 
@@ -21,11 +21,11 @@ jobs:
       - name: Login to Docker
         uses: docker/login-action@v2
         with:
-          username: 
-          password: 
+          username:
+          password:
       - name: Push to DockerHub
         uses: docker/build-push-action@v4
         with:
           context:
           push: true
-          tags: 
+          tags:

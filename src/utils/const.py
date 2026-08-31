@@ -9,7 +9,7 @@ __all__ = (
     "FFZ",
     "STV",
     "STV_IRENE_DEFAULT_EMOTE_SET_ID",
-    "Bots",
+    "BotsLowerName",
     "Global",
     "Logo",
     "LowerName",
@@ -152,7 +152,7 @@ class STV(StrEnum):
     YouTube = "YouTube"
 
 
-class Bots(StrEnum):
+class BotsLowerName(StrEnum):
     """List of known bot names.
 
     Used to identify other bots' messages.
@@ -176,6 +176,7 @@ class Bots(StrEnum):
     # Sery_Bot = "sery_bot"
     # StreamLabs = "streamlabs"
     # Streamelements = "streamelements"
+    # poggSpin = "poggspin"  # https://bot.itsbr0dyy.dev/
 
 
 DIGITS = [

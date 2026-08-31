@@ -194,7 +194,7 @@ class StableCommands(IrePersonalComponent):
         # chr(917504) is a weird "unknown" invisible symbol 7tv appends to the message
         # and the rest is just to get a possible clear name in case chatter was mentioning one
         potential_name = arg.replace(chr(917504), "").strip().removeprefix("@").lower()
-        if potential_name in const.Bots:
+        if potential_name in const.BotsLowerName:
             await ctx.send("Silly organic, bots cannot know love BibleThump")
         elif potential_name == ctx.chatter.name:
             await ctx.send("pls")

@@ -87,7 +87,7 @@ class Timers(IrePersonalComponent):
         if not self.is_owner(message.broadcaster.id):
             return
 
-        if message.chatter.name in const.Bots:
+        if message.chatter.name in const.BotsLowerName:
             # do not count messages from known bot accounts
             return
 

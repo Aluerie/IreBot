@@ -53,7 +53,7 @@ class Counters(IrePersonalComponent):
         """Erm Counter."""
         if not self.is_owner(message.broadcaster.id):
             return
-        if message.chatter.name in const.Bots or not message.text:
+        if message.chatter.name in const.BotsLowerName or not message.text:
             return
         if not re.search(r"\bErm\b", message.text):
             return
