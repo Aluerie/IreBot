@@ -12,8 +12,10 @@ multi-ecosystem-groups:
 updates:
   - package-ecosystem: "uv"
     directory: "/"
+    patterns: ["*"]
     multi-ecosystem-group: "infrastructure"
 
   - package-ecosystem: "github-actions"
     directory: "/"
+    patterns: ["*"]
     multi-ecosystem-group: "infrastructure"
