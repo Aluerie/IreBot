@@ -166,7 +166,7 @@ class BotsLowerName(StrEnum):
     Supibot = "supibot"
     WizeBot = "wizebot"
 
-    # Not invited to Irene's channel;
+    # Not invited to Irene's channel currently;
     # d9kmmrbot = "9kmmrbot"
     # dotabod = "dotabod"
     # Fossabot = "fossabot"

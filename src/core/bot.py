@@ -19,7 +19,7 @@ from twitchio.web import StarletteAdapter
 
 from config import env
 from modules import PUBLIC_D9MMRBOT, get_modules
-from utils import const, dota2 as dota2utils, errors, seven_tv
+from utils import const, dota2 as dota2utils, errors, seven_tv_api
 
 from .bases import IreContext
 from .error_manager import ErrorManager
@@ -213,7 +213,7 @@ class IreBot(commands.AutoBot):
         self.streamers_index_ready: asyncio.Event = asyncio.Event()
         self.friends_index_ready: asyncio.Event = asyncio.Event()
 
-        self.stv: seven_tv.SevenTVClient = seven_tv.SevenTVClient(session=session)
+        self.stv: seven_tv_api.SevenTVClient = seven_tv_api.SevenTVClient(session=session)
 
         # initialized later
         self.dota2: dota2utils.Dota2Client = MISSING
@@ -392,7 +392,8 @@ class IreBot(commands.AutoBot):
                 )
             # A potential workaround for steam login issues
             # https://github.com/Gobot1234/steam.py/issues/446
-            # # TODO: Check if it works as desired.
+            # My service / docker files are set to restart the bot on exits
+            # So it will keep restarting the bot until Steam Issues are resolved.
             except steam.errors.NoCMsFound:
                 log.warning("🔴 Encountered `steam.errors.NoCMsFound` - restarting. 🔴")
                 sys.exit(1)
@@ -404,7 +405,7 @@ class IreBot(commands.AutoBot):
 
     @override
     async def close(self, **options: Any) -> None:
-        if hasattr(self, "dota2"):
+        if self.dota2:
             await self.dota2.close()
         await super().close(**options)
 

@@ -1,7 +1,7 @@
 version: 2
-updates:
-  - package-ecosystem: "uv"
-    directory: "/"
+
+multi-ecosystem-groups:
+  infrastructure:
     schedule:
       interval: "weekly"
       # interval: "cron"
@@ -9,11 +9,11 @@ updates:
     commit-message:
       prefix: "🤖 dependabot chore:"
 
+updates:
+  - package-ecosystem: "uv"
+    directory: "/"
+    multi-ecosystem-group: "infrastructure"
+
   - package-ecosystem: "github-actions"
     directory: "/"
-    schedule:
-      interval: "daily"
-      # interval: "cron"
-      # cronjob: "0 6 1 */3 *"
-    commit-message:
-      prefix: "🤖 dependabot chore:"
+    multi-ecosystem-group: "infrastructure"

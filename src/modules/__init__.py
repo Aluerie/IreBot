@@ -19,9 +19,9 @@ from pkgutil import iter_modules
 __all__ = ("get_modules",)
 
 try:
-    from modules_subset import CATEGORY_MODULES_MAPPING, LOAD_ALL_MODULES  # pyright: ignore[reportMissingImports]
+    from modules_subset import LOAD_ALL_MODULES, MODULES_SUBSET  # pyright: ignore[reportMissingImports]
 except ModuleNotFoundError:
-    CATEGORY_MODULES_MAPPING: dict[str, list[str]] = {}  # pyright: ignore[reportConstantRedefinition]
+    MODULES_SUBSET: dict[str, list[str]] = {}  # pyright: ignore[reportConstantRedefinition]
     LOAD_ALL_MODULES: bool = True  # pyright: ignore[reportConstantRedefinition]
 
 
@@ -46,7 +46,7 @@ def get_test_subset_modules(categories: dict[str, list[str]]) -> tuple[str, ...]
     Returns
     -------
     tuple[str, ...]
-        Tuple of modules to load. Modules are listed in dot-format, i.e. "modules.public.dota_rp_flow"
+        Tuple of modules to load. Modules are listed in a dot-format, i.e. `"modules.public.dota_rp_flow"`.
     """
     modules_to_load: tuple[str, ...] = (
         # Categorized modules
@@ -77,7 +77,7 @@ def get_modules(*, test: bool) -> tuple[str, ...]:
     """
     if test and not LOAD_ALL_MODULES:
         # assume testing specific modules from `m.py`
-        return get_test_subset_modules(CATEGORY_MODULES_MAPPING)
+        return get_test_subset_modules(MODULES_SUBSET)
 
     # assume running full bot functionality (besides `DISABLED_MODULES`)
     current_folder = "src/" + str(__package__)

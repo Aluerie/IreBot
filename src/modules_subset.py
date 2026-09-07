@@ -1,6 +1,6 @@
 """Modules to load when `bot.test_subset_mode` is `True`."""
 
-CATEGORY_MODULES_MAPPING: dict[str, list[str]] = {
+MODULES_SUBSET: dict[str, list[str]] = {
     "dev": [
         # "required",
         # ---

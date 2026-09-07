@@ -17,8 +17,8 @@ from typing import TYPE_CHECKING, Annotated, Any, override
 from twitchio.ext import commands
 
 from core import IrePersonalComponent, ireloop
-from utils import const, errors, guards, seven_tv
-from utils.seven_tv import EmoteNotFoundInSetError
+from utils import const, errors, guards, seven_tv_api
+from utils.seven_tv_api import EmoteNotFoundInSetError
 
 if TYPE_CHECKING:
     import twitchio
@@ -64,7 +64,7 @@ class SevenTVEmoteConverter(commands.Converter[str]):
         return await ctx.bot.stv.user_search_emote(broadcaster_id=ctx.broadcaster.id, emote_name=user_input)
 
 
-class CyclingEmotes(IrePersonalComponent):
+class SevenTVCyclingEmotes(IrePersonalComponent):
     """Cycling Emotes."""
 
     def __init__(self, bot: IreBot, *args: Any, **kwargs: Any) -> None:
@@ -87,8 +87,7 @@ class CyclingEmotes(IrePersonalComponent):
         query = "SELECT reward_id FROM ttv_cycling_emote_rewards"
         self.reward_ids_cache = {r for (r,) in await self.bot.pool.fetch(query)}
 
-    @guards.is_owner_channel()
-    @commands.is_owner()
+    @guards.is_broadcaster_or_dev()
     @commands.command()
     async def create_7tv_cycling_emote_reward(self, ctx: IreContext) -> None:
         custom_reward = await ctx.broadcaster.create_custom_reward(
@@ -194,7 +193,7 @@ class CyclingEmotes(IrePersonalComponent):
                     emote_set_id=emote_set_id,
                     emote_id=emote_id_to_remove,
                 )
-            except seven_tv.EmoteNotFoundInSetError:
+            except seven_tv_api.EmoteNotFoundInSetError:
                 pass
             else:
                 await redemption.respond(f"Removed {emote_name_to_remove} ({get_seven_tv_link(emote_id_to_remove)})")
@@ -213,7 +212,7 @@ class CyclingEmotes(IrePersonalComponent):
                 emote_id=emote_id,
                 emote_alias=emote_alias,
             )
-        except seven_tv.ConflictingEmoteNameError:
+        except seven_tv_api.ConflictingEmoteNameError:
             try:
                 await self.bot.stv.emote_emote_set_alias(emote_set_id=emote_set_id, emote_id=emote_id)
             except EmoteNotFoundInSetError:
@@ -239,7 +238,7 @@ class CyclingEmotes(IrePersonalComponent):
         await redemption.respond(f"Added '{emote_alias}' ({get_seven_tv_link(emote_id)}) {const.STV.DonkCrayon}")
         await redemption.fulfill(token_for=redemption.broadcaster.id)
 
-    @guards.is_owner_channel()
+    @guards.is_broadcaster_or_dev()
     @commands.command()
     async def remove_emote_from_cycling(self, ctx: IreContext, emote_id: Annotated[str, SevenTVEmoteConverter]) -> None:
         """Remove an emote from the cycling list.
@@ -253,7 +252,6 @@ class CyclingEmotes(IrePersonalComponent):
         await ctx.send(f"The {emote_id} was removed from the cycling emote list {const.STV.DonkCrayon}")
 
     @commands.is_owner()
-    @guards.is_owner_channel()
     @commands.command()
     async def dev_cycle_reset(self, ctx: IreContext) -> None:
         """Developer command for temporary reset / testing.
@@ -293,6 +291,35 @@ class CyclingEmotes(IrePersonalComponent):
         await ctx.send(f"Done {const.STV.DonkCrayon}")
 
 
+class SevenTVManagement(IrePersonalComponent):
+    """Seven TV Emotes Management."""
+
+    def __init__(self, bot: IreBot, *args: Any, **kwargs: Any) -> None:
+        super().__init__(bot, *args, **kwargs)
+
+    @commands.is_moderator()
+    @commands.command()
+    async def add(self, ctx: IreContext, emote_id: Annotated[str, SevenTVEmoteConverter]) -> None:
+        pass
+
+    @commands.is_moderator()
+    @commands.command()
+    async def remove(self, ctx: IreContext, emote_id: Annotated[str, SevenTVEmoteConverter]) -> None:
+        pass
+
+
+class SevenTVEmotesStatistics(IrePersonalComponent):
+    """Seven TV Emotes Statistics."""
+
+    def __init__(self, bot: IreBot, *args: Any, **kwargs: Any) -> None:
+        super().__init__(bot, *args, **kwargs)
+
+
 async def setup(bot: IreBot) -> None:
     """Load IreBot module. Framework of twitchio."""
-    await bot.add_component(CyclingEmotes(bot))
+    for component in {
+        SevenTVCyclingEmotes,
+        SevenTVManagement,
+        SevenTVEmotesStatistics,
+    }:
+        await bot.add_component(component(bot))

@@ -66,3 +66,17 @@ def is_owner_channel() -> Any:
         raise errors.SilentError(msg)
 
     return commands.guard(predicate)
+
+
+def is_broadcaster_or_dev() -> Any:
+    """ "Allow the command to be completed only by broadcaster or Irene.
+
+    Similar to `@commands.is_broadcaster` but includes Irene too."""
+
+    def predicate(ctx: IreContext) -> bool:
+        if ctx.chatter.id in {ctx.broadcaster.id, ctx.bot.owner_id}:
+            return True
+        msg = f"Sorry, this command can only be used by the streamer {const.FFZ.peepoPolice}"
+        raise errors.RespondWithError(msg)
+
+    return commands.guard(predicate)

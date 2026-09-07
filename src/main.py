@@ -1,5 +1,5 @@
 """
-Python Launcher file for the bot.
+Python file to launch the bot with, so called "main".
 
 Generally, it's preferred to use `make run` to run this bot, however you can use
 `uv run src/main.py`, `python src/main.py`, etc. directly, if you like.
