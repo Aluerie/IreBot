@@ -1,21 +1,21 @@
 version: 2
 
 multi-ecosystem-groups:
-  infrastructure:
+  uv-lock:
     schedule:
-      interval: "weekly"
+      interval: "monthly"
       # interval: "cron"
       # cronjob: "0 6 1 */3 *"
     commit-message:
-      prefix: "🤖 dependabot chore:"
+      prefix: "🤖 Dependabot Chore:"
 
 updates:
   - package-ecosystem: "uv"
     directory: "/"
     patterns: ["*"]
-    multi-ecosystem-group: "infrastructure"
+    multi-ecosystem-group: "uv-lock"
 
   - package-ecosystem: "github-actions"
     directory: "/"
     patterns: ["*"]
-    multi-ecosystem-group: "infrastructure"
+    multi-ecosystem-group: "uv-lock"
