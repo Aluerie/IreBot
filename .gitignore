@@ -1,3 +1,6 @@
+# DEFAULT GITIGNORE
+# -----------------
+
 # Python-generated files
 __pycache__/
 
@@ -7,6 +10,9 @@ __pycache__/
 # Virtual environments
 .venv
 venv
+
+# Windows `desktop.ini` memes
+desktop.ini
 
 # `.vscode` folder
 .vscode/*
@@ -19,18 +25,11 @@ ipynb/
 .ipynb_checkpoints
 *.ipynb
 
-# Windows `desktop.ini` memes
-*.ini
-
-# Config
-.env
-
 # Temporary files
 .temp/
 
-# Testing Related
-src/modules/beta.py
-subset.py
+# FILES TO COMMIT ELSEWHERE
+# -------------------------
 
 # Wiki
 # I like cloning wiki https://github.com/Aluerie/IreBot.wiki.git 
@@ -38,3 +37,13 @@ subset.py
 # It would be inappropriate to use git-submodules for it, but I guess, gitignore trickery is fine.
 IreBot.wiki
 .wiki
+
+# FILES TO PRIVATELY SAVE
+# -----------------------
+
+# Config
+.env
+
+# Testing Related
+src/modules/beta.py
+modules_subset.py

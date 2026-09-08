@@ -480,6 +480,24 @@ class IreBot(commands.AutoBot):
             )
             return self.add_args_field(embed, "Command Args", ctx.kwargs)
 
+        async def handle_cause(error: BaseException) -> bool:
+            """
+            Handle cause error, helper function.
+
+            Returns
+            -------
+            bool
+                Whether the cause was handled within this function or not.
+            """
+            if not (cause := error.__cause__):
+                return False
+
+            if isinstance(cause, errors.RespondWithError):
+                # my custom guards / converters / etc should `raise errors.RespondWithError`
+                await ctx.send(str(cause))
+                return True
+            return bool(isinstance(cause, errors.SilentError))
+
         match error:
             # MY CUSTOM ERRORS
             case errors.SilentError():
@@ -503,29 +521,26 @@ class IreBot(commands.AutoBot):
                     f"Command {command_name} is on cooldown! Try again in {error.remaining:.0f} sec {const.STV.Timeloth}"
                 )
             case commands.GuardFailure():
-                if cause := error.__cause__:
-                    if isinstance(cause, errors.RespondWithError):
-                        # my custom guards should `raise errors.RespondWithError`
-                        await ctx.send(str(cause))
-                    elif isinstance(cause, errors.SilentError):
-                        return
-                else:
-                    # To make custom responses for default `twitchio` guards - need to cook a bit.
-                    # (or make our own guards with the same predicates, not like it's anything complex)
-                    guard_response = {
-                        "is_moderator": "Only moderators are allowed to use this command",
-                        "is_owner": "Only Irene Adler is allowed to use this command",
-                        "is_broadcaster": "Only broadcaster is allowed to use this command",
-                    }.get(
-                        # an example of `.__qualname__`: "is_moderator.<locals>.predicate"
-                        (
-                            guard_name := "Unknown Guard"
-                            if error.guard is None
-                            else error.guard.__qualname__.removesuffix(".<locals>.predicate")
-                        ),
-                        f'For some reason ("{guard_name}") you are not allowed to use this command',
-                    )
-                    await ctx.send(f"{guard_response} {const.FFZ.peepoPolice}")
+                if await handle_cause(error):
+                    # Guards raise `GuardFailure` errors while we're always interested in `__cause__`.
+                    return
+
+                # To make custom responses for default `twitchio` guards - need to cook a bit.
+                # (or make our own guards with the same predicates, not like it's anything complex)
+                guard_response = {
+                    "is_moderator": "Only moderators are allowed to use this command",
+                    "is_owner": "Only Irene Adler is allowed to use this command",
+                    "is_broadcaster": "Only broadcaster is allowed to use this command",
+                }.get(
+                    # an example of `.__qualname__`: "is_moderator.<locals>.predicate"
+                    (
+                        guard_name := "Unknown Guard"
+                        if error.guard is None
+                        else error.guard.__qualname__.removesuffix(".<locals>.predicate")
+                    ),
+                    f'For some reason ("{guard_name}") you are not allowed to use this command',
+                )
+                await ctx.send(f"{guard_response} {const.FFZ.peepoPolice}")
             case twitchio.HTTPException():
                 await ctx.send(
                     f"{error.__class__.__name__} - "
@@ -536,10 +551,18 @@ class IreBot(commands.AutoBot):
                 )
             case commands.MissingRequiredArgument():
                 await ctx.send(f'You need to provide "{error.param.name}" argument for this command {const.FFZ.peepoPolice}')
-
-            # case commands.BadArgument():
-            #     log.warning("%s %s", error.name, error)
-            #     await ctx.send(f"Couldn't find any {error.name} like that")
+            case commands.BadArgument():
+                if await handle_cause(error):
+                    # Converters raise `BadArgument` Failed to convert "this" to <class 'typing._ProtocolMeta'>, which is not
+                    # exactly telling much. We are more interested in the original `__cause__`.
+                    return
+                log.warning("%s: %s | error.name=%s | error.value=%s", type(error), error, error.name, error.value)
+                await ctx.send(
+                    content=(
+                        f"Couldn't convert value `{error.value}` for argument `{error.name}` "
+                        f"to required type {const.STV.dankFix}"
+                    )
+                )
             # case commands.ArgumentError():
             #     await ctx.send(str(error))
 

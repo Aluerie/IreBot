@@ -78,3 +78,10 @@ ty:  # Run ty (beta testing ty typechecker)
 .SILENT: basedpyright
 basedpyright:  # Run basedpyright
 	uv run basedpyright $(sources)
+
+.PHONY: lazy
+.SILENT: lazy
+lazy:  # Run basedpyright
+	cd src/shared && git add .
+	cd src/shared && git commit -a -m "Lazy Update"
+	cd src/shared && git push

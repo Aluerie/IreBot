@@ -11,10 +11,10 @@ MODULES_SUBSET: dict[str, list[str]] = {
     "personal": [
         # "alerts",
         # "counters",
-        "cycling_emotes",
         # "discord_notifications",
+        # "emotes_common"
+        "emotes_7tv",
         # "information",
-        # "emotes"
         # "keywords",
         # "stable",
         # "tags",
