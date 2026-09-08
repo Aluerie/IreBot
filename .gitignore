@@ -34,6 +34,7 @@ subset.py
 
 # Wiki
 # I like cloning wiki https://github.com/Aluerie/IreBot.wiki.git 
-# into the same folder so I can edit it in the same IDE window
+# into the same folder so I can edit it in the same IDE window without much hassle.
+# It would be inappropriate to use git-submodules for it, but I guess, gitignore trickery is fine.
 IreBot.wiki
 .wiki

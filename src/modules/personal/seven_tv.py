@@ -1,10 +1,10 @@
 """
-_Insert Module Docstring Here._
+_Insert Module Docstring Here_.
 
 License
 -------
 * This Source Code Form is subject to the terms of the [Mozilla Public License v2.0](<http://mozilla.org/MPL/2.0/>).
-* Copyright (C) 2020-present [Aluerie](<https://github.com/Aluerie>).
+* Copyright (C) 2020-present [@Aluerie](<https://github.com/Aluerie>).
 """
 
 from __future__ import annotations
@@ -17,8 +17,8 @@ from typing import TYPE_CHECKING, Annotated, Any, override
 from twitchio.ext import commands
 
 from core import IrePersonalComponent, ireloop
-from utils import const, errors, guards, seven_tv_api
-from utils.seven_tv_api import EmoteNotFoundInSetError
+from shared import seven_tv
+from utils import const, errors, guards
 
 if TYPE_CHECKING:
     import twitchio
@@ -49,7 +49,8 @@ def to_emote_id(user_input: str) -> str:
 class SevenTVEmoteConverter(commands.Converter[str]):
     """Seven TV Emote Converter.
 
-    Converts user_input from `str` type into 7TV emote_id."""
+    Converts user_input from `str` type into 7TV emote_id.
+    """
 
     @override
     async def convert(self, ctx: IreContext, user_input: str) -> str:  # pyright: ignore[reportIncompatibleMethodOverride]
@@ -129,7 +130,8 @@ class SevenTVCyclingEmotes(IrePersonalComponent):
         async def refund_and_respond(content: str) -> None:
             """Refund the redemption and response.
 
-            Just a little lazy shortcut."""
+            Just a little lazy shortcut.
+            """
             await redemption.refund(token_for=redemption.broadcaster.id)
             await redemption.respond(content=content)
 
@@ -193,7 +195,7 @@ class SevenTVCyclingEmotes(IrePersonalComponent):
                     emote_set_id=emote_set_id,
                     emote_id=emote_id_to_remove,
                 )
-            except seven_tv_api.EmoteNotFoundInSetError:
+            except seven_tv.EmoteNotFoundInSetError:
                 pass
             else:
                 await redemption.respond(f"Removed {emote_name_to_remove} ({get_seven_tv_link(emote_id_to_remove)})")
@@ -212,10 +214,10 @@ class SevenTVCyclingEmotes(IrePersonalComponent):
                 emote_id=emote_id,
                 emote_alias=emote_alias,
             )
-        except seven_tv_api.ConflictingEmoteNameError:
+        except seven_tv.ConflictingEmoteNameError:
             try:
                 await self.bot.stv.emote_emote_set_alias(emote_set_id=emote_set_id, emote_id=emote_id)
-            except EmoteNotFoundInSetError:
+            except seven_tv.EmoteNotFoundInSetError:
                 # This means the new emote has a conflicting name
                 await refund_and_respond(
                     f"This emote has a conflicting name, consider adding it with an alias {const.FFZ.peepoPolice}"
@@ -243,7 +245,8 @@ class SevenTVCyclingEmotes(IrePersonalComponent):
     async def remove_emote_from_cycling(self, ctx: IreContext, emote_id: Annotated[str, SevenTVEmoteConverter]) -> None:
         """Remove an emote from the cycling list.
 
-        Useful when a streamer wants an emote to stop from being cycled out."""
+        Useful when a streamer wants an emote to stop from being cycled out.
+        """
         query = """
             DELETE FROM ttv_cycling_emotes
             WHERE emote_id = $1 AND streamer_id = $2
@@ -261,7 +264,6 @@ class SevenTVCyclingEmotes(IrePersonalComponent):
         * removes all current @Irene's cycling emotes;
         * removes color emotes (Blue, Teal, Yellow) from Irene's active emote set;
         """
-
         query = "UPDATE ttv_cycling_emote_rewards SET emote_limit = $1 WHERE streamer_id = $2;"
         await self.bot.pool.execute(query, 2, const.UserID.Irene)
 
@@ -283,7 +285,7 @@ class SevenTVCyclingEmotes(IrePersonalComponent):
             # cSpell: enable
         ]
         for emote_id in color_ball_ids:
-            with contextlib.suppress(EmoteNotFoundInSetError):
+            with contextlib.suppress(seven_tv.EmoteNotFoundInSetError):
                 await ctx.bot.stv.emote_set_remove_emote(
                     emote_set_id=const.STV_IRENE_DEFAULT_EMOTE_SET_ID,
                     emote_id=emote_id,

@@ -142,6 +142,7 @@ class STV(StrEnum):
     science = "science"
     Speedge = "Speedge"
     Spotify = "Spotify"
+    Timeloth = "Timeloth"
     yo = "yo"
     uuh = "uuh"
     uuhAcktshucally = "uuhAcktshucally"

@@ -4,7 +4,7 @@ _Insert Module Docstring Here._
 License
 -------
 * This Source Code Form is subject to the terms of the [Mozilla Public License v2.0](<http://mozilla.org/MPL/2.0/>).
-* Copyright (C) 2020-present [Aluerie](<https://github.com/Aluerie>).
+* Copyright (C) 2020-present [@Aluerie](<https://github.com/Aluerie>).
 """
 
 from __future__ import annotations

@@ -19,3 +19,8 @@ updates:
     directory: "/"
     patterns: ["*"]
     multi-ecosystem-group: "uv-lock"
+
+  - package-ecosystem: "pre-commit"
+    directory: "/"
+    patterns: ["*"]
+    multi-ecosystem-group: "uv-lock"

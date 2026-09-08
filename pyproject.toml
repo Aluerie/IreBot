@@ -99,9 +99,6 @@ src = ["src"]
 select = ["ALL"]
 ignore = [
     "ERA",      # eradicate
-    "D",
-    "D417",
-    "DOC",
     "W191",     # tab-indentation
     "E111",     # indentation-with-invalid-multiple
     "E114",     # indentation-with-invalid-multiple-comment 

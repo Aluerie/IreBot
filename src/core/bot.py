@@ -19,7 +19,8 @@ from twitchio.web import StarletteAdapter
 
 from config import env
 from modules import PUBLIC_D9MMRBOT, get_modules
-from utils import const, dota2 as dota2utils, errors, seven_tv_api
+from shared import seven_tv
+from utils import const, dota2 as dota2utils, errors
 
 from .bases import IreContext
 from .error_manager import ErrorManager
@@ -213,7 +214,7 @@ class IreBot(commands.AutoBot):
         self.streamers_index_ready: asyncio.Event = asyncio.Event()
         self.friends_index_ready: asyncio.Event = asyncio.Event()
 
-        self.stv: seven_tv_api.SevenTVClient = seven_tv_api.SevenTVClient(session=session)
+        self.stv: seven_tv.SevenTVClient = seven_tv.SevenTVClient(env.SEVEN_TV_BEARER, session=session)
 
         # initialized later
         self.dota2: dota2utils.Dota2Client = MISSING
@@ -498,7 +499,9 @@ class IreBot(commands.AutoBot):
                 log.info("CommandNotFound: %s", error)
             case commands.CommandOnCooldown():
                 command_name = f"{ctx.prefix}{command.name}" if command else "this command"
-                await ctx.send(f"Command {command_name} is on cooldown! Try again in {error.remaining:.0f} sec.")
+                await ctx.send(
+                    f"Command {command_name} is on cooldown! Try again in {error.remaining:.0f} sec {const.STV.Timeloth}"
+                )
             case commands.GuardFailure():
                 if cause := error.__cause__:
                     if isinstance(cause, errors.RespondWithError):
@@ -510,9 +513,9 @@ class IreBot(commands.AutoBot):
                     # To make custom responses for default `twitchio` guards - need to cook a bit.
                     # (or make our own guards with the same predicates, not like it's anything complex)
                     guard_response = {
-                        "is_moderator": f"Only moderators are allowed to use this command {const.FFZ.peepoPolice}",
-                        "is_owner": f"Only Irene Adler is allowed to use this command {const.FFZ.peepoPolice}",
-                        "is_broadcaster": f"Only broadcaster is allowed to use this command {const.FFZ.peepoPolice}",
+                        "is_moderator": "Only moderators are allowed to use this command",
+                        "is_owner": "Only Irene Adler is allowed to use this command",
+                        "is_broadcaster": "Only broadcaster is allowed to use this command",
                     }.get(
                         # an example of `.__qualname__`: "is_moderator.<locals>.predicate"
                         (
@@ -520,9 +523,9 @@ class IreBot(commands.AutoBot):
                             if error.guard is None
                             else error.guard.__qualname__.removesuffix(".<locals>.predicate")
                         ),
-                        f'For some reason ("{guard_name}") you are not allowed to use this command {const.FFZ.peepoPolice}',
+                        f'For some reason ("{guard_name}") you are not allowed to use this command',
                     )
-                    await ctx.send(guard_response)
+                    await ctx.send(f"{guard_response} {const.FFZ.peepoPolice}")
             case twitchio.HTTPException():
                 await ctx.send(
                     f"{error.__class__.__name__} - "
@@ -596,7 +599,7 @@ class IreBot(commands.AutoBot):
         return s.online if (s := self.streamers.get(user_id, None)) else False
 
     def is_irene_live(self) -> bool:
-        """Whether @irene, the bot's owner is live on twitch"""
+        """Whether @irene, the bot's owner is live on twitch."""
         return self.is_online(const.UserID.Irene)
 
     def get_partial_owner(self) -> twitchio.PartialUser:

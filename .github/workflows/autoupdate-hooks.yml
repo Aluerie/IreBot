@@ -1,3 +1,6 @@
+# Currently manually disabled at https://github.com/Aluerie/IreBot/actions/workflows
+# as I'm trying to make dependabot do these 
+
 name: Autoupdate pre-commit hooks
 on:
   schedule:
