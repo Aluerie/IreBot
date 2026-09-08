@@ -13,11 +13,11 @@ MODULES_SUBSET: dict[str, list[str]] = {
         # "counters",
         # "discord_notifications",
         # "emotes_common"
-        "emotes_7tv",
+        # "emotes_7tv",
         # "information",
         # "keywords",
         # "stable",
-        # "tags",
+        "tags",
         # "temporary",
         # "timers",
     ],

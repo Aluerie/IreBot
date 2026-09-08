@@ -1,5 +1,12 @@
+# ifeq ($(OS),Windows_NT)
+# SHELL := powershell.exe
+# .SHELLFLAGS := -Command
+# endif
+
+# Sources to run type-checkers / linters against
 sources = src tests examples
-m = 😴 Fixes & Updates
+# Default commit message with `make commit`
+m = fix(lazy): Various fixes & updates
 
 default: help
 
@@ -82,11 +89,11 @@ ty:  # Run ty (beta testing ty typechecker)
 basedpyright:  # Run basedpyright
 	uv run basedpyright $(sources)
 
-.PHONY: git
-.SILENT: git
-# Lazy git commands, use make git m="Fix this and that" for custom commit messages.
+.PHONY: commit
+.SILENT: commit
+# Lazy git commit commands, use make commit m="Fix this and that" for custom commit messages.
 # This creates and pushes commits to both IreBot and Shared-Bot-Utilities repositories.
-git:  
+commit:  
 	cd src/shared && git add .
 	cd src/shared && git commit -a -m "$(m)"
 	cd src/shared && git push
@@ -97,5 +104,5 @@ git:
 
 .PHONY: echo
 .SILENT: echo
-echo:  # Testing stuff with make, why don't we test it with echo 
-	echo $(m)
+echo:  # Testing stuff with make, why don't we test it with echo
+	echo "$(m)"

@@ -529,7 +529,7 @@ class IreBot(commands.AutoBot):
                 # (or make our own guards with the same predicates, not like it's anything complex)
                 guard_response = {
                     "is_moderator": "Only moderators are allowed to use this command",
-                    "is_owner": "Only Irene Adler is allowed to use this command",
+                    "is_owner": "Only Irene_Adler__ is allowed to use this command",
                     "is_broadcaster": "Only broadcaster is allowed to use this command",
                 }.get(
                     # an example of `.__qualname__`: "is_moderator.<locals>.predicate"
@@ -556,11 +556,12 @@ class IreBot(commands.AutoBot):
                     # Converters raise `BadArgument` Failed to convert "this" to <class 'typing._ProtocolMeta'>, which is not
                     # exactly telling much. We are more interested in the original `__cause__`.
                     return
-                log.warning("%s: %s | error.name=%s | error.value=%s", type(error), error, error.name, error.value)
+
+                log.error("%s: %s | error.name=%s | error.value=%s", type(error), error, error.name, error.value)
                 await ctx.send(
                     content=(
                         f"Couldn't convert value `{error.value}` for argument `{error.name}` "
-                        f"to required type {const.STV.dankFix}"
+                        f"to required type/format {const.STV.dankFix}"
                     )
                 )
             # case commands.ArgumentError():

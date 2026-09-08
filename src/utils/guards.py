@@ -69,9 +69,10 @@ def is_owner_channel() -> Any:
 
 
 def is_broadcaster_or_dev() -> Any:
-    """ "Allow the command to be completed only by broadcaster or Irene.
+    """Allow the command to be completed only by broadcaster or Irene.
 
-    Similar to `@commands.is_broadcaster` but includes Irene too."""
+    Similar to `@commands.is_broadcaster` but includes Irene too.
+    """
 
     def predicate(ctx: IreContext) -> bool:
         if ctx.chatter.id in {ctx.broadcaster.id, ctx.bot.owner_id}:

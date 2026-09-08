@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, TypedDict
+from typing import TYPE_CHECKING, Any, TypedDict
 
 import asyncpg
 from twitchio.ext import commands
@@ -18,12 +18,13 @@ if TYPE_CHECKING:
 
 __all__ = ("Tags",)
 
+NO_TAG_MESSAGE_FMT = "There is no tag with name '{tag_name}' {emote}".format(
+    tag_name="{tag_name}", emote=const.STV.uuhAcktshucally
+)
+
 
 class Tags(IrePersonalComponent):
     """Commands to fetch something by a tag name."""
-
-    def tag_does_not_exist_message(self, tag_name: str) -> str:
-        return f"There is no tag with name '{tag_name}' {const.STV.uuhAcktshucally}"
 
     @commands.is_moderator()
     @commands.group(invoke_fallback=True, name="tag", aliases=["tags", "t"])
@@ -37,9 +38,9 @@ class Tags(IrePersonalComponent):
             WHERE tag_name = $1;
         """
         tag_content: str | None = await self.bot.pool.fetchval(query, tag_name)
-        await ctx.send(self.tag_does_not_exist_message(tag_name) if tag_content is None else tag_content)
+        await ctx.send(NO_TAG_MESSAGE_FMT.format(tag_name=tag_name) if tag_content is None else tag_content)
 
-    @tag_group.command(aliases=["a", "create"])
+    @tag_group.command(name="add", aliases=["a", "create"])
     async def tag_add(self, ctx: IreContext, tag_name: str, *, tag_content: str) -> None:
         """Add tag."""
         if tag_name in ("delete", "remove", "del", "add", "list", "edit", "a", "d", "r", "e", "l"):
@@ -57,7 +58,7 @@ class Tags(IrePersonalComponent):
             msg = f"There already exists a tag with name '{tag_name}' {const.STV.uuhAcktshucally}"
             raise errors.RespondWithError(msg) from None
 
-    @tag_group.command(aliases=["del", "remove", "d"])
+    @tag_group.command(name="delete", aliases=["del", "remove", "d"])
     async def tag_delete(self, ctx: IreContext, tag_name: str) -> None:
         """Delete tag by name."""
         query = """
@@ -67,12 +68,12 @@ class Tags(IrePersonalComponent):
         """
         val: str | None = await self.bot.pool.fetchval(query, tag_name)
         await ctx.send(
-            self.tag_does_not_exist_message(tag_name)
+            NO_TAG_MESSAGE_FMT.format(tag_name=tag_name)
             if val is None
             else f"Deleted tag '{tag_name}' {const.STV.uuhAcktshucally}"
         )
 
-    @tag_group.command(aliases=["e"])
+    @tag_group.command(name="edit", aliases=["e"])
     async def tag_edit(self, ctx: IreContext, tag_name: str, *, tag_content: str) -> None:
         """Edit tag."""
         query = """
@@ -83,12 +84,12 @@ class Tags(IrePersonalComponent):
         """
         val: str | None = await self.bot.pool.fetchval(query, tag_name, tag_content)
         await ctx.send(
-            self.tag_does_not_exist_message(tag_name)
+            NO_TAG_MESSAGE_FMT.format(tag_name=tag_name)
             if val is None
             else f"Edited tag '{tag_name}' {const.STV.uuhAcktshucally}"
         )
 
-    @tag_group.command(aliases=["r"])
+    @tag_group.command(name="rename", aliases=["r"])
     async def tag_rename(self, ctx: IreContext, tag_name: str, new_tag_name: str) -> None:
         """Rename tag."""
         query = """
@@ -99,12 +100,12 @@ class Tags(IrePersonalComponent):
         """
         val: str | None = await self.bot.pool.fetchval(query, tag_name, new_tag_name)
         await ctx.send(
-            self.tag_does_not_exist_message(tag_name)
+            NO_TAG_MESSAGE_FMT.format(tag_name=tag_name)
             if val is None
             else f"Renamed tag '{tag_name}' into '{new_tag_name}' {const.STV.uuhAcktshucally}"
         )
 
-    @tag_group.command(aliases=["n"])
+    @tag_group.command(name="names", aliases=["n"])
     async def tag_names(self, ctx: IreContext) -> None:
         """Tag names list."""
         query = """

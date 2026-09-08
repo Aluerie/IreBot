@@ -95,6 +95,7 @@ class SevenTVCyclingEmotes(IrePersonalComponent):
     @guards.is_broadcaster_or_dev()
     @commands.command()
     async def create_7tv_cycling_emote_reward(self, ctx: IreContext) -> None:
+        """Create 7TV Cycling emote reward."""
         custom_reward = await ctx.broadcaster.create_custom_reward(
             title="Add a 7TV emote (10 slots, oldest cycles out)",
             cost=10,
@@ -306,12 +307,12 @@ class SevenTVManagement(IrePersonalComponent):
     @commands.is_moderator()
     @commands.command()
     async def add(self, ctx: IreContext, emote_id: Annotated[str, SevenTVEmoteConverter]) -> None:
-        pass
+        """Add 7TV emote."""
 
     @commands.is_moderator()
     @commands.command()
     async def remove(self, ctx: IreContext, emote_id: Annotated[str, SevenTVEmoteConverter]) -> None:
-        pass
+        """Remove 7TV emote."""
 
 
 class SevenTVEmotesStatistics(IrePersonalComponent):

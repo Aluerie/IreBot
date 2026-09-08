@@ -135,7 +135,8 @@ class Counters(IrePersonalComponent):
     async def double_check_offline(self) -> None:
         """Double Check if the stream is online.
 
-        Sometimes, the bot is offline during Irene's stream ends so it doesn't catch the `stream_offline` event."""
+        Sometimes, the bot is offline during Irene's stream ends so it doesn't catch the `stream_offline` event.
+        """
         await self.bot.streamers_index_ready.wait()
         if (irene_streamer := self.bot.streamers.get(const.UserID.Irene)) is not None and not irene_streamer.online:
             first_reward = next(

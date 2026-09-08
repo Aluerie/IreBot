@@ -1,5 +1,5 @@
 """
-_Insert Module Docstring Here._
+_Insert Module Docstring Here_.
 
 License
 -------
