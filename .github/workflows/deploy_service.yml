@@ -23,6 +23,7 @@ jobs:
         script: |
           cd ./IreBot
           git pull
+          git submodule update --recursive
           ~/.local/bin/uv sync --no-dev
           sudo systemctl restart irebot.service
           sudo systemctl start irebot.service
