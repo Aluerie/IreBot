@@ -101,6 +101,13 @@ commit:
 	git commit -a -m "$(m)"
 	git push
 
+.PHONY: com
+.SILENT: com
+# This creates and pushes commits to IreBot repository
+com:  
+	git add .
+	git commit -a -m "$(m)"
+	git push
 
 .PHONY: echo
 .SILENT: echo

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, TypedDict
+from typing import TYPE_CHECKING, TypedDict
 
 import asyncpg
 from twitchio.ext import commands
@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 __all__ = ("Tags",)
 
 NO_TAG_MESSAGE_FMT = "There is no tag with name '{tag_name}' {emote}".format(
+    # Trickery: https://stackoverflow.com/a/69462670/19217368
     tag_name="{tag_name}", emote=const.STV.uuhAcktshucally
 )
 
