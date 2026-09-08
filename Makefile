@@ -27,7 +27,8 @@ help:  # Help
 	@echo * make pages: Locally run the github pages website
 	@echo * make ty: Run ty (beta testing ty typechecker)
 	@echo * make basedpyright: Run basedpyright
-	@echo * make git: Lazy git commit and push
+	@echo * make commit: Lazy git commit and push+
+	@echo * make com: This creates and pushes commits to IreBot repository
 	@echo * make echo: # Testing stuff with make, why don't we test it with echo 
 
 

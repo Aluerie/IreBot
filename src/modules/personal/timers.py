@@ -26,8 +26,12 @@ MESSAGES: list[str] = [
         "hi chat many features of this bot are WIP so, please, if you notice bugs or incorrect responses - "
         f"inform me {const.STV.DANKHACKERMANS}"
     ),
-    (f"Audio too loud? Music too low? Bad image quality? Please, let me know about any problems {const.STV.dankFix}"),
-    ("!showemote ass"),
+    f"Audio too loud? Music too low? Bad image quality? Please, let me know about any problems {const.STV.dankFix}",
+    "!showemote ass",
+    (
+        f"chat I kinda need to grind affiliate on @IrenesBot account. "
+        f"Please, follow it and if possible lurk there when I eventually gonna stream from it {const.STV.DankApprove}"
+    ),
     # (
     #     "hey chat I'm making a small web-page to describe the bot's features (WIP)."
     #     "You can see it here: (not implemented xdd)"
