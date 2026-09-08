@@ -103,7 +103,7 @@ class StableCommands(IrePersonalComponent):
 
     @commands.group(name="ads", aliases=["ad", "commercial"])
     async def ads_group(self, ctx: IreContext) -> None:
-        """A group command !ads"""
+        """A group command !ads."""
 
     @ads_group.command(name="start", aliases=["run"])
     async def ads_start(self, ctx: IreContext, length: int = 180) -> None:
@@ -332,7 +332,8 @@ class StableCommands(IrePersonalComponent):
             """Checks whether the message is likely to be a response from StreamerBot !song request functionality.
 
             * They are sent by @IrenesBot
-            * All such messages should start with `dankJAM`."""
+            * All such messages should start with `dankJAM`.
+            """
             return payload.chatter.id == const.UserID.Bot and payload.text.startswith(const.STV.YouTube)
 
         try:

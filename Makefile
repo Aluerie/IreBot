@@ -1,4 +1,5 @@
 sources = src tests examples
+m = 😴 Fixes & Updates
 
 default: help
 
@@ -19,6 +20,8 @@ help:  # Help
 	@echo * make pages: Locally run the github pages website
 	@echo * make ty: Run ty (beta testing ty typechecker)
 	@echo * make basedpyright: Run basedpyright
+	@echo * make git: Lazy git commit and push
+	@echo * make echo: # Testing stuff with make, why don't we test it with echo 
 
 
 .PHONY: setup
@@ -79,9 +82,20 @@ ty:  # Run ty (beta testing ty typechecker)
 basedpyright:  # Run basedpyright
 	uv run basedpyright $(sources)
 
-.PHONY: lazy
-.SILENT: lazy
-lazy:  # Run basedpyright
+.PHONY: git
+.SILENT: git
+# Lazy git commands, use make git m="Fix this and that" for custom commit messages.
+# This creates and pushes commits to both IreBot and Shared-Bot-Utilities repositories.
+git:  
 	cd src/shared && git add .
-	cd src/shared && git commit -a -m "Lazy Update"
+	cd src/shared && git commit -a -m "$(m)"
 	cd src/shared && git push
+	git add .
+	git commit -a -m "$(m)"
+	git push
+
+
+.PHONY: echo
+.SILENT: echo
+echo:  # Testing stuff with make, why don't we test it with echo 
+	echo $(m)
