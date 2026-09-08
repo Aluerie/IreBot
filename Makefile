@@ -24,8 +24,10 @@ help:  # Help
 .PHONY: setup
 .SILENT: setup
 setup:  # Setup the repository - recommended to use right after cloning
+	git submodule update --init --recursive
 	uv sync
 	prek install
+
 
 .PHONY: sync
 .SILENT: sync
