@@ -26,7 +26,8 @@ from twitchio.ext import commands
 
 from config import env
 from core import IreDevComponent, ireloop
-from utils import const, errors
+from shared import errors
+from utils import const
 
 if TYPE_CHECKING:
     from core import IreBot, IreContext

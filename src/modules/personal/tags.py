@@ -6,7 +6,8 @@ import asyncpg
 from twitchio.ext import commands
 
 from core import IrePersonalComponent
-from utils import const, errors
+from shared import errors
+from utils import const
 
 if TYPE_CHECKING:
     from core import IreBot, IreContext
@@ -20,7 +21,8 @@ __all__ = ("Tags",)
 
 NO_TAG_MESSAGE_FMT = "There is no tag with name '{tag_name}' {emote}".format(
     # Trickery: https://stackoverflow.com/a/69462670/19217368
-    tag_name="{tag_name}", emote=const.STV.uuhAcktshucally
+    tag_name="{tag_name}",
+    emote=const.STV.uuhAcktshucally,
 )
 
 

@@ -18,7 +18,7 @@ from twitchio.ext import commands
 
 from core import IrePersonalComponent, ireloop
 from shared import errors, seven_tv
-from utils import const, errors as util_errors, guards
+from utils import const, guards
 
 if TYPE_CHECKING:
     import twitchio
@@ -66,7 +66,7 @@ class SevenTVEmoteConverter(commands.Converter[str]):
             return await ctx.bot.stv.user_search_emote(broadcaster_id=ctx.broadcaster.id, emote_name=user_input)
         except errors.UnsatisfyingResultError:
             msg = f"It seems there is no emote like that {const.STV.POLICE}"
-            raise util_errors.RespondWithError(msg) from None
+            raise errors.RespondWithError(msg) from None
 
 
 class SevenTVCyclingEmotes(IrePersonalComponent):

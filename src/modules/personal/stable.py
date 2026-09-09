@@ -11,7 +11,8 @@ from twitchio.ext import commands
 
 from config import env
 from core import IreBot, IrePersonalComponent
-from utils import const, errors, fmt, guards
+from shared import errors, fmt
+from utils import const, guards
 
 if TYPE_CHECKING:
     from aiohttp import ClientSession
@@ -39,7 +40,7 @@ class TranslateResult(NamedTuple):
     target_lang: str
 
 
-class TranslateError(errors.IreBotError):
+class TranslateError(errors.CustomError):
     """Raised when there is an error in translate functionality."""
 
     def __init__(self, status_code: int, text: str) -> None:

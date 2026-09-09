@@ -13,7 +13,9 @@ from typing import TYPE_CHECKING, Any
 
 from twitchio.ext import commands
 
-from . import const, errors
+from shared import errors
+
+from . import const
 
 if TYPE_CHECKING:
     from core import IreContext

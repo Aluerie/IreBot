@@ -8,7 +8,8 @@ from typing import TYPE_CHECKING, Any, override
 from twitchio.ext import commands
 
 from core import IrePersonalComponent, ireloop
-from utils import const, fmt
+from shared import fmt
+from utils import const
 
 if TYPE_CHECKING:
     import twitchio

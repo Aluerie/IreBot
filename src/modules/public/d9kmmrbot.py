@@ -19,14 +19,14 @@ from twitchio.ext import commands
 from config import env
 from core import IrePublicComponent, ireloop
 from modules import DEV_REQUIRED, PUBLIC_D9MMRBOT
-from utils import dota2 as dota2utils, errors, fmt, guards
+from shared import dota2 as dota2utils, errors, fmt
+from utils import guards
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Coroutine
 
     from core import IreBot, IreContext
-    from types_.dota_api_schemas import OpendotaMatchesPlayer
-    from utils.dota2 import SteamUserUpdate
+    from shared.dota2 import SteamUserUpdate, api_schemas as dota2_api_schemas
 
     type ActiveMatch = PlayingMatch | SpectatingMatch | UnsupportedActivity
 
@@ -542,7 +542,7 @@ class SpectatingMatch(LiveMatch):
         log.debug('Updating %s data for watching_server "%s"', self.__class__.__name__, self.watching_server)
         try:
             match = await self.bot.dota2.web_api.get_real_time_stats(self.server_steam_id)
-        except dota2utils.APIClientError:
+        except errors.APIDataError:
             # If SteamWebAPI didn't respond with any data then we have no way to get the data
             self.unavailable = True
             self.update_data.stop()
@@ -622,10 +622,10 @@ class Dota2RichPresenceFlow(IrePublicComponent):
     async def component_load(self) -> None:
         if "modules.dev.required" not in self.bot.modules_to_load:
             msg = f"Module '{PUBLIC_D9MMRBOT}' requires '{DEV_REQUIRED}' to be loaded."
-            raise errors.IreBotError(msg)
+            raise errors.PlaceholderError(msg)
         if not hasattr(self.bot, "dota2"):
             msg = f"Module '{PUBLIC_D9MMRBOT}' requires Dota2Client to be attached to bot's instance as 'self.bot.dota2'."
-            raise errors.IreBotError(msg)
+            raise errors.PlaceholderError(msg)
 
         self.starting_fill_friends.start()
         self.add_steam_user_update_listener.start()
@@ -1211,7 +1211,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             self.process_pending_abandons.cancel()
             return
 
-        players_cache: dict[int, list[OpendotaMatchesPlayer]] = {}
+        players_cache: dict[int, list[dota2_api_schemas.OpendotaMatchesPlayer]] = {}
 
         for row in rows:
             players = players_cache.get(row["match_id"])
@@ -1648,7 +1648,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
     @override
     async def component_command_error(self, payload: commands.CommandErrorPayload) -> bool | None:
         """Event called when an error occurs in a command in this Component."""
-        if isinstance(payload.exception, dota2utils.APIClientError):
+        if isinstance(payload.exception, errors.APIDataError):
             msg = "I'm not able to fetch data for this match, sorry!"
             await payload.context.send(msg)
             return False

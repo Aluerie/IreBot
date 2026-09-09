@@ -19,8 +19,8 @@ from twitchio.web import StarletteAdapter
 
 from config import env
 from modules import PUBLIC_D9MMRBOT, get_modules
-from shared import seven_tv
-from utils import const, dota2 as dota2utils, errors
+from shared import dota2 as dota2utils, errors, seven_tv
+from utils import const
 
 from .bases import IreContext
 from .error_manager import ErrorManager
