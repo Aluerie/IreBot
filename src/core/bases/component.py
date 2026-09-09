@@ -4,7 +4,8 @@ from typing import TYPE_CHECKING, override
 
 from twitchio.ext import commands
 
-from utils import const, errors
+from shared import errors
+from utils import const
 
 if TYPE_CHECKING:
     from core import IreBot, IreContext

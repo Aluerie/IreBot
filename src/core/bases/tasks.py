@@ -8,7 +8,7 @@ import discord
 from discord.ext import tasks
 from discord.utils import MISSING
 
-from utils import errors
+from shared import errors
 
 if TYPE_CHECKING:
     import datetime
