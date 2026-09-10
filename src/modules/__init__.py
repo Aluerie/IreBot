@@ -40,7 +40,7 @@ PUBLIC_D9MMRBOT = "modules.public.d9kmmrbot"
 DEV_REQUIRED = "modules.dev.required"
 
 
-def get_test_subset_modules(categories: dict[str, list[str]]) -> tuple[str, ...]:
+def get_subset_modules(categories: dict[str, list[str]]) -> tuple[str, ...]:
     """Get a tuple of modules to load from a friendly formatted categories dictionary.
 
     Returns
@@ -77,7 +77,7 @@ def get_modules(*, test: bool) -> tuple[str, ...]:
     """
     if test and not LOAD_ALL_MODULES:
         # assume testing specific modules from `m.py`
-        return get_test_subset_modules(MODULES_SUBSET)
+        return get_subset_modules(MODULES_SUBSET)
 
     # assume running full bot functionality (besides `DISABLED_MODULES`)
     current_folder = "src/" + str(__package__)

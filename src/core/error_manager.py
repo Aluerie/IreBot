@@ -47,6 +47,7 @@ class ErrorManager:
 
         if platform.system() == "Linux":
             slash = "/"
+            # TODO: fix python 3.12 to be read from info
             venv_path = f"{Path.cwd()}{slash}.venv{slash}lib{slash}python3.12{slash}site-packages"
         else:
             # windows
@@ -58,14 +59,11 @@ class ErrorManager:
 
         replacements = {
             # Just making code blocks shorter without losing much information;
-            f"{src_path}{slash}modules": "<modules>",
-            f"{src_path}{slash}core": "<core>",
-            f"{src_path}{slash}utils": "<utils>",
             venv_path: "<venv>",
             src_path: "<src>",
         }
-        regex = re.compile("|".join(map(re.escape, replacements.keys())))
-        traceback_string = regex.sub(lambda mo: replacements[mo.group()], "".join(traceback.format_exception(error)))
+        regex_pattern = re.compile("|".join(map(re.escape, replacements.keys())))
+        traceback_string = regex_pattern.sub(lambda mo: replacements[mo.group()], "".join(traceback.format_exception(error)))
 
         async with self._lock:
             if self._most_recent and (delta := datetime.datetime.now(datetime.UTC) - self._most_recent) < self.cooldown:

@@ -1,4 +1,4 @@
-"""Modules to load when `bot.test_subset_mode` is `True`."""
+"""Modules to load when `bot.subset_mode` is `True`."""
 
 MODULES_SUBSET: dict[str, list[str]] = {
     "dev": [
@@ -28,4 +28,4 @@ MODULES_SUBSET: dict[str, list[str]] = {
 }
 
 
-LOAD_ALL_MODULES: bool = False
+LOAD_ALL_MODULES: bool = True

@@ -3,7 +3,6 @@ from __future__ import annotations
 import asyncio
 import datetime
 import logging
-import platform
 import pprint
 import sys
 from dataclasses import dataclass
@@ -19,8 +18,9 @@ from twitchio.web import StarletteAdapter
 
 from config import env
 from modules import PUBLIC_D9MMRBOT, get_modules
-from shared import dota2 as dota2utils, errors, seven_tv
+from shared import errors, seven_tv
 from utils import const
+from utils.dota2 import IreDota2Client
 
 from .bases import IreContext
 from .error_manager import ErrorManager
@@ -28,7 +28,7 @@ from .error_manager import ErrorManager
 if TYPE_CHECKING:
     from aiohttp import ClientSession
 
-    from types_.database import PoolTypedWithAny
+    from shared.types_.database import PoolTypedWithAny
 
     class LoadTokensQueryRow(TypedDict):
         user_id: str
@@ -174,6 +174,7 @@ class IreBot(commands.AutoBot):
         owner_id: str,
         force_subscribe: bool,
         local: bool,
+        subset_mode: bool,
     ) -> None:
         """Initiate IreBot."""
         self.prefixes: tuple[str, ...] = ("!", "?", "$", "%")
@@ -201,13 +202,13 @@ class IreBot(commands.AutoBot):
         self.pool: PoolTypedWithAny = pool
         self.scopes_only: bool = scopes_only
 
-        self.test_subset_mode: bool = platform.system() == "Windows"
+        self.subset_mode: bool = subset_mode
         """A boolean flag indicating whether we launch the whole bot (on VPS machine)
         or just a subset of features (on my home Windows machine). We also use
         different credentials for certain things depending on home/vps choice.
         """
 
-        self.modules_to_load: tuple[str, ...] = get_modules(test=self.test_subset_mode)
+        self.modules_to_load: tuple[str, ...] = get_modules(test=self.subset_mode)
         self.error_manager = ErrorManager(self)
 
         self.streamers: dict[str, Streamer] = {}
@@ -217,7 +218,7 @@ class IreBot(commands.AutoBot):
         self.stv: seven_tv.SevenTVClient = seven_tv.SevenTVClient(env.SEVEN_TV_BEARER, session=session)
 
         # initialized later
-        self.dota2: dota2utils.Dota2Client = MISSING
+        self.dota2: IreDota2Client = MISSING
         self.launch_time: datetime.datetime
         self.logs_via_webhook_handler: logging.Handler
 
@@ -385,7 +386,7 @@ class IreBot(commands.AutoBot):
         save_tokens: bool = True,
     ) -> None:
         if PUBLIC_D9MMRBOT in self.modules_to_load:
-            self.dota2 = dota2utils.Dota2Client(self)
+            self.dota2 = IreDota2Client(self)
             try:
                 await asyncio.gather(
                     super().start(token, with_adapter=with_adapter, load_tokens=load_tokens, save_tokens=save_tokens),
@@ -612,7 +613,7 @@ class IreBot(commands.AutoBot):
     @discord.utils.cached_property
     def error_ping(self) -> str:
         """Error Role ping used to notify the developer(-s) about some errors."""
-        return "<@&1337106675433340990>" if self.test_subset_mode else "<@&1116171071528374394>"
+        return "<@&1337106675433340990>" if self.subset_mode else "<@&1116171071528374394>"
 
     def is_online(self, user_id: str) -> bool:
         """Whether the user is online.

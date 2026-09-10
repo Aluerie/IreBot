@@ -31,7 +31,7 @@ from core import IreBot, get_eventsub_subscriptions, setup_logging
 from utils import const
 
 if TYPE_CHECKING:
-    from types_.database import PoolTypedWithAny
+    from shared.types_.database import PoolTypedWithAny
 
 try:
     import uvloop  # pyright: ignore[reportMissingImports]  # ty: ignore[unresolved-import]
@@ -49,7 +49,14 @@ async def create_pool() -> asyncpg.Pool[asyncpg.Record]:
     return await asyncpg.create_pool(postgres_url, command_timeout=60, min_size=10, max_size=10, statement_cache_size=0)
 
 
-async def start_the_bot(*, scopes_only: bool, owner_id: str, force_subscribe: bool, local: bool) -> None:
+async def start_the_bot(
+    *,
+    scopes_only: bool,
+    force_subscribe: bool,
+    local_adapter: bool,
+    owner_id: str,
+    subset_mode: bool,
+) -> None:
     """Start the bot."""
     log = logging.getLogger()
     try:
@@ -73,7 +80,8 @@ async def start_the_bot(*, scopes_only: bool, owner_id: str, force_subscribe: bo
             scopes_only=scopes_only,
             owner_id=owner_id,
             force_subscribe=force_subscribe,
-            local=local,
+            local=local_adapter,
+            subset_mode=subset_mode,
         ) as irebot,
     ):
         await irebot.start()
@@ -93,6 +101,20 @@ async def start_the_bot(*, scopes_only: bool, owner_id: str, force_subscribe: bo
     ),
 )
 @click.option(
+    "--force-subscribe",
+    "-f",
+    is_flag=True,
+    default=False,  # usual default: False ✅
+    help="Which value to pass into `force_subscribe` bot's kwarg",
+)
+@click.option(
+    "--local-adapter",
+    "-l",
+    is_flag=True,
+    default=True,  # usual default: True ✅
+    help="Whether to use adapter with localhost (default) or remote host (currently ngrok-free for testing purposes).",
+)
+@click.option(
     "--owner",
     "-o",
     type=click.Choice(["irene", "aluerie"]),
@@ -105,26 +127,24 @@ async def start_the_bot(*, scopes_only: bool, owner_id: str, force_subscribe: bo
     ),
 )
 @click.option(
-    "--force-subscribe",
-    "-f",
+    "--subset-mode",
+    "-u",
     is_flag=True,
     default=False,  # usual default: False ✅
-    help="Which value to pass into `force_subscribe` bot's kwarg",
-)
-@click.option(
-    "--local",
-    "-l",
-    is_flag=True,
-    default=True,  # usual default: True ✅
-    help="Whether to use adapter with localhost (default) or remote host (currently ngrok-free for testing purposes).",
+    help=(
+        "Whether to launch the bot in subset-mode. "
+        "In this mode the bot only loads modules that are listed in `modules_subset.py` file."
+        "Useful for debugging as it makes launch times much faster."
+    ),
 )
 def main(
     click_ctx: click.Context,
     *,
     scopes_only: bool,
-    owner: Literal["irene", "aluerie"],
     force_subscribe: bool,
-    local: bool,
+    local_adapter: bool,
+    owner: Literal["irene", "aluerie"],
+    subset_mode: bool,
 ) -> None:
     """Launches the bot."""
     if click_ctx.invoked_subcommand is None:
@@ -132,7 +152,13 @@ def main(
             owner_id: str = {"irene": const.UserID.Irene, "aluerie": const.UserID.Aluerie}[owner]
             try:
                 RUNTIME(
-                    start_the_bot(scopes_only=scopes_only, owner_id=owner_id, force_subscribe=force_subscribe, local=local)
+                    start_the_bot(
+                        scopes_only=scopes_only,
+                        force_subscribe=force_subscribe,
+                        local_adapter=local_adapter,
+                        owner_id=owner_id,
+                        subset_mode=subset_mode,
+                    )
                 )
             except KeyboardInterrupt:
                 print("Aborted! The bot was interrupted with `KeyboardInterrupt`!")  # noqa: T201

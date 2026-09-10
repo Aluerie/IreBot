@@ -5,10 +5,9 @@ from collections.abc import Callable, Coroutine, Sequence
 from typing import TYPE_CHECKING, Any, Protocol, TypeVar, override
 
 import discord
-from discord.ext import tasks
 from discord.utils import MISSING
 
-from shared import errors
+from shared.concepts import tasks
 
 if TYPE_CHECKING:
     import datetime
@@ -28,7 +27,7 @@ _func = Callable[..., Coroutine[Any, Any, Any]]
 LF = TypeVar("LF", bound=_func)
 
 
-class IreLoop(tasks.Loop[LF]):
+class IreLoop(tasks.CustomLoop[LF]):
     """My subclass for discord.ext.tasks.Loop.
 
     Just extra boilerplate functionality.
@@ -45,39 +44,20 @@ class IreLoop(tasks.Loop[LF]):
 
     """
 
-    def __init__(
-        self,
-        coro: LF,
-        seconds: float,
-        hours: float,
-        minutes: float,
-        time: datetime.time | Sequence[datetime.time],
-        count: int | None,
-        *,
-        reconnect: bool,
-        name: str | None,
-        wait_for_ready: bool = False,
-    ) -> None:
-        super().__init__(coro, seconds, hours, minutes, time, count, reconnect, name)
-        if wait_for_ready:
-            self._before_loop = self._wait_for_ready
-        # Not sure how I feel about it, but it's annoying that it silences `aiohttp.ClientError, asyncio.TimeoutError`
-        # because valid aiohttp requests raise them as well !
-        self.clear_exception_types()
-
-    async def _wait_for_ready(self, cog: HasBotAttribute) -> None:  # *args: Any
+    @override
+    async def _wait_for_ready(self, cog: HasBotAttribute) -> None:  # pyright: ignore[reportIncompatibleMethodOverride]
         await cog.bot.wait_until_ready()
 
     @override
     async def _error(self, cog: HasBotAttribute, exception: Exception) -> None:  # pyright: ignore[reportIncompatibleMethodOverride]
         """Same `_error` as in parent class but with `exc_manager` integrated."""
         embed = discord.Embed(title=f"Task Error `{self.coro.__qualname__}`", colour=0x1A7A8A)
-        if isinstance(exception, errors.PlaceholderError) and exception.data:
-            embed = cog.bot.add_args_field(embed, f"Extra {exception.__class__.__name__} Debug Data", exception.data)
+        if exception_data := getattr(exception, "data", None):
+            embed = cog.bot.add_args_field(embed, f"Extra {exception.__class__.__name__} Debug Data", exception_data)
         await cog.bot.error_manager.register(exception, embed)
 
 
-@discord.utils.copy_doc(tasks.loop)
+@discord.utils.copy_doc(tasks.custom_loop)
 def ireloop(
     *,
     seconds: float = MISSING,

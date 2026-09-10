@@ -1,4 +1,4 @@
-"""Modules to load when `bot.test_subset_mode` is `True`.
+"""Modules to load when `bot.subset_mode` is `True`.
 
 Rename this file to 'm.py' and choose modules you want to load when
 testing version of the bot is running.

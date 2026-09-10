@@ -12,7 +12,8 @@ default: help
 
 .PHONY: help
 # TODO: Look into ways to automatically gather output for this command.
-# The struggle is that Windows Terminal doesn't have `grep`; and vice-versa windows grep-like tools won't work for linux
+# The struggle is that Windows Terminal doesn't have any normal working `grep`; 
+# and vice-versa windows grep-like tools won't work for linux
 help:  # Help
 	@echo IreBot Makefile
 	@echo ---------------
@@ -55,7 +56,7 @@ update:  # Update dependencies
 .PHONY: run
 .SILENT: run
 run:  # Run the bot
-	uv run src/main.py
+	uv run src/main.py --subset-mode
 
 .PHONY: lint
 .SILENT: lint

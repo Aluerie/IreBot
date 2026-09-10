@@ -32,7 +32,7 @@ class DiscordNotifications(IrePersonalComponent):
     @discord.utils.cached_property
     def notification_webhook(self) -> discord.Webhook:
         """A shortcut to error webhook."""
-        webhook_url = env.WEBHOOK_STREAM_NOTIFS if not self.bot.test_subset_mode else env.WEBHOOK_LOGGER
+        webhook_url = env.WEBHOOK_STREAM_NOTIFS if not self.bot.subset_mode else env.WEBHOOK_LOGGER
         return discord.Webhook.from_url(url=webhook_url, session=self.bot.session)
 
     @commands.Component.listener(name="stream_online")
