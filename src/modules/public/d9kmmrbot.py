@@ -26,7 +26,8 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Coroutine
 
     from core import IreBot, IreContext
-    from shared.dota2 import SteamUserUpdate, api_schemas as dota2_api_schemas
+    from shared.dota2 import api_schemas as dota2_api_schemas
+    from utils.dota2 import SteamUserUpdate
 
     type ActiveMatch = PlayingMatch | SpectatingMatch | UnsupportedActivity
 
