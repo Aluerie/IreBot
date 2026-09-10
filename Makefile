@@ -10,27 +10,34 @@ m = fix(lazy): Various fixes & updates
 
 default: help
 
+define HELP_BODY
+Usage:
+	make <command>
+
+Commands:
+	setup               Setup the repository - recommended to use right after cloning
+	sync                Install dependencies
+	update              Update dependencies
+	run                 Run the bot
+	lint                Run the linter
+	format              Format the code
+	format-check        Check code formatting
+	tests               Run the tests
+	pages               Locally run the github pages website
+	ty                  Run ty (beta testing ty typechecker)
+	basedpyright        Run basedpyright
+	commit              Lazy git commit and push+
+	com                 This creates and pushes commits to IreBot repository
+	echo                Testing stuff with make, why don't we test it with echo
+endef
+
 .PHONY: help
+.SILENT: help
 # TODO: Look into ways to automatically gather output for this command.
 # The struggle is that Windows Terminal doesn't have any normal working `grep`; 
 # and vice-versa windows grep-like tools won't work for linux
 help:  # Help
-	@echo IreBot Makefile
-	@echo ---------------
-	@echo * make setup: Setup the repository - recommended to use right after cloning
-	@echo * make sync: Install dependencies
-	@echo * make update: Update dependencies
-	@echo * make run: Run the bot
-	@echo * make lint: Run the linter
-	@echo * make format: Format the code
-	@echo * make format-check: Check code formatting
-	@echo * make tests: Run the tests
-	@echo * make pages: Locally run the github pages website
-	@echo * make ty: Run ty (beta testing ty typechecker)
-	@echo * make basedpyright: Run basedpyright
-	@echo * make commit: Lazy git commit and push+
-	@echo * make com: This creates and pushes commits to IreBot repository
-	@echo * make echo: # Testing stuff with make, why don't we test it with echo 
+	$(info $(HELP_BODY))
 
 
 .PHONY: setup
@@ -97,10 +104,10 @@ basedpyright:  # Run basedpyright
 # This creates and pushes commits to both IreBot and Shared-Bot-Utilities repositories.
 commit:  
 	cd src/shared && git add .
-	cd src/shared && git commit -a -m "$(m)"
+	chcp 65001>nul && cd src/shared && git commit -a -m "$(m)"
 	cd src/shared && git push
 	git add .
-	git commit -a -m "$(m)"
+	chcp 65001>nul && git commit -a -m "$(m)"
 	git push
 
 .PHONY: com
@@ -114,4 +121,7 @@ com:
 .PHONY: echo
 .SILENT: echo
 echo:  # Testing stuff with make, why don't we test it with echo
-	echo "$(m)"
+	echo $(SHELL)
+	chcp 65001>nul && echo "$(m)"
+# 	@Write-Output $(m)
+# 	printf '%s\n' "$sample"

@@ -1,6 +1,9 @@
-# 🐬 IreBot ([@IrenesBot](https://www.twitch.tv/irenesbot) on twitch.tv)
 
 ![IreBot Social Preview](<assets/images/profile/GitHub - Social Preview.png>)
+
+<h1 align="center">
+🐬IreBot (<a href="https://www.twitch.tv/irenesbot">@IrenesBot</a> on twitch.tv)
+</h1>
 
 Just a personal twitch.tv bot of mine.
 
