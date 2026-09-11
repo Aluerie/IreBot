@@ -62,7 +62,7 @@ update:  # Update dependencies
 
 .PHONY: run
 .SILENT: run
-run:  # Run the bot
+run:  # Run the bot in the subset-mode
 	uv run src/main.py --subset-mode
 
 .PHONY: lint
@@ -104,10 +104,10 @@ basedpyright:  # Run basedpyright
 # This creates and pushes commits to both IreBot and Shared-Bot-Utilities repositories.
 commit:  
 	cd src/shared && git add .
-	chcp 65001>nul && cd src/shared && git commit -a -m "$(m)"
+	cd src/shared && git commit -a -m "$(m)"
 	cd src/shared && git push
 	git add .
-	chcp 65001>nul && git commit -a -m "$(m)"
+	git commit -a -m "$(m)"
 	git push
 
 .PHONY: com
@@ -122,6 +122,7 @@ com:
 .SILENT: echo
 echo:  # Testing stuff with make, why don't we test it with echo
 	echo $(SHELL)
-	chcp 65001>nul && echo "$(m)"
+	chcp
+	echo "$(m)"
 # 	@Write-Output $(m)
 # 	printf '%s\n' "$sample"
