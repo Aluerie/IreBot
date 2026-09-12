@@ -214,6 +214,8 @@ I'm not planning to go big with this bot, so I didn't make an easy one-click way
 
 1. Add the bot's steam account into your friends: <https://steamcommunity.com/id/irenesbot>.
 2. Tell me that you want to add the bot - find me (`@Irene_Adler__`) in a twitch chat or catch my stream.
-3. After that I'm going to make the following link work: <https://parrot-thankful-trivially.ngrok-free.app/oauth?scopes=channel:bot&force_verify=true>. Yes, the link looks sketchy af because I don't care enough to spend money for a real web-site domain. When I activate the said link - it will become an Authorization link where you allow the bot to be a bot in your channel.
+3. The link: <https://parrot-thankful-trivially.ngrok-free.app/oauth?scopes=channel:bot+channel:read:redemptions+channel:manage:redemptions&force_verify=true>
+
+    After that I'm going to make this link work. Yes, the link looks sketchy af because I don't care enough to spend money for a real web-site domain. When I activate the said link - it will become an Authorization link where you allow the bot to be a bot in your channel.
 4. Click the link and authorize, it's the same "allow permissions" thing like any other twitch bot.
 5. ⚠️ Remember that for the bot features to work - you need to be green-online in Dota 2 as well.

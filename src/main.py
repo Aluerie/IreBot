@@ -111,7 +111,7 @@ async def start_the_bot(
     "--local-adapter",
     "-l",
     is_flag=True,
-    default=True,  # usual default: True ✅
+    default=False,  # usual default: True ✅
     help="Whether to use adapter with localhost (default) or remote host (currently ngrok-free for testing purposes).",
 )
 @click.option(
