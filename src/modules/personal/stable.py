@@ -11,7 +11,7 @@ from twitchio.ext import commands
 
 from config import env
 from core import IreBot, IrePersonalComponent
-from shared import errors, fmt
+from shared import common_const, errors, fmt
 from utils import const, guards
 
 if TYPE_CHECKING:
@@ -299,9 +299,9 @@ class StableCommands(IrePersonalComponent):
 
         for phrase in [
             f"/me places the revolver to {mention}'s head {const.FFZ.monkaGIGAGUN}",
-            f"{const.DIGITS[3]} {const.Global.monkaS} ... ",
-            f"{const.DIGITS[2]} {const.FFZ.monkaH} ... ",
-            f"{const.DIGITS[1]} {const.FFZ.monkaGIGA} ... The trigger is pulled... ",
+            f"{common_const.DIGITS[3]} {const.Global.monkaS} ... ",
+            f"{common_const.DIGITS[2]} {const.FFZ.monkaH} ... ",
+            f"{common_const.DIGITS[1]} {const.FFZ.monkaGIGA} ... The trigger is pulled... ",
         ]:
             await ctx.send(phrase)
             await asyncio.sleep(0.87)
