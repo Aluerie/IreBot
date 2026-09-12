@@ -8,6 +8,7 @@ sources = src tests examples
 # Default commit message with `make commit`
 m = fix(lazy): Various fixes & updates
 
+
 default: help
 
 define HELP_BODY
@@ -122,7 +123,8 @@ com:
 .SILENT: echo
 echo:  # Testing stuff with make, why don't we test it with echo
 	echo $(SHELL)
-	chcp
-	echo "$(m)"
+	chcp && echo "$(m)"
+	echo $(LANG)
+
 # 	@Write-Output $(m)
 # 	printf '%s\n' "$sample"

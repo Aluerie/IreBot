@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import random
-from typing import TYPE_CHECKING, Any, override
+from typing import TYPE_CHECKING, Any
 
 from twitchio.ext import commands
 
@@ -28,17 +28,6 @@ class Alerts(IrePersonalComponent):
     def __init__(self, bot: IreBot, *args: Any, **kwargs: Any) -> None:
         super().__init__(bot, *args, **kwargs)
         self.ban_list: set[str] = set()
-        self.known_chatters: list[str] = []
-
-    @override
-    async def component_load(self) -> None:
-        self.fill_known_chatters.start()
-        await super().component_load()
-
-    @override
-    async def component_teardown(self) -> None:
-        self.fill_known_chatters.cancel()
-        await super().component_teardown()
 
     # SECTION 1.
     # Channel Points beta test event (because it's the easiest event to test out)
@@ -183,15 +172,6 @@ class Alerts(IrePersonalComponent):
 
         self.ban_list.add(ban.user.id)
 
-    @ireloop(count=1)
-    async def fill_known_chatters(self) -> None:
-        """The task that ensures the reward "First" under a specific id exists.
-
-        Just a fool proof measure in case I randomly snap and delete it.
-        """
-        query = "SELECT user_id FROM ttv_chatters"
-        self.known_chatters = [r for (r,) in await self.bot.pool.fetch(query)]
-
     @commands.Component.listener(name="message")
     async def first_message(self, message: twitchio.ChatMessage) -> None:
         """Greet first time chatters with FirstTimeChadder treatment.
@@ -204,7 +184,12 @@ class Alerts(IrePersonalComponent):
         if not message.text:
             return
 
-        if message.chatter.id in self.known_chatters:
+        query = """--sql
+            SELECT COUNT(1)
+            FROM ttv_chatters
+            WHERE user_id = $1
+        """
+        if await self.bot.pool.fetchval(query, message.chatter.id) == 1:
             # if in database: a known chatter
             return
 
@@ -213,9 +198,14 @@ class Alerts(IrePersonalComponent):
             await message.respond(const.STV.LastTimeChatter)
             return
 
-        query = "INSERT INTO ttv_chatters (user_id, name_lower) VALUES ($1, $2)"
+        query = """
+            INSERT INTO ttv_chatters
+            (user_id, name_lower)
+            VALUES ($1, $2)
+            ON CONFLICT (user_id)
+                DO NOTHING;
+        """
         await self.bot.pool.execute(query, message.chatter.id, message.chatter.name)
-        self.known_chatters.append(message.chatter.id)
 
         await message.respond(
             f"{const.STV.FirstTimeChadder} or {const.STV.FirstTimeDentge} "

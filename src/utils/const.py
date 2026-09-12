@@ -5,7 +5,6 @@ from enum import StrEnum
 
 __all__ = (
     "BTTV",
-    "DIGITS",
     "FFZ",
     "STV",
     "STV_IRENE_DEFAULT_EMOTE_SET_ID",
@@ -178,20 +177,6 @@ class BotsLowerName(StrEnum):
     # StreamLabs = "streamlabs"
     # Streamelements = "streamelements"
     # poggSpin = "poggspin"  # https://bot.itsbr0dyy.dev/
-
-
-DIGITS = [
-    "\N{DIGIT ZERO}\N{COMBINING ENCLOSING KEYCAP}",
-    "\N{DIGIT ONE}\N{COMBINING ENCLOSING KEYCAP}",
-    "\N{DIGIT TWO}\N{COMBINING ENCLOSING KEYCAP}",
-    "\N{DIGIT THREE}\N{COMBINING ENCLOSING KEYCAP}",
-    "\N{DIGIT FOUR}\N{COMBINING ENCLOSING KEYCAP}",
-    "\N{DIGIT FIVE}\N{COMBINING ENCLOSING KEYCAP}",
-    "\N{DIGIT SIX}\N{COMBINING ENCLOSING KEYCAP}",
-    "\N{DIGIT SEVEN}\N{COMBINING ENCLOSING KEYCAP}",
-    "\N{DIGIT EIGHT}\N{COMBINING ENCLOSING KEYCAP}",
-    "\N{DIGIT NINE}\N{COMBINING ENCLOSING KEYCAP}",
-]
 
 
 class Logo(StrEnum):

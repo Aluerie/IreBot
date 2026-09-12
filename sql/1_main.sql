@@ -39,3 +39,27 @@ CREATE TABLE
         added_at TIMESTAMPTZ DEFAULT (NOW () AT TIME zone 'utc'),
         requested_by TEXT NOT NULL -- twitch_id string;
     );
+
+CREATE TABLE
+    /* First Chatter Channel Reward Redeems
+    
+    Contains records of how many times a person redeemed 'First' channel reward
+    for streamers in the database. 
+     */
+    IF NOT EXISTS ttv_first_chatter_redeems (
+        user_id TEXT,
+        streamer_id TEXT,
+        PRIMARY KEY (user_id, streamer_id),
+        first_times INT DEFAULT (1)
+    );
+
+CREATE TABLE
+    /* First Chatter Channel Rewards 
+    
+    Contains relation between streamers and their 'First' Channel Reward, if they have it set up.
+     */
+    IF NOT EXISTS ttv_first_chatter_rewards (
+        streamer_id TEXT PRIMARY KEY,
+        reward_id TEXT NOT NULL,
+        original_title TEXT
+    );

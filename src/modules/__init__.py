@@ -19,10 +19,9 @@ from pkgutil import iter_modules
 __all__ = ("get_modules",)
 
 try:
-    from modules_subset import LOAD_ALL_MODULES, MODULES_SUBSET  # pyright: ignore[reportMissingImports]
+    from modules_subset import MODULES_SUBSET  # pyright: ignore[reportMissingImports]
 except ModuleNotFoundError:
     MODULES_SUBSET: dict[str, list[str]] = {}  # pyright: ignore[reportConstantRedefinition]
-    LOAD_ALL_MODULES: bool = True  # pyright: ignore[reportConstantRedefinition]
 
 
 log = logging.getLogger(__name__)
@@ -65,7 +64,7 @@ def get_subset_modules(categories: dict[str, list[str]]) -> tuple[str, ...]:
     return modules_to_load
 
 
-def get_modules(*, test: bool) -> tuple[str, ...]:
+def get_modules(*, is_subset_mode: bool) -> tuple[str, ...]:
     """Get list of bot modules to load.
 
     Returns
@@ -75,7 +74,7 @@ def get_modules(*, test: bool) -> tuple[str, ...]:
         The modules are given in a full dot form.
         Example: `('modules.personal.alerts', 'modules.dev.control', 'modules.public.dota_rp_flow', )`
     """
-    if test and not LOAD_ALL_MODULES:
+    if is_subset_mode:
         # assume testing specific modules from `m.py`
         return get_subset_modules(MODULES_SUBSET)
 

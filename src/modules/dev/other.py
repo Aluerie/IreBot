@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, TypedDict
 from twitchio.ext import commands
 
 from core import IreDevComponent
-from shared import fmt
+from shared import common_const, fmt
 
 if TYPE_CHECKING:
     from core import IreBot, IreContext
@@ -77,6 +77,17 @@ class OtherDevCommands(IreDevComponent):
             f"Python {pv.major}.{pv.minor}.{pv.micro} | "
             + " | ".join(f"{package}: {importlib.metadata.version(package)}" for package in curious_packages)
         )
+
+    @commands.command()
+    async def test_digits(self, ctx: IreContext) -> None:
+        """Test digit emotes in twitch chat.
+
+        At the point of writing this function - the number emotes like :one: were not working
+        in twitch chat powered with FFZ/7TV addons.
+        So use it to check if it's fixed. if yes - then we can rewrite some functions to use these emotes.
+        """
+        content = " ".join(common_const.DIGITS)
+        await ctx.send(content)
 
 
 async def setup(bot: IreBot) -> None:

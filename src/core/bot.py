@@ -52,6 +52,7 @@ def get_public_subscriptions(member: str, bot: str) -> list[twitchio.eventsub.Su
     Their accounts do not need all EventSub models activated.
     """
     return [
+        eventsub.ChannelPointsRedeemAddSubscription(broadcaster_user_id=member),
         eventsub.ChatMessageSubscription(broadcaster_user_id=member, user_id=bot),
         eventsub.StreamOfflineSubscription(broadcaster_user_id=member),
         eventsub.StreamOnlineSubscription(broadcaster_user_id=member),
@@ -208,7 +209,7 @@ class IreBot(commands.AutoBot):
         different credentials for certain things depending on home/vps choice.
         """
 
-        self.modules_to_load: tuple[str, ...] = get_modules(test=self.subset_mode)
+        self.modules_to_load: tuple[str, ...] = get_modules(is_subset_mode=self.subset_mode)
         self.error_manager = ErrorManager(self)
 
         self.streamers: dict[str, Streamer] = {}

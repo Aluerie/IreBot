@@ -2,14 +2,14 @@
 
 MODULES_SUBSET: dict[str, list[str]] = {
     "dev": [
-        # "required",
+        "required",
         # ---
         # "control",
         # "other",
         # "webhook_logs",
     ],
     "personal": [
-        # "alerts",
+        "alerts",
         # "counters",
         # "discord_notifications",
         # "emotes_common"
@@ -23,9 +23,7 @@ MODULES_SUBSET: dict[str, list[str]] = {
     ],
     "public": [
         # "d9kmmrbot",
+        "first",
         # "meta"
     ],
 }
-
-
-LOAD_ALL_MODULES: bool = True

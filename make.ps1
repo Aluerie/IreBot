@@ -47,6 +47,7 @@ function commit() {
 	git commit -a -m "$m"
 	git push
     cd ..
+    cd ..
 	git add .
 	git commit -a -m "$m"
 	git push

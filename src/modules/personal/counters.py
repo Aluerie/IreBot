@@ -4,13 +4,11 @@ import asyncio
 import datetime
 import random
 import re
-from typing import TYPE_CHECKING, Any, TypedDict, override
+from typing import TYPE_CHECKING, Any, TypedDict
 
-from discord import Embed
 from twitchio.ext import commands
 
-from core import IrePersonalComponent, ireloop
-from shared import fmt
+from core import IrePersonalComponent
 from utils import const
 
 if TYPE_CHECKING:
@@ -34,18 +32,6 @@ class Counters(IrePersonalComponent):
     def __init__(self, bot: IreBot, *args: Any, **kwargs: Any) -> None:
         super().__init__(bot, *args, **kwargs)
         self.last_erm_notification: datetime.datetime = datetime.datetime.now(datetime.UTC)
-
-    @override
-    async def component_load(self) -> None:
-        self.check_first_reward.start()
-        self.double_check_offline.start()
-        await super().component_load()
-
-    @override
-    async def component_teardown(self) -> None:
-        self.check_first_reward.cancel()
-        self.double_check_offline.cancel()
-        await super().component_teardown()
 
     # ERM COUNTERS
 
@@ -89,118 +75,6 @@ class Counters(IrePersonalComponent):
         query = "SELECT value FROM ttv_counters WHERE name = $1"
         value: int = await self.bot.pool.fetchval(query, "erm")
         await ctx.send(f"{value} {const.STV.Erm} in chat.")
-
-    # FIRST COUNTER
-
-    @commands.Component.listener(name="custom_redemption_add")
-    async def first_counter(self, redemption: twitchio.ChannelPointsRedemptionAdd) -> None:
-        """Count all redeems for the reward 'First'."""
-        if not self.is_owner(redemption.broadcaster.id):
-            return
-
-        if redemption.reward.id != FIRST_ID:
-            return
-
-        query = """--sql
-            INSERT INTO ttv_first_redeems (user_id, user_name)
-            VALUES ($1, $2)
-            ON CONFLICT (user_id) DO
-                UPDATE SET first_times = ttv_first_redeems.first_times + 1, user_name = $2
-            RETURNING first_times;
-        """
-        count: int = await self.bot.pool.fetchval(query, redemption.user.id, str(redemption.user.name))
-
-        if count == 1:
-            msg = f'@{redemption.user.display_name}, gratz on your very first "First!" {const.STV.gg}'
-        else:
-            msg = f"@{redemption.user.display_name}, Gratz! you've been first {count} times {const.STV.gg} {const.Global.EZ}"
-
-        await redemption.respond(msg)
-
-        reward = await redemption.reward.fetch_reward()
-        await reward.update(title=f"@{redemption.user.display_name} was 1st today !")
-
-    @commands.Component.listener(name="stream_offline")
-    async def reset_first_redeem_title(self, offline: twitchio.StreamOffline) -> None:
-        """Reset the title of the "First!" redeem back to its original state.
-
-        Currently, it should be changed when somebody redeems to "@user was first!
-        """
-        if not self.is_owner(offline.broadcaster.id):
-            return
-
-        first_reward = next(reward for reward in await offline.broadcaster.fetch_custom_rewards() if reward.id == FIRST_ID)
-        await first_reward.update(title="First !")
-
-    @ireloop(hours=8)
-    async def double_check_offline(self) -> None:
-        """Double Check if the stream is online.
-
-        Sometimes, the bot is offline during Irene's stream ends so it doesn't catch the `stream_offline` event.
-        """
-        await self.bot.streamers_index_ready.wait()
-        if (irene_streamer := self.bot.streamers.get(const.UserID.Irene)) is not None and not irene_streamer.online:
-            first_reward = next(
-                reward
-                for reward in await self.bot.create_partialuser(self.bot.owner_id).fetch_custom_rewards()
-                if reward.id == FIRST_ID
-            )
-            await first_reward.update(title="First !")
-
-    @commands.command(aliases=["first"])
-    async def firsts(self, ctx: IreContext) -> None:
-        """Get top10 first redeemers."""
-        query = """--sql
-            SELECT user_name, first_times
-            FROM ttv_first_redeems
-            ORDER BY first_times DESC
-            LIMIT 3;
-        """
-        rows: list[FirstRedeemsRow] = await self.bot.pool.fetch(query)
-        content = f'Top3 "First!" redeemers {const.BTTV.DankG} '
-
-        rank_medals = ["\N{FIRST PLACE MEDAL}", "\N{SECOND PLACE MEDAL}", "\N{THIRD PLACE MEDAL}"]  # + const.DIGITS[4:10]
-        content += " ".join(
-            [f"{rank_medals[i]} {row['user_name']}: {fmt.plural(row['first_times']):time};" for i, row in enumerate(rows)]
-        )
-        await ctx.send(content)
-
-    @commands.command()
-    async def test_digits(self, ctx: IreContext) -> None:
-        """Test digit emotes in twitch chat.
-
-        At the point of writing this function - the number emotes like :one: were not working
-        in twitch chat powered with FFZ/7TV addons.
-        So use it to check if it's fixed. if yes - then we can rewrite some functions to use these emotes.
-        """
-        content = " ".join(const.DIGITS)
-        await ctx.send(content)
-
-    @ireloop(time=[datetime.time(hour=3, minute=59)])
-    async def check_first_reward(self) -> None:
-        """The task that ensures the reward "First" under a specific id exists.
-
-        Just a fool proof measure in case I randomly snap and delete it.
-        """
-        if datetime.datetime.now(datetime.UTC).day != 14:
-            # simple way to make a task run once/month
-            return
-
-        custom_rewards = await self.bot.create_partialuser(const.UserID.Irene).fetch_custom_rewards()
-        for reward in custom_rewards:
-            if reward.id == FIRST_ID:
-                # we good
-                if reward.title != "First !":
-                    # wrong title somehow
-                    await reward.update()
-                break
-        else:
-            # we bad
-            content = self.bot.error_ping
-            embed = Embed(
-                description='Looks like you deleted "First!" channel points reward from the channel.', colour=0x345245
-            ).set_footer(text="WTF, bring it back!")
-            await self.bot.error_webhook.send(content=content, embed=embed)
 
 
 async def setup(bot: IreBot) -> None:
