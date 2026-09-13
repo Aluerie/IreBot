@@ -28,6 +28,10 @@ ipynb/
 # Temporary files
 .temp/
 
+# Testing Related
+src/modules/beta.py
+modules_subset.py
+
 # FILES TO COMMIT ELSEWHERE
 # -------------------------
 
@@ -43,7 +47,3 @@ IreBot.wiki
 
 # Config
 .env
-
-# Testing Related
-src/modules/beta.py
-modules_subset.py

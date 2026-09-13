@@ -117,6 +117,7 @@ class FirstChatterChannelRewardManagement(IrePublicComponent):
             max_per_user=1,
             max_per_stream=1,
         )
+        await ctx.send("Successfully fixed the First Chatter Channel Reward!")
 
     # COMMON DATABASE REQUESTS
 
@@ -174,7 +175,7 @@ class FirstChatterChannelRewardManagement(IrePublicComponent):
             )
 
         if reward.max_per_stream is None:
-            msg = get_response(f"For some reason {reward.max_per_stream} was set to `None` which is wrong.")
+            msg = get_response("For some reason `reward.max_per_stream` was set to `None` which is wrong.")
             await reward.respond(msg)
             return
         if not reward.max_per_stream.enabled:
@@ -280,7 +281,6 @@ class FirstChatterChannelRewardManagement(IrePublicComponent):
         """
         rows: list[FirstChatterRewardsQueryRow] = await self.bot.pool.fetch(query)
         for row in rows:
-            log.debug("🥇 First: Double check Task starts now.")
             streamer = self.bot.get_streamer(row["streamer_id"])
             if streamer.online:
                 continue
@@ -300,7 +300,7 @@ class FirstChatterChannelRewardManagement(IrePublicComponent):
             # simple way to make a task run once/month
             return
 
-        log.debug("🥇 First: Checking if all rewards in the database are fine.")
+        log.debug("🥇 First: Checking if all rewards in the database exist.")
         query = """
             SELECT streamer_id, reward_id, original_title
             FROM ttv_first_chatter_rewards;

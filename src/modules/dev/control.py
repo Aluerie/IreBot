@@ -110,7 +110,7 @@ class Control(IreDevComponent):
             if m:
                 await ctx.send(f"{const.STV.DankDolmes} {c}: {', '.join(m)}")
 
-    @ireloop(minutes=11)
+    @ireloop(minutes=10)
     async def heartbeat_task(self) -> None:
         """Send heartbeat reports to a discord channel with a small information."""
         await self.bot.heartbeat_webhook.send("Alive")
