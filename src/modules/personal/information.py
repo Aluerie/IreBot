@@ -147,7 +147,7 @@ class StreamInformation(IrePersonalComponent):
     @commands.Component.listener(name="channel_update")
     async def channel_update(self, update: twitchio.ChannelUpdate) -> None:
         """Channel Info (game, title, etc) got updated."""
-        if not self.is_owner(update.broadcaster.id):
+        if not self.is_irene(update.broadcaster.id):
             return
 
         now = datetime.datetime.now(datetime.UTC)
@@ -159,7 +159,6 @@ class StreamInformation(IrePersonalComponent):
                 # time condition so the bot doesn't announce changes done via !game command
                 await update.respond(f'{const.STV.donkDetective} Game was changed to "{new_category}"')
 
-            # why it's not a default functionality ?
             if self.bot.is_online(update.broadcaster.id):
                 with contextlib.suppress(twitchio.HTTPException):
                     await update.broadcaster.create_stream_marker(

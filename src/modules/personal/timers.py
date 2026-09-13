@@ -60,7 +60,7 @@ class Timers(IrePersonalComponent):
     @commands.Component.listener(name="stream_online")
     async def stream_online_start_the_task(self, online: twitchio.StreamOffline) -> None:
         """Start counting messages when stream goes online."""
-        if not self.is_owner(online.broadcaster.id):
+        if not self.is_irene(online.broadcaster.id):
             return
 
         random.shuffle(self.messages)
@@ -72,7 +72,7 @@ class Timers(IrePersonalComponent):
     @commands.Component.listener(name="stream_offline")
     async def stream_offline_cancel_the_task(self, offline: twitchio.StreamOffline) -> None:
         """Cancel the counting messages listener when stream goes offline."""
-        if not self.is_owner(offline.broadcaster.id):
+        if not self.is_irene(offline.broadcaster.id):
             return
 
         self.bot.remove_listener(self.count_messages)
@@ -88,7 +88,7 @@ class Timers(IrePersonalComponent):
 
         If these two are fulfilled then the bot sends a semi-periodic message in the chat.
         """
-        if not self.is_owner(message.broadcaster.id):
+        if not self.is_irene(message.broadcaster.id):
             return
 
         if message.chatter.name in const.BotsLowerName:
@@ -116,15 +116,15 @@ class Timers(IrePersonalComponent):
         if self.random_daily_announcement.current_loop == 0:
             return
 
-        owner = self.bot.get_partial_owner()
-
         now = datetime.datetime.now(datetime.UTC)
-        if (now.day == 4 and now.hour > 18) or (now.day == 5 and now.hour < 6):
-            message = f"it's friday night gents {const.STV.fridayNight} time to dance"
-        else:
-            message = f"It's time to {const.STV.Boink}"
-
-        await owner.send_announcement(message=message, moderator=self.bot.bot_id, color="primary")
+        message = (
+            f"it's friday night gents {const.STV.fridayNight} time to dance"
+            if (now.weekday == 4 and now.hour > 18) or (now.weekday == 5 and now.hour < 6)
+            else f"It's time to {const.STV.Boink}"
+        )
+        await self.bot.create_partialuser(self.bot.owner_id).send_announcement(
+            message=message, moderator=self.bot.bot_id, color="primary"
+        )
 
 
 async def setup(bot: IreBot) -> None:

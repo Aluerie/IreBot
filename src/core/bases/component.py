@@ -31,13 +31,13 @@ class IrePersonalComponent(IreComponent):
     Features in personal components are only available in Irene's main and secondary twitch channels.
     """
 
-    def is_owner(self, user_id: str) -> bool:
+    def is_irene(self, user_id: str) -> bool:
         """A check whether the user is a bot owner."""
         return user_id == self.bot.owner_id
 
     @override
     async def component_before_invoke(self, ctx: IreContext) -> None:  # pyright: ignore[reportIncompatibleMethodOverride]
-        if not self.is_owner(ctx.broadcaster.id):
+        if not self.is_irene(ctx.broadcaster.id):
             msg = "Command is not allowed anywhere except Irene's channel"
             raise errors.SilentError(msg)
 

@@ -30,6 +30,8 @@ class StreamerIndexManagement(IreDevComponent):
     This index is used to cache some information about streamers
     that twitchio does not cache for me by itself, such as their `online` state
     (twitchio only allows fetching their state at the exact moment).
+
+    This class is an attempt to reduce amount of `.fetch_streams` API calls across the bot.
     """
 
     def __init__(self, bot: IreBot) -> None:

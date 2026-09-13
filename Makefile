@@ -1,13 +1,16 @@
-# ifeq ($(OS),Windows_NT)
-# SHELL := powershell.exe
-# .SHELLFLAGS := -Command
-# endif
+include .env
+
+ifeq ($(OS),Windows_NT)
+    SHELL := pwsh.exe
+else
+    SHELL := pwsh
+endif
+.SHELLFLAGS := -NoProfile -Command 
 
 # Sources to run type-checkers / linters against
 sources = src tests examples
 # Default commit message with `make commit`
 m = fix(lazy): Various fixes & updates
-
 
 default: help
 
@@ -48,7 +51,6 @@ setup:  # Setup the repository - recommended to use right after cloning
 	uv sync
 	prek install
 
-
 .PHONY: sync
 .SILENT: sync
 sync:  # Install dependencies
@@ -64,7 +66,7 @@ update:  # Update dependencies
 .PHONY: run
 .SILENT: run
 run:  # Run the bot in the subset-mode
-	uv run src/main.py --subset-mode
+	uv run src/main.py --subset-mode --local-adapter
 
 .PHONY: lint
 .SILENT: lint
@@ -104,12 +106,12 @@ basedpyright:  # Run basedpyright
 # Lazy git commit commands, use make commit m="Fix this and that" for custom commit messages.
 # This creates and pushes commits to both IreBot and Shared-Bot-Utilities repositories.
 commit:  
-	cd src/shared && git add .
-	cd src/shared && git commit -a -m "$(m)"
-	cd src/shared && git push
-	git add .
-	git commit -a -m "$(m)"
-	git push
+	-cd src/shared && git add .
+	-cd src/shared && git commit -a -m "$(m)"
+	-cd src/shared && git push
+	-git add .
+	-git commit -a -m "$(m)"
+	-git push
 
 .PHONY: com
 .SILENT: com
@@ -122,9 +124,15 @@ com:
 .PHONY: echo
 .SILENT: echo
 echo:  # Testing stuff with make, why don't we test it with echo
+	[console]::OutputEncoding
 	echo $(SHELL)
-	chcp && echo "$(m)"
+	echo "$(m)"
 	echo $(LANG)
+	@Write-Output $(m)
 
-# 	@Write-Output $(m)
-# 	printf '%s\n' "$sample"
+
+.PHONY: scp
+.SILENT: scp
+scp:  # Commands to copy required files into the VPS
+	scp -i "${SSH_PRIVATE_KEY}" .env ${SSH_USERNAME}@${SSH_HOST}:~/IreBot/.env
+# 	C:\WINDOWS\System32\OpenSSH\scp.exe -i "${SSH_PRIVATE_KEY}" .\.env ${SSH_USERNAME}@${SSH_HOST}:~/IreBot/.env

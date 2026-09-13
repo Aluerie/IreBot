@@ -21,6 +21,7 @@ jobs:
         port: ${{ secrets.PORT }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
+          set -e
           cd ./IreBot
           git pull
           git submodule update --recursive

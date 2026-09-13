@@ -612,6 +612,11 @@ class IreBot(commands.AutoBot):
         return self.webhook_from_url(env.WEBHOOK_ERROR)
 
     @discord.utils.cached_property
+    def heartbeat_webhook(self) -> discord.Webhook:
+        """A webhook in hideout server to send small heartbeat reports."""
+        return self.webhook_from_url(env.WEBHOOK_HEARTBEAT)
+
+    @discord.utils.cached_property
     def error_ping(self) -> str:
         """Error Role ping used to notify the developer(-s) about some errors."""
         return "<@&1337106675433340990>" if self.subset_mode else "<@&1116171071528374394>"
@@ -622,12 +627,8 @@ class IreBot(commands.AutoBot):
         This relies on `self.streamers` index.
         For proper request - we need to use twitchio's `.fetch_streams` method.
         """
-        return s.online if (s := self.streamers.get(user_id, None)) else False
-
-    def is_irene_live(self) -> bool:
-        """Whether @irene, the bot's owner is live on twitch."""
-        return self.is_online(const.UserID.Irene)
-
-    def get_partial_owner(self) -> twitchio.PartialUser:
-        """A shortcut to get a partial user object for the bot's owner."""
-        return self.create_partialuser(self.owner_id)
+        try:
+            return self.streamers[user_id].online
+        except KeyError:
+            msg = f"Somehow {user_id} is not in the bots' streamer index."
+            raise errors.PlaceholderError(msg) from None

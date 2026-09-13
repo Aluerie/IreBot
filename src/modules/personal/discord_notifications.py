@@ -38,7 +38,7 @@ class DiscordNotifications(IrePersonalComponent):
     @commands.Component.listener(name="stream_online")
     async def stream_start(self, online: twitchio.StreamOnline) -> None:
         """Stream started (went live)."""
-        if not self.is_owner(online.broadcaster.id):
+        if not self.is_irene(online.broadcaster.id):
             return
 
         irene = await online.broadcaster.user()
@@ -77,10 +77,15 @@ class DiscordNotifications(IrePersonalComponent):
     @commands.Component.listener("stream_offline")
     async def twitch_tv_offline_edit_notification(self, offline: twitchio.StreamOffline) -> None:
         """Starts the task to edit the notification message."""
-        if not self.is_owner(offline.broadcaster.id):
+        if not self.is_irene(offline.broadcaster.id):
             return
+
         await asyncio.sleep(11 * 60)
-        messages = self.active_notification_messages[:-1] if self.bot.is_irene_live() else self.active_notification_messages
+        messages = (
+            self.active_notification_messages[:-1]
+            if self.bot.is_online(offline.broadcaster.id)
+            else self.active_notification_messages
+        )
         for message in messages:
             embed = message.embeds[0]
             embed.set_image(url=(await offline.broadcaster.user()).offline_image)

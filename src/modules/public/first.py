@@ -38,8 +38,6 @@ if TYPE_CHECKING:
 
 __all__ = ("FirstChatterChannelRewardManagement",)
 
-# FIRST_ID: str = "902e931b-3d09-4a2e-9996-1d1ad599761d"
-
 DEFAULT_FIRST_REWARD_TITLE = "First!"
 
 
@@ -48,13 +46,13 @@ class FirstChatterChannelRewardManagement(IrePublicComponent):
 
     @override
     async def component_load(self) -> None:
-        self.double_check_offline.start()
+        self.double_check.start()
         self.check_first_reward.start()
         await super().component_load()
 
     @override
     async def component_teardown(self) -> None:
-        self.double_check_offline.cancel()
+        self.double_check.cancel()
         self.check_first_reward.cancel()
         await super().component_teardown()
 
@@ -73,8 +71,14 @@ class FirstChatterChannelRewardManagement(IrePublicComponent):
             INSERT INTO ttv_first_chatter_rewards
             (streamer_id, reward_id)
             VALUES ($1, $2)
+            ON CONFLICT (streamer_id)
+                DO NOTHING
+            returning streamer_id
         """
-        await self.bot.pool.execute(query, ctx.broadcaster.id, custom_reward.id)
+        streamer_id: str | None = await self.bot.pool.fetchval(query, ctx.broadcaster.id, custom_reward.id)
+        if streamer_id is None:
+            msg = "This channel already has First Chatter Channel Reward"
+            raise errors.RespondWithError(msg)
         await ctx.send(
             "Successfully created channel reward 'First'! If you want to edit it (e.g. text or color) - "
             "visit your creator dashboard "
@@ -135,7 +139,9 @@ class FirstChatterChannelRewardManagement(IrePublicComponent):
         This replaces it back to the original.
         """
         first_reward = next(iter(await broadcaster.fetch_custom_rewards(ids=[reward_id])))
-        await first_reward.update(title=original_title or DEFAULT_FIRST_REWARD_TITLE)
+        intended_title = original_title or DEFAULT_FIRST_REWARD_TITLE
+        if first_reward.title != intended_title:
+            await first_reward.update(title=intended_title)
 
     @commands.Component.listener(name="stream_offline")
     async def reset_first_redeem_title(self, offline: twitchio.StreamOffline) -> None:
@@ -156,10 +162,10 @@ class FirstChatterChannelRewardManagement(IrePublicComponent):
             )
 
     @ireloop(hours=6)
-    async def double_check_offline(self) -> None:
-        """Double Check if the stream is online.
+    async def double_check(self) -> None:
+        """Double Check the information.
 
-        Sometimes, the bot is offline during streamer stream ends so it doesn't catch the `stream_offline` event.
+        Sometimes, the bot is offline during streamer stream ends so it doesn't catch some events.
         """
         await self.bot.streamers_index_ready.wait()
         query = """
@@ -192,7 +198,7 @@ class FirstChatterChannelRewardManagement(IrePublicComponent):
             msg = "This channel doesn't have `First!` feature setup."
             raise errors.RespondWithError(msg)
 
-        content = f'Top5 "First!" redeemers {const.BTTV.DankG} '
+        content = f'{const.BTTV.DankG} Top5 "First!" redeemers: '
         rank_medals = [
             "\N{FIRST PLACE MEDAL}",
             "\N{SECOND PLACE MEDAL}",

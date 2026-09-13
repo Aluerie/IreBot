@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import TYPE_CHECKING, Annotated
+from typing import TYPE_CHECKING, Annotated, override
 
 from twitchio.ext import commands
 
-from core import IreDevComponent
+from core import IreDevComponent, ireloop
 from utils import const, guards
 
 if TYPE_CHECKING:
@@ -25,6 +25,16 @@ def to_module(_: IreContext, module: str) -> str:
 
 class Control(IreDevComponent):
     """Dev Only Commands."""
+
+    @override
+    async def component_load(self) -> None:
+        self.heartbeat_task.start()
+        await super().component_load()
+
+    @override
+    async def component_teardown(self) -> None:
+        self.heartbeat_task.stop()
+        await super().component_teardown()
 
     @guards.is_vps()
     @commands.command(aliases=["kill"])
@@ -99,6 +109,11 @@ class Control(IreDevComponent):
         for c, m in index.items():
             if m:
                 await ctx.send(f"{const.STV.DankDolmes} {c}: {', '.join(m)}")
+
+    @ireloop(minutes=11)
+    async def heartbeat_task(self) -> None:
+        """Send heartbeat reports to a discord channel with a small information."""
+        await self.bot.heartbeat_webhook.send("Alive")
 
 
 async def setup(bot: IreBot) -> None:

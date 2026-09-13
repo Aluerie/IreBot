@@ -5,6 +5,8 @@ Makefile script in PowerShell that contains commands useful during development f
 .Description
 Available commands:
    run              Run the bot in the subset mode.
+   scp              Transfer files to VPS
+   commit           Commit to github
 
 .Parameter Command
 Command to execute. See Cmdlet's description for more information.
@@ -22,16 +24,27 @@ param (
                 $commandAst,
                 $fakeBoundParameters
             )
-            $script:availableCommands = @("draft", "run", "commit")
+            $script:availableCommands = @("draft", "run", "commit", "scp")
             return $script:availableCommands | Where-Object { $_ -like "$wordToComplete*" }
         })]
     [String]
     $command,
     [String]
-    $m="😴 update(lazy): Various fixes and updates",
+    $m = "😴 update(lazy): Various fixes and updates",
     [switch]
     $help = $false
 )
+
+# get-content .env | Foreach-Object {
+#     if ($_.contains("#")) {
+#         return;
+#     }
+#     else {
+#         $name, $value = $_.split('=')
+#         Write-Host $name, $value
+#         Set-Content env:\$name $values
+#     }
+# }
 
 function draft {
     Write-Host($m)
@@ -42,15 +55,21 @@ function run() {
 }
 
 function commit() {
-    cd src/shared
+    Set-Location src/shared
     git add .
-	git commit -a -m "$m"
-	git push
-    cd ..
-    cd ..
-	git add .
-	git commit -a -m "$m"
-	git push
+    git commit -a -m "$m"
+    git push
+    Set-Location ..
+    Set-Location ..
+    git add .
+    git commit -a -m "$m"
+    git push
+}
+
+function scp() {
+    # Write-Host $env:SSH_USERNAME
+    # Write-Host [Environment]::GetEnvironmentVariable($SSH_PRIVATE_KEY)
+    # scp -i "$Env:SSH_PRIVATE_KEY" ".\.env" $Env:SSH_USERNAME@$Env:SSH_HOST:~/IreBot/.env
 }
 
 $script:availableCommands = $MyInvocation.MyCommand.ParameterSets[0].Parameters[0].Attributes[0].ScriptBlock.Invoke()
