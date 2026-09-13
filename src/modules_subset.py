@@ -9,7 +9,7 @@ MODULES_SUBSET: dict[str, list[str]] = {
         # "webhook_logs",
     ],
     "personal": [
-        "alerts",
+        # "alerts",
         # "counters",
         # "discord_notifications",
         # "emotes_common"
@@ -17,7 +17,7 @@ MODULES_SUBSET: dict[str, list[str]] = {
         # "information",
         # "keywords",
         # "stable",
-        "tags",
+        # "tags",
         # "temporary",
         # "timers",
     ],

@@ -20,7 +20,7 @@ import asyncio
 import logging
 import platform
 import sys
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING
 
 import aiohttp
 import asyncpg
@@ -28,7 +28,6 @@ import click
 
 from config import env
 from core import IreBot, get_eventsub_subscriptions, setup_logging
-from utils import const
 
 if TYPE_CHECKING:
     from shared.types_.database import PoolTypedWithAny
@@ -54,7 +53,6 @@ async def start_the_bot(
     scopes_only: bool,
     force_subscribe: bool,
     local_adapter: bool,
-    owner_id: str,
     subset_mode: bool,
 ) -> None:
     """Start the bot."""
@@ -68,7 +66,7 @@ async def start_the_bot(
         log.exception(msg)
         return
 
-    subscriptions = await get_eventsub_subscriptions(pool, owner_id)
+    subscriptions = await get_eventsub_subscriptions(pool)
 
     async with (
         aiohttp.ClientSession() as session,
@@ -78,7 +76,6 @@ async def start_the_bot(
             pool=pool,
             subscriptions=subscriptions,
             scopes_only=scopes_only,
-            owner_id=owner_id,
             force_subscribe=force_subscribe,
             local=local_adapter,
             subset_mode=subset_mode,
@@ -105,7 +102,7 @@ async def start_the_bot(
     "-f",
     is_flag=True,
     default=False,  # usual default: False ✅
-    help="Which value to pass into `force_subscribe` bot's kwarg",
+    help=("Whether to force subscribing to Conduits.You have to do this every time you add new subscriptions"),
 )
 @click.option(
     "--local-adapter",
@@ -113,18 +110,6 @@ async def start_the_bot(
     is_flag=True,
     default=False,  # usual default: True ✅
     help="Whether to use adapter with localhost (default) or remote host (currently ngrok-free for testing purposes).",
-)
-@click.option(
-    "--owner",
-    "-o",
-    type=click.Choice(["irene", "aluerie"]),
-    default="irene",  # usual default: "irene" ✅
-    help=(
-        "Which account to consider as bot's owner. Two options: `irene` or `aluerie`."
-        "Sometimes I switch between those accounts."
-        "The bot makes personal EventSubs subscriptions for the chosen account."
-        "Also changes the logic of `is_owner` condition."
-    ),
 )
 @click.option(
     "--subset-mode",
@@ -143,20 +128,17 @@ def main(
     scopes_only: bool,
     force_subscribe: bool,
     local_adapter: bool,
-    owner: Literal["irene", "aluerie"],
     subset_mode: bool,
 ) -> None:
     """Launches the bot."""
     if click_ctx.invoked_subcommand is None:
         with setup_logging():
-            owner_id: str = {"irene": const.UserID.Irene, "aluerie": const.UserID.Aluerie}[owner]
             try:
                 RUNTIME(
                     start_the_bot(
                         scopes_only=scopes_only,
                         force_subscribe=force_subscribe,
                         local_adapter=local_adapter,
-                        owner_id=owner_id,
                         subset_mode=subset_mode,
                     )
                 )

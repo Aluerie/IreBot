@@ -24,6 +24,7 @@ from utils.dota2 import IreDota2Client
 
 from .bases import IreContext
 from .error_manager import ErrorManager
+from .subscriptions import get_all_oauth_urls, get_user_subscriptions
 
 if TYPE_CHECKING:
     from aiohttp import ClientSession
@@ -35,92 +36,11 @@ if TYPE_CHECKING:
         token: str
         refresh: str
 
-    class GetMemberAccountsQueryRow(TypedDict):
-        user_id: str
 
-
-__all__ = ("IreBot", "Streamer", "get_eventsub_subscriptions")
+__all__ = ("IreBot", "Streamer")
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
-
-
-def get_public_subscriptions(member: str, bot: str) -> list[twitchio.eventsub.SubscriptionPayload]:
-    """Get member EventSub subscriptions.
-
-    Public accounts are people who are only allowed to use public features.
-    Their accounts do not need all EventSub models activated.
-    """
-    return [
-        eventsub.ChannelPointsRedeemAddSubscription(broadcaster_user_id=member),
-        eventsub.ChatMessageSubscription(broadcaster_user_id=member, user_id=bot),
-        eventsub.StreamOfflineSubscription(broadcaster_user_id=member),
-        eventsub.StreamOnlineSubscription(broadcaster_user_id=member),
-    ]
-
-
-async def get_eventsub_subscriptions(pool: PoolTypedWithAny, owner: str) -> list[twitchio.eventsub.SubscriptionPayload]:
-    """Get all EventSub subscriptions that are required for the bot's EventSub related features to work.
-
-    The function also includes (in code) a table showcasing which subscriptions/scopes are required for what.
-    For more links:
-
-    More links
-    ----------
-    TwitchDev Docs
-        * Eventsub:        https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types
-        * Scopes:          https://dev.twitch.tv/docs/authentication/scopes/
-    TwitchIO  Docs
-        * Event Reference: https://twitchio.dev/en/latest/references/events/events.html
-        * Models:          https://twitchio.dev/en/latest/references/eventsub/index.html
-    """
-    bot = const.UserID.Bot
-    subscriptions: list[eventsub.SubscriptionPayload] = []
-
-    # 1. My personal account to have all the features on.
-    subscriptions.extend(
-        [
-            # EventSub Subscriptions Table (order - function name sorted by alphabet).
-            # Subscription Name                     Permission
-            # ------------------------------------------------------
-            # ✅ Ad break begin                         channel:read:ads
-            eventsub.AdBreakBeginSubscription(broadcaster_user_id=owner),
-            # ✅ Bans                                   channel:moderate
-            eventsub.ChannelBanSubscription(broadcaster_user_id=owner),
-            # ✅ Follows                                moderator:read:followers
-            eventsub.ChannelFollowSubscription(broadcaster_user_id=owner, moderator_user_id=bot),
-            # ✅ Channel Points Redeem                  channel:read:redemptions or channel:manage:redemptions
-            eventsub.ChannelPointsRedeemAddSubscription(broadcaster_user_id=owner),
-            # ✅ Message                                user:read:chat from the chatbot, channel:bot from broadcaster
-            eventsub.ChatMessageSubscription(broadcaster_user_id=owner, user_id=bot),
-            # ✅ Raids to the channel                   No authorization required
-            eventsub.ChannelRaidSubscription(to_broadcaster_user_id=owner),
-            # ✅ Stream went offline                    No authorization required
-            eventsub.StreamOfflineSubscription(broadcaster_user_id=owner),
-            # ✅ Stream went live                       No authorization required
-            eventsub.StreamOnlineSubscription(broadcaster_user_id=owner),
-            # ✅ Channel Update (title/game)            No authorization required
-            eventsub.ChannelUpdateSubscription(broadcaster_user_id=owner),
-            # ❓ Channel Subscribe (paid)               channel:read:subscriptions
-            eventsub.ChannelSubscribeSubscription(broadcaster_user_id=owner),
-            # ❓ Channel Subscribe Message (paid)       channel:read:subscriptions
-            eventsub.ChannelSubscribeMessageSubscription(broadcaster_user_id=owner),
-        ]
-    )
-
-    # 2. Public member accounts (i.e. other people using my bot) only have some public features on
-    # so we only need a subset of eventsub-subscriptions.
-    query = """
-        SELECT t.user_id
-        FROM ttv_tokens t
-        JOIN ttv_streamers s ON t.user_id = s.user_id
-        WHERE active = TRUE AND t.user_id != ANY($1)
-    """
-    exclude_ids = {const.UserID.Aluerie, const.UserID.Irene, const.UserID.Bot}
-    public_rows: list[GetMemberAccountsQueryRow] = await pool.fetch(query, exclude_ids)
-    for user in public_rows:
-        subscriptions.extend(get_public_subscriptions(user["user_id"], bot))
-    return subscriptions
 
 
 @dataclass
@@ -172,7 +92,6 @@ class IreBot(commands.AutoBot):
         pool: PoolTypedWithAny,
         subscriptions: list[eventsub.SubscriptionPayload],
         scopes_only: bool,
-        owner_id: str,
         force_subscribe: bool,
         local: bool,
         subset_mode: bool,
@@ -193,7 +112,7 @@ class IreBot(commands.AutoBot):
             client_id=env.TWITCH_CLIENT_ID,
             client_secret=env.TWITCH_CLIENT_SECRET,
             bot_id=const.UserID.Bot,
-            owner_id=owner_id,
+            owner_id=const.UserID.Irene,
             prefix=self.prefixes,
             adapter=adapter,  # pyright: ignore[reportArgumentType], it's hinted as `NotRequired` while I need to use `None`.
             subscriptions=subscriptions,
@@ -223,60 +142,6 @@ class IreBot(commands.AutoBot):
         self.launch_time: datetime.datetime
         self.logs_via_webhook_handler: logging.Handler
 
-    def show_oauth_helper(self, scopes: list[str], prefix: str) -> str:
-        """Helper function for `show_bot_oauth`, `show_personal_oauth`, `show_public_oauth`.
-
-        The authorization is required for proper work of Twitch Eventsub events and API requests.
-        Currently, we separate bot features into two categories:
-        * Personal - that are only used by me;
-        * Public - that I allow to be used by everybody;
-        They require different sets of scopes. And also, we need a separate oauth for the bot account.
-        Therefore, we have 3 distinct links depending on which account should click on it.
-
-        """
-        link = f"{self.domain}/oauth?scopes={'+'.join(scopes)}&force_verify=true"
-        return f"{prefix}\n{link}"
-
-    def show_bot_oauth(self) -> str:
-        """Print a link for me (developer) to click and authorize the bot scopes for the bot account.
-
-        Note, that we need to login with the bot account (do not use this link for personal accounts).
-        Required for proper work of Twitch Eventsub events and API requests.
-        """
-        scopes = [
-            "user:read:chat",
-            "user:write:chat",
-            "user:bot",
-            "moderator:read:followers",
-            "moderator:manage:shoutouts",
-            "moderator:manage:announcements",
-            "moderator:manage:banned_users",
-            "clips:edit",
-        ]
-        return self.show_oauth_helper(scopes, "🤖🤖🤖 BOT OAUTH LINK: 🤖🤖🤖")
-
-    def show_personal_oauth(self) -> str:
-        """Print a link for me (personal bot user with all the features) to click and authorize the scopes for the bot."""
-        scopes = [
-            "channel:bot",
-            "channel:edit:commercial",  # "channel:read:ads",
-            "channel:moderate",
-            "channel:read:redemptions",
-            "channel:manage:redemptions",
-            "channel:manage:broadcast",
-            "channel:read:subscriptions",
-        ]
-        return self.show_oauth_helper(scopes, "🎬🎬🎬 PERSONAL OAUTH LINK: 🎬🎬🎬")
-
-    def show_public_oauth(self) -> str:
-        """Print a link for public streamers to click and authorize the scopes for the bot."""
-        scopes = [
-            "channel:bot",
-            "channel:read:redemptions",
-            "channel:manage:redemptions",
-        ]
-        return self.show_oauth_helper(scopes, "🌈🌈🌈 PUBLIC OAUTH LINK: 🌈🌈🌈")
-
     @override
     async def setup_hook(self) -> None:
         """
@@ -297,11 +162,8 @@ class IreBot(commands.AutoBot):
         """
         if self.scopes_only:
             msg = (
-                "Scopes Only Mode: print oauth urls and start the bot in adapter-only mode (no modules enabled)."
-                "\n"
-                f"{self.show_bot_oauth()}\n"
-                f"{self.show_personal_oauth()}\n"
-                f"{self.show_public_oauth()}\n"
+                "Scopes Only Mode: print oauth urls and start the bot in adapter-only mode (no modules enabled).\n"
+                f"{get_all_oauth_urls(self.domain)}"
             )
             log.warning(msg)
             return
@@ -335,7 +197,7 @@ class IreBot(commands.AutoBot):
             # We usually don't want subscribe to events on the bots channel...
             return
 
-        subs: list[eventsub.SubscriptionPayload] = get_public_subscriptions(payload.user_id, self.bot_id)
+        subs: list[eventsub.SubscriptionPayload] = get_user_subscriptions(payload.user_id, self.bot_id)
         resp: twitchio.MultiSubscribePayload = await self.multi_subscribe(subs)
         if resp.errors:
             log.warning("Failed to subscribe to: %r, for user: %s", resp.errors, payload.user_id)

@@ -105,7 +105,10 @@ basedpyright:  # Run basedpyright
 .SILENT: commit
 # Lazy git commit commands, use make commit m="Fix this and that" for custom commit messages.
 # This creates and pushes commits to both IreBot and Shared-Bot-Utilities repositories.
-commit:  
+# Notice "-" Usage 
+# https://stackoverflow.com/a/2670143/19217368) 
+# This kinda makes this command unsafe against me being dumb.
+commit: 
 	-cd src/shared && git add .
 	-cd src/shared && git commit -a -m "$(m)"
 	-cd src/shared && git push
@@ -135,4 +138,3 @@ echo:  # Testing stuff with make, why don't we test it with echo
 .SILENT: scp
 scp:  # Commands to copy required files into the VPS
 	scp -i "${SSH_PRIVATE_KEY}" .env ${SSH_USERNAME}@${SSH_HOST}:~/IreBot/.env
-# 	C:\WINDOWS\System32\OpenSSH\scp.exe -i "${SSH_PRIVATE_KEY}" .\.env ${SSH_USERNAME}@${SSH_HOST}:~/IreBot/.env

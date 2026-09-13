@@ -60,6 +60,15 @@ class FirstChatterChannelRewardManagement(IrePublicComponent):
     @commands.command()
     async def setup_first_reward(self, ctx: IreContext) -> None:
         """Setup First Chatter Channel Reward in the broadcaster channel."""
+        query = """
+            SELECT COUNT(1)
+            FROM ttv_first_chatter_rewards
+            WHERE streamer_id = $1;
+        """
+        if await self.bot.pool.fetchval(query, ctx.broadcaster.id) == 1:
+            msg = "This channel already had First Chatter Channel Reward"
+            raise errors.RespondWithError(msg)
+
         custom_reward = await ctx.broadcaster.create_custom_reward(
             title="First!",
             cost=1,
@@ -85,15 +94,40 @@ class FirstChatterChannelRewardManagement(IrePublicComponent):
             f"(dashboard.twitch.tv/u/{ctx.broadcaster.name}/viewer-rewards/channel-points/rewards)"
         )
 
-    @commands.Component.listener(name="event_custom_reward_update")
-    async def update_reward_title_in_database(self, reward_update: twitchio.ChannelPointsRewardUpdate) -> None:
+    @commands.Component.listener(name="custom_reward_update")
+    async def update_reward_title_in_database(self, reward: twitchio.ChannelPointsRewardUpdate) -> None:
         """Update reward title in the database."""
         query = """
             UPDATE ttv_first_chatter_rewards
             SET original_title = $1
             WHERE reward_id = $2
         """
-        await self.bot.pool.execute(query, reward_update.title, reward_update.id)
+        await self.bot.pool.execute(query, reward.title, reward.id)
+
+    async def is_reward_in_database(self, reward_id: str) -> bool:
+        """Check whether the reward with `reward_id` is present in the database."""
+        query = """--sql
+            SELECT COUNT(1)
+            FROM ttv_first_chatter_rewards
+            WHERE reward_id = $1
+        """
+        return await self.bot.pool.fetchval(query, reward_id) == 1
+
+    @commands.Component.listener(name="custom_reward_update")
+    async def validate_reward_attributes(self, reward: twitchio.ChannelPointsRewardUpdate) -> None:
+        """Check if reward attributes make sense.
+
+        This is in case the streamer changes those attributes to illogical values.
+        """
+        if not await self.is_reward_in_database(reward.id):
+            return
+
+        if reward.max_per_stream is None or not reward.max_per_stream.enabled or reward.max_per_stream != 1:
+            msg = (
+                f"{reward.broadcaster.mention} You (or your mods) have just changed settings for First Chatter Redeem."
+                f"But don't worry, I've fixed it. Please don't touch `Limit Redemptions Per Stream` though."
+            )
+            await reward.respond(msg)
 
     @commands.Component.listener(name="custom_redemption_add")
     async def first_counter(self, redemption: twitchio.ChannelPointsRedemptionAdd) -> None:
@@ -102,12 +136,7 @@ class FirstChatterChannelRewardManagement(IrePublicComponent):
         * Count all redeems for the reward 'First'.
         * Responds to the user.
         """
-        query = """--sql
-            SELECT COUNT(1)
-            FROM ttv_first_chatter_rewards
-            WHERE reward_id = $1
-        """
-        if await self.bot.pool.fetchval(query, redemption.reward.id) == 0:
+        if not await self.is_reward_in_database(redemption.reward.id):
             return
 
         query = """--sql
