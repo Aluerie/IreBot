@@ -293,7 +293,7 @@ class FirstChatterChannelRewardManagement(IrePublicComponent):
             SELECT streamer_id, reward_id, original_title
             FROM ttv_first_chatter_rewards;
         """
-        rows: list[FirstChatterRewardsQuery] = await self.bot.pool.fetch(query)
+        rows: list[FirstChatterRewardsQueryRow] = await self.bot.pool.fetch(query)
 
         for row in rows:
             partial_user = self.bot.create_partialuser(row["streamer_id"])
