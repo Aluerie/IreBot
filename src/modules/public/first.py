@@ -168,8 +168,8 @@ class FirstChatterChannelRewardManagement(IrePublicComponent):
         def get_response(msg: str) -> str:
             """Add message prefix and suffix to `msg`."""
             return (
-                f"{reward.broadcaster.mention} settings for `First Chatter Redeem` were just changed."
-                f"{msg}"
+                f"{reward.broadcaster.mention} settings for `First Chatter Redeem` were just changed. "
+                f"{msg} "
                 "Please, fix or run `!fix_first_reward`."
             )
 
