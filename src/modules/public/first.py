@@ -104,7 +104,7 @@ class FirstChatterChannelRewardManagement(IrePublicComponent):
         if (reward_row := await self.fetch_reward(ctx.broadcaster.id)) is None:
             msg = (
                 "This stream does not have First Chatter Channel Reward set up. "
-                "You can use !setup_first_reward to creaate it."
+                "You can use !setup_first_reward to create it."
             )
             raise errors.RespondWithError(msg)
 
@@ -228,8 +228,10 @@ class FirstChatterChannelRewardManagement(IrePublicComponent):
         await redemption.respond(msg)
         with contextlib.suppress(twitchio.HTTPException):
             await redemption.fulfill(token_for=redemption.broadcaster.id)
-        reward = await redemption.reward.fetch_reward()
-        await reward.update(title=f"@{redemption.user.display_name} was 1st today!")
+        await redemption.broadcaster.update_custom_reward(
+            id=redemption.reward.id,
+            title=f"@{redemption.user.display_name} was 1st today!",
+        )
 
     async def helper_reset_redeem_title_to_original(
         self, broadcaster: twitchio.PartialUser, reward_id: str, original_title: str
