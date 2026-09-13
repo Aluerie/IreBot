@@ -1,5 +1,6 @@
 include .env
 
+# Otherwise `make scp` doesn't work, idk.
 ifeq ($(OS),Windows_NT)
     SHELL := pwsh.exe
 else

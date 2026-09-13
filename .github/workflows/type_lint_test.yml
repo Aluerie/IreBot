@@ -37,7 +37,7 @@ jobs:
         run: uv run ruff check src tests examples --output-format github
 
       - name: Pytest Tests
-        run: uv run make tests
+        run: uv run pytest
         env:
           # it doesn't need any real .env values for most of it, just so pydantic doesn't crash out
           PROJECT_NAME: irebot
@@ -53,9 +53,10 @@ jobs:
           STEAM_IRENESBOT_PASSWORD: str
           STRATZ_BEARER: str
           STEAM_API_KEY: str
+          SEVEN_TV_BEARER: ${{ secrets.SEVEN_TV_BEARER }}
           SPOTIFY_AIDENWALLIS: str
           EVENTSUB: str
-          SEVEN_TV_BEARER: ${{ secrets.SEVEN_TV_BEARER }}
           WEBHOOK_LOGGER: str
           WEBHOOK_ERROR: str
+          WEBHOOK_HEARTBEAT: str
           WEBHOOK_STREAM_NOTIFS: str

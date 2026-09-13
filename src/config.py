@@ -38,13 +38,13 @@ class Env(EnvConfig):
     STEAM_IRENESBOT_PASSWORD: str
     STRATZ_BEARER: str
     STEAM_API_KEY: str
+    SEVEN_TV_BEARER: str
     SPOTIFY_AIDENWALLIS: str
     EVENTSUB: str
     WEBHOOK_LOGGER: str
     WEBHOOK_ERROR: str
     WEBHOOK_STREAM_NOTIFS: str
     WEBHOOK_HEARTBEAT: str
-    SEVEN_TV_BEARER: str
 
 
 env = Env()  # pyright: ignore[reportCallIssue]
