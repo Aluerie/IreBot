@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import contextlib
 import datetime
+import logging
 import re
 from typing import TYPE_CHECKING, TypedDict, override
 
@@ -36,6 +37,9 @@ if TYPE_CHECKING:
         reward_id: str
         original_title: str
 
+
+log = logging.getLogger(__name__)
+log.setLevel(logging.DEBUG)
 
 __all__ = ("FirstChatterChannelRewardManagement",)
 
@@ -234,7 +238,10 @@ class FirstChatterChannelRewardManagement(IrePublicComponent):
         )
 
     async def helper_reset_redeem_title_to_original(
-        self, broadcaster: twitchio.PartialUser, reward_id: str, original_title: str
+        self,
+        broadcaster: twitchio.PartialUser,
+        reward_id: str,
+        original_title: str,
     ) -> None:
         """Helper function to reset First Chatter Reward title's to normal.
 
@@ -265,6 +272,7 @@ class FirstChatterChannelRewardManagement(IrePublicComponent):
 
         Sometimes, the bot is offline during streamer stream ends so it doesn't catch some events.
         """
+        log.debug("🥇 First: Double check Task starts now.")
         await self.bot.streamers_index_ready.wait()
         query = """
             SELECT streamer_id, reward_id, original_title
@@ -272,8 +280,9 @@ class FirstChatterChannelRewardManagement(IrePublicComponent):
         """
         rows: list[FirstChatterRewardsQueryRow] = await self.bot.pool.fetch(query)
         for row in rows:
-            streamer = self.bot.streamers.get(row["streamer_id"])
-            if streamer is None or not streamer.online:
+            log.debug("🥇 First: Double check Task starts now.")
+            streamer = self.bot.get_streamer(row["streamer_id"])
+            if streamer.online:
                 continue
             await self.helper_reset_redeem_title_to_original(
                 self.bot.create_partialuser(row["streamer_id"]),
@@ -291,6 +300,7 @@ class FirstChatterChannelRewardManagement(IrePublicComponent):
             # simple way to make a task run once/month
             return
 
+        log.debug("🥇 First: Checking if all rewards in the database are fine.")
         query = """
             SELECT streamer_id, reward_id, original_title
             FROM ttv_first_chatter_rewards;

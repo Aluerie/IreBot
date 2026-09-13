@@ -489,8 +489,12 @@ class IreBot(commands.AutoBot):
         This relies on `self.streamers` index.
         For proper request - we need to use twitchio's `.fetch_streams` method.
         """
+        return self.get_streamer(user_id).online
+
+    def get_streamer(self, user_id: str) -> Streamer:
+        """Get streamer from the bot's streamer index."""
         try:
-            return self.streamers[user_id].online
+            return self.streamers[user_id]
         except KeyError:
             msg = f"Somehow {user_id} is not in the bots' streamer index."
             raise errors.PlaceholderError(msg) from None
