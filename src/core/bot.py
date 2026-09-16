@@ -18,7 +18,7 @@ from twitchio.web import StarletteAdapter
 
 from config import env
 from modules import PUBLIC_D9MMRBOT, get_modules
-from shared import errors, seven_tv
+from shared import errors, fmt, seven_tv
 from utils import const
 from utils.dota2 import IreDota2Client
 
@@ -300,12 +300,10 @@ class IreBot(commands.AutoBot):
         """A helper method to add arguments as a field for the unknown error report embed."""
         embed.add_field(
             name=field_name,
-            value=(
-                "```py\n"
-                + "\n".join(f"[{name}]: {pprint.pformat(repr(value), indent=4)}" for name, value in data.items())
-                + "```"
+            value=fmt.codeblock(
+                "\n".join(f"[{name}]: {pprint.pformat(repr(value), indent=4)}" for name, value in data.items())
                 if data
-                else "```py\nNo arguments```"
+                else "No arguments"
             ),
             inline=False,
         )

@@ -1,5 +1,7 @@
 """
-Event Sub Subscriptions.
+Subscriptions and Oath.
+
+Contains functions to subscribe to proper EventSub subscriptions as well as helper functions for twitch permissions.
 
 A lot of confusion and pain about Twitch Dev is related to Event Sub subscriptions.
 So here are some notes.

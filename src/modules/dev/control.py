@@ -4,6 +4,7 @@ import asyncio
 import logging
 from typing import TYPE_CHECKING, Annotated, override
 
+import discord
 from twitchio.ext import commands
 
 from core import IreDevComponent, ireloop
@@ -25,6 +26,13 @@ def to_module(_: IreContext, module: str) -> str:
 
 class Control(IreDevComponent):
     """Dev Only Commands."""
+
+    def __init__(self, bot: IreBot) -> None:
+        super().__init__(bot)
+        # I'm not sure if it's the right way but one day our 10 minutes loop task
+        # got rate-limited with
+        # `discord.errors.HTTPException: 429 Too Many Requests (error code: 40062): Service resource is being rate limited`
+        self.heartbeat_task.add_exception_type(discord.HTTPException)
 
     @override
     async def component_load(self) -> None:

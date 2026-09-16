@@ -27,7 +27,8 @@ import asyncpg
 import click
 
 from config import env
-from core import IreBot, get_eventsub_subscriptions, setup_logging
+from core import IreBot, get_eventsub_subscriptions
+from shared.concepts import logs
 
 if TYPE_CHECKING:
     from shared.types_.database import PoolTypedWithAny
@@ -40,6 +41,16 @@ except ModuleNotFoundError:
 else:
     # LINUX
     RUNTIME = uvloop.run  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
+
+# generated at https://patorjk.com/software/taag/ using "Standard" font
+ASCII_STARTING_UP_ART = r"""
+  ___ ____  _____ ____   ___ _____   ____ _____  _    ____ _____ ___ _   _  ____
+ |_ _|  _ \| ____| __ ) / _ \_   _| / ___|_   _|/ \  |  _ \_   _|_ _| \ | |/ ___|
+  | || |_) |  _| |  _ \| | | || |   \___ \ | | / _ \ | |_) || |  | ||  \| | |  _
+  | ||  _ <| |___| |_) | |_| || |    ___) || |/ ___ \|  _ < | |  | || |\  | |_| |
+ |___|_| \_\_____|____/ \___/ |_|   |____/ |_/_/   \_\_| \_\|_| |___|_| \_|\____
+                    [ IREBOT IS STARTING NOW ]
+"""
 
 
 async def create_pool() -> asyncpg.Pool[asyncpg.Record]:
@@ -132,7 +143,10 @@ def main(
 ) -> None:
     """Launches the bot."""
     if click_ctx.invoked_subcommand is None:
-        with setup_logging():
+        with logs.setup_logging(
+            starting_up_art=ASCII_STARTING_UP_ART,
+            filename="irebot.log",
+        ):
             try:
                 RUNTIME(
                     start_the_bot(

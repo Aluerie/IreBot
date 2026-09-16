@@ -26,7 +26,10 @@ MESSAGES: list[str] = [
         "hi chat many features of this bot are WIP so, please, if you notice bugs or incorrect responses - "
         f"inform me {const.STV.DANKHACKERMANS}"
     ),
-    f"Audio too loud? Music too low? Bad image quality? Please, let me know about any problems {const.STV.dankFix}",
+    (
+        f"Bad image quality? Overlay not working (especially chat/!showemote ones)? Sound issues? "
+        f"Please, let me know about any problems {const.STV.dankFix}"
+    ),
     "!showemote ass",
     (
         f"chat I kinda need to grind affiliate on @IrenesBot account. "

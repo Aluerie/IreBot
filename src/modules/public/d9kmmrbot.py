@@ -1631,7 +1631,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
             async with asyncio.timeout(11 * 60):  # 11 minutes
                 await self.bot.dota2.wait_until_gc_ready()
         except TimeoutError:
-            log.warning("🔴 Failed to wait for Dota 2 Game Coordinator to get ready - restarting the bot. 🔴")
+            log.critical("🔴 Failed to wait for Dota 2 Game Coordinator to get ready - restarting the bot. 🔴")
             try:
                 await asyncio.create_subprocess_shell("sudo systemctl restart irebot")
             except Exception:
