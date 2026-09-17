@@ -1,0 +1,95 @@
+---
+---
+/* What do these --- mean, why everything breaks
+if they are not in this state:
+---
+---
+And why VSCode formatting always breaks them into --- --- ?!
+*/
+
+// For original values look https://github.com/pages-themes/cayman/blob/master/_sass/jekyll-theme-cayman.scss
+
+// Breakpoints
+$large-breakpoint: 64em;
+$medium-breakpoint: 42em;
+
+// Headers
+$header-heading-color: #fff;
+$header-bg-color: #790069;
+$header-bg-color-secondary: #155799;
+
+// Text
+$section-headings-color: #9d39cc !default;
+$body-text-color: #edf3f5 !default;
+$body-link-color: #1e6bb8 !default;
+$blockquote-text-color: #819198 !default;
+
+// Code
+$code-bg-color: #e2e2e2 !default;
+$code-text-color: #2f4047 !default;
+
+// Borders
+$border-color: #dce6f0 !default;
+$table-border-color: #a114ff7e !default; //
+$hr-border-color: #eff0f1 !default;
+
+
+@import "{{ site.theme }}";
+
+body {
+    background-color: #0d1117;
+}
+
+.main-content {
+    min-width: 96rem;
+    max-width: 96rem;
+}
+
+.btn {
+    display: inline-flex;
+    padding: 9px 9px;
+    font-size: 14px;
+    align-items: center;
+}
+
+.page-header {
+    padding: 1rem 1rem;
+}
+
+.project-name {
+    margin-top: 0;
+    margin-bottom: 0.1rem;
+
+    @include large {
+        font-size: 2.9rem;
+    }
+
+    @include medium {
+        font-size: 1.9rem;
+    }
+
+    @include small {
+        font-size: 1.4rem;
+    }
+}
+
+.aliases-column {
+    background-color: rgba(92, 6, 81, 0.473);
+}
+
+.my-footer-text {
+    margin-top: 0;
+    margin-bottom: 0.1rem;
+
+    @include large {
+        font-size: 1.7rem;
+    }
+
+    @include medium {
+        font-size: 0.85rem;
+    }
+
+    @include small {
+        font-size: 0.43rem;
+    }
+}

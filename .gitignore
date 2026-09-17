@@ -1,0 +1,54 @@
+# DEFAULT GITIGNORE
+# -----------------
+
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Pytest cache
+.pytest_cache 
+
+# Virtual environments
+.venv
+venv
+
+# Windows `desktop.ini` memes
+desktop.ini
+
+# `.vscode` folder
+.vscode/*
+!.vscode/launch.json
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# iPython Notebooks
+ipynb/
+.ipynb_checkpoints
+*.ipynb
+
+# Temporary files
+.temp/
+
+# Testing Related
+src/modules/beta.py
+modules_subset.py
+
+# FILES TO COMMIT ELSEWHERE
+# -------------------------
+
+# Wiki
+# I like cloning wiki https://github.com/Aluerie/IreBot.wiki.git 
+# into the same folder so I can edit it in the same IDE window without much hassle.
+# It would be inappropriate to use git-submodules for it, but I guess, gitignore trickery is fine.
+IreBot.wiki
+.wiki
+
+# FILES TO PRIVATELY SAVE
+# -----------------------
+
+# Config
+.env
