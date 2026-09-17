@@ -20,3 +20,9 @@ Contents
 
    usage
    api
+
+XD
+
+.. autofunction:: src.main.main
+
+.. autofunction:: src.main
