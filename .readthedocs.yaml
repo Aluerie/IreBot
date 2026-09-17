@@ -2,7 +2,7 @@ version: 2
 
 submodules:
   include:
-    - shared
+    - src/shared
   recursive: true
 
 build:
