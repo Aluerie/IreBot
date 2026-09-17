@@ -771,6 +771,10 @@ dev = [
     { name = "sphinx-rtd-theme" },
     { name = "ty" },
 ]
+docs = [
+    { name = "sphinx" },
+    { name = "sphinx-rtd-theme" },
+]
 
 [package.metadata]
 requires-dist = [
@@ -797,6 +801,10 @@ dev = [
     { name = "sphinx", specifier = ">=9.1.0" },
     { name = "sphinx-rtd-theme", specifier = ">=3.1.0" },
     { name = "ty", specifier = ">=0.0.37" },
+]
+docs = [
+    { name = "sphinx", specifier = ">=9.1.0" },
+    { name = "sphinx-rtd-theme", specifier = ">=3.1.0" },
 ]
 
 [[package]]
