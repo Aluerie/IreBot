@@ -2,6 +2,11 @@
 
 # -- Project information
 
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path('..', 'src').resolve()))
+
 project = 'IreBot'
 copyright = '2020, Aluerie'
 author = 'Aluerie'

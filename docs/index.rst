@@ -21,8 +21,8 @@ Contents
    usage
    api
 
-XD
+XD XD
 
-.. autofunction:: src.main.main
+.. autofunction:: main.main
 
-.. autofunction:: src.main
+.. automodule:: main
