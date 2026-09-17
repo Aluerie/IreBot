@@ -1,5 +1,10 @@
 version: 2
 
+submodules:
+  include:
+    - shared
+  recursive: true
+
 build:
   os: ubuntu-24.04
   tools:
