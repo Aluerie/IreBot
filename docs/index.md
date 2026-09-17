@@ -5,11 +5,11 @@
 Use this link:
 
 <div align=center>
-<h3>
+<p style="font-size: 20px">
 <a href=https://parrot-thankful-trivially.ngrok-free.app/oauth?scopes=channel:bot+channel:read:redemptions+channel:manage:redemptions&force_verify=true>
 https://parrot-thankful-trivially.ngrok-free.app/oauth?scopes=channel:bot+channel:read:redemptions+channel:manage:redemptions&force_verify=true
 </a>
-</h3>
+</p>
 </div>
 
 Yes, I know the link is ugly and the host "parrot-thankful-trivially.ngrok-free.app" looks suspicious, but I don't really care to pay money to get a proper looking domain. The link will show the screen below where you read what permissions my bot is asking and authorize it if you are fine with it.

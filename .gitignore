@@ -30,6 +30,10 @@ ipynb/
 .ipynb_checkpoints
 *.ipynb
 
+# Sphinx documentation
+docs/_build/
+_build/
+
 # Temporary files
 .temp/
 
