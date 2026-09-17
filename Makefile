@@ -34,6 +34,7 @@ Commands:
 	commit              Lazy git commit and push+
 	com                 This creates and pushes commits to IreBot repository
 	echo                Testing stuff with make, why don't we test it with echo
+	sphinx				Sphinx
 endef
 
 .PHONY: help
@@ -89,8 +90,7 @@ tests:  # Run the tests
 .PHONY: pages
 .SILENT: pages
 pages:  # Run the pages
-	cd docs && \
-	bundle exec jekyll serve
+	cd docs && bundle exec jekyll serve
 
 .PHONY: ty
 .SILENT: ty
@@ -133,6 +133,12 @@ echo:  # Testing stuff with make, why don't we test it with echo
 	echo "$(m)"
 	echo $(LANG)
 	@Write-Output $(m)
+
+
+.PHONY: sphinx
+.SILENT: sphinx
+sphinx:  # sphinx
+	cd docs && uv run sphinx-build . _build
 
 
 .PHONY: scp
