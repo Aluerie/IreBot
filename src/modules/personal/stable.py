@@ -125,14 +125,6 @@ class StableCommands(IrePersonalComponent):
         """Send an announcement for an obligatory boink."""
         await ctx.send_announcement(content=f"it's time to boink {const.STV.Boink}", color="purple")
 
-    @guards.is_online()
-    @guards.is_owner_channel()
-    @commands.command()
-    async def clip(self, ctx: IreContext) -> None:
-        """Create a clip for last 30 seconds of the stream."""
-        clip = await ctx.broadcaster.create_clip(token_for=const.UserID.Bot)
-        await ctx.send(f"https://clips.twitch.tv/{clip.id}")
-
     @commands.command()
     async def controller(self, ctx: IreContext) -> None:
         """Get Irene's current controller model."""

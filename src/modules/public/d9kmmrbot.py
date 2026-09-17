@@ -1642,7 +1642,7 @@ class Dota2RichPresenceFlow(IrePublicComponent):
     async def send_raw_rich_presence(self, ctx: IreContext) -> None:
         """Send current rich presence state to @irene for debugging reasons."""
         friend = await self.find_friend_account(ctx.broadcaster.id)
-        to_send = f"```json\n{pprint.pformat(friend.rich_presence.raw)}```"
+        to_send = fmt.codeblock(pprint.pformat(friend.rich_presence.raw), "json")
         await self.bot.error_webhook.send(content=to_send)
         await ctx.send(content="Done")
 

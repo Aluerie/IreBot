@@ -23,7 +23,7 @@ MODULES_SUBSET: dict[str, list[str]] = {
     ],
     "public": [
         # "d9kmmrbot",
-        "first",
-        # "meta"
+        # "first",
+        "meta"
     ],
 }

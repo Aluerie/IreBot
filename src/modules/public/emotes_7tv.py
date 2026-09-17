@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING, Annotated, Any, override
 
 from twitchio.ext import commands
 
-from core import IrePersonalComponent, ireloop
+from core import IrePublicComponent, ireloop
 from shared import errors, seven_tv
 from utils import const, guards
 
@@ -69,7 +69,7 @@ class SevenTVEmoteConverter(commands.Converter[str]):
             raise errors.RespondWithError(msg) from None
 
 
-class SevenTVCyclingEmotes(IrePersonalComponent):
+class SevenTVCyclingEmotes(IrePublicComponent):
     """Cycling Emotes."""
 
     def __init__(self, bot: IreBot, *args: Any, **kwargs: Any) -> None:
@@ -94,7 +94,7 @@ class SevenTVCyclingEmotes(IrePersonalComponent):
 
     @guards.is_broadcaster_or_dev()
     @commands.command()
-    async def create_7tv_cycling_emote_reward(self, ctx: IreContext) -> None:
+    async def create_7tv_cycling_emote_reward(self, ctx: IreContext, emote_limit: int = 10) -> None:
         """Create 7TV Cycling emote reward."""
         custom_reward = await ctx.broadcaster.create_custom_reward(
             title="Add a 7TV emote (10 slots, oldest cycles out)",
@@ -111,7 +111,7 @@ class SevenTVCyclingEmotes(IrePersonalComponent):
             (streamer_id, reward_id, emote_limit)
             VALUES ($1, $2, $3)
         """
-        await self.bot.pool.execute(query, ctx.broadcaster.id, custom_reward.id, 10)
+        await self.bot.pool.execute(query, ctx.broadcaster.id, custom_reward.id, emote_limit)
         self.reward_ids_cache.add(custom_reward.id)
         await ctx.send(f"Created a cycling 7tv emote channel points reward {const.STV.DankApprove}")
 
@@ -298,7 +298,7 @@ class SevenTVCyclingEmotes(IrePersonalComponent):
         await ctx.send(f"Done {const.STV.DonkCrayon}")
 
 
-class SevenTVManagement(IrePersonalComponent):
+class SevenTVManagement(IrePublicComponent):
     """Seven TV Emotes Management."""
 
     def __init__(self, bot: IreBot, *args: Any, **kwargs: Any) -> None:
@@ -315,7 +315,7 @@ class SevenTVManagement(IrePersonalComponent):
         """Remove 7TV emote."""
 
 
-class SevenTVEmotesStatistics(IrePersonalComponent):
+class SevenTVEmotesStatistics(IrePublicComponent):
     """Seven TV Emotes Statistics."""
 
     def __init__(self, bot: IreBot, *args: Any, **kwargs: Any) -> None:

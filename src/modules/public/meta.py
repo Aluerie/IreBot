@@ -6,7 +6,8 @@ import twitchio  # noqa: TC002
 from twitchio.ext import commands
 
 from core import IrePublicComponent
-from utils import const
+from shared import errors
+from utils import const, guards
 
 if TYPE_CHECKING:
     from core import IreBot, IreContext
@@ -27,6 +28,28 @@ class MetaCommands(IrePublicComponent):
     async def about(self, ctx: IreContext) -> None:
         """A bit bio information about the bot."""
         await ctx.send(f"I'm a personal Irene's bot, made by Irene. {const.STV.AYAYA}")
+
+    @guards.is_online()
+    @commands.command()
+    async def clip(self, ctx: IreContext, *, title: str | None = None) -> None:
+        """Create a clip."""
+        # TODO: include `duration` argument
+        # (I guess we have to use some regex converter cause twitchio doesnt have duration = None, *, title: str support)
+        # TODO: try to experiment with edit_url
+        clip = await ctx.broadcaster.create_clip(token_for=const.UserID.Bot, title=title)
+        await ctx.send(f"clips.twitch.tv/{clip.id}")
+        await ctx.send(f"Editing Link: {clip.edit_url}")
+
+    @clip.error
+    async def clip_error(self, payload: commands.CommandErrorPayload) -> None:
+        """Error handler for !clip command."""
+        error = payload.exception
+        if isinstance(error, ValueError):
+            # clip duration is bad value
+            await payload.context.send(str(error))
+            return
+        # Unresolved
+        raise error
 
     @commands.command(name="commands", aliases=["help", "irenesbot"])
     async def command_list(self, ctx: IreContext) -> None:

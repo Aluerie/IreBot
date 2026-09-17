@@ -1,6 +1,48 @@
-# Chat Commands
+<!-- markdownlint-disable MD041 -->
 
-## 1. 🍋Dota 2
+## 1. 💜You want to do add the bot?
+
+Use this link:
+
+<h3 align=center>
+<a href=https://parrot-thankful-trivially.ngrok-free.app/oauth?scopes=channel:bot+channel:read:redemptions+channel:manage:redemptions&force_verify=true>
+https://parrot-thankful-trivially.ngrok-free.app/oauth?scopes=channel:bot+channel:read:redemptions+channel:manage:redemptions&force_verify=true
+</a>
+</h3>
+
+Yes, I know the link is ugly and the host "parrot-thankful-trivially.ngrok-free.app" looks suspicious, but I don't really care to pay money to get a proper looking domain. The link will show the screen below where you read what permissions my bot is asking and authorize it if you are fine with it.
+<div align=center>
+<img  src="./images/authorize.png" alt="authorize" width="300"/>
+</div>
+
+PS. If I add more public features or if you ask me to add some feature - I might add more permissions to the link. You will have to reauthorize the bot in that case.
+
+## 2. 🌠 Meta Commands
+
+<table>
+  <tr>
+    <th>Command Name</th>
+    <th class="aliases-column">Chat Aliases</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>Commands List</td>
+    <td class="aliases-column">!commands<br/>!help<br/>!irenesbot</td>
+    <td>Show link to this page.</td>
+    <tr>
+    <td>Source Code</td>
+    <td class="aliases-column">!source<br/>!github</td>
+    <td><a href="https://github.com/Aluerie/IreBot">github.com/Aluerie/IreBot</a></td>
+  </tr>
+  </tr>
+  <tr>
+    <td>Irene</td>
+    <td class="aliases-column">!irene</td>
+    <td><img src="./images/FeelsDankMan.png" alt="FeelsDankMan" width="64"/></td>
+  </tr>
+</table>
+
+## 3. 🍋Dota 2
 
 <table>
   <tr>
@@ -162,7 +204,7 @@
   </tr>
 </table>
 
-### 7️⃣ Tip for merging 7tv emote sets
+### 3.1.7️⃣ Tip for merging 7tv emote sets
 
 To make bot responses look like in the "Showcase" column you can add those emotes quickly to your channel by merging your main 7tv emote set with the <a href="https://7tv.app/emote-sets/01JS1XW1PAAKP34984FDYZVDR7">Dota 2 emote set</a> using a tool like [potat.app/help/mergeset](<https://potat.app/help/mergeset>). Some short instructions for @PotatBotat specifically:
 
@@ -174,48 +216,11 @@ To make bot responses look like in the "Showcase" column you can add those emote
 * @PotatBotat will create a new emote set trying to merge the provided ones; if there is more then 1000 emotes in total - some emotes from the 2nd set won't make it;
 * Now you can switch between your main set and a merged version;
 
-### 🤷‍♀️ Dota 2 functionality restrictions
+### 3.2.🤷‍♀️ Dota 2 functionality restrictions
 
-Unfortunately, due to implementation specifics currently for the Dota 2 features to work:
+Unfortunately, due to implementation specifics and Valve being stupid - currently for the Dota 2 features to work:
 
-1. You need to add the bot's steam accounts to friends.
-2. You also need to be green-online 🟢 in Dota 2 (and have rich presence visible to friends) for the bot to be able to see your status live.
+1. You need to add the [bot's steam account](<https://steamcommunity.com/id/irenesbot>) to friends.
+2. You also need to be green-online 🟢 in Dota 2 (and have rich presence visible to friends in your privacy settings) for the bot to be able to see your status live.
 
 PS. Another implementation for these features (using Dota 2 Game State Integration) is coming soon™️. It won't have mentioned restrictions but you will have to put a `.cfg` file into the Dota 2 directory.
-
-## 2. 🌠 Meta Commands
-
-<table>
-  <tr>
-    <th>Command Name</th>
-    <th class="aliases-column">Chat Aliases</th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td>Commands List</td>
-    <td class="aliases-column">!commands<br/>!help<br/>!irenesbot</td>
-    <td>Show link to this page.</td>
-    <tr>
-    <td>Source Code</td>
-    <td class="aliases-column">!source<br/>!github</td>
-    <td><a href="https://github.com/Aluerie/IreBot">github.com/Aluerie/IreBot</a></td>
-  </tr>
-  </tr>
-  <tr>
-    <td>Irene</td>
-    <td class="aliases-column">!irene</td>
-    <td><img src="./images/FeelsDankMan.png" alt="FeelsDankMan" width="64"/></td>
-  </tr>
-</table>
-
-## 3. 🤔 How to add the bot to your channel?
-
-I'm not planning to go big with this bot, so I didn't make an easy one-click way to add the bot. However, steps are as follows:
-
-1. Add the bot's steam account into your friends: <https://steamcommunity.com/id/irenesbot>.
-2. Tell me that you want to add the bot - find me (`@Irene_Adler__`) in a twitch chat or catch my stream.
-3. The link: <https://parrot-thankful-trivially.ngrok-free.app/oauth?scopes=channel:bot+channel:read:redemptions+channel:manage:redemptions&force_verify=true>
-
-    After that I'm going to make this link work. Yes, the link looks sketchy af because I don't care enough to spend money for a real web-site domain. When I activate the said link - it will become an Authorization link where you allow the bot to be a bot in your channel.
-4. Click the link and authorize, it's the same "allow permissions" thing like any other twitch bot.
-5. ⚠️ Remember that for the bot features to work - you need to be green-online in Dota 2 as well.
