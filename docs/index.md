@@ -4,11 +4,9 @@
 
 Use this link:
 
-<p align=center>
-<a href=https://parrot-thankful-trivially.ngrok-free.app/oauth?scopes=channel:bot+channel:read:redemptions+channel:manage:redemptions&force_verify=true style="font-size: 20px; color: #9d39cc">
-https://parrot-thankful-trivially.ngrok-free.app/oauth?scopes=channel:bot+channel:read:redemptions+channel:manage:redemptions&force_verify=true
-</a>
-</p>
+<div align=center>
+<a href="https://parrot-thankful-trivially.ngrok-free.app/oauth?scopes=channel:bot+channel:read:redemptions+channel:manage:redemptions&force_verify=true" style="font-size: 25px; color: #9d39cc">https://parrot-thankful-trivially.ngrok-free.app/oauth?scopes=channel:bot+channel:read:redemptions+channel:manage:redemptions&force_verify=true</a>
+</div>
 
 Yes, I know the link is ugly and the host "parrot-thankful-trivially.ngrok-free.app" looks suspicious, but I don't really care to pay money to get a proper looking domain. The link will show the screen below where you read what permissions my bot is asking and authorize it if you are fine with it.
 <div align=center>

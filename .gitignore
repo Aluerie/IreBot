@@ -30,6 +30,9 @@ ipynb/
 .ipynb_checkpoints
 *.ipynb
 
+# Jekyll Github Pages
+docs/_site/
+
 # Sphinx documentation
 docs/_build/
 _build/
