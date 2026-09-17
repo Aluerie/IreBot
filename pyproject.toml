@@ -43,12 +43,9 @@ dev = [
     "pytest-asyncio>=1.4.0",
     "ruff>=0.15.11",
     "ty>=0.0.37",
-    {include-group = "docs"}
+    { include-group = "docs" },
 ]
-docs = [
-    "sphinx>=9.1.0",
-    "sphinx-rtd-theme>=3.1.0",
-]
+docs = ["sphinx>=9.1.0", "sphinx-rtd-theme>=3.1.0"]
 
 [[tool.uv.index]]
 name = "umbra"
@@ -97,8 +94,8 @@ missing-type-argument = "warn"
 line-length = 125
 target-version = "py314"
 preview = false
-exclude = [".venv", "docs"]
-src = ["src"]
+exclude = [".venv"]
+src = ["src", "docs"]
 
 [tool.ruff.lint]
 select = ["ALL"]
