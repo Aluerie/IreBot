@@ -6,7 +6,6 @@ import twitchio  # noqa: TC002
 from twitchio.ext import commands
 
 from core import IrePublicComponent
-from shared import errors
 from utils import const, guards
 
 if TYPE_CHECKING:
